@@ -39,16 +39,72 @@ public final class ScreenSwapper {
         return cfg.customTitleScreen && !(cfg.yieldTitleScreenToMods && otherTitleMod());
     }
 
+    private static java.lang.reflect.Field pauseFlag;
+    private static boolean pauseFlagSearched;
+
+    /** PauseScreen(false) открывается по F3+Esc — его не подменяем. */
+    private static boolean showsPauseMenu(Screen s) {
+        try {
+            if (!pauseFlagSearched) {
+                pauseFlagSearched = true;
+                for (java.lang.reflect.Field f : net.minecraft.client.gui.screens.PauseScreen.class.getDeclaredFields()) {
+                    if (f.getType() == boolean.class && !java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                        f.setAccessible(true);
+                        pauseFlag = f;
+                        break;
+                    }
+                }
+            }
+            return pauseFlag == null || pauseFlag.getBoolean(s);
+        } catch (Throwable t) {
+            return true;
+        }
+    }
+
     public static Screen swap(Screen next, Screen current) {
         if (next == null) return null;
         ArcConfig cfg = ArcConfig.get();
-        // только «чистый» ванильный экран — подклассы других модов не трогаем
-        if (next.getClass() == TitleScreen.class && titleScreenActive()) {
+        if (next instanceof TitleScreen && titleScreenActive()) {
+            // при «уступать другим модам» трогаем только ванильный экран, иначе — и подклассы (меню Aether и т.п.)
+            boolean vanilla = next.getClass() == TitleScreen.class;
+            if (vanilla || !cfg.yieldTitleScreenToMods) return new ArcTitleScreen();
+        }
+        // Меню модов (Aether через Cumulus и т.п.), которые не наследуют TitleScreen
+        if (cfg.customTitleScreen && !cfg.yieldTitleScreenToMods && !(next instanceof ArcTitleScreen)
+                && next.getClass().getSimpleName().endsWith("TitleScreen")) {
             return new ArcTitleScreen();
         }
         if (cfg.customControlsScreen && next instanceof KeyBindsScreen) {
             return new ArcControlsScreen(current, Minecraft.getInstance().options);
         }
-        return next;
+        Minecraft mc = Minecraft.getInstance();
+        Class<?> c = next.getClass();
+        if (next instanceof net.minecraft.client.gui.screens.DeathScreen) {
+            com.arc4io.archud.client.map.WaypointManager.onDeath();
+        }
+        if (cfg.customPauseScreen && c == net.minecraft.client.gui.screens.PauseScreen.class && showsPauseMenu(next)) {
+            return new ArcPauseScreen();
+        }
+        if (cfg.customOptionsScreens) {
+            if (c == net.minecraft.client.gui.screens.OptionsScreen.class) return new ArcOptionsScreen(current, mc.options);
+            if (c == net.minecraft.client.gui.screens.SoundOptionsScreen.class) return ArcOptionListScreen.sound(current, mc.options);
+            if (c == net.minecraft.client.gui.screens.ChatOptionsScreen.class) return ArcOptionListScreen.chat(current, mc.options);
+            if (c == net.minecraft.client.gui.screens.AccessibilityOptionsScreen.class) return ArcOptionListScreen.accessibility(current, mc.options);
+            if (c == net.minecraft.client.gui.screens.SkinCustomizationScreen.class) return new ArcAppearanceScreen(current, mc.options);
+            if (c == net.minecraft.client.gui.screens.LanguageSelectScreen.class) return new ArcLanguageScreen(current, mc.options);
+        }
+        if (cfg.customAdvancements && c == net.minecraft.client.gui.screens.advancements.AdvancementsScreen.class && mc.player != null) {
+            return new ArcAdvancementsScreen(mc.player.connection.getAdvancements());
+        }
+        if (cfg.customStats && c == net.minecraft.client.gui.screens.achievement.StatsScreen.class && mc.player != null) {
+            return new ArcStatsScreen(current, mc.player.getStats());
+        }
+        if (cfg.customLanScreen && c == net.minecraft.client.gui.screens.ShareToLanScreen.class) {
+            return new ArcLanScreen(current);
+        }
+        if (cfg.customInventory && c == net.minecraft.client.gui.screens.inventory.InventoryScreen.class && mc.player != null) {
+            return new ArcInventoryScreen(mc.player);
+        }
+        return com.arc4io.archud.client.ArcClient.platform().swapPlatformScreen(next, current);
     }
 }

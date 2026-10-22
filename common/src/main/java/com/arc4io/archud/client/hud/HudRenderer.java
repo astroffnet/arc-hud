@@ -578,6 +578,29 @@ public final class HudRenderer {
                 y -= 20;
             }
         }
+        if (cfg.tempadIntegration) {
+            // Tempad: заряд (если у варианта есть шкала) или «готов»
+            Inventory inv2 = p.getInventory();
+            for (int i = 0; i < inv2.getContainerSize(); i++) {
+                ItemStack s = inv2.getItem(i);
+                if (s.isEmpty() || !BuiltInRegistries.ITEM.getKey(s.getItem()).getNamespace().equals("tempad")) continue;
+                if (BuiltInRegistries.ITEM.getKey(s.getItem()).getPath().contains("card")) continue;
+                String txt = s.isBarVisible() ? Math.round(s.getBarWidth() * 100F / 13F) + "%" : "✔";
+                boolean cd = p.getCooldowns().isOnCooldown(s.getItem());
+                chip(g, font, x, y, s, -1, cd ? "…" : txt, cd ? 0xFFFF8A65 : 0xFFFFB74D, accent);
+                y -= 20;
+                break;
+            }
+        }
+        {
+            // перезарядка предмета в руке (свиток / камень телепорта Waystones, эндер-жемчуг и т.д.)
+            ItemStack held = p.getMainHandItem();
+            float cool = held.isEmpty() ? 0F : p.getCooldowns().getCooldownPercent(held.getItem(), 0F);
+            if (cool > 0F) {
+                chip(g, font, x, y, held, -1, Math.round(cool * 100) + "%", 0xFFFF8A65, accent);
+                y -= 20;
+            }
+        }
         if (cfg.itemEnergy) {
             for (ItemStack s : new ItemStack[]{p.getMainHandItem(), p.getOffhandItem(), p.getItemBySlot(EquipmentSlot.CHEST)}) {
                 long[] e = energy(s);

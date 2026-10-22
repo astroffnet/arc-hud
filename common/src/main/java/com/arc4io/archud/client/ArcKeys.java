@@ -18,7 +18,13 @@ public final class ArcKeys {
     public static final KeyMapping OPEN_CONFIG = new KeyMapping("key.archud.config", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY);
     public static final KeyMapping SORT_INVENTORY = new KeyMapping("key.archud.sort", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
 
-    public static final List<KeyMapping> ALL = List.of(OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY);
+    public static final KeyMapping WORLD_MAP = new KeyMapping("key.archud.world_map", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
+    public static final KeyMapping ADD_WAYPOINT = new KeyMapping("key.archud.add_waypoint", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, CATEGORY);
+    public static final KeyMapping ZOOM_IN = new KeyMapping("key.archud.zoom_in", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_EQUAL, CATEGORY);
+    public static final KeyMapping ZOOM_OUT = new KeyMapping("key.archud.zoom_out", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_MINUS, CATEGORY);
+
+    public static final List<KeyMapping> ALL = List.of(OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
+            WORLD_MAP, ADD_WAYPOINT, ZOOM_IN, ZOOM_OUT);
 
     private ArcKeys() {}
 }

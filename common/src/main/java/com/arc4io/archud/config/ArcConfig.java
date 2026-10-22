@@ -97,6 +97,34 @@ public class ArcConfig {
     public HudAnchor pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
     public HudAnchor statusAnchor = HudAnchor.BOTTOM_LEFT;
     public HudAnchor addonPanelsAnchor = HudAnchor.RIGHT;
+    public HudAnchor minimapAnchor = HudAnchor.TOP_RIGHT;
+
+    // ---- Мини-карта ----
+    public boolean minimap = true;
+    public boolean minimapRotate = false;
+    public boolean minimapEntities = true;
+    public boolean minimapCaveMode = true;
+    public boolean minimapWaypoints = true;
+    public boolean compassWaypoints = true;
+    public boolean deathWaypoint = true;
+    public int minimapSize = 110;
+    public double minimapZoom = 1.5;
+
+    // ---- Новые экраны ----
+    public boolean arcWidgets = true;
+    public boolean customPauseScreen = true;
+    public boolean customOptionsScreens = true;
+    public boolean customAdvancements = true;
+    public boolean customStats = true;
+    public boolean customLanScreen = true;
+    public boolean customModList = true;
+    public boolean customInventory = true;
+
+    // ---- Интеграции ----
+    public boolean waystonesIntegration = true;
+    public boolean tempadIntegration = true;
+    public boolean adAstraIntegration = true;
+    public boolean regenerationIntegration = true;
 
     // ---- Совместимость ----
     /** Не заменять главное меню, если его уже меняет другой мод (Aether, FancyMenu и т.п.). */
@@ -154,6 +182,10 @@ public class ArcConfig {
             if (instance.gearAnchor == null) instance.gearAnchor = HudAnchor.LEFT;
             if (instance.pickupsAnchor == null) instance.pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
             if (instance.statusAnchor == null) instance.statusAnchor = HudAnchor.BOTTOM_LEFT;
+            if (instance.minimapAnchor == null) instance.minimapAnchor = HudAnchor.TOP_RIGHT;
+            if (instance.addonPanelsAnchor == null) instance.addonPanelsAnchor = HudAnchor.RIGHT;
+            instance.minimapSize = Math.max(64, Math.min(200, instance.minimapSize));
+            instance.minimapZoom = Math.max(0.25, Math.min(6.0, instance.minimapZoom));
             if (instance.addonPanelsAnchor == null) instance.addonPanelsAnchor = HudAnchor.RIGHT;
             save();
         } catch (Exception e) {
