@@ -106,6 +106,7 @@ public class WorldMapScreen extends Screen {
         addRenderableWidget(new ArcButton(390, y, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime));
         addRenderableWidget(new ArcButton(416, y, 22, 18, Component.literal("◎"), b -> showZones = !showZones));
         addRenderableWidget(new ArcButton(442, y, 70, 18, Component.translatable("archud.map.export"), b -> export()));
+        addRenderableWidget(new ArcButton(516, y, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
         gotoBox = addRenderableWidget(new EditBox(font, 6, height - 46, 120, 16, Component.translatable("archud.map.goto")));
         gotoBox.setHint(Component.translatable("archud.map.goto_hint"));
         addRenderableWidget(new ArcButton(130, height - 47, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
@@ -341,6 +342,8 @@ public class WorldMapScreen extends Screen {
             menuItems.add("add");
             menuItems.add("nav_here");
             menuItems.add("share_coords");
+            if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && minecraft.player != null
+                    && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) menuItems.add("tempad_door_here");
         }
         if (minecraft.player != null && minecraft.player.hasPermissions(2) && viewingCurrent()) menuItems.add("tp");
         menuOpen = true;
@@ -376,12 +379,21 @@ public class WorldMapScreen extends Screen {
             case "nav" -> Navigator.set(menuWaypoint);
             case "nav_stop" -> Navigator.clear();
             case "share" -> minecraft.setScreen(new ShareWaypointScreen(this, menuWaypoint));
-            case "tempad_door" -> TempadCompat.openDoor(menuWaypoint);
+            case "tempad_door" -> {
+                TempadCompat.openDoor(menuWaypoint);
+                minecraft.setScreen(null);
+            }
             case "add" -> {
                 int n = WaypointManager.user().size() + 1;
                 Waypoint wp = new Waypoint(Component.translatable("archud.wp.default", n).getString(), menuWX, ty, menuWZ,
                         Waypoint.PALETTE[(n - 1) % Waypoint.PALETTE.length], viewDim(), Waypoint.Source.USER);
                 minecraft.setScreen(new WaypointEditScreen(this, wp, true));
+            }
+            case "tempad_door_here" -> {
+                boolean known = viewingCurrent() && minecraft.level != null && minecraft.level.hasChunk(menuWX >> 4, menuWZ >> 4);
+                Waypoint t = new Waypoint(menuWX + ", " + menuWZ, menuWX, known ? ty : Integer.MIN_VALUE, menuWZ, 0xFFFF8800, viewDim(), Waypoint.Source.TEMP);
+                TempadCompat.openDoor(t);
+                minecraft.setScreen(null);
             }
             case "nav_here" -> Navigator.navigateTo(menuWX, ty, menuWZ, viewDim());
             case "share_coords" -> {
@@ -552,6 +564,28 @@ public class WorldMapScreen extends Screen {
         }
         if (gotoBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) {
             gotoCoords(false);
+            return true;
+        }
+        if (!typing && keyCode == GLFW.GLFW_KEY_DELETE) {
+            double mx = minecraft.mouseHandler.xpos() * width / minecraft.getWindow().getScreenWidth();
+            double my = minecraft.mouseHandler.ypos() * height / minecraft.getWindow().getScreenHeight();
+            Waypoint hit = null;
+            if (showList && mx >= width - listW()) {
+                int idx = (int) ((my - 52 + listScroll) / 22);
+                List<Waypoint> list = listed();
+                if (my >= 52 && idx >= 0 && idx < list.size()) hit = list.get(idx);
+            } else hit = waypointAt(mx, my);
+            if (hit != null && WaypointListScreen.deletable(hit)) {
+                if (Navigator.isTarget(hit)) Navigator.clear();
+                WaypointManager.remove(hit);
+                if (minecraft.player != null) {
+                    minecraft.player.displayClientMessage(Component.translatable("archud.wpl.deleted", hit.name), true);
+                }
+            }
+            return true;
+        }
+        if (!typing && keyCode == GLFW.GLFW_KEY_L) {
+            minecraft.setScreen(new WaypointListScreen(this));
             return true;
         }
         if (menuOpen && keyCode == GLFW.GLFW_KEY_ESCAPE) {

@@ -56,6 +56,7 @@ public final class ArcServer {
         ArcNet.onServer("hello", ArcServer::onHello);
         ArcNet.onServer("map_chunks", ArcServer::onChunks);
         ArcNet.onServer("wp_share", ArcServer::onShare);
+        TempadServer.init();
     }
 
     // ------------------------------------------------------------------ жизненный цикл
@@ -152,6 +153,7 @@ public final class ArcServer {
         w.writeBoolean(cfg.serverMapSync);
         w.writeBoolean(cfg.serverPlayerPositions);
         w.writeBoolean(cfg.serverWaypointSharing);
+        w.writeBoolean(TempadServer.isAvailable());
         ArcNet.sendToPlayer(player, w);
         if (protocol != PROTOCOL || !cfg.serverMapSync) return;
         Deque<long[]> q = new ArrayDeque<>();

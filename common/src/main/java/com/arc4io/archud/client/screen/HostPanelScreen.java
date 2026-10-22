@@ -356,23 +356,7 @@ public class HostPanelScreen extends ArcScreen {
     private String address() {
         IntegratedServer s = server();
         int port = s == null ? 0 : ((IntegratedServerAccessor) s).archud$getPublishedPort();
-        String ip = "127.0.0.1";
-        try {
-            outer:
-            for (Iterator<NetworkInterface> it = NetworkInterface.getNetworkInterfaces().asIterator(); it.hasNext(); ) {
-                NetworkInterface ni = it.next();
-                if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
-                for (Iterator<InetAddress> ia = ni.getInetAddresses().asIterator(); ia.hasNext(); ) {
-                    InetAddress a = ia.next();
-                    if (a instanceof Inet4Address && a.isSiteLocalAddress()) {
-                        ip = a.getHostAddress();
-                        break outer;
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return ip + ":" + port;
+        return com.arc4io.archud.client.NetUtil.primaryAddress() + ":" + port;
     }
 
     /** Закрыть игру для сети: перестать принимать подключения, отключить гостей, убрать из списка LAN. */

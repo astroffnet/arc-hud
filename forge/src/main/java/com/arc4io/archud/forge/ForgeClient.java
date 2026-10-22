@@ -192,6 +192,6 @@ public final class ForgeClient implements ClientPlatform {
 
     private static void onRenderLevel(net.minecraftforge.client.event.RenderLevelStageEvent event) {
         if (event.getStage() != net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        com.arc4io.archud.client.map.WaypointWorldRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
+        com.arc4io.archud.client.map.WaypointWorldRenderer.capture(event.getPoseStack(), event.getProjectionMatrix(), event.getCamera());
     }
 }

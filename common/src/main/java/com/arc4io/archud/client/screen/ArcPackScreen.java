@@ -30,7 +30,11 @@ import java.util.Map;
  */
 public class ArcPackScreen extends ArcScreen {
     private static final int ROW = 30;
-    private static final Map<String, java.util.Optional<ResourceLocation>> ICONS = new HashMap<>();
+    /** Значок пака без pack.png (как в ванильном экране). */
+    private static final ResourceLocation UNKNOWN_PACK = new ResourceLocation("textures/misc/unknown_pack.png");
+    private final Map<String, ResourceLocation> icons = new HashMap<>();
+    private final java.util.List<ResourceLocation> registered = new java.util.ArrayList<>();
+    private static int iconCounter;
     private final Options options;
     private final List<Pack> available = new ArrayList<>();
     private final List<Pack> selected = new ArrayList<>(); // сверху — высший приоритет
@@ -70,20 +74,32 @@ public class ArcPackScreen extends ArcScreen {
     }
 
     private ResourceLocation icon(Pack pack) {
-        return ICONS.computeIfAbsent(pack.getId(), id -> {
+        return icons.computeIfAbsent(pack.getId(), id -> {
             try (PackResources res = pack.open()) {
                 IoSupplier<InputStream> sup = res.getRootResource("pack.png");
-                if (sup == null) return java.util.Optional.empty();
-                try (InputStream in = sup.get()) {
-                    NativeImage img = NativeImage.read(in);
-                    ResourceLocation loc = ArcHud.id("pack_icon/" + Integer.toHexString(id.hashCode()));
-                    minecraft.getTextureManager().register(loc, new DynamicTexture(img));
-                    return java.util.Optional.of(loc);
+                if (sup != null) {
+                    try (InputStream in = sup.get()) {
+                        NativeImage img = NativeImage.read(in);
+                        // уникальный id на каждое открытие экрана: старые текстуры освобождаются в removed()
+                        ResourceLocation loc = ArcHud.id("pack_icon/" + (iconCounter++) + "_" + Integer.toHexString(id.hashCode()));
+                        minecraft.getTextureManager().register(loc, new DynamicTexture(img));
+                        registered.add(loc);
+                        return loc;
+                    }
                 }
-            } catch (Exception e) {
-                return java.util.Optional.empty();
+            } catch (Throwable e) {
+                ArcHud.LOGGER.debug("Arc HUD: pack icon for {} failed: {}", id, e.toString());
             }
-        }).orElse(null);
+            return UNKNOWN_PACK;
+        });
+    }
+
+    @Override
+    public void removed() {
+        for (ResourceLocation r : registered) minecraft.getTextureManager().release(r);
+        registered.clear();
+        icons.clear();
+        super.removed();
     }
 
     @Override

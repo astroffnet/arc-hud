@@ -116,6 +116,7 @@ public class ArcConfig {
     public boolean minimapFacing = true;
     public boolean worldWaypoints = true;
     public boolean waypointBeams = true;
+    public boolean waypointEdgeMarkers = true;
     public boolean waypointLabels = true;
     public boolean navigator = true;
     public boolean navigateToDeath = false;
@@ -153,6 +154,8 @@ public class ArcConfig {
 
     // ---- Интеграции ----
     public boolean voiceIntegration = true;
+    public boolean foodPreview = true;
+    public boolean exhaustionBar = true;
     public boolean tempadPanel = true;
     public boolean waystonesIntegration = true;
     public boolean tempadIntegration = true;

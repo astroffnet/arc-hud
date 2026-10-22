@@ -30,6 +30,7 @@ public final class TempadServer {
     private static Method getLocations, getLocation, getName, getPos, getLevel, getId;
     private static Method findTempad, mayTeleport, getOption, canOpen, onOpen, summon;
     private static Class<?> tempadItem;
+    private static java.lang.reflect.Constructor<?> newLocation;
     private static final Map<UUID, Integer> LAST_HASH = new HashMap<>();
     private static int tick;
 
@@ -56,6 +57,7 @@ public final class TempadServer {
             canOpen = option.getMethod("canTimedoorOpen", net.minecraft.world.entity.player.Player.class, ItemStack.class);
             onOpen = option.getMethod("onTimedoorOpen", net.minecraft.world.entity.player.Player.class);
             summon = tempadItem.getMethod("summonTimeDoor", data, net.minecraft.world.entity.player.Player.class, int.class);
+            newLocation = data.getConstructor(String.class, ResourceKey.class, BlockPos.class, UUID.class);
             available = true;
         } catch (Throwable t) {
             available = false;
@@ -90,6 +92,74 @@ public final class TempadServer {
     /** Игрок переподключился — отправить заново. */
     public static void forget(UUID player) {
         LAST_HASH.remove(player);
+    }
+
+    public static void init() {
+        com.arc4io.archud.network.ArcNet.onServer("tempad_door", (player, buf) -> {
+            String name = buf.readUtf(64);
+            int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
+            String dim = buf.readUtf(128);
+            openDoorTo(player, name, x, y, z, dim);
+        });
+    }
+
+    /** Есть ли на сервере Tempad (для клиента: можно ли открывать двери к любым меткам). */
+    public static boolean isAvailable() {
+        return available();
+    }
+
+    /**
+     * Дверь Tempad к любой точке (метке с карты Arc HUD) в любом измерении — с теми же проверками, что у Tempad:
+     * Tempad в инвентаре или браслете, заряд/топливо, разрешение на межпространственные переходы.
+     */
+    public static void openDoorTo(ServerPlayer player, String name, int x, int y, int z, String dim) {
+        if (!available()) return;
+        try {
+            ResourceLocation dimId = ResourceLocation.tryParse(dim);
+            if (dimId == null || player.getServer() == null) return;
+            ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, dimId);
+            if (player.getServer().getLevel(key) == null) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_level"), true);
+                return;
+            }
+            if (Math.abs(x) > 30_000_000 || Math.abs(z) > 30_000_000) return;
+            if (y == Integer.MIN_VALUE) y = safeY(player.getServer().getLevel(key), x, z);
+            ItemStack stack = (ItemStack) findTempad.invoke(null, player);
+            if (stack == null || stack.isEmpty() || !tempadItem.isInstance(stack.getItem())) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_tempad"), true);
+                return;
+            }
+            Object option = getOption.invoke(stack.getItem());
+            if (!(boolean) canOpen.invoke(option, player, stack)) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_fuel"), true);
+                return;
+            }
+            if (!(boolean) mayTeleport.invoke(null, key, player)) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_dimension"), true);
+                return;
+            }
+            String n = name == null || name.isBlank() ? "Arc HUD" : name.length() > 48 ? name.substring(0, 48) : name;
+            Object loc = newLocation.newInstance(n, key, new BlockPos(x, y, z), UUID.randomUUID());
+            onOpen.invoke(option, player);
+            summon.invoke(null, loc, player, 0xFF8800);
+        } catch (Throwable t) {
+            ArcHud.LOGGER.debug("Arc HUD: Tempad door to waypoint failed", t);
+        }
+    }
+
+    /** Безопасная высота для точки с карты (без известной Y): поверхность или, в измерениях с потолком, первая пещера. */
+    private static int safeY(net.minecraft.server.level.ServerLevel level, int x, int z) {
+        level.getChunk(x >> 4, z >> 4);
+        if (!level.dimensionType().hasCeiling()) {
+            return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        }
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        int min = level.getMinBuildHeight() + 5, max = Math.min(level.getMaxBuildHeight() - 5, level.getMinBuildHeight() + level.getLogicalHeight() - 5);
+        for (int yy = min; yy < max; yy++) {
+            boolean floor = level.getBlockState(m.set(x, yy - 1, z)).isSolid();
+            if (floor && level.getBlockState(m.set(x, yy, z)).isAir() && level.getBlockState(m.set(x, yy + 1, z)).isAir()) return yy;
+        }
+        return 64;
     }
 
     /** Открыть временную дверь к локации (запрос с карты Arc HUD). */
