@@ -38,6 +38,13 @@ public class ArcHudForge {
         ITEMS.register(modBus);
         modBus.addListener(ArcHudForge::onCreativeTabs);
         ForgeNetwork.register();
+        if (net.minecraftforge.fml.ModList.get().isLoaded("curios")) {
+            try {
+                com.arc4io.archud.forge.compat.CuriosCompat.registerKeepTempad();
+            } catch (Throwable t) {
+                ArcHud.LOGGER.warn("Arc HUD: Curios drop rules not registered: {}", t.toString());
+            }
+        }
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onServerTick);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onLogout);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.server.ServerStoppingEvent e) ->

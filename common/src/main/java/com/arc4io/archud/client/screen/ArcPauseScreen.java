@@ -32,7 +32,7 @@ public class ArcPauseScreen extends Screen {
         pw = 220;
         int bw = pw - 20;
         int half = (bw - 6) / 2;
-        int rows = 7;
+        int rows = 8;
         ph = 34 + rows * 24 + 6;
         px = (width - pw) / 2;
         py = Math.max(8, (height - ph) / 2);
@@ -58,6 +58,16 @@ public class ArcPauseScreen extends Screen {
         modsBtn.active = mods != null;
         addRenderableWidget(modsBtn);
         y += 24;
+        addRenderableWidget(new ArcButton(x, y, half, 20, Component.translatable("archud.wpl.title"),
+                b -> minecraft.setScreen(new com.arc4io.archud.client.map.WaypointListScreen(this))).icon(Icons.PIN));
+        ArcButton hide = new ArcButton(x + half + 6, y, half, 20, hideLabel(), b -> {
+            com.arc4io.archud.client.ArcClientNet.setHidden(!com.arc4io.archud.config.ArcConfig.get().hideFromMap);
+            b.setMessage(hideLabel());
+        }).icon(Icons.GLOBE);
+        hide.active = !minecraft.isLocalServer() || (minecraft.getSingleplayerServer() != null && minecraft.getSingleplayerServer().isPublished());
+        hide.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.hide.tooltip")));
+        addRenderableWidget(hide);
+        y += 24;
         addRenderableWidget(new ArcButton(x, y, half, 20, Component.translatable("menu.options"),
                 b -> minecraft.setScreen(new OptionsScreen(this, minecraft.options))).icon(Icons.COMPASS));
         boolean published = minecraft.hasSingleplayerServer() && minecraft.getSingleplayerServer().isPublished();
@@ -78,6 +88,10 @@ public class ArcPauseScreen extends Screen {
             b.active = false;
             disconnect();
         }).icon(Icons.WARNING).danger());
+    }
+
+    private static Component hideLabel() {
+        return Component.translatable(com.arc4io.archud.config.ArcConfig.get().hideFromMap ? "archud.hide.on" : "archud.hide.off");
     }
 
     private void disconnect() {

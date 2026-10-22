@@ -86,12 +86,8 @@ public class WaypointListScreen extends ArcScreen {
             minecraft.setScreen(null);
         }));
         tpB = addRenderableWidget(new ArcButton(x + (bw + 4) * 3, by, bw, 18, Component.translatable("archud.wp.teleport"), b -> {
-            if (selected == null || minecraft.getConnection() == null) return;
-            String dim = selected.dimension;
-            String cmd = dim.equals(WaypointManager.currentDimension())
-                    ? "tp @s " + selected.x + " " + selected.y + " " + selected.z
-                    : "execute in " + dim + " run tp @s " + selected.x + " " + selected.y + " " + selected.z;
-            minecraft.getConnection().sendCommand(cmd);
+            if (selected == null) return;
+            com.arc4io.archud.client.ArcClientNet.safeTeleport(selected.dimension, selected.x, selected.y, selected.z);
             minecraft.setScreen(null);
         }));
         editB = addRenderableWidget(new ArcButton(x + (bw + 4) * 4, by, bw, 18, Component.translatable("selectServer.edit"),

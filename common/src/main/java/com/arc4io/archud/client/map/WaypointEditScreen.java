@@ -62,7 +62,7 @@ public class WaypointEditScreen extends ArcScreen {
                 minecraft.setScreen(null);
             }));
         }
-        tp.active = minecraft.player != null && minecraft.player.hasPermissions(2) && wp.dimension.equals(WaypointManager.currentDimension());
+        tp.active = minecraft.player != null && minecraft.player.hasPermissions(2);
         ArcButton del = addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("archud.wp.delete"), b -> {
             WaypointManager.remove(wp);
             onClose();
@@ -92,8 +92,7 @@ public class WaypointEditScreen extends ArcScreen {
     }
 
     private void teleport() {
-        if (minecraft.getConnection() == null) return;
-        minecraft.getConnection().sendCommand("tp @s " + parse(x, wp.x) + " " + parse(y, wp.y) + " " + parse(z, wp.z));
+        com.arc4io.archud.client.ArcClientNet.safeTeleport(wp.dimension, parse(x, wp.x), parse(y, wp.y), parse(z, wp.z));
         minecraft.setScreen(null);
     }
 

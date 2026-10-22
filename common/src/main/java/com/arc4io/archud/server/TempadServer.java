@@ -66,8 +66,31 @@ public final class TempadServer {
     }
 
     /** Вызывается каждый серверный тик (Forge / Fabric). */
+    /** Предмет Tempad (по id мода), без рефлексии — для правил выпадения при смерти и т.п. */
+    public static boolean isTempadStack(ItemStack s) {
+        if (s.isEmpty()) return false;
+        ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem());
+        return id.getNamespace().equals("tempad") && id.getPath().contains("tempad");
+    }
+
     public static void tick(MinecraftServer server, BiConsumer<ServerPlayer, TempadSyncPacket> sender) {
-        if (++tick % PERIOD != 0 || !available()) return;
+        tick++;
+        if (tick % 10 == 0 && com.arc4io.archud.config.ArcConfig.get().tempadNoCooldown && available()) {
+            // без перезарядки: убираем таймер Tempad (в инвентаре и в браслете)
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                var inv = p.getInventory();
+                for (int i = 0; i < inv.getContainerSize(); i++) {
+                    ItemStack s = inv.getItem(i);
+                    if (isTempadStack(s) && s.hasTag() && s.getTag().contains("Timer")) s.removeTagKey("Timer");
+                }
+                try {
+                    ItemStack s = (ItemStack) findTempad.invoke(null, p);
+                    if (s != null && s.hasTag() && s.getTag().contains("Timer")) s.removeTagKey("Timer");
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+        if (tick % PERIOD != 0 || !available()) return;
         Level overworld = server.overworld();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             try {
@@ -95,6 +118,18 @@ public final class TempadServer {
     }
 
     public static void init() {
+        com.arc4io.archud.network.ArcNet.onServer("tempad_door_player", (player, buf) -> {
+            UUID target = buf.readUUID();
+            if (!com.arc4io.archud.config.ArcConfig.get().serverTempadToPlayers || player.getServer() == null) return;
+            ServerPlayer t = player.getServer().getPlayerList().getPlayer(target);
+            if (t == null || t == player) return;
+            if (ArcServer.isHidden(t.getUUID())) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.player_hidden"), true);
+                return;
+            }
+            openDoorTo(player, t.getGameProfile().getName(), t.getBlockX(), t.getBlockY(), t.getBlockZ(),
+                    t.level().dimension().location().toString());
+        });
         com.arc4io.archud.network.ArcNet.onServer("tempad_door", (player, buf) -> {
             String name = buf.readUtf(64);
             int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
@@ -123,13 +158,22 @@ public final class TempadServer {
                 return;
             }
             if (Math.abs(x) > 30_000_000 || Math.abs(z) > 30_000_000) return;
-            if (y == Integer.MIN_VALUE) y = safeY(player.getServer().getLevel(key), x, z);
+            // всегда ищем безопасное место: твёрдый пол, не пустота, не лава (чанк при необходимости загружается)
+            BlockPos safe = TeleportSafety.find(player.getServer().getLevel(key), x, y, z);
+            if (safe == null) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tp.unsafe"), true);
+                return;
+            }
+            x = safe.getX();
+            y = safe.getY();
+            z = safe.getZ();
             ItemStack stack = (ItemStack) findTempad.invoke(null, player);
             if (stack == null || stack.isEmpty() || !tempadItem.isInstance(stack.getItem())) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_tempad"), true);
                 return;
             }
             Object option = getOption.invoke(stack.getItem());
+            if (com.arc4io.archud.config.ArcConfig.get().tempadNoCooldown) stack.removeTagKey("Timer");
             if (!(boolean) canOpen.invoke(option, player, stack)) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_fuel"), true);
                 return;
@@ -141,25 +185,11 @@ public final class TempadServer {
             String n = name == null || name.isBlank() ? "Arc HUD" : name.length() > 48 ? name.substring(0, 48) : name;
             Object loc = newLocation.newInstance(n, key, new BlockPos(x, y, z), UUID.randomUUID());
             onOpen.invoke(option, player);
+            if (com.arc4io.archud.config.ArcConfig.get().tempadNoCooldown) stack.removeTagKey("Timer");
             summon.invoke(null, loc, player, 0xFF8800);
         } catch (Throwable t) {
             ArcHud.LOGGER.debug("Arc HUD: Tempad door to waypoint failed", t);
         }
-    }
-
-    /** Безопасная высота для точки с карты (без известной Y): поверхность или, в измерениях с потолком, первая пещера. */
-    private static int safeY(net.minecraft.server.level.ServerLevel level, int x, int z) {
-        level.getChunk(x >> 4, z >> 4);
-        if (!level.dimensionType().hasCeiling()) {
-            return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        }
-        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        int min = level.getMinBuildHeight() + 5, max = Math.min(level.getMaxBuildHeight() - 5, level.getMinBuildHeight() + level.getLogicalHeight() - 5);
-        for (int yy = min; yy < max; yy++) {
-            boolean floor = level.getBlockState(m.set(x, yy - 1, z)).isSolid();
-            if (floor && level.getBlockState(m.set(x, yy, z)).isAir() && level.getBlockState(m.set(x, yy + 1, z)).isAir()) return yy;
-        }
-        return 64;
     }
 
     /** Открыть временную дверь к локации (запрос с карты Arc HUD). */

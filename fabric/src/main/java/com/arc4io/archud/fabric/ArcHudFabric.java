@@ -24,6 +24,13 @@ public class ArcHudFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         ArcHud.init(new FabricPlatform());
+        if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("trinkets")) {
+            try {
+                com.arc4io.archud.fabric.compat.TrinketsCompat.registerKeepTempad();
+            } catch (Throwable t) {
+                ArcHud.LOGGER.warn("Arc HUD: Trinkets drop rule not registered: {}", t.toString());
+            }
+        }
 
         for (BackpackTier tier : BackpackTier.values()) {
             BACKPACKS.add(Registry.register(BuiltInRegistries.ITEM, ArcHud.id(tier.itemName()), new BackpackItem(tier, new Item.Properties())));
