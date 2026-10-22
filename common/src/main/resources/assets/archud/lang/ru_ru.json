@@ -418,5 +418,21 @@
   "archud.config.serverPlayerPositions": "Сервер: позиции игроков",
   "archud.config.serverWaypointSharing": "Сервер: обмен метками",
   "archud.config.voiceIntegration": "Интеграция с голосовым чатом",
-  "archud.config.tempadPanel": "Панель Tempad"
+  "archud.config.tempadPanel": "Панель Tempad",
+  "archud.worlds.loading": "Загрузка миров…",
+  "archud.worlds.count": "Миров: %s",
+  "archud.worlds.empty": "Миров пока нет — создайте первый!",
+  "archud.worlds.nothing": "Ничего не найдено",
+  "archud.worlds.select": "Выберите мир слева",
+  "archud.worlds.mode": "Режим игры",
+  "archud.worlds.cheats": "Читы",
+  "archud.worlds.difficulty": "Сложность",
+  "archud.worlds.played": "Последняя игра",
+  "archud.worlds.experimental": "Экспериментальные функции",
+  "archud.mp.continue": "Продолжить: %s",
+  "archud.mp.count": "Серверов: %s · в сети: %s",
+  "archud.mp.empty": "Список пуст — добавьте сервер",
+  "archud.mp.last_direct": "Последний адрес: %s",
+  "archud.config.customWorldSelect": "Новый экран «Одиночная игра»",
+  "archud.config.customMultiplayer": "Новый экран «Сетевая игра»"
 }

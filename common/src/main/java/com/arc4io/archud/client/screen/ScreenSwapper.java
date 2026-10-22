@@ -102,6 +102,13 @@ public final class ScreenSwapper {
         if (cfg.customLanScreen && c == net.minecraft.client.gui.screens.ShareToLanScreen.class) {
             return new ArcLanScreen(current);
         }
+        if (cfg.customWorldSelect && c == net.minecraft.client.gui.screens.worldselection.SelectWorldScreen.class) {
+            return new ArcWorldSelectScreen(((com.arc4io.archud.mixin.SelectWorldScreenAccessor) next).archud$lastScreen());
+        }
+        if (cfg.customMultiplayer && c == net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen.class) {
+            Screen back = ((com.arc4io.archud.mixin.JoinMultiplayerScreenAccessor) next).archud$lastScreen();
+            return new ArcMultiplayerScreen(back != null ? back : new net.minecraft.client.gui.screens.TitleScreen());
+        }
         if (cfg.customInventory && c == net.minecraft.client.gui.screens.inventory.InventoryScreen.class && mc.player != null) {
             return new ArcInventoryScreen(mc.player);
         }

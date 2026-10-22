@@ -356,5 +356,21 @@
   "archud.config.serverPlayerPositions": "Server: player positions",
   "archud.config.serverWaypointSharing": "Server: waypoint sharing",
   "archud.config.voiceIntegration": "Voice chat integration",
-  "archud.config.tempadPanel": "Tempad panel"
+  "archud.config.tempadPanel": "Tempad panel",
+  "archud.worlds.loading": "Loading worlds…",
+  "archud.worlds.count": "Worlds: %s",
+  "archud.worlds.empty": "No worlds yet — create your first one!",
+  "archud.worlds.nothing": "Nothing found",
+  "archud.worlds.select": "Select a world on the left",
+  "archud.worlds.mode": "Game mode",
+  "archud.worlds.cheats": "Cheats",
+  "archud.worlds.difficulty": "Difficulty",
+  "archud.worlds.played": "Last played",
+  "archud.worlds.experimental": "Experimental features",
+  "archud.mp.continue": "Continue: %s",
+  "archud.mp.count": "Servers: %s · LAN: %s",
+  "archud.mp.empty": "The list is empty — add a server",
+  "archud.mp.last_direct": "Last address: %s",
+  "archud.config.customWorldSelect": "New Singleplayer screen",
+  "archud.config.customMultiplayer": "New Multiplayer screen"
 }
