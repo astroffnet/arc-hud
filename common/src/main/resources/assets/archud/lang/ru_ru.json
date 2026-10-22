@@ -161,5 +161,16 @@
   "archud.recipe.click": "Нажми, чтобы крафтить это",
   "archud.chat.count": "сообщений: %s",
   "archud.chat.new": "новые сообщения ↓",
-  "archud.controls.count": "клавиш"
+  "archud.controls.count": "клавиш",
+  "archud.legends.stamina": "Выносл.",
+  "archud.legends.mana": "Мана",
+  "archud.legends.abilities": "Способности",
+  "archud.config.addonPanelsAnchor": "Панели модов (Legends…)",
+  "archud.overlays.title": "Элементы HUD модов",
+  "archud.overlays.open": "HUD модов…",
+  "archud.overlays.hint": "Нажми на элемент, чтобы скрыть или показать его",
+  "archud.overlays.empty": "Нет HUD-элементов других модов",
+  "archud.overlays.replaced": "в Arc HUD",
+  "archud.overlays.hidden": "скрыт",
+  "archud.overlays.shown": "показан"
 }

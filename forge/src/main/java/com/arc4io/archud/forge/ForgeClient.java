@@ -2,6 +2,8 @@ package com.arc4io.archud.forge;
 
 import com.arc4io.archud.client.ArcClient;
 import com.arc4io.archud.client.ArcKeys;
+import com.arc4io.archud.client.hud.ArcHudApi;
+import com.arc4io.archud.forge.compat.LegendsCompat;
 import com.arc4io.archud.client.ClientPlatform;
 import com.arc4io.archud.client.hud.HudRenderer;
 import com.arc4io.archud.client.screen.ArcConfigScreen;
@@ -22,6 +24,10 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.gui.ModListScreen;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.GuiOverlayManager;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -56,6 +62,7 @@ public final class ForgeClient implements ClientPlatform {
         ArcClient.init(new ForgeClient());
         modBus.addListener(ForgeClient::onRegisterKeys);
         modBus.addListener(ForgeClient::onRegisterOverlays);
+        modBus.addListener(ForgeClient::onClientSetup);
 
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new ArcConfigScreen(parent)));
@@ -68,6 +75,12 @@ public final class ForgeClient implements ClientPlatform {
         bus.addListener(ForgeClient::onScreenRenderPre);
         bus.addListener(ForgeClient::onScreenRenderPost);
         bus.addListener(ForgeClient::onScreenMouse);
+    }
+
+    private static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            if (ModList.get().isLoaded("legendsmod")) LegendsCompat.init();
+        });
     }
 
     private static void onRegisterKeys(RegisterKeyMappingsEvent event) {
@@ -100,7 +113,8 @@ public final class ForgeClient implements ClientPlatform {
         // место под Arc HUD резервируем ДО полос других модов (они регистрируются над хотбаром)
         if (id.equals(VanillaGuiOverlay.HOTBAR.id()) || id.equals(VanillaGuiOverlay.VIGNETTE.id())) reserveSpace();
         if (ArcConfig.get().hiddenOverlays.contains(id.toString())
-                || (ArcConfig.get().hideDuplicateModBars && HudRenderer.replacesStatusBars() && DUPLICATE_BARS.contains(id.toString()))) {
+                || (ArcConfig.get().hideDuplicateModBars && HudRenderer.replacesStatusBars() && DUPLICATE_BARS.contains(id.toString()))
+                || (ArcConfig.get().addonBars && HudRenderer.replacesStatusBars() && ArcHudApi.isReplaced(id.toString()))) {
             event.setCanceled(true);
             return;
         }
@@ -148,6 +162,16 @@ public final class ForgeClient implements ClientPlatform {
     @Override
     public void sendToServer(ArcPacket packet, ResourceLocation arg) {
         if (Minecraft.getInstance().getConnection() != null) ForgeNetwork.send(packet, arg);
+    }
+
+    @Override
+    public List<String> hudOverlayIds() {
+        List<String> out = new java.util.ArrayList<>();
+        for (NamedGuiOverlay o : GuiOverlayManager.getOverlays()) {
+            String ns = o.id().getNamespace();
+            if (!ns.equals("minecraft") && !ns.equals("forge") && !ns.equals(com.arc4io.archud.ArcHud.MODID)) out.add(o.id().toString());
+        }
+        return out;
     }
 
     @Override

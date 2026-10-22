@@ -365,7 +365,7 @@ public final class HudRenderer {
                 if (v == null || v.length < 2) continue;
                 float frac = v[1] <= 0 ? 0 : v[0] / v[1];
                 thinRow(g, font, leftX, leftY, rowW, Icons.STAR, frac, Draw.brighten(bar.color(), 0.25F), Draw.darken(bar.color(), 0.3F),
-                        bar.label().getString() + " " + fmt(v[0]), accent);
+                        bar.label().getString() + "  " + fmt(v[0]) + "/" + fmt(v[1]), accent);
                 leftY -= 10;
             }
         }

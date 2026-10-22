@@ -72,6 +72,9 @@ final class HudBlocks {
             add(map, cfg.compassAnchor, target(mc, font, accent));
             if (cfg.effectsPanel) add(map, cfg.effectsAnchor, effects(mc, p, font, accent));
         }
+        if (!spectator && cfg.addonBars) {
+            for (ArcHudApi.Panel panel : ArcHudApi.panels()) add(map, cfg.addonPanelsAnchor, panel(panel, font, accent));
+        }
         if (!spectator) {
             add(map, cfg.gearAnchor, gear(p, font, accent));
             if (cfg.pickupNotifications) add(map, cfg.pickupsAnchor, pickups(font, accent, now));
@@ -339,6 +342,49 @@ final class HudBlocks {
                             g.fill(x + 24, ey + 19, x + 24 + Math.round((bw - 27) * f), ey + 20, color);
                         }
                     }
+                }
+            }
+        };
+    }
+
+    // ------------------------------------------------- панели аддонов (Legends и др.)
+    private static Block panel(ArcHudApi.Panel panel, Font font, int accent) {
+        List<ArcHudApi.PanelRow> rows;
+        try {
+            rows = panel.rows().get();
+        } catch (Exception e) {
+            rows = null;
+        }
+        if (rows == null || rows.isEmpty()) return null;
+        final List<ArcHudApi.PanelRow> list = rows;
+        int maxW = Math.round(font.width(panel.title()) * 0.75F) + 12;
+        for (ArcHudApi.PanelRow r : list) {
+            maxW = Math.max(maxW, font.width(r.text()) + (r.right().isEmpty() ? 0 : font.width(r.right()) + 10) + 14);
+        }
+        final int bw = Math.min(220, maxW), bh = 12 + list.size() * 14 + 2;
+        return new Block() {
+            public int w() { return bw; }
+
+            public int h() { return bh; }
+
+            public void draw(GuiGraphics g, int x, int y, boolean right) {
+                Draw.panel(g, x, y, bw, bh, Draw.PANEL, Draw.alpha(panel.color(), 0x70));
+                g.fill(x + 2, y, x + bw - 2, y + 1, Draw.alpha(panel.color(), 0xFF));
+                Draw.small(g, font, panel.title().getString().toUpperCase(), x + 5, y + 3, Draw.alpha(panel.color(), 0xFF), 0.75F);
+                int ry = y + 12;
+                for (ArcHudApi.PanelRow r : list) {
+                    if (r.highlight()) g.fill(x + 2, ry, x + bw - 2, ry + 13, Draw.alpha(r.color(), 0x30));
+                    g.fill(x + 2, ry + 1, x + 4, ry + 12, Draw.alpha(r.color(), 0xFF));
+                    String text = r.text();
+                    int rw = r.right().isEmpty() ? 0 : font.width(r.right()) + 8;
+                    if (font.width(text) > bw - 12 - rw) text = font.plainSubstrByWidth(text, bw - 16 - rw) + "…";
+                    g.drawString(font, text, x + 7, ry + 2, r.highlight() ? 0xFFFFFFFF : Draw.TEXT, true);
+                    if (!r.right().isEmpty()) g.drawString(font, r.right(), x + bw - 5 - font.width(r.right()), ry + 2, r.color(), true);
+                    if (r.progress() >= 0) {
+                        g.fill(x + 7, ry + 11, x + bw - 5, ry + 12, 0x50000000);
+                        g.fill(x + 7, ry + 11, x + 7 + Math.round((bw - 12) * Mth.clamp(r.progress(), 0, 1)), ry + 12, r.color());
+                    }
+                    ry += 14;
                 }
             }
         };
