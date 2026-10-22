@@ -25,7 +25,10 @@
     "ScreenBackgroundMixin",
     "CreateWorldScreenMixin",
     "JoinMultiplayerScreenAccessor",
-    "SelectWorldScreenAccessor"
+    "SelectWorldScreenAccessor",
+    "EntityCullingMixin",
+    "BlockEntityCullingMixin",
+    "DynamicFpsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

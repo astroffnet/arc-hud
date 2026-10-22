@@ -122,8 +122,16 @@ public class WorldMapScreen extends Screen {
         if (layers.isEmpty()) return Component.translatable("archud.map.layer.none");
         String[] l = layers.get(Math.min(layerIndex, layers.size() - 1));
         String dim = HudRenderer.pretty(l[0].substring(l[0].indexOf(':') + 1));
-        String lv = l[1].equals("surface") ? Component.translatable("archud.map.layer.surface").getString()
-                : "Y " + (Integer.parseInt(l[1].replace("cave_", "")) * 16);
+        String lv;
+        if (l[1].equals("surface")) lv = Component.translatable("archud.map.layer.surface").getString();
+        else if (l[1].equals("cave")) lv = Component.translatable("archud.map.cave").getString();
+        else {
+            try {
+                lv = "Y " + (Integer.parseInt(l[1].replace("cave_", "")) * 16);
+            } catch (NumberFormatException e) {
+                lv = l[1];
+            }
+        }
         return Component.literal(dim + " · " + lv);
     }
 
@@ -191,7 +199,8 @@ public class WorldMapScreen extends Screen {
         RenderSystem.enableBlend();
         g.enableScissor(0, 0, mapW, height);
         MapCache.Layer layer = viewLayer != null ? viewLayer : MapCache.active();
-        if (layer != null) MapView.drawTerrain(g, layer, cx, cy, centerX, centerZ, zoom, 0F, radius);
+        if (viewLayer == null) MapView.drawTerrain(g, cx, cy, centerX, centerZ, zoom, 0F, radius);
+        else if (layer != null) MapView.drawTerrain(g, layer, cx, cy, centerX, centerZ, zoom, 0F, radius);
         if (showGrid) drawGrid(g, mapW, cx, cy);
         if (showSlime) MapView.drawSlimeChunks(g, minecraft, cx, cy, centerX, centerZ, zoom, 0F, radius);
         if (showTrail) MapView.drawTrail(g, TrailManager.trail(viewDim()), cx, cy, centerX, centerZ, zoom, 0F, radius, accent);

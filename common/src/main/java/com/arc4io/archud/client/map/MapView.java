@@ -21,7 +21,16 @@ public final class MapView {
     private MapView() {}
 
     public static void drawTerrain(GuiGraphics g, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float radiusPx) {
-        if (MapCache.active() != null) drawTerrain(g, MapCache.active(), cx, cy, centerX, centerZ, zoom, rotation, radiusPx);
+        MapCache.Layer act = MapCache.active();
+        if (act == null) return;
+        MapCache.Layer under = MapScanner.underlay();
+        if (under != null && under != act) {
+            // под землёй: поверхность (пройденный путь) затемнена, пещеры поверх
+            drawTerrain(g, under, cx, cy, centerX, centerZ, zoom, rotation, radiusPx);
+            int r = (int) Math.ceil(radiusPx * 1.5F) + 2;
+            g.fill((int) cx - r, (int) cy - r, (int) cx + r, (int) cy + r, 0xB0000000);
+        }
+        drawTerrain(g, act, cx, cy, centerX, centerZ, zoom, rotation, radiusPx);
     }
 
     public static void drawTerrain(GuiGraphics g, MapCache.Layer layer, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float radiusPx) {

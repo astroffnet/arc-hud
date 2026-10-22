@@ -24,19 +24,30 @@ import java.util.Map;
  * глубина воды, режим пещер (в Незере и под землёй).
  */
 public final class MapScanner {
-    private static final Map<Long, Long> SCANNED = new HashMap<>();
+    private static final Map<Long, Long> SCANNED = new HashMap<>();      // поверхность
+    private static final Map<Long, Long> SCANNED_CAVE = new HashMap<>(); // пещеры
     private static final int RADIUS = 9;
-    private static boolean cave;
-    private static int caveY;
+    private static final int CAVE_RADIUS = 6;
+    private static boolean cave, scanningCave, undergroundState;
+    private static int caveY, lastCaveScanY = Integer.MIN_VALUE, ticksUnder, ticksAbove;
+    private static MapCache.Layer surfaceLayer, caveLayer;
+    private static int slowTick;
 
     private MapScanner() {}
 
     static void clearScanned() {
+        // слой сменился (другое измерение / мир) — пересканировать
         SCANNED.clear();
+        SCANNED_CAVE.clear();
     }
 
     public static boolean caveMode() {
         return cave;
+    }
+
+    /** Слой поверхности, который рисуется затемнённым под пещерным (чтобы пройденный путь оставался виден). */
+    public static MapCache.Layer underlay() {
+        return cave && surfaceLayer != null ? surfaceLayer : null;
     }
 
     private static boolean inWorld;
@@ -50,6 +61,9 @@ public final class MapScanner {
             TrailManager.clear();
             com.arc4io.archud.compat.TempadCompat.reset();
             com.arc4io.archud.compat.WaystonesCompat.reset();
+            surfaceLayer = caveLayer = null;
+            SCANNED.clear();
+            SCANNED_CAVE.clear();
         }
         inWorld = now;
     }
@@ -60,18 +74,53 @@ public final class MapScanner {
         if (level == null || p == null) return;
 
         BlockPos pos = p.blockPosition();
-        boolean underground = !level.canSeeSky(pos.above()) && p.getY() < level.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - 6;
         boolean ceiling = level.dimensionType().hasCeiling();
-        cave = ceiling || (ArcConfig.get().minimapCaveMode && underground); // в Незере и подобных — всегда слой у игрока
+        // под землёй: нет неба над головой (свет неба ≈ 0) и глубоко под поверхностью (листва не считается).
+        // С задержкой, чтобы карта не «мигала» в лесу, под мостом или в доме.
+        int sky = level.getBrightness(net.minecraft.world.level.LightLayer.SKY, BlockPos.containing(p.getEyePosition()));
+        int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+        boolean under = sky <= 1 && pos.getY() < surface - 4;
+        if (under) {
+            ticksUnder++;
+            ticksAbove = 0;
+        } else {
+            ticksAbove++;
+            ticksUnder = 0;
+        }
+        if (!undergroundState && ticksUnder >= 40) undergroundState = true;
+        if (undergroundState && ticksAbove >= 20) undergroundState = false;
+        cave = ceiling || (ArcConfig.get().minimapCaveMode && undergroundState); // в Незере и подобных — всегда слой у игрока
         caveY = pos.getY();
-        String layerName = cave ? "cave_" + Math.floorDiv(caveY, 16) : "surface";
-        MapCache.activate(WaypointManager.worldKey(), level.dimension().location().toString(), layerName);
+
+        String world = WaypointManager.worldKey(), dim = level.dimension().location().toString();
+        MapCache.Layer act = MapCache.activate(world, dim, cave ? "cave" : "surface");
+        surfaceLayer = ceiling ? null : MapCache.layer(world, dim, "surface");
+        caveLayer = cave ? act : null;
+        if (surfaceLayer != null) MapCache.touch(surfaceLayer);
         MapCache.tick();
 
         long now = Util.getMillis();
         int pcx = pos.getX() >> 4, pcz = pos.getZ() >> 4;
-        int budget = 6;
-        for (int r = 0; r <= RADIUS && budget > 0; r++) {
+        // при низком FPS сканируем реже (карта всё равно догонит), при высоком — как обычно
+        if (ArcConfig.get().adaptiveMapScan) {
+            int fps = mc.getFps();
+            int step = fps < 25 ? 4 : fps < 45 ? 2 : 1;
+            if (++slowTick % step != 0) return;
+        }
+        // поверхность сканируется всегда (кроме измерений с потолком) — путь сохраняется и под землёй
+        if (surfaceLayer != null) scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, RADIUS, cave ? 3 : 6, now, false);
+        if (cave) {
+            if (Math.abs(caveY - lastCaveScanY) >= 6) {
+                SCANNED_CAVE.clear(); // другая глубина — обновить пещеры вокруг
+                lastCaveScanY = caveY;
+            }
+            scanArea(mc, level, caveLayer, SCANNED_CAVE, pcx, pcz, CAVE_RADIUS, 5, now, true);
+        }
+    }
+
+    private static void scanArea(Minecraft mc, ClientLevel level, MapCache.Layer layer, Map<Long, Long> scanned, int pcx, int pcz, int radius,
+                                 int budget, long now, boolean caveScan) {
+        for (int r = 0; r <= radius && budget > 0; r++) {
             long interval = r <= 1 ? 700L : r <= 3 ? 2500L : 15000L;
             for (int dx = -r; dx <= r && budget > 0; dx++) {
                 for (int dz = -r; dz <= r && budget > 0; dz++) {
@@ -79,17 +128,18 @@ public final class MapScanner {
                     int cx = pcx + dx, cz = pcz + dz;
                     if (!level.hasChunk(cx, cz)) continue;
                     long k = ((long) cx << 32) ^ (cz & 0xFFFFFFFFL);
-                    Long last = SCANNED.get(k);
+                    Long last = scanned.get(k);
                     if (last != null && now - last < interval) continue;
-                    SCANNED.put(k, now);
-                    scanChunk(mc, level, cx, cz);
+                    scanned.put(k, now);
+                    scanningCave = caveScan;
+                    scanChunk(mc, level, layer, cx, cz);
                     budget--;
                 }
             }
         }
     }
 
-    private static void scanChunk(Minecraft mc, ClientLevel level, int cx, int cz) {
+    private static void scanChunk(Minecraft mc, ClientLevel level, MapCache.Layer layer, int cx, int cz) {
         int[] out = new int[256];
         int[] heights = new int[17 * 16];
         BlockState[] states = new BlockState[17 * 16];
@@ -140,19 +190,19 @@ public final class MapScanner {
                     int north = heights[i - 16];
                     int hDiff = heights[i] - north;
                     shade = hDiff > 0 ? 1.12F : hDiff < 0 ? 0.82F : 1F;
-                    if (cave) shade *= 0.95F;
+                    if (scanningCave) shade *= 0.95F;
                 }
                 rgb = mul(rgb, shade);
                 int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
                 out[dz * 16 + dx] = 0xFF000000 | (b << 16) | (g << 8) | r;
             }
         }
-        MapCache.putChunk(cx, cz, out);
-        if (!cave) com.arc4io.archud.client.ArcClientNet.offerChunk(level.dimension().location().toString(), cx, cz, out);
+        MapCache.putChunk(layer, cx, cz, out);
+        if (!scanningCave) com.arc4io.archud.client.ArcClientNet.offerChunk(level.dimension().location().toString(), cx, cz, out);
     }
 
     private static int topY(ClientLevel level, BlockPos.MutableBlockPos m, int x, int z, int minY) {
-        if (cave) {
+        if (scanningCave) {
             int y = caveY + 1;
             int limit = 48;
             // если внутри потолка — опускаемся до воздуха

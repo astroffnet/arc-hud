@@ -30,11 +30,19 @@ public class ArcConfigScreen extends Screen {
     private double scroll;
     private int px, py, pw, ph, listY, listH;
 
+    /** Числовые настройки: значения, между которыми переключает клик (ЛКМ — дальше, ПКМ — назад). */
+    private static final java.util.Map<String, int[]> PRESETS = java.util.Map.of(
+            "decorCullDistance", new int[]{0, 24, 32, 48, 64, 96},
+            "backgroundFps", new int[]{1, 5, 10, 15, 30, 60},
+            "waypointMaxDistance", new int[]{0, 250, 500, 1000, 2000, 5000},
+            "minimapSize", new int[]{80, 96, 110, 128, 150, 180});
+
     public ArcConfigScreen(Screen parent) {
         super(Component.translatable("archud.config.title"));
         this.parent = parent;
         for (Field f : ArcConfig.class.getFields()) {
-            if ((f.getType() == boolean.class || f.getType() == HudAnchor.class) && !Modifier.isStatic(f.getModifiers())) fields.add(f);
+            if (Modifier.isStatic(f.getModifiers())) continue;
+            if (f.getType() == boolean.class || f.getType() == HudAnchor.class || (f.getType() == int.class && PRESETS.containsKey(f.getName()))) fields.add(f);
         }
     }
 
@@ -93,6 +101,7 @@ public class ArcConfigScreen extends Screen {
 
     private boolean get(Field f) {
         try {
+            if (f.getType() == int.class) return f.getInt(ArcConfig.get()) != 0;
             return f.getType() != boolean.class || f.getBoolean(ArcConfig.get());
         } catch (IllegalAccessException e) {
             return false;
@@ -104,10 +113,29 @@ public class ArcConfigScreen extends Screen {
             if (f.getType() == HudAnchor.class) {
                 HudAnchor a = (HudAnchor) f.get(ArcConfig.get());
                 f.set(ArcConfig.get(), (a == null ? HudAnchor.TOP_LEFT : a).next(dir));
+            } else if (f.getType() == int.class) {
+                int[] p = PRESETS.get(f.getName());
+                int cur = f.getInt(ArcConfig.get()), idx = 0;
+                for (int i = 0; i < p.length; i++) if (p[i] <= cur) idx = i;
+                f.setInt(ArcConfig.get(), p[Math.floorMod(idx + dir, p.length)]);
             } else {
                 f.setBoolean(ArcConfig.get(), !f.getBoolean(ArcConfig.get()));
             }
         } catch (IllegalAccessException ignored) {
+        }
+    }
+
+    private String intValue(Field f) {
+        try {
+            int v = f.getInt(ArcConfig.get());
+            if (v == 0) return Component.translatable("options.off").getString();
+            return switch (f.getName()) {
+                case "backgroundFps" -> v + " FPS";
+                case "minimapSize" -> v + " px";
+                default -> v + " m";
+            };
+        } catch (IllegalAccessException e) {
+            return "?";
         }
     }
 
@@ -147,9 +175,9 @@ public class ArcConfigScreen extends Screen {
             boolean hov = mouseX >= x && mouseX < x + cw && mouseY >= y && mouseY < y + ROW_H - 2 && mouseY >= listY && mouseY < listY + listH;
             Draw.panel(g, x, y, cw, ROW_H - 2, hov ? Draw.PANEL_LIGHT : Draw.PANEL, on ? Draw.alpha(accent, 0x70) : 0x30FFFFFF);
             int reserve = 36;
-            if (f.getType() == HudAnchor.class) {
-                // выбор края экрана (ЛКМ — дальше, ПКМ — назад)
-                String v = HudLayoutScreen.anchorName(anchor(f)).getString();
+            if (f.getType() == HudAnchor.class || f.getType() == int.class) {
+                // выбор края экрана / значения (ЛКМ — дальше, ПКМ — назад)
+                String v = f.getType() == int.class ? intValue(f) : HudLayoutScreen.anchorName(anchor(f)).getString();
                 int vw = Math.round(font.width(v) * 0.75F) + 10;
                 reserve = vw + 10;
                 int vx = x + cw - vw - 4;

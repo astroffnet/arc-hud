@@ -102,8 +102,9 @@ public final class MapCache {
         Layer l = LAYERS.computeIfAbsent(key, k -> new Layer(world, dim, level));
         if (active != l) {
             if (active != null) saveLayer(active);
+            boolean otherPlace = active == null || !active.world.equals(world) || !active.dim.equals(dim);
             active = l;
-            MapScanner.clearScanned();
+            if (otherPlace) MapScanner.clearScanned();
         }
         l.lastUsed = System.currentTimeMillis();
         return l;
@@ -169,9 +170,12 @@ public final class MapCache {
 
     /** Записывает цвета чанка (256 пикселей ABGR, индекс z*16+x) в активный слой. */
     static void putChunk(int cx, int cz, int[] abgr) {
-        if (active == null) return;
+        if (active != null) putChunk(active, cx, cz, abgr);
+    }
+
+    static void putChunk(Layer layer, int cx, int cz, int[] abgr) {
         int bx = cx * 16, bz = cz * 16;
-        Region r = region(active, Math.floorDiv(bx, REGION), Math.floorDiv(bz, REGION), true);
+        Region r = region(layer, Math.floorDiv(bx, REGION), Math.floorDiv(bz, REGION), true);
         int lx = Math.floorMod(bx, REGION), lz = Math.floorMod(bz, REGION);
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {

@@ -394,5 +394,12 @@
   "archud.lan.other": "Other addresses (VPN etc.): %s",
   "archud.config.waypointEdgeMarkers": "Off-screen waypoints",
   "archud.config.foodPreview": "Held food preview (AppleSkin)",
-  "archud.config.exhaustionBar": "Exhaustion on hunger bar (AppleSkin)"
+  "archud.config.exhaustionBar": "Exhaustion on hunger bar (AppleSkin)",
+  "archud.config.entityCulling": "Performance: don't render mobs behind walls",
+  "archud.config.blockEntityCulling": "Performance: don't render chests/signs behind walls",
+  "archud.config.cullPlayers": "Performance: cull players behind walls too",
+  "archud.config.decorCullDistance": "Performance: item frame/painting/armor stand distance",
+  "archud.config.dynamicFps": "Performance: lower FPS when the game is in background",
+  "archud.config.backgroundFps": "Background FPS",
+  "archud.config.adaptiveMapScan": "Performance: slower map scanning at low FPS"
 }
