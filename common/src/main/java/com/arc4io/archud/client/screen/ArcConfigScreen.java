@@ -63,6 +63,13 @@ public class ArcConfigScreen extends Screen {
                     ArcConfig.save();
                     minecraft.setScreen(new HudLayoutScreen(this));
                 }));
+        if (!com.arc4io.archud.client.ArcClient.platform().hudOverlayIds().isEmpty()) {
+            addRenderableWidget(new ArcButton(px + 254, py + ph - 24, Math.max(60, pw - 254 - 132), 18, Component.translatable("archud.overlays.open"),
+                    b -> {
+                        ArcConfig.save();
+                        minecraft.setScreen(new ModOverlaysScreen(this));
+                    }));
+        }
         refresh();
     }
 

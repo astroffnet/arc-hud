@@ -99,5 +99,16 @@
   "archud.recipe.click": "Click to craft this one",
   "archud.chat.count": "%s messages",
   "archud.chat.new": "new messages ↓",
-  "archud.controls.count": "keys"
+  "archud.controls.count": "keys",
+  "archud.legends.stamina": "Stamina",
+  "archud.legends.mana": "Mana",
+  "archud.legends.abilities": "Abilities",
+  "archud.config.addonPanelsAnchor": "Mod panels (Legends…)",
+  "archud.overlays.title": "Mod HUD elements",
+  "archud.overlays.open": "Mod HUD…",
+  "archud.overlays.hint": "Click an element to hide or show it",
+  "archud.overlays.empty": "No HUD elements from other mods",
+  "archud.overlays.replaced": "in Arc HUD",
+  "archud.overlays.hidden": "hidden",
+  "archud.overlays.shown": "shown"
 }

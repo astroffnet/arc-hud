@@ -96,6 +96,7 @@ public class ArcConfig {
     public HudAnchor gearAnchor = HudAnchor.LEFT;
     public HudAnchor pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
     public HudAnchor statusAnchor = HudAnchor.BOTTOM_LEFT;
+    public HudAnchor addonPanelsAnchor = HudAnchor.RIGHT;
 
     // ---- Совместимость ----
     /** Не заменять главное меню, если его уже меняет другой мод (Aether, FancyMenu и т.п.). */
@@ -153,6 +154,7 @@ public class ArcConfig {
             if (instance.gearAnchor == null) instance.gearAnchor = HudAnchor.LEFT;
             if (instance.pickupsAnchor == null) instance.pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
             if (instance.statusAnchor == null) instance.statusAnchor = HudAnchor.BOTTOM_LEFT;
+            if (instance.addonPanelsAnchor == null) instance.addonPanelsAnchor = HudAnchor.RIGHT;
             save();
         } catch (Exception e) {
             ArcHud.LOGGER.error("Arc HUD: не удалось загрузить конфиг, используются значения по умолчанию", e);

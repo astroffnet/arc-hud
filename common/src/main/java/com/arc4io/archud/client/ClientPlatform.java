@@ -16,4 +16,9 @@ public interface ClientPlatform {
 
     /** Экран списка модов (Forge Mods / Mod Menu) или null, если недоступен. */
     Screen createModListScreen(Screen parent);
+
+    /** id HUD-элементов других модов (на Forge — зарегистрированные оверлеи). */
+    default java.util.List<String> hudOverlayIds() {
+        return java.util.List.of();
+    }
 }
