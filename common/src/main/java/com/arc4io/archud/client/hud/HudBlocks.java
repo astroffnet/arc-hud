@@ -244,6 +244,7 @@ final class HudBlocks {
                         if (t > 12500 && t < 23500) g.fill(ix, iy, ix + is, iy + is, 0x70000818);
                     }
                     if (cfg.minimapEntities) MapView.drawEntities(g, mc, cx, cy, wx, wz, zoom, rot, half, cfg.minimapPlayerNames);
+                    MapView.drawRemotePlayers(g, mc, dim, cx, cy, wx, wz, zoom, rot, half, cfg.minimapPlayerNames, cfg.showLoadZones);
                     MapView.drawNavigatorLine(g, mc, cx, cy, wx, wz, zoom, rot, half);
                 };
                 g.enableScissor(ix, iy, ix + is, iy + is);

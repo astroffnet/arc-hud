@@ -182,6 +182,30 @@ public final class MapCache {
         r.unsaved = true;
     }
 
+    /** Чанк от другого игрока (общая карта): пишет в слой поверхности измерения, не трогая прозрачные пиксели. */
+    public static void putRemote(String world, String dim, int cx, int cz, int[] abgr) {
+        Layer layer = layer(world, dim, "surface");
+        layer.lastUsed = System.currentTimeMillis();
+        int bx = cx * 16, bz = cz * 16;
+        Region r = region(layer, Math.floorDiv(bx, REGION), Math.floorDiv(bz, REGION), true);
+        int lx = Math.floorMod(bx, REGION), lz = Math.floorMod(bz, REGION);
+        boolean changed = false;
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                int v = abgr[z * 16 + x];
+                if (v == 0) continue;
+                if (r.image.getPixelRGBA(lx + x, lz + z) != v) {
+                    r.image.setPixelRGBA(lx + x, lz + z, v);
+                    changed = true;
+                }
+            }
+        }
+        if (changed) {
+            r.dirty = true;
+            r.unsaved = true;
+        }
+    }
+
     /** Цвет (ABGR) в точке активного слоя, 0 — неизвестно. */
     public static int colorAt(int x, int z) {
         if (active == null) return 0;

@@ -20,6 +20,7 @@ public final class ArcClient {
     public static void init(ClientPlatform p) {
         platform = p;
         com.arc4io.archud.compat.Integrations.init();
+        ArcClientNet.init();
     }
 
     public static ClientPlatform platform() {
@@ -29,6 +30,7 @@ public final class ArcClient {
     /** Вызывается в конце каждого клиентского тика. */
     public static void tick(Minecraft mc) {
         com.arc4io.archud.client.map.MapScanner.worldCheck(mc);
+        ArcClientNet.tick(mc);
         if (mc.player == null) return;
         ArcConfig cfg = ArcConfig.get();
 
@@ -54,6 +56,11 @@ public final class ArcClient {
             if (mc.screen == null) mc.setScreen(new ArcConfigScreen(null));
         }
 
+        while (ArcKeys.HOST_PANEL.consumeClick()) {
+            if (mc.screen == null && com.arc4io.archud.client.screen.HostPanelScreen.available()) {
+                mc.setScreen(new com.arc4io.archud.client.screen.HostPanelScreen(null));
+            }
+        }
         while (ArcKeys.WORLD_MAP.consumeClick()) {
             if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WorldMapScreen(null));
         }

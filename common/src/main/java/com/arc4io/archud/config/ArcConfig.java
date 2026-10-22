@@ -123,6 +123,15 @@ public class ArcConfig {
     public boolean waystoneToasts = true;
     public boolean netherCoordinates = true;
     public int waypointMaxDistance = 0;
+    // ---- Сеть (общая карта, игроки, метки) ----
+    public boolean mapSharing = true;
+    public boolean showRemotePlayers = true;
+    public boolean showLoadZones = false;
+    public boolean acceptSharedWaypoints = true;
+    /** Серверные настройки (действуют, если этот клиент — хост или это выделенный сервер). */
+    public boolean serverMapSync = true;
+    public boolean serverPlayerPositions = true;
+    public boolean serverWaypointSharing = true;
     public List<String> hiddenWaypointSources = new ArrayList<>();
     public int minimapSize = 110;
     public double minimapZoom = 1.5;
@@ -138,6 +147,8 @@ public class ArcConfig {
     public boolean customInventory = true;
 
     // ---- Интеграции ----
+    public boolean voiceIntegration = true;
+    public boolean tempadPanel = true;
     public boolean waystonesIntegration = true;
     public boolean tempadIntegration = true;
     public boolean adAstraIntegration = true;

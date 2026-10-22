@@ -23,8 +23,10 @@ public final class ArcKeys {
     public static final KeyMapping ZOOM_IN = new KeyMapping("key.archud.zoom_in", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_EQUAL, CATEGORY);
     public static final KeyMapping ZOOM_OUT = new KeyMapping("key.archud.zoom_out", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_MINUS, CATEGORY);
 
+    public static final KeyMapping HOST_PANEL = new KeyMapping("key.archud.host_panel", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
+
     public static final List<KeyMapping> ALL = List.of(OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
-            WORLD_MAP, ADD_WAYPOINT, ZOOM_IN, ZOOM_OUT);
+            WORLD_MAP, ADD_WAYPOINT, ZOOM_IN, ZOOM_OUT, HOST_PANEL);
 
     private ArcKeys() {}
 }

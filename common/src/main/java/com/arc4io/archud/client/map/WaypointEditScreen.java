@@ -54,7 +54,7 @@ public class WaypointEditScreen extends ArcScreen {
             else Navigator.set(wp);
             onClose();
         }));
-        addRenderableWidget(new ArcButton(lx + bw + 4, py + 120, bw, 18, Component.translatable("archud.map.menu.share"), b -> WaypointManager.share(wp)));
+        addRenderableWidget(new ArcButton(lx + bw + 4, py + 120, bw, 18, Component.translatable("archud.map.menu.share"), b -> minecraft.setScreen(new ShareWaypointScreen(this, wp))));
         ArcButton tp = addRenderableWidget(new ArcButton(lx + (bw + 4) * 2, py + 120, w - (bw + 4) * 2, 18, Component.translatable("archud.wp.teleport"), b -> teleport()));
         if (com.arc4io.archud.compat.TempadCompat.canOpenDoor(wp)) {
             addRenderableWidget(new ArcButton(lx, py + 142, w, 18, Component.translatable("archud.map.menu.tempad_door"), b -> {
@@ -104,7 +104,12 @@ public class WaypointEditScreen extends ArcScreen {
         g.drawString(font, Component.translatable("archud.wp.name"), lx, py + 32, Draw.TEXT_DIM, true);
         g.drawString(font, "X / Y / Z", lx, py + 54, Draw.TEXT_DIM, true);
         MapView.diamond(g, lx + 20, py + 81, 5, Waypoint.PALETTE[colorIndex]);
-        g.drawString(font, Component.translatable("archud.wp.src." + wp.source.name().toLowerCase()), lx, py + 166, Draw.TEXT_DIM, true);
+        String src = Component.translatable("archud.wp.src." + wp.source.name().toLowerCase()).getString();
+        if (wp.source == Waypoint.Source.SHARED && wp.sharedBy != null) {
+            src += " · " + Component.translatable("archud.share.from", wp.sharedBy).getString() + " · "
+                    + Component.translatable("archud.share.save_hint").getString();
+        }
+        g.drawString(font, src, lx, py + 166, Draw.TEXT_DIM, true);
         super.render(g, mouseX, mouseY, partialTick);
     }
 }

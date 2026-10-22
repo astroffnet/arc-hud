@@ -13,7 +13,9 @@
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",
-    "AbstractSliderButtonAccessor"
+    "AbstractSliderButtonAccessor",
+    "IntegratedServerAccessor",
+    "ServerConnectionListenerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

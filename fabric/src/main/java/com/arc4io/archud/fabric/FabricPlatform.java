@@ -49,6 +49,17 @@ public class FabricPlatform implements Platform {
     }
 
     @Override
+    public ItemStack findAccessory(Player player, java.util.function.Predicate<ItemStack> filter) {
+        if (isModLoaded("trinkets")) {
+            try {
+                return TrinketsCompat.find(player, filter);
+            } catch (Throwable ignored) {
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
     public long[] getItemEnergy(ItemStack stack) {
         return NbtEnergy.read(stack);
     }

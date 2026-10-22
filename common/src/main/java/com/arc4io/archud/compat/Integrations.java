@@ -38,5 +38,10 @@ public final class Integrations {
         } catch (Throwable t) {
             ArcHud.LOGGER.warn("Arc HUD: Regeneration — интеграция не подключена: {}", t.toString());
         }
+        try {
+            VoiceCompat.init();
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: голосовой чат — интеграция не подключена: {}", t.toString());
+        }
     }
 }

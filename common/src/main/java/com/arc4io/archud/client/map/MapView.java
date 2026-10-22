@@ -76,10 +76,67 @@ public final class MapView {
             int x = Math.round(cx + s[0]) - size / 2, y = Math.round(cy + s[1]) - size / 2;
             g.fill(x - 1, y - 1, x + size + 1, y + size + 1, 0xC0000000);
             g.fill(x, y, x + size, y + size, color);
+            if (e instanceof Player && com.arc4io.archud.compat.VoiceCompat.isTalking(e.getUUID())) talkRing(g, x + size / 2, y + size / 2);
             if (names && e instanceof Player pl) {
                 Draw.smallCentered(g, mc.font, pl.getGameProfile().getName(), x + 2, y - 6, 0xFFFFFFFF, 0.5F);
             }
         }
+    }
+
+    /** Кольцо «говорит» (голосовой чат). */
+    public static void talkRing(GuiGraphics g, int x, int y) {
+        int c = 0xFF66FF99;
+        g.fill(x - 4, y - 5, x + 5, y - 4, c);
+        g.fill(x - 4, y + 5, x + 5, y + 6, c);
+        g.fill(x - 5, y - 4, x - 4, y + 5, c);
+        g.fill(x + 5, y - 4, x + 6, y + 5, c);
+    }
+
+    /**
+     * Игроки, о которых сообщил сервер Arc HUD (за пределами прорисовки), и зоны прогруженных ими чанков.
+     */
+    public static void drawRemotePlayers(GuiGraphics g, Minecraft mc, String dim, float cx, float cy, double centerX, double centerZ, float zoom,
+                                         float rotation, float half, boolean names, boolean zones) {
+        if (mc.level == null) return;
+        com.arc4io.archud.config.ArcConfig cfg = com.arc4io.archud.config.ArcConfig.get();
+        if (zones && rotation == 0F) {
+            int vd = com.arc4io.archud.client.ArcClientNet.viewDistance();
+            if (mc.player != null && dim.equals(mc.level.dimension().location().toString())) {
+                zone(g, mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4, vd, cx, cy, centerX, centerZ, zoom, 0x2A4FC3F7, 0x804FC3F7);
+            }
+            for (var p : com.arc4io.archud.client.ArcClientNet.players()) {
+                if (!dim.equals(p.dimension())) continue;
+                zone(g, (int) Math.floor(p.x()) >> 4, (int) Math.floor(p.z()) >> 4, vd, cx, cy, centerX, centerZ, zoom, 0x2AFFB74D, 0x80FFB74D);
+            }
+        }
+        if (!cfg.showRemotePlayers) return;
+        for (var p : com.arc4io.archud.client.ArcClientNet.players()) {
+            if (!dim.equals(p.dimension())) continue;
+            if (mc.level.getPlayerByUUID(p.id()) != null && dim.equals(mc.level.dimension().location().toString())) continue; // уже виден
+            float[] s = toScreen(p.x(), p.z(), centerX, centerZ, zoom, rotation);
+            boolean edge = Math.abs(s[0]) > half - 3 || Math.abs(s[1]) > half - 3;
+            if (edge) {
+                float k = (half - 3) / Math.max(Math.abs(s[0]), Math.abs(s[1]));
+                s[0] *= k;
+                s[1] *= k;
+            }
+            int x = Math.round(cx + s[0]) - 2, y = Math.round(cy + s[1]) - 2;
+            g.fill(x - 1, y - 1, x + 5, y + 5, 0xC0000000);
+            g.fill(x, y, x + 4, y + 4, 0xFF80DEEA);
+            if (com.arc4io.archud.compat.VoiceCompat.isTalking(p.id())) talkRing(g, x + 2, y + 2);
+            if (names && !edge) Draw.smallCentered(g, mc.font, p.name(), x + 2, y - 6, 0xFF80DEEA, 0.5F);
+        }
+    }
+
+    private static void zone(GuiGraphics g, int pcx, int pcz, int vd, float cx, float cy, double centerX, double centerZ, float zoom, int fill, int border) {
+        double minX = (pcx - vd) * 16.0, minZ = (pcz - vd) * 16.0, maxX = (pcx + vd + 1) * 16.0, maxZ = (pcz + vd + 1) * 16.0;
+        int x0 = Math.round(cx + (float) ((minX - centerX) * zoom)), y0 = Math.round(cy + (float) ((minZ - centerZ) * zoom));
+        int x1 = Math.round(cx + (float) ((maxX - centerX) * zoom)), y1 = Math.round(cy + (float) ((maxZ - centerZ) * zoom));
+        g.fill(x0, y0, x1, y1, fill);
+        g.fill(x0, y0, x1, y0 + 1, border);
+        g.fill(x0, y1 - 1, x1, y1, border);
+        g.fill(x0, y0, x0 + 1, y1, border);
+        g.fill(x1 - 1, y0, x1, y1, border);
     }
 
     /** Ромб метки. */

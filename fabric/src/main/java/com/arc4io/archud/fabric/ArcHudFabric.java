@@ -39,6 +39,15 @@ public class ArcHudFabric implements ModInitializer {
                         server.execute(() -> packet.handle(player, arg));
                     });
         }
+        ServerPlayNetworking.registerGlobalReceiver(com.arc4io.archud.network.ArcNet.C2S, (server, player, handler, buf, sender) -> {
+            byte[] data = com.arc4io.archud.network.ArcNet.bytes(buf);
+            server.execute(() -> com.arc4io.archud.network.ArcNet.receiveOnServer(player, com.arc4io.archud.network.ArcNet.wrap(data)));
+        });
+        com.arc4io.archud.network.ArcNet.setServerSide(
+                (player, buf) -> ServerPlayNetworking.send(player, com.arc4io.archud.network.ArcNet.S2C, buf),
+                player -> ServerPlayNetworking.canSend(player, com.arc4io.archud.network.ArcNet.S2C));
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(com.arc4io.archud.server.ArcServer::tick);
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(com.arc4io.archud.server.ArcServer::onStop);
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server ->
                 com.arc4io.archud.server.TempadServer.tick(server, (player, packet) -> {
                     if (!ServerPlayNetworking.canSend(player, com.arc4io.archud.network.TempadSyncPacket.ID)) return;
@@ -46,7 +55,9 @@ public class ArcHudFabric implements ModInitializer {
                     packet.write(buf);
                     ServerPlayNetworking.send(player, com.arc4io.archud.network.TempadSyncPacket.ID, buf);
                 }));
-        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-                com.arc4io.archud.server.TempadServer.forget(handler.player.getUUID()));
+        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            com.arc4io.archud.server.TempadServer.forget(handler.player.getUUID());
+            com.arc4io.archud.server.ArcServer.onLogout(handler.player);
+        });
     }
 }

@@ -14,6 +14,13 @@ import java.util.Optional;
 public final class TrinketsCompat {
     private TrinketsCompat() {}
 
+    public static ItemStack find(Player player, java.util.function.Predicate<ItemStack> filter) {
+        Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(player);
+        if (component.isEmpty()) return ItemStack.EMPTY;
+        var equipped = component.get().getEquipped(filter);
+        return equipped.isEmpty() ? ItemStack.EMPTY : equipped.get(0).getB();
+    }
+
     public static ItemStack findBackpack(Player player) {
         Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(player);
         if (component.isEmpty()) return ItemStack.EMPTY;
