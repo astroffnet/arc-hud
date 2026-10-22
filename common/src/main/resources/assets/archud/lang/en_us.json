@@ -110,5 +110,6 @@
   "archud.overlays.empty": "No HUD elements from other mods",
   "archud.overlays.replaced": "in Arc HUD",
   "archud.overlays.hidden": "hidden",
-  "archud.overlays.shown": "shown"
+  "archud.overlays.shown": "shown",
+  "archud.legends.speed": "Suit speed"
 }

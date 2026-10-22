@@ -132,8 +132,10 @@ public final class HudRenderer {
 
     /** Сколько пикселей снизу занимает HUD (для Forge leftHeight/rightHeight, чтобы HUD других модов вставал выше). */
     public static int occupiedHeight() {
-        return 54;
+        return occupied;
     }
+
+    private static int occupied = 54;
 
     // =====================================================================
     //  Тик: трекеры
@@ -331,9 +333,24 @@ public final class HudRenderer {
         if (cfg.healthBar) healthRow(g, mc, p, font, leftX, rowY, rowW, accent, k, now);
         if (cfg.hungerBar) foodRow(g, p, font, rightX, rowY, rowW, accent, k);
 
+        // большие полосы модов (мана/выносливость Legends и т.п.) — над HP и едой
+        int leftY = h - 41;
+        int rightY = h - 41;
+        if (cfg.addonBars) {
+            for (ArcHudApi.Bar bar : ArcHudApi.bars()) {
+                if (!bar.main()) continue;
+                float[] v = values(bar);
+                if (v == null) continue;
+                boolean right = bar.side() == ArcHudApi.Side.RIGHT;
+                int y = (right ? rightY : leftY) - 12;
+                mainRow(g, font, right ? rightX : leftX, y, rowW, bar, v, accent, right);
+                if (right) rightY = y;
+                else leftY = y;
+            }
+        }
         // верхний тонкий ряд
-        int leftY = h - 51;
-        int rightY = h - 51;
+        leftY -= 10;
+        rightY -= 10;
         if (cfg.armorBar && p.getArmorValue() > 0) {
             int armor = p.getArmorValue();
             float tough = (float) p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS);
@@ -356,19 +373,40 @@ public final class HudRenderer {
         }
         if (cfg.addonBars) {
             for (ArcHudApi.Bar bar : ArcHudApi.bars()) {
-                float[] v;
-                try {
-                    v = bar.values().get();
-                } catch (Exception e) {
-                    v = null;
-                }
-                if (v == null || v.length < 2) continue;
+                if (bar.main()) continue;
+                float[] v = values(bar);
+                if (v == null) continue;
                 float frac = v[1] <= 0 ? 0 : v[0] / v[1];
-                thinRow(g, font, leftX, leftY, rowW, Icons.STAR, frac, Draw.brighten(bar.color(), 0.25F), Draw.darken(bar.color(), 0.3F),
+                thinRow(g, font, leftX, leftY, rowW, bar.icon(), frac, Draw.brighten(bar.color(), 0.25F), Draw.darken(bar.color(), 0.3F),
                         bar.label().getString() + "  " + fmt(v[0]) + "/" + fmt(v[1]), accent);
                 leftY -= 10;
             }
         }
+        occupied = Math.max(54, h - Math.min(leftY, rightY) - 6);
+    }
+
+    private static float[] values(ArcHudApi.Bar bar) {
+        try {
+            float[] v = bar.values().get();
+            return v == null || v.length < 2 ? null : v;
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    /** Большая полоса мода в стиле HP/еды. */
+    private static void mainRow(GuiGraphics g, Font font, int x, int y, int w, ArcHudApi.Bar bar, float[] v, int accent, boolean right) {
+        float frac = v[1] <= 0 ? 0 : Mth.clamp(v[0] / v[1], 0, 1);
+        int color = bar.color();
+        Draw.panel(g, x, y, w, 11, Draw.PANEL, Draw.alpha(Draw.mix(accent, color, 0.5F), 0x70));
+        int bx = right ? x + 2 : x + 11, by = y + 2, bw = w - 13, bh = 7;
+        Draw.icon(g, bar.icon(), right ? x + w - 10 : x + 1, y + 1);
+        g.fill(bx, by, bx + bw, by + bh, 0xC0050608);
+        Draw.barFill(g, bx, by, bw, bh, frac, Draw.brighten(color, 0.3F), Draw.darken(color, 0.35F), right);
+        Draw.ticks(g, bx, by, bw, bh, v[1], v[1] <= 20 ? 2F : v[1] <= 100 ? 10F : v[1] / 10F);
+        String s = bar.label().getString() + "  " + fmt(v[0]) + "/" + fmt(v[1]);
+        if (font.width(s) * 0.72F > bw - 2) s = fmt(v[0]) + "/" + fmt(v[1]);
+        Draw.smallCentered(g, font, s, bx + bw / 2F, by + 0.5F, 0xFFFFFFFF, 0.72F);
     }
 
     private static void healthRow(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int x, int y, int w, int accent, float k, long now) {

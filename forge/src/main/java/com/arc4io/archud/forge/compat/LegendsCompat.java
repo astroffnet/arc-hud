@@ -2,10 +2,17 @@ package com.arc4io.archud.forge.compat;
 
 import com.arc4io.archud.ArcHud;
 import com.arc4io.archud.client.hud.ArcHudApi;
+import com.arc4io.archud.client.hud.Icons;
 import com.arc4io.archud.config.ArcConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.capabilities.Capability;
+
+import java.lang.reflect.Field;
+import java.util.Optional;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,7 +28,11 @@ public final class LegendsCompat {
     private static final String UTIL = "com.tihyo.legends.utils.client.LegendsClientUtil";
     private static final String ABILITIES = "com.tihyo.legends.client.gui.AbilitiesOverlay";
 
-    private static Method shouldRender, stamina, maxStamina, mana, maxMana;
+    /** HP и броню Legends Arc HUD и так показывает — их дубли скрываются. */
+    public static final List<String> DUPLICATE_OVERLAYS = List.of("legendsmod:health", "legendsmod:legends_armor");
+
+    private static Method shouldRender, stamina, maxStamina, mana, maxMana, getSuit, walkSpeed;
+    private static Capability<?> livingCap;
     private static Method rows, rowLabel, rowCooldown, rowProgress, rowActive, rowCooling;
 
     private LegendsCompat() {}
@@ -35,15 +46,28 @@ public final class LegendsCompat {
             maxMana = data.getMethod("getPlayerMaxMana");
             shouldRender = Class.forName(UTIL).getMethod("shouldRenderAttributeHUD", Player.class);
 
-            ArcHudApi.registerBar(ArcHud.id("legends_stamina"), Component.translatable("archud.legends.stamina"), 0xFF7CDB5A,
-                    () -> values(stamina, maxStamina));
-            ArcHudApi.registerBar(ArcHud.id("legends_mana"), Component.translatable("archud.legends.mana"), 0xFF4FA3FF,
-                    () -> values(mana, maxMana));
+            // мана — слева над HP, выносливость — справа над едой (как у самого Legends)
+            ArcHudApi.registerMainBar(ArcHud.id("legends_mana"), Component.translatable("archud.legends.mana"), 0xFF2F9BE0,
+                    Icons.STAR, ArcHudApi.Side.LEFT, () -> values(mana, maxMana));
+            ArcHudApi.registerMainBar(ArcHud.id("legends_stamina"), Component.translatable("archud.legends.stamina"), 0xFF35C83A,
+                    Icons.SPEED, ArcHudApi.Side.RIGHT, () -> values(stamina, maxStamina));
             ArcHudApi.markReplaced("legendsmod:stamina");
             ArcHudApi.markReplaced("legendsmod:mana");
             ArcHud.LOGGER.info("Arc HUD: Legends — выносливость и мана подключены");
         } catch (Throwable t) {
             ArcHud.LOGGER.warn("Arc HUD: не удалось подключить полосы Legends: {}", t.toString());
+        }
+        try {
+            // скорость костюма (0..10) — тонкая полоса
+            Class<?> suit = Class.forName("com.tihyo.legends.armors.LegendsSuit");
+            getSuit = suit.getMethod("getSuit", LivingEntity.class);
+            Field capField = Class.forName("com.tihyo.legends.data.living.LegendsLivingEntityProvider").getField("CAPABILITY");
+            livingCap = (Capability<?>) capField.get(null);
+            walkSpeed = Class.forName("com.tihyo.legends.data.living.ILegendsLiving").getMethod("getWalkSpeed");
+            ArcHudApi.registerBar(ArcHud.id("legends_speed"), Component.translatable("archud.legends.speed"), 0xFFFFC107, LegendsCompat::speed);
+            ArcHudApi.markReplaced("legendsmod:speed");
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: скорость костюма Legends недоступна: {}", t.toString());
         }
         try {
             Class<?> overlay = Class.forName(ABILITIES);
@@ -86,6 +110,19 @@ public final class LegendsCompat {
             float m = ((Number) max.invoke(null)).floatValue();
             if (m <= 0) return null;
             return new float[]{((Number) value.invoke(null)).floatValue(), m};
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static float[] speed() {
+        LocalPlayer p = Minecraft.getInstance().player;
+        if (!visible(p) || livingCap == null) return null;
+        try {
+            if (getSuit.invoke(null, p) == null) return null;
+            Optional<?> living = p.getCapability(livingCap).resolve();
+            if (living.isEmpty()) return null;
+            return new float[]{((Number) walkSpeed.invoke(living.get())).floatValue(), 10F};
         } catch (Throwable t) {
             return null;
         }

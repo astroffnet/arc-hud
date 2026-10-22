@@ -21,7 +21,10 @@ import java.util.function.Supplier;
  * Если supplier возвращает null — элемент скрыт.
  */
 public final class ArcHudApi {
-    public record Bar(ResourceLocation id, Component label, int color, Supplier<float[]> values) {}
+    public enum Side {LEFT, RIGHT}
+
+    /** main = большая полоса в стиле HP/еды (LEFT — над HP, RIGHT — над едой), иначе тонкая слева. */
+    public record Bar(ResourceLocation id, Component label, int color, Supplier<float[]> values, boolean main, Side side, int icon) {}
 
     /** Строка панели: текст слева, текст справа, прогресс 0..1 (или -1 без полосы), цвет, выделение. */
     public record PanelRow(String text, String right, float progress, int color, boolean highlight) {}
@@ -36,7 +39,13 @@ public final class ArcHudApi {
 
     public static void registerBar(ResourceLocation id, Component label, int argbColor, Supplier<float[]> valueAndMax) {
         BARS.removeIf(b -> b.id().equals(id));
-        BARS.add(new Bar(id, label, argbColor, valueAndMax));
+        BARS.add(new Bar(id, label, argbColor, valueAndMax, false, Side.LEFT, Icons.STAR));
+    }
+
+    /** Большая полоса в стиле HP/еды. icon — индекс из {@link Icons}. */
+    public static void registerMainBar(ResourceLocation id, Component label, int argbColor, int icon, Side side, Supplier<float[]> valueAndMax) {
+        BARS.removeIf(b -> b.id().equals(id));
+        BARS.add(new Bar(id, label, argbColor, valueAndMax, true, side, icon));
     }
 
     public static void unregisterBar(ResourceLocation id) {
