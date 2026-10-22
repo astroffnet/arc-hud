@@ -4,6 +4,7 @@ import com.arc4io.archud.client.hud.Draw;
 import com.arc4io.archud.client.hud.HudRenderer;
 import com.arc4io.archud.client.hud.Theme;
 import com.arc4io.archud.config.ArcConfig;
+import com.arc4io.archud.config.HudAnchor;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -33,7 +34,7 @@ public class ArcConfigScreen extends Screen {
         super(Component.translatable("archud.config.title"));
         this.parent = parent;
         for (Field f : ArcConfig.class.getFields()) {
-            if (f.getType() == boolean.class && !Modifier.isStatic(f.getModifiers())) fields.add(f);
+            if ((f.getType() == boolean.class || f.getType() == HudAnchor.class) && !Modifier.isStatic(f.getModifiers())) fields.add(f);
         }
     }
 
@@ -55,8 +56,13 @@ public class ArcConfigScreen extends Screen {
         });
         addRenderableWidget(search);
         addRenderableWidget(new ArcButton(px + pw - 126, py + ph - 24, 120, 18, Component.translatable("gui.done"), b -> onClose()));
-        addRenderableWidget(new ArcButton(px + 6, py + ph - 24, 120, 18, Component.translatable("archud.config.controls"),
+        addRenderableWidget(new ArcButton(px + 6, py + ph - 24, 110, 18, Component.translatable("archud.config.controls"),
                 b -> minecraft.setScreen(new ArcControlsScreen(this, minecraft.options))));
+        addRenderableWidget(new ArcButton(px + 120, py + ph - 24, 130, 18, Component.translatable("archud.layout.open"),
+                b -> {
+                    ArcConfig.save();
+                    minecraft.setScreen(new HudLayoutScreen(this));
+                }));
         refresh();
     }
 
@@ -80,16 +86,29 @@ public class ArcConfigScreen extends Screen {
 
     private boolean get(Field f) {
         try {
-            return f.getBoolean(ArcConfig.get());
+            return f.getType() != boolean.class || f.getBoolean(ArcConfig.get());
         } catch (IllegalAccessException e) {
             return false;
         }
     }
 
-    private void toggle(Field f) {
+    private void toggle(Field f, int dir) {
         try {
-            f.setBoolean(ArcConfig.get(), !f.getBoolean(ArcConfig.get()));
+            if (f.getType() == HudAnchor.class) {
+                HudAnchor a = (HudAnchor) f.get(ArcConfig.get());
+                f.set(ArcConfig.get(), (a == null ? HudAnchor.TOP_LEFT : a).next(dir));
+            } else {
+                f.setBoolean(ArcConfig.get(), !f.getBoolean(ArcConfig.get()));
+            }
         } catch (IllegalAccessException ignored) {
+        }
+    }
+
+    private HudAnchor anchor(Field f) {
+        try {
+            return (HudAnchor) f.get(ArcConfig.get());
+        } catch (IllegalAccessException e) {
+            return HudAnchor.TOP_LEFT;
         }
     }
 
@@ -120,13 +139,24 @@ public class ArcConfigScreen extends Screen {
             boolean on = get(f);
             boolean hov = mouseX >= x && mouseX < x + cw && mouseY >= y && mouseY < y + ROW_H - 2 && mouseY >= listY && mouseY < listY + listH;
             Draw.panel(g, x, y, cw, ROW_H - 2, hov ? Draw.PANEL_LIGHT : Draw.PANEL, on ? Draw.alpha(accent, 0x70) : 0x30FFFFFF);
-            // переключатель
-            int tx = x + cw - 26, ty = y + 4;
-            g.fill(tx, ty, tx + 20, ty + 8, on ? Draw.alpha(accent, 0xC0) : 0xFF2A3038);
-            int knob = on ? tx + 12 : tx;
-            g.fill(knob, ty, knob + 8, ty + 8, 0xFFEAF2FA);
+            int reserve = 36;
+            if (f.getType() == HudAnchor.class) {
+                // выбор края экрана (ЛКМ — дальше, ПКМ — назад)
+                String v = HudLayoutScreen.anchorName(anchor(f)).getString();
+                int vw = Math.round(font.width(v) * 0.75F) + 10;
+                reserve = vw + 10;
+                int vx = x + cw - vw - 4;
+                Draw.panel(g, vx, y + 2, vw, ROW_H - 6, Draw.PANEL_LIGHT, Draw.alpha(accent, 0xA0));
+                Draw.small(g, font, v, vx + 5, y + 5, Draw.alpha(accent, 0xFF), 0.75F);
+            } else {
+                // переключатель
+                int tx = x + cw - 26, ty = y + 4;
+                g.fill(tx, ty, tx + 20, ty + 8, on ? Draw.alpha(accent, 0xC0) : 0xFF2A3038);
+                int knob = on ? tx + 12 : tx;
+                g.fill(knob, ty, knob + 8, ty + 8, 0xFFEAF2FA);
+            }
             String s = label(f).getString();
-            if (font.width(s) > cw - 36) s = font.plainSubstrByWidth(s, cw - 40) + "…";
+            if (font.width(s) > cw - reserve) s = font.plainSubstrByWidth(s, cw - reserve - 4) + "…";
             g.drawString(font, s, x + 6, y + 4, on ? Draw.TEXT : 0xFF8C9AAB, true);
         }
         g.disableScissor();
@@ -142,7 +172,7 @@ public class ArcConfigScreen extends Screen {
                 int x = px + 10 + col * (cw + 6);
                 int y = listY + row * ROW_H - (int) scroll;
                 if (mx >= x && mx < x + cw && my >= y && my < y + ROW_H - 2) {
-                    toggle(visible.get(i));
+                    toggle(visible.get(i), button == 1 ? -1 : 1);
                     return true;
                 }
             }

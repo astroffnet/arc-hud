@@ -6,6 +6,7 @@ import com.arc4io.archud.client.ClientPlatform;
 import com.arc4io.archud.client.hud.HudRenderer;
 import com.arc4io.archud.client.screen.ChatStyler;
 import com.arc4io.archud.client.screen.InventoryExtras;
+import com.arc4io.archud.client.screen.RecipeChoiceUI;
 import com.arc4io.archud.network.ArcPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -13,11 +14,14 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Клиентская часть Fabric. Отключение ванильных полос — в mixin/GuiMixin, подмена экранов — в mixin/MinecraftMixin.
@@ -40,15 +44,19 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
             ScreenEvents.afterRender(screen).register((s, graphics, mouseX, mouseY, delta) -> {
                 ChatStyler.postRender(s, graphics);
                 InventoryExtras.onRender(s, graphics);
+                RecipeChoiceUI.onRender(s, graphics, mouseX, mouseY);
             });
+            ScreenMouseEvents.allowMouseClick(screen).register((s, mouseX, mouseY, button) -> !RecipeChoiceUI.onClick(s, mouseX, mouseY, button));
         });
     }
 
     // ---- ClientPlatform ----
     @Override
-    public void sendToServer(ArcPacket packet) {
+    public void sendToServer(ArcPacket packet, ResourceLocation arg) {
         if (Minecraft.getInstance().getConnection() != null && ClientPlayNetworking.canSend(packet.id())) {
-            ClientPlayNetworking.send(packet.id(), PacketByteBufs.empty());
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            ArcPacket.writeArg(buf, arg);
+            ClientPlayNetworking.send(packet.id(), buf);
         }
     }
 

@@ -34,7 +34,10 @@ public class ArcHudFabric implements ModInitializer {
 
         for (ArcPacket packet : ArcPacket.values()) {
             ServerPlayNetworking.registerGlobalReceiver(packet.id(),
-                    (server, player, handler, buf, sender) -> server.execute(() -> packet.handle(player)));
+                    (server, player, handler, buf, sender) -> {
+                        var arg = ArcPacket.readArg(buf);
+                        server.execute(() -> packet.handle(player, arg));
+                    });
         }
     }
 }
