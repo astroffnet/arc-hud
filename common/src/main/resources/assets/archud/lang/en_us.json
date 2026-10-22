@@ -392,7 +392,6 @@
   "archud.tempad.no_level": "This dimension does not exist on the server",
   "archud.lan.address": "Game open to LAN: %s (click to copy)",
   "archud.lan.other": "Other addresses (VPN etc.): %s",
-  "archud.config.waypointEdgeMarkers": "Off-screen waypoints",
   "archud.config.foodPreview": "Held food preview (AppleSkin)",
   "archud.config.exhaustionBar": "Exhaustion on hunger bar (AppleSkin)",
   "archud.config.entityCulling": "Performance: don't render mobs behind walls",
@@ -401,5 +400,19 @@
   "archud.config.decorCullDistance": "Performance: item frame/painting/armor stand distance",
   "archud.config.dynamicFps": "Performance: lower FPS when the game is in background",
   "archud.config.backgroundFps": "Background FPS",
-  "archud.config.adaptiveMapScan": "Performance: slower map scanning at low FPS"
+  "archud.config.adaptiveMapScan": "Performance: slower map scanning at low FPS",
+  "archud.tp.unsafe": "No safe spot nearby — teleport cancelled",
+  "archud.tp.no_permission": "Operator permission required",
+  "archud.tempad.player_hidden": "This player is hidden from the map",
+  "archud.map.menu.nav_player": "Navigate to player",
+  "archud.map.menu.tempad_player": "Tempad door to player",
+  "archud.map.menu.tp_player": "Teleport to player (op)",
+  "archud.hide.on": "Hidden from map",
+  "archud.hide.off": "Visible on map",
+  "archud.hide.tooltip": "Other players won't see you on their minimap and world map, and can't open a Tempad door to you",
+  "archud.config.waypointEdgeArrows": "Off-screen waypoints (arrows)",
+  "archud.config.serverTempadToPlayers": "Server: Tempad doors to players",
+  "archud.config.hideFromMap": "Hide myself from other players' maps",
+  "archud.config.tempadNoCooldown": "Tempad without cooldown",
+  "archud.config.tempadKeepOnDeath": "Keep Tempad in bracelet slot on death"
 }

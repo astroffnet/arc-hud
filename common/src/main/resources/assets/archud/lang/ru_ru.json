@@ -454,7 +454,6 @@
   "archud.tempad.no_level": "Такого измерения нет на сервере",
   "archud.lan.address": "Игра открыта для сети: %s (нажмите, чтобы скопировать)",
   "archud.lan.other": "Другие адреса (VPN и т.п.): %s",
-  "archud.config.waypointEdgeMarkers": "Метки за краем экрана",
   "archud.config.foodPreview": "Предпросмотр еды в руке (AppleSkin)",
   "archud.config.exhaustionBar": "Истощение на полосе голода (AppleSkin)",
   "archud.config.entityCulling": "Оптимизация: не рисовать мобов за стенами",
@@ -463,5 +462,19 @@
   "archud.config.decorCullDistance": "Оптимизация: дальность рамок, картин, стоек",
   "archud.config.dynamicFps": "Оптимизация: меньше FPS, когда игра в фоне",
   "archud.config.backgroundFps": "FPS в фоне",
-  "archud.config.adaptiveMapScan": "Оптимизация: карта сканирует реже при низком FPS"
+  "archud.config.adaptiveMapScan": "Оптимизация: карта сканирует реже при низком FPS",
+  "archud.tp.unsafe": "Рядом нет безопасного места — телепорт отменён",
+  "archud.tp.no_permission": "Нужны права оператора",
+  "archud.tempad.player_hidden": "Игрок скрыл себя с карты",
+  "archud.map.menu.nav_player": "Навигация к игроку",
+  "archud.map.menu.tempad_player": "Дверь Tempad к игроку",
+  "archud.map.menu.tp_player": "Телепорт к игроку (оп)",
+  "archud.hide.on": "Вы скрыты с карты",
+  "archud.hide.off": "Вы видны на карте",
+  "archud.hide.tooltip": "Другие игроки не увидят вас на мини-карте и карте мира, и к вам нельзя будет открыть дверь Tempad",
+  "archud.config.waypointEdgeArrows": "Метки за краем экрана (стрелки)",
+  "archud.config.serverTempadToPlayers": "Сервер: двери Tempad к игрокам",
+  "archud.config.hideFromMap": "Скрыть себя с карт других игроков",
+  "archud.config.tempadNoCooldown": "Tempad без перезарядки",
+  "archud.config.tempadKeepOnDeath": "Tempad остаётся в браслете после смерти"
 }

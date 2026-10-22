@@ -72,6 +72,7 @@ public final class MapView {
         if (mc.level == null) return;
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e == mc.player || e instanceof ItemEntity || e.isInvisible()) continue;
+            if (e instanceof Player && com.arc4io.archud.client.ArcClientNet.isHidden(e.getUUID())) continue; // скрыл себя с карты
             float[] s = toScreen(e.getX(), e.getZ(), centerX, centerZ, zoom, rotation);
             if (Math.abs(s[0]) > half - 2 || Math.abs(s[1]) > half - 2) continue;
             int color;

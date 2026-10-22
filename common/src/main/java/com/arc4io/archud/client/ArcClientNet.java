@@ -33,6 +33,7 @@ public final class ArcClientNet {
     private static int viewDistance = 10;
     private static long lastPlayers;
     private static final Map<UUID, RemotePlayer> PLAYERS = new LinkedHashMap<>();
+    private static final java.util.Set<UUID> HIDDEN = new java.util.HashSet<>();
     private static final Map<String, Integer> SENT_HASH = new HashMap<>();
     private static final Map<String, MapCodec.Chunk> OUTGOING = new LinkedHashMap<>();
     private static int tick;
@@ -48,6 +49,7 @@ public final class ArcClientNet {
             positions = buf.readBoolean();
             sharing = buf.readBoolean();
             tempadDoors = buf.isReadable() && buf.readBoolean();
+            if (ArcConfig.get().hideFromMap) sendPrivacy(true);
         });
         ArcNet.onClient("map_chunks", buf -> {
             List<MapCodec.Chunk> list = MapCodec.read(buf, 4096);
@@ -93,6 +95,7 @@ public final class ArcClientNet {
     private static void reset() {
         helloSent = welcomed = mapSync = positions = sharing = tempadDoors = false;
         PLAYERS.clear();
+        HIDDEN.clear();
         SENT_HASH.clear();
         OUTGOING.clear();
         WaypointManager.clearShared();
@@ -124,6 +127,11 @@ public final class ArcClientNet {
                     buf.readDouble(), buf.readFloat(), buf.readFloat());
             PLAYERS.put(p.id(), p);
         }
+        HIDDEN.clear();
+        if (buf.isReadable()) {
+            int h = buf.readVarInt();
+            for (int i = 0; i < h; i++) HIDDEN.add(buf.readUUID());
+        }
         lastPlayers = System.currentTimeMillis();
     }
 
@@ -145,6 +153,48 @@ public final class ArcClientNet {
 
     public static boolean positionsActive() {
         return welcomed && positions;
+    }
+
+    /** Скрыт ли игрок с карт (он сам так решил). */
+    public static boolean isHidden(UUID id) {
+        return HIDDEN.contains(id);
+    }
+
+    /** «Скрыть меня с карты» — сервер перестаёт показывать вас другим игрокам. */
+    public static void setHidden(boolean hidden) {
+        ArcConfig.get().hideFromMap = hidden;
+        ArcConfig.save();
+        if (welcomed) sendPrivacy(hidden);
+    }
+
+    private static void sendPrivacy(boolean hidden) {
+        FriendlyByteBuf buf = ArcNet.create("privacy");
+        buf.writeBoolean(hidden);
+        ArcNet.sendToServer(buf);
+    }
+
+    /** Телепорт с карты на безопасное место: через сервер Arc HUD, иначе ванильный /spreadplayers (ставит на поверхность). */
+    public static void safeTeleport(String dim, int x, int yHint, int z) {
+        Minecraft mc = Minecraft.getInstance();
+        if (welcomed) {
+            FriendlyByteBuf buf = ArcNet.create("safe_tp");
+            buf.writeUtf(dim, 128);
+            buf.writeInt(x);
+            buf.writeInt(yHint);
+            buf.writeInt(z);
+            ArcNet.sendToServer(buf);
+            return;
+        }
+        if (mc.getConnection() == null) return;
+        boolean ceiling = dim.equals("minecraft:the_nether");
+        mc.getConnection().sendCommand("execute in " + dim + " run spreadplayers " + x + " " + z + " 0 1 "
+                + (ceiling ? "under 120 " : "") + "false @s");
+    }
+
+    public static void tempadDoorToPlayer(UUID id) {
+        FriendlyByteBuf buf = ArcNet.create("tempad_door_player");
+        buf.writeUUID(id);
+        ArcNet.sendToServer(buf);
     }
 
     /** Сервер умеет открывать двери Tempad к любым точкам. */

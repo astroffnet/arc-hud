@@ -116,7 +116,8 @@ public class ArcConfig {
     public boolean minimapFacing = true;
     public boolean worldWaypoints = true;
     public boolean waypointBeams = true;
-    public boolean waypointEdgeMarkers = true;
+    /** Метки за краем экрана — стрелками у края (по умолчанию выключено: видны только метки в поле зрения). */
+    public boolean waypointEdgeArrows = false;
     public boolean waypointLabels = true;
     public boolean navigator = true;
     public boolean navigateToDeath = false;
@@ -133,6 +134,12 @@ public class ArcConfig {
     public boolean serverMapSync = true;
     public boolean serverPlayerPositions = true;
     public boolean serverWaypointSharing = true;
+    public boolean serverTempadToPlayers = true;
+    /** Скрыть себя с карт других игроков. */
+    public boolean hideFromMap = false;
+    /** Tempad без перезарядки и сохраняется в браслете после смерти. */
+    public boolean tempadNoCooldown = true;
+    public boolean tempadKeepOnDeath = true;
     public List<String> hiddenWaypointSources = new ArrayList<>();
     public int minimapSize = 110;
     public double minimapZoom = 1.5;

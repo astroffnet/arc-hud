@@ -44,6 +44,8 @@ public final class ArcServer {
     private static final List<String> DIM_INDEX = new ArrayList<>();
     private static final List<Pending> RELAY = new ArrayList<>();
     private static final Map<UUID, Long> LAST_SHARE = new HashMap<>();
+    /** Игроки, скрывшие себя с карт других. */
+    private static final Set<UUID> HIDDEN = new HashSet<>();
     private static MinecraftServer current;
     private static boolean dirty;
     private static int tick;
@@ -57,6 +59,11 @@ public final class ArcServer {
         ArcNet.onServer("map_chunks", ArcServer::onChunks);
         ArcNet.onServer("wp_share", ArcServer::onShare);
         TempadServer.init();
+        ArcNet.onServer("privacy", (player, buf) -> {
+            if (buf.readBoolean()) HIDDEN.add(player.getUUID());
+            else HIDDEN.remove(player.getUUID());
+        });
+        ArcNet.onServer("safe_tp", ArcServer::onSafeTp);
     }
 
     // ------------------------------------------------------------------ жизненный цикл
@@ -104,9 +111,10 @@ public final class ArcServer {
                 if (!ARC_PLAYERS.contains(p.getUUID())) continue;
                 FriendlyByteBuf buf = ArcNet.create("players");
                 buf.writeVarInt(vd);
-                buf.writeVarInt(all.size() - 1);
-                for (ServerPlayer o : all) {
-                    if (o == p) continue;
+                List<ServerPlayer> visible = new ArrayList<>();
+                for (ServerPlayer o : all) if (o != p && !HIDDEN.contains(o.getUUID())) visible.add(o);
+                buf.writeVarInt(visible.size());
+                for (ServerPlayer o : visible) {
                     buf.writeUUID(o.getUUID());
                     buf.writeUtf(o.getGameProfile().getName(), 32);
                     buf.writeUtf(o.level().dimension().location().toString(), 128);
@@ -116,13 +124,45 @@ public final class ArcServer {
                     buf.writeFloat(o.getYRot());
                     buf.writeFloat(o.getHealth());
                 }
+                // скрытые — чтобы клиенты не рисовали их на мини-карте и рядом (по сущностям)
+                List<UUID> hidden = new ArrayList<>();
+                for (UUID h : HIDDEN) if (!h.equals(p.getUUID())) hidden.add(h);
+                buf.writeVarInt(hidden.size());
+                for (UUID h : hidden) buf.writeUUID(h);
                 ArcNet.sendToPlayer(p, buf);
             }
         }
         if (dirty && tick % (20 * 120) == 0) save(server);
     }
 
+    public static boolean isHidden(UUID id) {
+        return HIDDEN.contains(id);
+    }
+
+    /** Телепорт с карты (для операторов) — на безопасное место, а не в пустоту. */
+    private static void onSafeTp(ServerPlayer player, FriendlyByteBuf buf) {
+        String dim = buf.readUtf(128);
+        int x = buf.readInt(), yHint = buf.readInt(), z = buf.readInt();
+        if (!player.hasPermissions(2) || player.getServer() == null) {
+            player.displayClientMessage(Component.translatable("archud.tp.no_permission"), true);
+            return;
+        }
+        net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.tryParse(dim);
+        if (id == null) return;
+        net.minecraft.server.level.ServerLevel level = player.getServer().getLevel(
+                net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, id));
+        if (level == null || Math.abs(x) > 30_000_000 || Math.abs(z) > 30_000_000) return;
+        net.minecraft.core.BlockPos pos = TeleportSafety.find(level, x, yHint, z);
+        if (pos == null) {
+            player.displayClientMessage(Component.translatable("archud.tp.unsafe"), true);
+            return;
+        }
+        player.teleportTo(level, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.fallDistance = 0;
+    }
+
     public static void onLogout(ServerPlayer player) {
+        HIDDEN.remove(player.getUUID());
         ARC_PLAYERS.remove(player.getUUID());
         UPLOAD_QUEUE.remove(player.getUUID());
         LAST_SHARE.remove(player.getUUID());
@@ -135,6 +175,7 @@ public final class ArcServer {
 
     private static void reset() {
         ARC_PLAYERS.clear();
+        HIDDEN.clear();
         MAP.clear();
         UPLOAD_QUEUE.clear();
         DIM_INDEX.clear();

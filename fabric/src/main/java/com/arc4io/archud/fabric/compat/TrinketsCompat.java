@@ -27,4 +27,11 @@ public final class TrinketsCompat {
         var equipped = component.get().getEquipped(stack -> stack.getItem() instanceof BackpackItem);
         return equipped.isEmpty() ? ItemStack.EMPTY : equipped.get(0).getB();
     }
+
+    /** Tempad не выпадает из слота Trinkets после смерти. */
+    public static void registerKeepTempad() {
+        dev.emi.trinkets.api.event.TrinketDropCallback.EVENT.register((rule, stack, ref, entity) ->
+                com.arc4io.archud.config.ArcConfig.get().tempadKeepOnDeath && com.arc4io.archud.server.TempadServer.isTempadStack(stack)
+                        ? dev.emi.trinkets.api.TrinketEnums.DropRule.KEEP : rule);
+    }
 }

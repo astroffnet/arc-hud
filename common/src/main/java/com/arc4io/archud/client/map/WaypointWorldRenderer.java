@@ -34,7 +34,7 @@ public final class WaypointWorldRenderer {
     private static long frame;
 
     private record Marker(Waypoint w, float x, float y, float groundX, float groundY, boolean onScreen, double dist, boolean target,
-                          float edgeAngle) {}
+                          float edgeAngle, float fade) {}
 
     private WaypointWorldRenderer() {}
 
@@ -81,7 +81,7 @@ public final class WaypointWorldRenderer {
             boolean on = !behind && p[0] >= 0 && p[0] <= sw && p[1] >= 0 && p[1] <= sh;
             float angle = 0;
             if (!on) {
-                if (!target && !cfg.waypointEdgeMarkers) continue;
+                if (!cfg.waypointEdgeArrows) continue; // вне поля зрения — не показываем
                 float dx = p[0] - cx, dy = p[1] - cy;
                 if (behind) {
                     dx = -dx;
@@ -95,7 +95,14 @@ public final class WaypointWorldRenderer {
                 p[0] = cx + dx * k;
                 p[1] = cy + dy * k;
             }
-            markers.add(new Marker(w, p[0], p[1], base[0], base[1], on && base[2] > 0, dist, target, angle));
+            // чем дальше от центра взгляда, тем прозрачнее: у краёв экрана метки почти не видны и не отвлекают
+            float fade = 1F;
+            if (on) {
+                float r = Math.max(Math.abs(p[0] - cx) / cx, Math.abs(p[1] - cy) / cy);
+                fade = r < 0.55F ? 1F : Math.max(0F, 1F - (r - 0.55F) / 0.4F);
+                if (fade <= 0.02F) continue;
+            }
+            markers.add(new Marker(w, p[0], p[1], base[0], base[1], on && base[2] > 0, dist, target, angle, fade));
         }
         if (markers.isEmpty()) return;
 
@@ -122,7 +129,7 @@ public final class WaypointWorldRenderer {
         List<int[]> taken = new ArrayList<>();
         for (Marker m : markers) taken.add(new int[]{(int) m.x() - 6, (int) m.y() - 6, 12, 12}); // значки
         for (Marker m : byPriority) {
-            if (m == focus || !cfg.waypointLabels) continue;
+            if (m == focus || !cfg.waypointLabels || m.fade() < 0.6F) continue;
             String name = m.w().name;
             if (font.width(name) > 110) name = font.plainSubstrByWidth(name, 104) + "…";
             String dist = formatDist(m.dist());
@@ -169,8 +176,8 @@ public final class WaypointWorldRenderer {
 
     private static int alphaFor(Marker m) {
         // ближе 6 блоков — плавно растворяется, чтобы не мешать
-        if (m.target()) return 0xFF;
-        return (int) (0xFF * Math.min(1.0, Math.max(0.25, (m.dist() - 2.5) / 4.0)));
+        double near = m.target() ? 1.0 : Math.min(1.0, Math.max(0.25, (m.dist() - 2.5) / 4.0));
+        return (int) (0xFF * near * m.fade());
     }
 
     private static void drawIcon(GuiGraphics g, Font font, Marker m, ArcConfig cfg) {

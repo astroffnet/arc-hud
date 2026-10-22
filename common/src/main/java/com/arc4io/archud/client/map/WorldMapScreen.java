@@ -48,6 +48,9 @@ public class WorldMapScreen extends Screen {
     private boolean menuOpen;
     private int menuX, menuY, menuWX, menuWZ;
     private Waypoint menuWaypoint;
+    private java.util.UUID menuPlayer;
+    private String menuPlayerName;
+    private double[] menuPlayerPos;
     private final List<String> menuItems = new ArrayList<>();
 
     public WorldMapScreen(Screen parent) {
@@ -342,6 +345,16 @@ public class WorldMapScreen extends Screen {
         menuY = my;
         menuWaypoint = wp;
         menuItems.clear();
+        menuPlayer = null;
+        if (wp == null) findPlayerAt(mx, my);
+        if (menuPlayer != null) {
+            menuItems.add("nav_player");
+            if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && minecraft.player != null
+                    && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) menuItems.add("tempad_player");
+            if (minecraft.player != null && minecraft.player.hasPermissions(2) && minecraft.getConnection() != null) menuItems.add("tp_player");
+            menuOpen = true;
+            return;
+        }
         if (wp != null) {
             menuItems.add("edit");
             menuItems.add(Navigator.isTarget(wp) ? "nav_stop" : "nav");
@@ -354,8 +367,39 @@ public class WorldMapScreen extends Screen {
             if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && minecraft.player != null
                     && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) menuItems.add("tempad_door_here");
         }
-        if (minecraft.player != null && minecraft.player.hasPermissions(2) && viewingCurrent()) menuItems.add("tp");
+        if (minecraft.player != null && minecraft.player.hasPermissions(2)) menuItems.add("tp");
         menuOpen = true;
+    }
+
+    /** Игрок под курсором (виден рядом или известен серверу Arc HUD). */
+    private void findPlayerAt(int mx, int my) {
+        float cx = (width - listW()) / 2F, cy = height / 2F;
+        String dim = viewDim();
+        double best = 7 * 7;
+        if (viewingCurrent() && minecraft.level != null) {
+            for (net.minecraft.world.entity.player.Player p : minecraft.level.players()) {
+                if (p == minecraft.player || com.arc4io.archud.client.ArcClientNet.isHidden(p.getUUID())) continue;
+                float[] s = MapView.toScreen(p.getX(), p.getZ(), centerX, centerZ, zoom, 0F);
+                double d = Math.pow(cx + s[0] - mx, 2) + Math.pow(cy + s[1] - my, 2);
+                if (d < best) {
+                    best = d;
+                    menuPlayer = p.getUUID();
+                    menuPlayerName = p.getGameProfile().getName();
+                    menuPlayerPos = new double[]{p.getX(), p.getY(), p.getZ()};
+                }
+            }
+        }
+        for (var p : com.arc4io.archud.client.ArcClientNet.players()) {
+            if (!dim.equals(p.dimension())) continue;
+            float[] s = MapView.toScreen(p.x(), p.z(), centerX, centerZ, zoom, 0F);
+            double d = Math.pow(cx + s[0] - mx, 2) + Math.pow(cy + s[1] - my, 2);
+            if (d < best) {
+                best = d;
+                menuPlayer = p.id();
+                menuPlayerName = p.name();
+                menuPlayerPos = new double[]{p.x(), p.y(), p.z()};
+            }
+        }
     }
 
     private void renderMenu(GuiGraphics g, int mouseX, int mouseY, int accent) {
@@ -364,7 +408,7 @@ public class WorldMapScreen extends Screen {
         g.pose().pushPose();
         g.pose().translate(0, 0, 400);
         Draw.panel(g, x, y, w, h, 0xF0101419, Draw.alpha(accent, 0xFF));
-        String head = menuWaypoint != null ? menuWaypoint.name : menuWX + ", " + menuWZ;
+        String head = menuPlayer != null ? "☺ " + menuPlayerName : menuWaypoint != null ? menuWaypoint.name : menuWX + ", " + menuWZ;
         Draw.small(g, font, head, x + 5, y + 4, Draw.alpha(accent, 0xFF), 0.7F);
         for (int i = 0; i < menuItems.size(); i++) {
             int iy = y + 13 + i * 14;
@@ -399,9 +443,19 @@ public class WorldMapScreen extends Screen {
                 minecraft.setScreen(new WaypointEditScreen(this, wp, true));
             }
             case "tempad_door_here" -> {
-                boolean known = viewingCurrent() && minecraft.level != null && minecraft.level.hasChunk(menuWX >> 4, menuWZ >> 4);
-                Waypoint t = new Waypoint(menuWX + ", " + menuWZ, menuWX, known ? ty : Integer.MIN_VALUE, menuWZ, 0xFFFF8800, viewDim(), Waypoint.Source.TEMP);
+                Waypoint t = new Waypoint(menuWX + ", " + menuWZ, menuWX, com.arc4io.archud.server.TeleportSafety.NO_HINT, menuWZ, 0xFFFF8800,
+                        viewDim(), Waypoint.Source.TEMP);
                 TempadCompat.openDoor(t);
+                minecraft.setScreen(null);
+            }
+            case "nav_player" -> Navigator.navigateTo((int) Math.floor(menuPlayerPos[0]), (int) Math.floor(menuPlayerPos[1]),
+                    (int) Math.floor(menuPlayerPos[2]), viewDim());
+            case "tempad_player" -> {
+                com.arc4io.archud.client.ArcClientNet.tempadDoorToPlayer(menuPlayer);
+                minecraft.setScreen(null);
+            }
+            case "tp_player" -> {
+                if (minecraft.getConnection() != null) minecraft.getConnection().sendCommand("tp @s " + menuPlayerName);
                 minecraft.setScreen(null);
             }
             case "nav_here" -> Navigator.navigateTo(menuWX, ty, menuWZ, viewDim());
@@ -410,8 +464,8 @@ public class WorldMapScreen extends Screen {
             }
             case "tp" -> {
                 Waypoint t = menuWaypoint;
-                String cmd = t != null ? "tp @s " + t.x + " " + t.y + " " + t.z : "tp @s " + menuWX + " " + ty + " " + menuWZ;
-                if (minecraft.getConnection() != null) minecraft.getConnection().sendCommand(cmd);
+                if (t != null) com.arc4io.archud.client.ArcClientNet.safeTeleport(t.dimension, t.x, t.y, t.z);
+                else com.arc4io.archud.client.ArcClientNet.safeTeleport(viewDim(), menuWX, com.arc4io.archud.server.TeleportSafety.NO_HINT, menuWZ);
                 minecraft.setScreen(null);
             }
             default -> {
