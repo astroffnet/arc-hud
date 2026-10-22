@@ -1,0 +1,80 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+}
+
+version = mod_version
+group = 'com.arc4io.archud'
+
+base {
+    archivesName = "archud-forge-${minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    copyIdeResources = true
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { archud { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('run-server')
+            args '--nogui'
+            mods { archud { source sourceSets.main } }
+        }
+    }
+}
+
+// Общий код Forge + Fabric
+sourceSets.main {
+    java.srcDir '../common/src/main/java'
+    resources.srcDir '../common/src/main/resources'
+}
+
+repositories {
+    maven {
+        name = 'Curios'
+        url = 'https://maven.theillusivec4.top/'
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    def props = [mod_version: mod_version, minecraft_version: minecraft_version]
+    inputs.properties props
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching('META-INF/mods.toml') {
+        expand props
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : 'archud',
+                'Specification-Vendor'    : 'arc4io',
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.version,
+                'Implementation-Vendor'   : 'arc4io'
+        ])
+    }
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

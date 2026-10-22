@@ -1,0 +1,40 @@
+package com.arc4io.archud.fabric;
+
+import com.arc4io.archud.ArcHud;
+import com.arc4io.archud.item.BackpackItem;
+import com.arc4io.archud.item.BackpackTier;
+import com.arc4io.archud.network.ArcPacket;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Arc HUD — точка входа Fabric 1.20.1. Автор: arc4io
+ */
+public class ArcHudFabric implements ModInitializer {
+    public static final List<Item> BACKPACKS = new ArrayList<>();
+
+    @Override
+    public void onInitialize() {
+        ArcHud.init(new FabricPlatform());
+
+        for (BackpackTier tier : BackpackTier.values()) {
+            BACKPACKS.add(Registry.register(BuiltInRegistries.ITEM, ArcHud.id(tier.itemName()), new BackpackItem(tier, new Item.Properties())));
+        }
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
+            for (Item item : BACKPACKS) entries.accept(item);
+        });
+
+        for (ArcPacket packet : ArcPacket.values()) {
+            ServerPlayNetworking.registerGlobalReceiver(packet.id(),
+                    (server, player, handler, buf, sender) -> server.execute(() -> packet.handle(player)));
+        }
+    }
+}

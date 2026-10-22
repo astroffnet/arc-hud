@@ -1,0 +1,65 @@
+package com.arc4io.archud.fabric;
+
+import com.arc4io.archud.client.ArcClient;
+import com.arc4io.archud.client.ArcKeys;
+import com.arc4io.archud.client.ClientPlatform;
+import com.arc4io.archud.client.hud.HudRenderer;
+import com.arc4io.archud.client.screen.ChatStyler;
+import com.arc4io.archud.client.screen.InventoryExtras;
+import com.arc4io.archud.network.ArcPacket;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+
+/**
+ * Клиентская часть Fabric. Отключение ванильных полос — в mixin/GuiMixin, подмена экранов — в mixin/MinecraftMixin.
+ */
+public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform {
+    @Override
+    public void onInitializeClient() {
+        ArcClient.init(this);
+        for (var key : ArcKeys.ALL) KeyBindingHelper.registerKeyBinding(key);
+
+        HudRenderCallback.EVENT.register((graphics, tickDelta) -> {
+            if (!Minecraft.getInstance().options.hideGui) HudRenderer.render(graphics, tickDelta);
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(ArcClient::tick);
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            ChatStyler.onInit(screen);
+            InventoryExtras.onInit(screen, widget -> Screens.getButtons(screen).add(widget));
+            ScreenEvents.beforeRender(screen).register((s, graphics, mouseX, mouseY, delta) -> ChatStyler.preRender(s, graphics));
+            ScreenEvents.afterRender(screen).register((s, graphics, mouseX, mouseY, delta) -> {
+                ChatStyler.postRender(s, graphics);
+                InventoryExtras.onRender(s, graphics);
+            });
+        });
+    }
+
+    // ---- ClientPlatform ----
+    @Override
+    public void sendToServer(ArcPacket packet) {
+        if (Minecraft.getInstance().getConnection() != null && ClientPlayNetworking.canSend(packet.id())) {
+            ClientPlayNetworking.send(packet.id(), PacketByteBufs.empty());
+        }
+    }
+
+    @Override
+    public Screen createModListScreen(Screen parent) {
+        if (!FabricLoader.getInstance().isModLoaded("modmenu")) return null;
+        try {
+            Class<?> cls = Class.forName("com.terraformersmc.modmenu.gui.ModsScreen");
+            return (Screen) cls.getConstructor(Screen.class).newInstance(parent);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+}

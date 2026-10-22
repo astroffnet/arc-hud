@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "archud",
+  "version": "${version}",
+  "name": "Arc HUD",
+  "description": "Красивый HUD (50 функций), новый главный экран, окно управления и чат, BunnyHop как в Source, рюкзаки со слотом на спине (Trinkets) и переработанный инвентарь. / Beautiful HUD, new title & controls screens, Source-style bunny hop, wearable backpacks.",
+  "authors": ["arc4io"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/archud/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.arc4io.archud.fabric.ArcHudFabric"],
+    "client": ["com.arc4io.archud.fabric.ArcHudFabricClient"],
+    "modmenu": ["com.arc4io.archud.fabric.compat.ModMenuCompat"]
+  },
+  "mixins": [
+    {
+      "config": "archud.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "trinkets": "*",
+    "modmenu": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {}
+    }
+  }
+}

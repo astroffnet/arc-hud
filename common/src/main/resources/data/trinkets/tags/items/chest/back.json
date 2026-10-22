@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "archud:leather_backpack",
+    "archud:iron_backpack",
+    "archud:diamond_backpack"
+  ]
+}

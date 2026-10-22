@@ -1,0 +1,65 @@
+plugins {
+    id 'fabric-loom' version '1.7-SNAPSHOT'
+}
+
+version = project.mod_version
+group = 'com.arc4io.archud'
+
+base {
+    archivesName = "archud-fabric-${project.minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'TerraformersMC'
+        url = 'https://maven.terraformersmc.com/releases/'
+    }
+    maven {
+        name = 'Ladysnake Mods'
+        url = 'https://maven.ladysnake.org/releases'
+    }
+}
+
+loom {
+    mixin {
+        defaultRefmapName = 'archud.refmap.json'
+    }
+}
+
+// Общий код Forge + Fabric
+sourceSets.main {
+    java.srcDir '../common/src/main/java'
+    resources.srcDir '../common/src/main/resources'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // Официальные маппинги Mojang — те же имена классов, что и в Forge, поэтому общий код один
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Необязательные: Trinkets (слоты спины/пояса), Mod Menu (кнопка настроек)
+    modCompileOnly "dev.emi:trinkets:${project.trinkets_version}"
+    modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    modCompileOnly "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
+    modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+    it.options.encoding = 'UTF-8'
+}
