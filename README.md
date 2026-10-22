@@ -1,10 +1,16 @@
+<p align="center"><img src="docs/banner.png" alt="Arc HUD" width="820"></p>
+
 # Arc HUD — Minecraft 1.20.1 (Forge + Fabric)
 
-**Автор:** arc4io · **Лицензия:** MIT
+**Автор:** arc4io · **Лицензия:** MIT · Описание для Modrinth (RU + EN): [docs/MODRINTH.md](docs/MODRINTH.md)
 
-Красивый HUD, своя мини-карта и карта мира с навигатором и метками в мире, общая карта для сервера,
-панель хоста LAN, новые экраны всего меню (одиночная и сетевая игра, создание мира, настройки),
-BunnyHop как в играх на Source, рюкзаки со слотом на спине и интеграции с популярными модами.
+**Arc HUD** — единый стиль для всего интерфейса Minecraft: аккуратный HUD, своя мини-карта и карта мира
+с навигатором и метками в мире, общая карта для сервера, панель хоста LAN, переработанные меню
+(одиночная и сетевая игра, создание мира, настройки), оптимизация FPS, рюкзаки и интеграции с популярными модами.
+
+*A unified style for the whole Minecraft UI: a polished HUD, a built-in minimap and world map with a navigator and
+in-world waypoints, a shared server map, a LAN host panel, redesigned menus, FPS optimizations, backpacks and
+integrations with popular mods.*
 
 ---
 
