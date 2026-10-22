@@ -15,7 +15,7 @@ public final class ArcKeys {
     public static final KeyMapping OPEN_BACKPACK = new KeyMapping("key.archud.backpack", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
     public static final KeyMapping TOGGLE_HUD = new KeyMapping("key.archud.toggle_hud", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
     public static final KeyMapping TOGGLE_BHOP = new KeyMapping("key.archud.toggle_bhop", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
-    public static final KeyMapping OPEN_CONFIG = new KeyMapping("key.archud.config", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY);
+    public static final KeyMapping OPEN_CONFIG = new KeyMapping("key.archud.config", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, CATEGORY);
     public static final KeyMapping SORT_INVENTORY = new KeyMapping("key.archud.sort", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
 
     public static final KeyMapping WORLD_MAP = new KeyMapping("key.archud.world_map", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);

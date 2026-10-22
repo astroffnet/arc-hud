@@ -26,7 +26,7 @@ public class ArcOptionsScreen extends ArcScreen {
 
     @Override
     protected void init() {
-        layout(420, 270);
+        layout(420, 300);
         int x = px + 10, w = pw - 20;
         int half = (w - 6) / 2;
         addRenderableWidget(options.fov().createButton(options, x, py + 28, minecraft.level != null ? half : w));
@@ -42,8 +42,15 @@ public class ArcOptionsScreen extends ArcScreen {
         }
 
         record Tile(Component name, int icon, Runnable action) {}
-        Tile[] tiles = {
-                new Tile(Component.translatable("options.video"), Icons.SUN, () -> minecraft.setScreen(new VideoSettingsScreen(this, options))),
+        java.util.List<Tile> extra = new java.util.ArrayList<>();
+        if (com.arc4io.archud.compat.RenderCompat.shadersAvailable()) {
+            extra.add(new Tile(Component.translatable("archud.options.shaders"), Icons.STAR, () -> {
+                Screen sh = com.arc4io.archud.compat.RenderCompat.shaderScreen(this, options);
+                if (sh != null) minecraft.setScreen(sh);
+            }));
+        }
+        Tile[] base = {
+                new Tile(Component.translatable("options.video"), Icons.SUN, () -> minecraft.setScreen(com.arc4io.archud.compat.RenderCompat.videoSettings(this, options))),
                 new Tile(Component.translatable("options.sounds"), Icons.SIGNAL, () -> minecraft.setScreen(ArcOptionListScreen.sound(this, options))),
                 new Tile(Component.translatable("options.controls"), Icons.COMPASS, () -> minecraft.setScreen(new ControlsScreen(this, options))),
                 new Tile(Component.translatable("options.language"), Icons.GLOBE, () -> minecraft.setScreen(new ArcLanguageScreen(this, options))),
@@ -53,6 +60,9 @@ public class ArcOptionsScreen extends ArcScreen {
                 new Tile(Component.translatable("options.accessibility"), Icons.LIGHT, () -> minecraft.setScreen(ArcOptionListScreen.accessibility(this, options))),
                 new Tile(Component.translatable("archud.menu.arc_settings"), Icons.STAR, () -> minecraft.setScreen(new ArcConfigScreen(this))),
         };
+        java.util.List<Tile> all = new java.util.ArrayList<>(java.util.List.of(base));
+        all.addAll(1, extra);
+        Tile[] tiles = all.toArray(new Tile[0]);
         int cols = 3;
         int tw = (w - (cols - 1) * 6) / cols;
         int ty = py + 58;
@@ -62,7 +72,7 @@ public class ArcOptionsScreen extends ArcScreen {
             addRenderableWidget(new ArcButton(x + col * (tw + 6), ty + row * 30, tw, 26, t.name(), b -> t.action().run()).icon(t.icon()));
         }
         if (SkinRestorerScreen.available()) {
-            addRenderableWidget(new ArcButton(x, ty + 3 * 30 + 4, w, 20, Component.translatable("archud.skin.open"),
+            addRenderableWidget(new ArcButton(x, ty + ((tiles.length + cols - 1) / cols) * 30 + 4, w, 20, Component.translatable("archud.skin.open"),
                     b -> minecraft.setScreen(new SkinRestorerScreen(this))).icon(Icons.STAR));
         }
         addDone();

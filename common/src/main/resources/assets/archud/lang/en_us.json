@@ -17,7 +17,7 @@
   "archud.msg.bhop_off": "BunnyHop: OFF",
   "archud.menu.mods": "Mods",
   "archud.menu.arc_settings": "Arc HUD Settings",
-  "archud.title.tip.0": "Tip: press K in game to open Arc HUD settings",
+  "archud.title.tip.0": "Tip: press J in game to open Arc HUD settings",
   "archud.title.tip.1": "Tip: hold jump and strafe with the mouse to bunny hop",
   "archud.title.tip.2": "Tip: wear a backpack on your back and open it with B",
   "archud.title.tip.3": "Tip: H toggles between Arc HUD and the vanilla HUD",
@@ -211,5 +211,9 @@
   "archud.config.waystonesIntegration": "Waystones integration",
   "archud.config.tempadIntegration": "Tempad integration",
   "archud.config.adAstraIntegration": "Ad Astra integration",
-  "archud.config.regenerationIntegration": "Regeneration integration"
+  "archud.config.regenerationIntegration": "Regeneration integration",
+  "archud.options.shaders": "Shaders",
+  "archud.info.shader": "Shader: %s",
+  "archud.config.shaderInfo": "Shader pack name",
+  "archud.config.rendererInfo": "Renderer (Sodium/OptiFine…)"
 }
