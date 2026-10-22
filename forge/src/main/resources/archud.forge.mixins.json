@@ -12,7 +12,8 @@
     "ChatComponentMixin",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
-    "AdAstraOverlayMixin"
+    "AdAstraOverlayMixin",
+    "AbstractSliderButtonAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
