@@ -145,6 +145,11 @@ public class ArcConfig {
     public boolean customLanScreen = true;
     public boolean customModList = true;
     public boolean customInventory = true;
+    public boolean customWorldSelect = true;
+    public boolean customMultiplayer = true;
+    /** Последний сервер, на который заходили (для «Продолжить» в сетевой игре). */
+    public String lastServerIp = "";
+    public String lastServerName = "";
 
     // ---- Интеграции ----
     public boolean voiceIntegration = true;

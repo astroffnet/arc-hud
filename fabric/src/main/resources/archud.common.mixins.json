@@ -15,7 +15,17 @@
     "AdAstraOverlayMixin",
     "AbstractSliderButtonAccessor",
     "IntegratedServerAccessor",
-    "ServerConnectionListenerAccessor"
+    "ServerConnectionListenerAccessor",
+    "EditBoxMixin",
+    "CheckboxMixin",
+    "CheckboxAccessor",
+    "TabButtonMixin",
+    "TabNavigationBarMixin",
+    "TabNavigationBarAccessor",
+    "ScreenBackgroundMixin",
+    "CreateWorldScreenMixin",
+    "JoinMultiplayerScreenAccessor",
+    "SelectWorldScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
