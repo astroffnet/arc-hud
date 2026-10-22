@@ -154,6 +154,14 @@ public class ArcConfig {
 
     // ---- Интеграции ----
     public boolean voiceIntegration = true;
+    // ---- Оптимизация ----
+    public boolean entityCulling = true;
+    public boolean blockEntityCulling = true;
+    public boolean cullPlayers = false;
+    public int decorCullDistance = 48;
+    public boolean dynamicFps = true;
+    public int backgroundFps = 15;
+    public boolean adaptiveMapScan = true;
     public boolean foodPreview = true;
     public boolean exhaustionBar = true;
     public boolean tempadPanel = true;

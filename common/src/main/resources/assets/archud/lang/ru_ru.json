@@ -456,5 +456,12 @@
   "archud.lan.other": "Другие адреса (VPN и т.п.): %s",
   "archud.config.waypointEdgeMarkers": "Метки за краем экрана",
   "archud.config.foodPreview": "Предпросмотр еды в руке (AppleSkin)",
-  "archud.config.exhaustionBar": "Истощение на полосе голода (AppleSkin)"
+  "archud.config.exhaustionBar": "Истощение на полосе голода (AppleSkin)",
+  "archud.config.entityCulling": "Оптимизация: не рисовать мобов за стенами",
+  "archud.config.blockEntityCulling": "Оптимизация: не рисовать сундуки/таблички за стенами",
+  "archud.config.cullPlayers": "Оптимизация: скрывать и игроков за стенами",
+  "archud.config.decorCullDistance": "Оптимизация: дальность рамок, картин, стоек",
+  "archud.config.dynamicFps": "Оптимизация: меньше FPS, когда игра в фоне",
+  "archud.config.backgroundFps": "FPS в фоне",
+  "archud.config.adaptiveMapScan": "Оптимизация: карта сканирует реже при низком FPS"
 }
