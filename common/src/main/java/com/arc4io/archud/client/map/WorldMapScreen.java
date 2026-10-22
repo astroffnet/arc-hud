@@ -38,7 +38,7 @@ public class WorldMapScreen extends Screen {
     private final Screen parent;
     private double centerX, centerZ;
     private float zoom = 2F;
-    private boolean dragging, followPlayer = true, showList = true, showTrail = true, showSlime, showGrid = true;
+    private boolean dragging, followPlayer = true, showList = true, showTrail = true, showSlime, showGrid = true, showZones = true;
     private double listScroll;
     private MapCache.Layer viewLayer;
     private final List<String[]> layers = new ArrayList<>();
@@ -104,7 +104,8 @@ public class WorldMapScreen extends Screen {
         addRenderableWidget(new ArcButton(338, y, 22, 18, Component.literal("⋯"), b -> showTrail = !showTrail));
         addRenderableWidget(new ArcButton(364, y, 22, 18, Component.literal("▦"), b -> showGrid = !showGrid));
         addRenderableWidget(new ArcButton(390, y, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime));
-        addRenderableWidget(new ArcButton(416, y, 70, 18, Component.translatable("archud.map.export"), b -> export()));
+        addRenderableWidget(new ArcButton(416, y, 22, 18, Component.literal("◎"), b -> showZones = !showZones));
+        addRenderableWidget(new ArcButton(442, y, 70, 18, Component.translatable("archud.map.export"), b -> export()));
         gotoBox = addRenderableWidget(new EditBox(font, 6, height - 46, 120, 16, Component.translatable("archud.map.goto")));
         gotoBox.setHint(Component.translatable("archud.map.goto_hint"));
         addRenderableWidget(new ArcButton(130, height - 47, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
@@ -193,6 +194,7 @@ public class WorldMapScreen extends Screen {
         if (showGrid) drawGrid(g, mapW, cx, cy);
         if (showSlime) MapView.drawSlimeChunks(g, minecraft, cx, cy, centerX, centerZ, zoom, 0F, radius);
         if (showTrail) MapView.drawTrail(g, TrailManager.trail(viewDim()), cx, cy, centerX, centerZ, zoom, 0F, radius, accent);
+        MapView.drawRemotePlayers(g, minecraft, viewDim(), cx, cy, centerX, centerZ, zoom, 0F, radius, true, showZones);
         if (viewingCurrent()) {
             MapView.drawEntities(g, minecraft, cx, cy, centerX, centerZ, zoom, 0F, radius, true);
             MapView.drawNavigatorLine(g, minecraft, cx, cy, centerX, centerZ, zoom, 0F, radius);
@@ -220,6 +222,10 @@ public class WorldMapScreen extends Screen {
             Draw.small(g, font, info, 10, 19, Draw.TEXT_DIM, 0.6F);
         }
         Draw.small(g, font, Component.translatable("archud.map.hint").getString(), 6, height - 56, Draw.TEXT_DIM, 0.6F);
+        String sync = com.arc4io.archud.client.ArcClientNet.mapSyncActive()
+                ? Component.translatable("archud.map.sync_on", com.arc4io.archud.client.ArcClientNet.players().size()).getString()
+                : Component.translatable("archud.map.sync_off").getString();
+        Draw.small(g, font, sync, 6, height - 63, com.arc4io.archud.client.ArcClientNet.mapSyncActive() ? 0xFF9CFF5A : Draw.TEXT_DIM, 0.6F);
 
         if (showList) renderList(g, mapW, mouseX, mouseY, accent);
         super.render(g, mouseX, mouseY, partialTick);
@@ -369,7 +375,7 @@ public class WorldMapScreen extends Screen {
             case "edit" -> minecraft.setScreen(new WaypointEditScreen(this, menuWaypoint, false));
             case "nav" -> Navigator.set(menuWaypoint);
             case "nav_stop" -> Navigator.clear();
-            case "share" -> WaypointManager.share(menuWaypoint);
+            case "share" -> minecraft.setScreen(new ShareWaypointScreen(this, menuWaypoint));
             case "tempad_door" -> TempadCompat.openDoor(menuWaypoint);
             case "add" -> {
                 int n = WaypointManager.user().size() + 1;

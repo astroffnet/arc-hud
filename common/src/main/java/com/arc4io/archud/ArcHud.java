@@ -22,6 +22,7 @@ public final class ArcHud {
     public static void init(Platform p) {
         platform = p;
         ArcConfig.load();
+        com.arc4io.archud.server.ArcServer.init();
         LOGGER.info("{} by arc4io loaded on {}", NAME, p.loaderName());
     }
 

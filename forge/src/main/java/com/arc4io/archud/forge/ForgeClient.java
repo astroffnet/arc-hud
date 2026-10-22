@@ -67,6 +67,9 @@ public final class ForgeClient implements ClientPlatform {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new ArcConfigScreen(parent)));
 
+        com.arc4io.archud.network.ArcNet.setClientSide(
+                buf -> ForgeNetwork.CHANNEL.sendToServer(new ForgeNetwork.RawC2S(com.arc4io.archud.network.ArcNet.bytes(buf))),
+                () -> Minecraft.getInstance().getConnection() != null && ForgeNetwork.present(Minecraft.getInstance().getConnection().getConnection()));
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(ForgeClient::onOverlayPre);
         bus.addListener(ForgeClient::onClientTick);
@@ -163,7 +166,7 @@ public final class ForgeClient implements ClientPlatform {
     // ---- ClientPlatform ----
     @Override
     public void sendToServer(ArcPacket packet, ResourceLocation arg) {
-        if (Minecraft.getInstance().getConnection() != null) ForgeNetwork.send(packet, arg);
+        if (Minecraft.getInstance().getConnection() != null && ForgeNetwork.present(Minecraft.getInstance().getConnection().getConnection())) ForgeNetwork.send(packet, arg);
     }
 
     @Override

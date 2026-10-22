@@ -23,6 +23,11 @@ public interface Platform {
     /** Рюкзак в слоте Curios / Trinkets или ItemStack.EMPTY. */
     ItemStack findEquippedBackpack(Player player);
 
+    /** Первый предмет в слотах-аксессуарах (Curios / Trinkets: браслет, пояс, спина…) по условию, или ItemStack.EMPTY. */
+    default ItemStack findAccessory(Player player, java.util.function.Predicate<ItemStack> filter) {
+        return ItemStack.EMPTY;
+    }
+
     /** {запасено, максимум} энергии предмета (Forge Energy, IC2-подобные NBT и т.д.) или null. */
     long[] getItemEnergy(ItemStack stack);
 }

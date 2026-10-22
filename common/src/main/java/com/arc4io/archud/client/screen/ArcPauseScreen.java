@@ -60,9 +60,10 @@ public class ArcPauseScreen extends Screen {
         y += 24;
         addRenderableWidget(new ArcButton(x, y, half, 20, Component.translatable("menu.options"),
                 b -> minecraft.setScreen(new OptionsScreen(this, minecraft.options))).icon(Icons.COMPASS));
-        ArcButton lan = new ArcButton(x + half + 6, y, half, 20, Component.translatable("menu.shareToLan"),
-                b -> minecraft.setScreen(new ShareToLanScreen(this))).icon(Icons.SIGNAL);
-        lan.active = minecraft.hasSingleplayerServer() && !minecraft.getSingleplayerServer().isPublished();
+        boolean published = minecraft.hasSingleplayerServer() && minecraft.getSingleplayerServer().isPublished();
+        ArcButton lan = new ArcButton(x + half + 6, y, half, 20, Component.translatable(published ? "archud.admin.title" : "menu.shareToLan"),
+                b -> minecraft.setScreen(published ? new HostPanelScreen(this) : new ShareToLanScreen(this))).icon(Icons.SIGNAL);
+        lan.active = minecraft.hasSingleplayerServer();
         addRenderableWidget(lan);
         y += 24;
         addRenderableWidget(new ArcButton(x, y, half, 20, Component.translatable("archud.menu.arc_settings"),

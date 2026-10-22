@@ -4,7 +4,7 @@ package com.arc4io.archud.client.map;
  * Метка на карте.
  */
 public class Waypoint {
-    public enum Source {USER, DEATH, WAYSTONE, TEMPAD, SPAWN, TEMP}
+    public enum Source {USER, DEATH, WAYSTONE, TEMPAD, SPAWN, SHARED, TEMP}
 
     public static final int[] PALETTE = {0xFF4FC3F7, 0xFFFF5252, 0xFF9CFF5A, 0xFFFFD54F, 0xFFB388FF, 0xFFFF8A65, 0xFFFFFFFF, 0xFF26C6DA,
             0xFFF06292, 0xFF8D6E63};
@@ -20,6 +20,9 @@ public class Waypoint {
     /** Время создания (мс) — для истории смертей. */
     public long created = System.currentTimeMillis();
 
+    /** Кто поделился меткой (для SHARED). */
+    public String sharedBy;
+
     public Waypoint() {}
 
     public Waypoint(String name, int x, int y, int z, int color, String dimension, Source source) {
@@ -33,7 +36,7 @@ public class Waypoint {
     }
 
     public boolean editable() {
-        return source == Source.USER || source == Source.DEATH || source == Source.TEMP;
+        return source == Source.USER || source == Source.DEATH || source == Source.TEMP || source == Source.SHARED;
     }
 
     /** Буквы на значке метки (как в Xaero): первые буквы слов имени. */

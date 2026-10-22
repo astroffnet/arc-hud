@@ -579,17 +579,17 @@ public final class HudRenderer {
             }
         }
         if (cfg.tempadIntegration) {
-            // Tempad: заряд (если у варианта есть шкала) или «готов»
-            Inventory inv2 = p.getInventory();
-            for (int i = 0; i < inv2.getContainerSize(); i++) {
-                ItemStack s = inv2.getItem(i);
-                if (s.isEmpty() || !BuiltInRegistries.ITEM.getKey(s.getItem()).getNamespace().equals("tempad")) continue;
-                if (BuiltInRegistries.ITEM.getKey(s.getItem()).getPath().contains("card")) continue;
-                String txt = s.isBarVisible() ? Math.round(s.getBarWidth() * 100F / 13F) + "%" : "✔";
+            // Tempad: заряд (если у варианта есть шкала) или «готов»; ищется и в браслете Curios / Trinkets
+            com.arc4io.archud.compat.TempadCompat.Found tp = com.arc4io.archud.compat.TempadCompat.find(p);
+            if (tp != null) {
+                ItemStack s = tp.stack();
+                int ch = com.arc4io.archud.compat.TempadCompat.charge(s);
+                String txt = ch >= 0 ? ch + "%" : "✔";
                 boolean cd = p.getCooldowns().isOnCooldown(s.getItem());
-                chip(g, font, x, y, s, -1, cd ? "…" : txt, cd ? 0xFFFF8A65 : 0xFFFFB74D, accent);
+                if (cd) txt = Math.round((1F - p.getCooldowns().getCooldownPercent(s.getItem(), 0F)) * 100) + "%";
+                if (tp.accessory()) txt = "⌚" + txt;
+                chip(g, font, x, y, s, -1, txt, cd ? 0xFFFF8A65 : 0xFFFFB74D, accent);
                 y -= 20;
-                break;
             }
         }
         {

@@ -40,6 +40,8 @@ public class ArcHudForge {
         ForgeNetwork.register();
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onServerTick);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onLogout);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.server.ServerStoppingEvent e) ->
+                com.arc4io.archud.server.ArcServer.onStop(e.getServer()));
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ForgeClient.init(modBus);
         }
@@ -48,11 +50,14 @@ public class ArcHudForge {
     private static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
         if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
         var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
-        if (server != null) com.arc4io.archud.server.TempadServer.tick(server, ForgeNetwork::sendTo);
+        if (server == null) return;
+        com.arc4io.archud.server.TempadServer.tick(server, ForgeNetwork::sendTo);
+        com.arc4io.archud.server.ArcServer.tick(server);
     }
 
     private static void onLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         com.arc4io.archud.server.TempadServer.forget(event.getEntity().getUUID());
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) com.arc4io.archud.server.ArcServer.onLogout(sp);
     }
 
     private static void onCreativeTabs(BuildCreativeModeTabContentsEvent event) {

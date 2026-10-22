@@ -29,6 +29,8 @@ public final class WaypointManager {
     private static final List<Waypoint> USER = new CopyOnWriteArrayList<>();
     private static final List<Supplier<List<Waypoint>>> PROVIDERS = new CopyOnWriteArrayList<>();
     private static List<Waypoint> modCache = List.of();
+    /** Метки, которыми поделились другие игроки (до сохранения — только в памяти). */
+    private static final List<Waypoint> SHARED = new CopyOnWriteArrayList<>();
     private static long modCacheTime;
     private static String worldKey = "";
 
@@ -69,6 +71,7 @@ public final class WaypointManager {
             modCache = list;
         }
         List<Waypoint> out = new ArrayList<>(USER);
+        out.addAll(SHARED);
         out.addAll(modCache);
         return out;
     }
@@ -151,12 +154,17 @@ public final class WaypointManager {
     }
 
     public static void add(Waypoint w) {
+        if (w.source == Waypoint.Source.SHARED) {
+            SHARED.remove(w);
+            w.source = Waypoint.Source.USER;
+        }
         if (!USER.contains(w)) USER.add(w);
         save();
     }
 
     public static void remove(Waypoint w) {
         USER.remove(w);
+        SHARED.remove(w);
         save();
     }
 
@@ -200,6 +208,31 @@ public final class WaypointManager {
         List<String> h = ArcConfig.get().hiddenWaypointSources;
         if (!h.remove(s.name())) h.add(s.name());
         ArcConfig.save();
+    }
+
+    /** Метка от другого игрока. */
+    public static void addShared(Waypoint w) {
+        SHARED.removeIf(o -> o.x == w.x && o.y == w.y && o.z == w.z && o.dimension.equals(w.dimension));
+        SHARED.add(w);
+        while (SHARED.size() > 30) SHARED.remove(0);
+    }
+
+    public static void clearShared() {
+        SHARED.clear();
+    }
+
+    /** Поделиться меткой с игроком (target = ник) или со всеми (target пустой). Без Arc HUD на сервере — в чат. */
+    public static boolean shareWith(Waypoint w, String target) {
+        if (!com.arc4io.archud.client.ArcClientNet.canShare()) {
+            if (target == null || target.isEmpty()) share(w);
+            else if (Minecraft.getInstance().getConnection() != null) {
+                Minecraft.getInstance().getConnection().sendCommand("msg " + target + " [" + w.name + "] x:" + w.x + " y:" + w.y + " z:" + w.z
+                        + " (" + w.dimension.substring(w.dimension.indexOf(':') + 1) + ")");
+            }
+            return false;
+        }
+        com.arc4io.archud.client.ArcClientNet.shareWaypoint(w, target == null ? "" : target);
+        return true;
     }
 
     /** Отправить координаты метки в чат. */

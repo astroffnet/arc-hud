@@ -60,6 +60,7 @@ public final class ChatStyler {
     }
 
     public static void postRender(Screen screen, GuiGraphics g) {
+        com.arc4io.archud.compat.RegenCompat.renderScreenOverlay(screen, g);
         if (!pushed) return;
         pushed = false;
         int w = screen.width, h = screen.height;

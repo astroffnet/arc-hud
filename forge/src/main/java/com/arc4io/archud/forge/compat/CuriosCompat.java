@@ -13,6 +13,13 @@ import top.theillusivec4.curios.api.SlotResult;
 public final class CuriosCompat {
     private CuriosCompat() {}
 
+    public static ItemStack find(Player player, java.util.function.Predicate<ItemStack> filter) {
+        return CuriosApi.getCuriosInventory(player).resolve()
+                .flatMap(handler -> handler.findFirstCurio(filter))
+                .map(SlotResult::stack)
+                .orElse(ItemStack.EMPTY);
+    }
+
     public static ItemStack findBackpack(Player player) {
         return CuriosApi.getCuriosInventory(player).resolve()
                 .flatMap(handler -> handler.findFirstCurio(stack -> stack.getItem() instanceof BackpackItem))

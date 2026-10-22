@@ -53,6 +53,17 @@ public class ForgePlatform implements Platform {
     }
 
     @Override
+    public ItemStack findAccessory(Player player, java.util.function.Predicate<ItemStack> filter) {
+        if (isModLoaded("curios")) {
+            try {
+                return CuriosCompat.find(player, filter);
+            } catch (Throwable ignored) {
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
     public long[] getItemEnergy(ItemStack stack) {
         Optional<IEnergyStorage> energy = stack.getCapability(ForgeCapabilities.ENERGY).resolve();
         if (energy.isPresent()) {

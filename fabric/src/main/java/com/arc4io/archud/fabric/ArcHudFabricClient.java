@@ -36,6 +36,12 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
             if (!Minecraft.getInstance().options.hideGui) HudRenderer.render(graphics, tickDelta);
         });
         ClientTickEvents.END_CLIENT_TICK.register(ArcClient::tick);
+        ClientPlayNetworking.registerGlobalReceiver(com.arc4io.archud.network.ArcNet.S2C, (client, handler, buf, sender) -> {
+            byte[] data = com.arc4io.archud.network.ArcNet.bytes(buf);
+            client.execute(() -> com.arc4io.archud.network.ArcNet.receiveOnClient(com.arc4io.archud.network.ArcNet.wrap(data)));
+        });
+        com.arc4io.archud.network.ArcNet.setClientSide(buf -> ClientPlayNetworking.send(com.arc4io.archud.network.ArcNet.C2S, buf),
+                () -> ClientPlayNetworking.canSend(com.arc4io.archud.network.ArcNet.C2S));
         ClientPlayNetworking.registerGlobalReceiver(com.arc4io.archud.network.TempadSyncPacket.ID, (client, handler, buf, sender) -> {
             var packet = com.arc4io.archud.network.TempadSyncPacket.read(buf);
             client.execute(() -> com.arc4io.archud.compat.TempadCompat.applySync(packet));

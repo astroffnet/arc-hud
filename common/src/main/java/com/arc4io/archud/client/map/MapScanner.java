@@ -148,6 +148,7 @@ public final class MapScanner {
             }
         }
         MapCache.putChunk(cx, cz, out);
+        if (!cave) com.arc4io.archud.client.ArcClientNet.offerChunk(level.dimension().location().toString(), cx, cz, out);
     }
 
     private static int topY(ClientLevel level, BlockPos.MutableBlockPos m, int x, int z, int minY) {

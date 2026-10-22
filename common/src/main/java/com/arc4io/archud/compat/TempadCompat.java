@@ -43,6 +43,8 @@ public final class TempadCompat {
         }
         ready = true;
         registerProvider();
+        com.arc4io.archud.client.hud.ArcHudApi.registerPanel(ArcHud.id("tempad"), net.minecraft.network.chat.Component.literal("Tempad"),
+                0xFFFF8A65, TempadCompat::panel);
         ArcHud.LOGGER.info("Arc HUD: интеграция с Tempad включена");
     }
 
@@ -55,6 +57,79 @@ public final class TempadCompat {
                 return new ArrayList<>(LOCATIONS);
             }
         });
+    }
+
+    // ------------------------------------------------------------------ сам Tempad (инвентарь или браслет Curios/Trinkets)
+    public record Found(net.minecraft.world.item.ItemStack stack, boolean accessory) {}
+
+    public static boolean isTempad(net.minecraft.world.item.ItemStack s) {
+        if (s.isEmpty()) return false;
+        net.minecraft.resources.ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem());
+        return id.getNamespace().equals("tempad") && id.getPath().contains("tempad");
+    }
+
+    /** Ищет Tempad: руки → инвентарь → слоты-аксессуары (браслет). */
+    public static Found find(net.minecraft.world.entity.player.Player p) {
+        if (isTempad(p.getMainHandItem())) return new Found(p.getMainHandItem(), false);
+        if (isTempad(p.getOffhandItem())) return new Found(p.getOffhandItem(), false);
+        var inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (isTempad(inv.getItem(i))) return new Found(inv.getItem(i), false);
+        }
+        try {
+            net.minecraft.world.item.ItemStack acc = ArcHud.platform().findAccessory(p, TempadCompat::isTempad);
+            if (!acc.isEmpty()) return new Found(acc, true);
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    /** Заряд в процентах (−1, если у варианта Tempad нет шкалы). */
+    public static int charge(net.minecraft.world.item.ItemStack s) {
+        return s.isBarVisible() ? Math.round(s.getBarWidth() * 100F / 13F) : -1;
+    }
+
+    private static List<com.arc4io.archud.client.hud.ArcHudApi.PanelRow> panel() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        ArcConfig cfg = ArcConfig.get();
+        if (mc.player == null || !cfg.tempadIntegration || !cfg.tempadPanel) return null;
+        Found f = find(mc.player);
+        if (f == null) return null;
+        List<com.arc4io.archud.client.hud.ArcHudApi.PanelRow> rows = new ArrayList<>();
+        rows.add(new com.arc4io.archud.client.hud.ArcHudApi.PanelRow(
+                net.minecraft.network.chat.Component.translatable("archud.tempad.where").getString(),
+                net.minecraft.network.chat.Component.translatable(f.accessory() ? "archud.tempad.bracelet" : "archud.tempad.inventory").getString(),
+                -1F, 0xFFFFB74D, false));
+        boolean cd = mc.player.getCooldowns().isOnCooldown(f.stack().getItem());
+        int ch = charge(f.stack());
+        String state = cd ? net.minecraft.network.chat.Component.translatable("archud.tempad.cooldown").getString()
+                : ch >= 0 ? ch + "%" : net.minecraft.network.chat.Component.translatable("archud.tempad.ready").getString();
+        float prog = cd ? 1F - mc.player.getCooldowns().getCooldownPercent(f.stack().getItem(), 0F) : ch >= 0 ? ch / 100F : -1F;
+        rows.add(new com.arc4io.archud.client.hud.ArcHudApi.PanelRow(
+                net.minecraft.network.chat.Component.translatable("archud.tempad.charge").getString(), state, prog,
+                cd ? 0xFFFF8A65 : 0xFF9CFF5A, cd));
+        List<Waypoint> locs;
+        synchronized (LOCATIONS) {
+            locs = new ArrayList<>(LOCATIONS);
+        }
+        rows.add(new com.arc4io.archud.client.hud.ArcHudApi.PanelRow(
+                net.minecraft.network.chat.Component.translatable("archud.tempad.locations").getString(), Integer.toString(locs.size()), -1F,
+                0xFFFFFFFF, false));
+        String dim = mc.level == null ? "" : mc.level.dimension().location().toString();
+        Waypoint near = null;
+        double best = Double.MAX_VALUE;
+        for (Waypoint w : locs) {
+            if (!w.dimension.equals(dim)) continue;
+            double d = w.distanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            if (d < best) {
+                best = d;
+                near = w;
+            }
+        }
+        if (near != null) {
+            rows.add(new com.arc4io.archud.client.hud.ArcHudApi.PanelRow("◆ " + near.name, Math.round(best) + " m", -1F, COLOR, false));
+        }
+        return rows;
     }
 
     /** Список от сервера (клиентский поток). */
