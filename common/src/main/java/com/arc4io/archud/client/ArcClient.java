@@ -19,6 +19,7 @@ public final class ArcClient {
 
     public static void init(ClientPlatform p) {
         platform = p;
+        com.arc4io.archud.compat.Integrations.init();
     }
 
     public static ClientPlatform platform() {
@@ -52,6 +53,24 @@ public final class ArcClient {
             if (mc.screen == null) mc.setScreen(new ArcConfigScreen(null));
         }
 
+        while (ArcKeys.WORLD_MAP.consumeClick()) {
+            if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WorldMapScreen(null));
+        }
+        while (ArcKeys.ADD_WAYPOINT.consumeClick()) {
+            com.arc4io.archud.client.map.Waypoint w = com.arc4io.archud.client.map.WaypointManager.addHere();
+            if (w != null && mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WaypointEditScreen(null, w, false));
+        }
+        while (ArcKeys.ZOOM_IN.consumeClick()) {
+            cfg.minimapZoom = Math.min(6.0, cfg.minimapZoom * 1.25);
+            ArcConfig.save();
+        }
+        while (ArcKeys.ZOOM_OUT.consumeClick()) {
+            cfg.minimapZoom = Math.max(0.25, cfg.minimapZoom / 1.25);
+            ArcConfig.save();
+        }
+
+        com.arc4io.archud.client.map.WaypointManager.tick(mc);
+        com.arc4io.archud.client.map.MapScanner.tick(mc);
         BunnyHop.tick(mc);
         HudRenderer.tick(mc);
     }

@@ -9,7 +9,10 @@
   ],
   "client": [
     "ChatComponentAccessor",
-    "ChatComponentMixin"
+    "ChatComponentMixin",
+    "AbstractButtonMixin",
+    "AbstractSliderButtonMixin",
+    "AdAstraOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

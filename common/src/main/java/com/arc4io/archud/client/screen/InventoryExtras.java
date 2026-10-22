@@ -77,8 +77,8 @@ public final class InventoryExtras {
         String[][] rows = {
                 {Component.translatable("archud.stat.health").getString(), HudRenderer.fmt(p.getHealth()) + " / " + HudRenderer.fmt(p.getMaxHealth())},
                 {Component.translatable("archud.stat.armor").getString(), p.getArmorValue() + " (+" + HudRenderer.fmt(attr(p, Attributes.ARMOR_TOUGHNESS)) + ")"},
-                {Component.translatable("archud.stat.damage").getString(), HudRenderer.fmt(attr(p, Attributes.ATTACK_DAMAGE))},
-                {Component.translatable("archud.stat.attack_speed").getString(), String.format("%.2f", attr(p, Attributes.ATTACK_SPEED))},
+                {Component.translatable("archud.stat.damage").getString(), damageText(p)},
+                {Component.translatable("archud.stat.attack_speed").getString(), String.format("%.2f", withHeld(p, Attributes.ATTACK_SPEED))},
                 {Component.translatable("archud.stat.speed").getString(), String.format("%.2f", attr(p, Attributes.MOVEMENT_SPEED) * 43.17F)},
                 {Component.translatable("archud.stat.luck").getString(), HudRenderer.fmt(attr(p, Attributes.LUCK))},
                 {Component.translatable("archud.stat.knockback").getString(), Math.round(attr(p, Attributes.KNOCKBACK_RESISTANCE) * 100) + "%"},
@@ -103,6 +103,39 @@ public final class InventoryExtras {
         Draw.icon(g, Icons.BACKPACK, x + 5, y + 2);
         Component bp = back.isEmpty() ? Component.translatable("archud.stat.no_backpack") : back.getHoverName();
         Draw.small(g, mc.font, bp.getString(), x + 17, y + 3, back.isEmpty() ? 0xFF6A7380 : 0xFFFFE082, 0.75F);
+    }
+
+    /**
+     * Атрибуты урона/скорости атаки сервер не синхронизирует с клиентом, поэтому значение
+     * пересчитывается здесь: база игрока + модификаторы предмета в главной руке (+ эффекты).
+     */
+    static float withHeld(LocalPlayer p, Attribute a) {
+        net.minecraft.world.entity.ai.attributes.AttributeInstance inst = p.getAttribute(a);
+        if (inst == null) return 0F;
+        double base = inst.getBaseValue();
+        java.util.List<net.minecraft.world.entity.ai.attributes.AttributeModifier> mods = new java.util.ArrayList<>(inst.getModifiers());
+        ItemStack held = p.getMainHandItem();
+        java.util.Collection<net.minecraft.world.entity.ai.attributes.AttributeModifier> itemMods =
+                held.getAttributeModifiers(net.minecraft.world.entity.EquipmentSlot.MAINHAND).get(a);
+        // модификаторы предмета могут быть уже применены (одиночная игра) — не считаем их дважды
+        for (net.minecraft.world.entity.ai.attributes.AttributeModifier m : itemMods) {
+            mods.removeIf(x -> x.getId().equals(m.getId()));
+            mods.add(m);
+        }
+        double add = base;
+        for (var m : mods) if (m.getOperation() == net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION) add += m.getAmount();
+        double result = add;
+        for (var m : mods) if (m.getOperation() == net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE) result += add * m.getAmount();
+        for (var m : mods) if (m.getOperation() == net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL) result *= 1.0 + m.getAmount();
+        return (float) a.sanitizeValue(result);
+    }
+
+    private static String damageText(LocalPlayer p) {
+        float dmg = withHeld(p, Attributes.ATTACK_DAMAGE);
+        float ench = net.minecraft.world.item.enchantment.EnchantmentHelper.getDamageBonus(p.getMainHandItem(), net.minecraft.world.entity.MobType.UNDEFINED);
+        String s = HudRenderer.fmt(dmg + ench);
+        if (ench > 0) s += " (+" + HudRenderer.fmt(ench) + "✦)";
+        return s;
     }
 
     private static float attr(LocalPlayer p, Attribute a) {

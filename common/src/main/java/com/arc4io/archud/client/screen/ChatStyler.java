@@ -24,6 +24,7 @@ public final class ChatStyler {
     private ChatStyler() {}
 
     public static void onInit(Screen screen) {
+        com.arc4io.archud.compat.TempadCompat.onScreenInit(screen);
         if (screen instanceof ChatScreen) openTime = Util.getMillis();
     }
 

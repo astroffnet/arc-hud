@@ -70,7 +70,8 @@ public final class ForgeClient implements ClientPlatform {
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(ForgeClient::onOverlayPre);
         bus.addListener(ForgeClient::onClientTick);
-        bus.addListener(ForgeClient::onScreenOpening);
+        // самый низкий приоритет: срабатываем ПОСЛЕ модов, меняющих меню (Aether), и решаем последними
+        bus.addListener(net.minecraftforge.eventbus.api.EventPriority.LOWEST, ForgeClient::onScreenOpening);
         bus.addListener(ForgeClient::onScreenInit);
         bus.addListener(ForgeClient::onScreenRenderPre);
         bus.addListener(ForgeClient::onScreenRenderPost);
@@ -176,6 +177,12 @@ public final class ForgeClient implements ClientPlatform {
 
     @Override
     public Screen createModListScreen(Screen parent) {
-        return new ModListScreen(parent);
+        return ArcConfig.get().customModList ? new ArcModListScreen(parent) : new ModListScreen(parent);
+    }
+
+    @Override
+    public Screen swapPlatformScreen(Screen next, Screen current) {
+        if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new ArcModListScreen(current);
+        return next;
     }
 }
