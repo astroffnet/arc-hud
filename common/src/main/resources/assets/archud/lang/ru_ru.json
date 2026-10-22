@@ -172,5 +172,6 @@
   "archud.overlays.empty": "Нет HUD-элементов других модов",
   "archud.overlays.replaced": "в Arc HUD",
   "archud.overlays.hidden": "скрыт",
-  "archud.overlays.shown": "показан"
+  "archud.overlays.shown": "показан",
+  "archud.legends.speed": "Скорость костюма"
 }
