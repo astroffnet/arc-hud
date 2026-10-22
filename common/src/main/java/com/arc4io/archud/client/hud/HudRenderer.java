@@ -221,6 +221,7 @@ public final class HudRenderer {
         LocalPlayer p = mc.player;
         if (p == null || mc.level == null) return;
         ArcConfig cfg = ArcConfig.get();
+        com.arc4io.archud.client.map.WaypointWorldRenderer.renderOverlay(g);
         if (!cfg.enabled) return;
 
         long now = Util.getMillis();
@@ -489,8 +490,36 @@ public final class HudRenderer {
             int sw = Math.round(bw * Mth.clamp(shownSat / 20F, 0, 1));
             g.fill(bx + bw - sw, by + bh - 2, bx + bw, by + bh, 0xF0FFE36E);
         }
+        String gain = "";
+        if (cfg.foodPreview) {
+            // AppleSkin-style: предпросмотр еды в руке — сколько прибавится голода и насыщенности
+            ItemStack held = p.getMainHandItem();
+            com.arc4io.archud.compat.AppleSkinCompat.Food f = com.arc4io.archud.compat.AppleSkinCompat.food(held, p);
+            if (f == null) {
+                held = p.getOffhandItem();
+                f = com.arc4io.archud.compat.AppleSkinCompat.food(held, p);
+            }
+            if (f != null && com.arc4io.archud.compat.AppleSkinCompat.canEat(held, p)) {
+                int nf = Math.min(20, food + f.hunger());
+                float ns = Math.min(nf, sat + f.saturation());
+                int a = 0x60 + (int) (0x80 * Draw.pulse(1000));
+                int cw = Math.round(bw * food / 20F), nw = Math.round(bw * nf / 20F);
+                if (nw > cw) g.fill(bx + bw - nw, by, bx + bw - cw, by + bh, Draw.alpha(top, a));
+                if (cfg.saturation) {
+                    int sw0 = Math.round(bw * Mth.clamp(sat / 20F, 0, 1)), sw1 = Math.round(bw * Mth.clamp(ns / 20F, 0, 1));
+                    if (sw1 > sw0) g.fill(bx + bw - sw1, by + bh - 2, bx + bw - sw0, by + bh, Draw.alpha(0xFFFFE36E, a));
+                }
+                gain = "  +" + (nf - food) + (cfg.saturation ? " ✦+" + String.format("%.1f", ns - sat) : "");
+            }
+        }
+        if (cfg.exhaustionBar && com.arc4io.archud.compat.AppleSkinCompat.present()) {
+            // истощение (0..4): тонкая линия сверху — когда заполнится, спишется насыщенность / голод
+            float ex = Mth.clamp(fd.getExhaustionLevel() / 4F, 0F, 1F);
+            int ew = Math.round(bw * ex);
+            if (ew > 0) g.fill(bx + bw - ew, by, bx + bw, by + 1, 0xC0FFFFFF);
+        }
         Draw.ticks(g, bx, by, bw, bh, 20F, 2F);
-        String s = food + (cfg.saturation ? "  ✦" + String.format("%.1f", sat) : "");
+        String s = food + (cfg.saturation ? "  ✦" + String.format("%.1f", sat) : "") + gain;
         Draw.smallCentered(g, font, s, bx + bw / 2F, by + 0.5F, 0xFFFFFFFF, 0.72F);
     }
 

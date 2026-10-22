@@ -29,7 +29,7 @@ public final class ArcClientNet {
     /** Игрок, о котором сообщил сервер (может быть далеко или в другом измерении). */
     public record RemotePlayer(UUID id, String name, String dimension, double x, double y, double z, float yaw, float health) {}
 
-    private static boolean helloSent, welcomed, mapSync, positions, sharing;
+    private static boolean helloSent, welcomed, mapSync, positions, sharing, tempadDoors;
     private static int viewDistance = 10;
     private static long lastPlayers;
     private static final Map<UUID, RemotePlayer> PLAYERS = new LinkedHashMap<>();
@@ -47,6 +47,7 @@ public final class ArcClientNet {
             mapSync = buf.readBoolean();
             positions = buf.readBoolean();
             sharing = buf.readBoolean();
+            tempadDoors = buf.isReadable() && buf.readBoolean();
         });
         ArcNet.onClient("map_chunks", buf -> {
             List<MapCodec.Chunk> list = MapCodec.read(buf, 4096);
@@ -90,7 +91,7 @@ public final class ArcClientNet {
     }
 
     private static void reset() {
-        helloSent = welcomed = mapSync = positions = sharing = false;
+        helloSent = welcomed = mapSync = positions = sharing = tempadDoors = false;
         PLAYERS.clear();
         SENT_HASH.clear();
         OUTGOING.clear();
@@ -144,6 +145,21 @@ public final class ArcClientNet {
 
     public static boolean positionsActive() {
         return welcomed && positions;
+    }
+
+    /** Сервер умеет открывать двери Tempad к любым точкам. */
+    public static boolean tempadDoors() {
+        return welcomed && tempadDoors;
+    }
+
+    public static void tempadDoorTo(Waypoint w) {
+        FriendlyByteBuf buf = ArcNet.create("tempad_door");
+        buf.writeUtf(w.name.length() > 64 ? w.name.substring(0, 64) : w.name, 64);
+        buf.writeInt(w.x);
+        buf.writeInt(w.y);
+        buf.writeInt(w.z);
+        buf.writeUtf(w.dimension, 128);
+        ArcNet.sendToServer(buf);
     }
 
     // ------------------------------------------------------------------ метки

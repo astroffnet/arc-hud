@@ -47,7 +47,7 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
             client.execute(() -> com.arc4io.archud.compat.TempadCompat.applySync(packet));
         });
         net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.LAST.register(context ->
-                com.arc4io.archud.client.map.WaypointWorldRenderer.render(context.matrixStack(), context.camera(), context.tickDelta()));
+                com.arc4io.archud.client.map.WaypointWorldRenderer.capture(context.matrixStack(), context.projectionMatrix(), context.camera()));
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             ChatStyler.onInit(screen);

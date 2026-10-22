@@ -25,8 +25,10 @@ public final class ArcKeys {
 
     public static final KeyMapping HOST_PANEL = new KeyMapping("key.archud.host_panel", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
 
+    public static final KeyMapping WAYPOINTS = new KeyMapping("key.archud.waypoints", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, CATEGORY);
+
     public static final List<KeyMapping> ALL = List.of(OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
-            WORLD_MAP, ADD_WAYPOINT, ZOOM_IN, ZOOM_OUT, HOST_PANEL);
+            WORLD_MAP, ADD_WAYPOINT, WAYPOINTS, ZOOM_IN, ZOOM_OUT, HOST_PANEL);
 
     private ArcKeys() {}
 }

@@ -61,6 +61,9 @@ public final class ArcClient {
                 mc.setScreen(new com.arc4io.archud.client.screen.HostPanelScreen(null));
             }
         }
+        while (ArcKeys.WAYPOINTS.consumeClick()) {
+            if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WaypointListScreen(null));
+        }
         while (ArcKeys.WORLD_MAP.consumeClick()) {
             if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WorldMapScreen(null));
         }
@@ -77,11 +80,40 @@ public final class ArcClient {
             ArcConfig.save();
         }
 
+        lanNotice(mc);
         com.arc4io.archud.client.map.WaypointManager.tick(mc);
         com.arc4io.archud.client.map.MapScanner.tick(mc);
         com.arc4io.archud.client.map.Navigator.tick(mc);
         com.arc4io.archud.client.map.TrailManager.tick(mc);
         BunnyHop.tick(mc);
         HudRenderer.tick(mc);
+    }
+
+    private static boolean wasPublished;
+
+    /** После «Открыть для сети» (наш экран, ванильный или /publish) — сообщение с IP-адресом и портом, по клику копируется. */
+    private static void lanNotice(Minecraft mc) {
+        var server = mc.getSingleplayerServer();
+        boolean pub = server != null && server.isPublished();
+        if (pub && !wasPublished) {
+            int port = server.getPort();
+            try {
+                port = ((com.arc4io.archud.mixin.IntegratedServerAccessor) server).archud$getPublishedPort();
+            } catch (Throwable ignored) {
+            }
+            java.util.List<String> ips = NetUtil.localAddresses();
+            String main = ips.get(0) + ":" + port;
+            Component addr = Component.literal(main).withStyle(s -> s.withColor(ChatFormatting.AQUA).withUnderlined(true)
+                    .withClickEvent(new net.minecraft.network.chat.ClickEvent(net.minecraft.network.chat.ClickEvent.Action.COPY_TO_CLIPBOARD, main))
+                    .withHoverEvent(new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT,
+                            Component.translatable("chat.copy.click"))));
+            mc.gui.getChat().addMessage(Component.translatable("archud.lan.address", addr).withStyle(ChatFormatting.GREEN));
+            if (ips.size() > 1) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 1; i < ips.size(); i++) sb.append(i > 1 ? ", " : "").append(ips.get(i)).append(':').append(port);
+                mc.gui.getChat().addMessage(Component.translatable("archud.lan.other", sb.toString()).withStyle(ChatFormatting.GRAY));
+            }
+        }
+        wasPublished = pub;
     }
 }

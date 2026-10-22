@@ -156,13 +156,22 @@ public final class TempadCompat {
         }
     }
 
+    /** Можно ли открыть дверь Tempad к метке: к своей локации Tempad или (через сервер Arc HUD) к любой метке любого измерения. */
     public static boolean canOpenDoor(Waypoint w) {
-        return w != null && w.source == Waypoint.Source.TEMPAD && w.extId != null && serverSynced;
+        if (w == null) return false;
+        if (w.source == Waypoint.Source.TEMPAD && w.extId != null && serverSynced) return true;
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        return com.arc4io.archud.client.ArcClientNet.tempadDoors() && mc.player != null && find(mc.player) != null;
     }
 
     /** Запросить у сервера временную дверь к локации. */
     public static void openDoor(Waypoint w) {
-        if (w == null || w.extId == null || ArcClient.platform() == null) return;
+        if (w == null) return;
+        if (!(w.source == Waypoint.Source.TEMPAD && w.extId != null && serverSynced) && com.arc4io.archud.client.ArcClientNet.tempadDoors()) {
+            com.arc4io.archud.client.ArcClientNet.tempadDoorTo(w);
+            return;
+        }
+        if (w.extId == null || ArcClient.platform() == null) return;
         try {
             UUID.fromString(w.extId);
             ArcClient.platform().sendToServer(ArcPacket.TEMPAD_OPEN, ArcHud.id(w.extId));
