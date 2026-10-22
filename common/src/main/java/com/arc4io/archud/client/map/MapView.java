@@ -21,12 +21,17 @@ public final class MapView {
     private MapView() {}
 
     public static void drawTerrain(GuiGraphics g, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float radiusPx) {
+        if (MapCache.active() != null) drawTerrain(g, MapCache.active(), cx, cy, centerX, centerZ, zoom, rotation, radiusPx);
+    }
+
+    public static void drawTerrain(GuiGraphics g, MapCache.Layer layer, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float radiusPx) {
         double r = radiusPx / zoom * 1.5 + 2;
+        MapCache.touch(layer);
         g.pose().pushPose();
         g.pose().translate(cx, cy, 0);
         if (rotation != 0F) g.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
         g.pose().scale(zoom, zoom, 1F);
-        MapCache.forEach(centerX - r, centerZ - r, centerX + r, centerZ + r, region -> {
+        MapCache.forEach(layer, centerX - r, centerZ - r, centerX + r, centerZ + r, region -> {
             ResourceLocation tex = MapCache.texture(region);
             g.pose().pushPose();
             g.pose().translate((float) (region.rx() * MapCache.REGION - centerX), (float) (region.rz() * MapCache.REGION - centerZ), 0F);
@@ -50,6 +55,11 @@ public final class MapView {
     }
 
     public static void drawEntities(GuiGraphics g, Minecraft mc, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float half) {
+        drawEntities(g, mc, cx, cy, centerX, centerZ, zoom, rotation, half, true);
+    }
+
+    public static void drawEntities(GuiGraphics g, Minecraft mc, float cx, float cy, double centerX, double centerZ, float zoom, float rotation,
+                                    float half, boolean names) {
         if (mc.level == null) return;
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e == mc.player || e instanceof ItemEntity || e.isInvisible()) continue;
@@ -66,6 +76,9 @@ public final class MapView {
             int x = Math.round(cx + s[0]) - size / 2, y = Math.round(cy + s[1]) - size / 2;
             g.fill(x - 1, y - 1, x + size + 1, y + size + 1, 0xC0000000);
             g.fill(x, y, x + size, y + size, color);
+            if (names && e instanceof Player pl) {
+                Draw.smallCentered(g, mc.font, pl.getGameProfile().getName(), x + 2, y - 6, 0xFFFFFFFF, 0.5F);
+            }
         }
     }
 
@@ -94,11 +107,109 @@ public final class MapView {
                 s[1] *= k;
             }
             int x = Math.round(cx + s[0]), y = Math.round(cy + s[1]);
-            diamond(g, x, y, outside ? 3 : 4, w.color);
+            boolean target = Navigator.isTarget(w);
+            if (target) diamond(g, x, y, outside ? 5 : 7, 0xFFFFFFFF);
+            diamond(g, x, y, outside ? 3 : (labels ? 6 : 4), w.color);
             if (labels && !outside) {
-                String n = w.name;
-                Draw.smallCentered(g, font, n, x, y - 11, 0xFFFFFFFF, 0.6F);
+                Draw.smallCentered(g, font, w.initials(), x + 0.5F, y - 2, 0xFF000000, 0.5F);
+                Draw.smallCentered(g, font, w.name, x, y - 13, 0xFFFFFFFF, 0.6F);
             }
+        }
+    }
+
+    /** Круглая маска: рисует содержимое полосами, обрезанными по кругу. */
+    public static void circleBands(GuiGraphics g, int ix, int iy, int is, Runnable draw) {
+        float r = is / 2F, cy = iy + r, cx = ix + r;
+        int step = 3;
+        for (int y = iy; y < iy + is; y += step) {
+            float mid = y + step / 2F - cy;
+            float hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
+            if (hw < 1) continue;
+            g.enableScissor((int) (cx - hw), y, (int) Math.ceil(cx + hw), Math.min(y + step, iy + is));
+            draw.run();
+            g.disableScissor();
+        }
+    }
+
+    public static void circleRing(GuiGraphics g, float cx, float cy, float r, int color) {
+        for (int a = 0; a < 360; a += 2) {
+            double rad = Math.toRadians(a);
+            int x = Math.round(cx + (float) Math.cos(rad) * r), y = Math.round(cy + (float) Math.sin(rad) * r);
+            g.fill(x - 1, y - 1, x + 1, y + 1, color);
+        }
+    }
+
+    /** Сетка чанков. */
+    public static void drawChunkGrid(GuiGraphics g, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float half) {
+        double r = half / zoom * 1.5;
+        int x0 = (int) Math.floor((centerX - r) / 16) * 16, x1 = (int) Math.ceil((centerX + r) / 16) * 16;
+        int z0 = (int) Math.floor((centerZ - r) / 16) * 16, z1 = (int) Math.ceil((centerZ + r) / 16) * 16;
+        g.pose().pushPose();
+        g.pose().translate(cx, cy, 0);
+        if (rotation != 0F) g.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
+        for (int x = x0; x <= x1; x += 16) {
+            float sx = (float) ((x - centerX) * zoom);
+            g.fill((int) sx, (int) (-r * zoom), (int) sx + 1, (int) (r * zoom), 0x22FFFFFF);
+        }
+        for (int z = z0; z <= z1; z += 16) {
+            float sz = (float) ((z - centerZ) * zoom);
+            g.fill((int) (-r * zoom), (int) sz, (int) (r * zoom), (int) sz + 1, 0x22FFFFFF);
+        }
+        g.pose().popPose();
+    }
+
+    /** Слизневые чанки (только одиночная игра — нужен сид мира). */
+    public static void drawSlimeChunks(GuiGraphics g, Minecraft mc, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float half) {
+        if (mc.getSingleplayerServer() == null || mc.level == null || !mc.level.dimension().location().toString().equals("minecraft:overworld")) return;
+        long seed = mc.getSingleplayerServer().getWorldData().worldGenOptions().seed();
+        double r = half / zoom * 1.5;
+        int c0x = (int) Math.floor((centerX - r) / 16), c1x = (int) Math.floor((centerX + r) / 16);
+        int c0z = (int) Math.floor((centerZ - r) / 16), c1z = (int) Math.floor((centerZ + r) / 16);
+        if ((c1x - c0x) * (c1z - c0z) > 2500) return;
+        g.pose().pushPose();
+        g.pose().translate(cx, cy, 0);
+        if (rotation != 0F) g.pose().mulPose(Axis.ZP.rotationDegrees(rotation));
+        g.pose().scale(zoom, zoom, 1F);
+        for (int x = c0x; x <= c1x; x++) {
+            for (int z = c0z; z <= c1z; z++) {
+                if (net.minecraft.world.level.levelgen.WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L).nextInt(10) != 0) continue;
+                float sx = (float) (x * 16 - centerX), sz = (float) (z * 16 - centerZ);
+                g.pose().pushPose();
+                g.pose().translate(sx, sz, 0);
+                g.fill(0, 0, 16, 16, 0x3066FF66);
+                g.pose().popPose();
+            }
+        }
+        g.pose().popPose();
+    }
+
+    /** След игрока. */
+    public static void drawTrail(GuiGraphics g, java.util.Deque<int[]> trail, float cx, float cy, double centerX, double centerZ, float zoom,
+                                 float rotation, float half, int color) {
+        int i = 0, n = trail.size();
+        for (int[] pt : trail) {
+            i++;
+            float[] s = toScreen(pt[0] + 0.5, pt[1] + 0.5, centerX, centerZ, zoom, rotation);
+            if (Math.abs(s[0]) > half || Math.abs(s[1]) > half) continue;
+            int a = 40 + (int) (160F * i / Math.max(1, n));
+            int x = Math.round(cx + s[0]), y = Math.round(cy + s[1]);
+            g.fill(x, y, x + 1, y + 1, Draw.alpha(color, a));
+        }
+    }
+
+    /** Пунктир к цели навигатора. */
+    public static void drawNavigatorLine(GuiGraphics g, Minecraft mc, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float half) {
+        if (mc.level == null) return;
+        double[] t = Navigator.convertedTarget(mc.level.dimension().location().toString());
+        if (t == null) return;
+        float[] s = toScreen(t[0], t[1], centerX, centerZ, zoom, rotation);
+        float len = (float) Math.sqrt(s[0] * s[0] + s[1] * s[1]);
+        if (len < 4) return;
+        float max = Math.min(len, half * 1.5F);
+        int color = 0xFF000000 | Navigator.target().color;
+        for (float d = 6; d < max; d += 5) {
+            int x = Math.round(cx + s[0] / len * d), y = Math.round(cy + s[1] / len * d);
+            g.fill(x - 1, y - 1, x + 1, y + 1, color);
         }
     }
 

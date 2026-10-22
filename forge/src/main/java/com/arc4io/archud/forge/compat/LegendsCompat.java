@@ -64,7 +64,7 @@ public final class LegendsCompat {
             Field capField = Class.forName("com.tihyo.legends.data.living.LegendsLivingEntityProvider").getField("CAPABILITY");
             livingCap = (Capability<?>) capField.get(null);
             walkSpeed = Class.forName("com.tihyo.legends.data.living.ILegendsLiving").getMethod("getWalkSpeed");
-            ArcHudApi.registerBar(ArcHud.id("legends_speed"), Component.translatable("archud.legends.speed"), 0xFFFFC107, LegendsCompat::speed);
+            // скорость костюма не показываем вовсе — ни у нас, ни родную полосу Legends
             ArcHudApi.markReplaced("legendsmod:speed");
         } catch (Throwable t) {
             ArcHud.LOGGER.warn("Arc HUD: скорость костюма Legends недоступна: {}", t.toString());

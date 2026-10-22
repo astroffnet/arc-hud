@@ -28,6 +28,7 @@ public final class ArcClient {
 
     /** Вызывается в конце каждого клиентского тика. */
     public static void tick(Minecraft mc) {
+        com.arc4io.archud.client.map.MapScanner.worldCheck(mc);
         if (mc.player == null) return;
         ArcConfig cfg = ArcConfig.get();
 
@@ -71,6 +72,8 @@ public final class ArcClient {
 
         com.arc4io.archud.client.map.WaypointManager.tick(mc);
         com.arc4io.archud.client.map.MapScanner.tick(mc);
+        com.arc4io.archud.client.map.Navigator.tick(mc);
+        com.arc4io.archud.client.map.TrailManager.tick(mc);
         BunnyHop.tick(mc);
         HudRenderer.tick(mc);
     }

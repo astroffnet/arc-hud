@@ -5,6 +5,8 @@ import com.arc4io.archud.config.ArcConfig;
 import com.arc4io.archud.config.HudAnchor;
 import com.arc4io.archud.client.map.MapScanner;
 import com.arc4io.archud.client.map.MapView;
+import com.arc4io.archud.client.map.Navigator;
+import com.arc4io.archud.client.map.TrailManager;
 import com.arc4io.archud.client.map.Waypoint;
 import com.arc4io.archud.client.map.WaypointManager;
 import net.minecraft.client.Minecraft;
@@ -74,6 +76,7 @@ final class HudBlocks {
             if (cfg.minimap) add(map, cfg.minimapAnchor, minimap(mc, p, font, accent));
             if (cfg.infoPanel) add(map, cfg.infoPanelAnchor, info(mc, p, font, accent));
             if (cfg.compass) add(map, cfg.compassAnchor, compass(p, font, accent));
+            add(map, cfg.compassAnchor, navigator(mc, p, font, accent));
             add(map, cfg.compassAnchor, target(mc, font, accent));
             if (cfg.effectsPanel) add(map, cfg.effectsAnchor, effects(mc, p, font, accent));
         }
@@ -220,42 +223,119 @@ final class HudBlocks {
             public int h() { return size + 11; }
 
             public void draw(GuiGraphics g, int x, int y, boolean right) {
-                Draw.panel(g, x, y, size, size, 0xFF080B10, Draw.alpha(accent, 0xA0));
+                boolean circle = cfg.minimapCircle;
+                if (!circle) Draw.panel(g, x, y, size, size, 0xFF080B10, Draw.alpha(accent, 0xA0));
                 int ix = x + 2, iy = y + 2, is = size - 4;
                 double wx = Mth.lerp(pt, p.xo, p.getX()), wz = Mth.lerp(pt, p.zo, p.getZ());
                 float yaw = p.getViewYRot(pt);
                 float rot = cfg.minimapRotate ? 180F - yaw : 0F;
                 float zoom = (float) cfg.minimapZoom;
-                float cx = ix + is / 2F, cy = iy + is / 2F;
+                float cx = ix + is / 2F, cy = iy + is / 2F, half = is / 2F;
+                String dim = mc.level.dimension().location().toString();
+                Runnable layer = () -> {
+                    g.fill(ix, iy, ix + is, iy + is, 0xFF080B10);
+                    com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+                    MapView.drawTerrain(g, cx, cy, wx, wz, zoom, rot, half);
+                    if (cfg.minimapChunkGrid && zoom >= 1F) MapView.drawChunkGrid(g, cx, cy, wx, wz, zoom, rot, half);
+                    if (cfg.minimapSlimeChunks) MapView.drawSlimeChunks(g, mc, cx, cy, wx, wz, zoom, rot, half);
+                    if (cfg.minimapTrail) MapView.drawTrail(g, TrailManager.trail(dim), cx, cy, wx, wz, zoom, rot, half, accent);
+                    if (cfg.minimapNightTint && mc.level.dimensionType().hasSkyLight()) {
+                        long t = mc.level.getDayTime() % 24000L;
+                        if (t > 12500 && t < 23500) g.fill(ix, iy, ix + is, iy + is, 0x70000818);
+                    }
+                    if (cfg.minimapEntities) MapView.drawEntities(g, mc, cx, cy, wx, wz, zoom, rot, half, cfg.minimapPlayerNames);
+                    MapView.drawNavigatorLine(g, mc, cx, cy, wx, wz, zoom, rot, half);
+                };
                 g.enableScissor(ix, iy, ix + is, iy + is);
-                com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-                MapView.drawTerrain(g, cx, cy, wx, wz, zoom, rot, is / 2F);
-                if (cfg.minimapEntities) MapView.drawEntities(g, mc, cx, cy, wx, wz, zoom, rot, is / 2F);
-                if (cfg.minimapWaypoints) MapView.drawWaypoints(g, font, cx, cy, wx, wz, zoom, rot, is / 2F, true, false);
+                if (circle) MapView.circleBands(g, ix, iy, is, layer);
+                else layer.run();
+                if (cfg.minimapWaypoints) MapView.drawWaypoints(g, font, cx, cy, wx, wz, zoom, rot, circle ? half * 0.86F : half, true, false);
                 MapView.drawPlayerArrow(g, cx, cy, cfg.minimapRotate ? 0F : yaw + 180F, 0xFFFFFFFF);
                 g.disableScissor();
-                // рамка-уголки
-                int ac = Draw.alpha(accent, 0xFF);
-                g.fill(x, y, x + 8, y + 1, ac);
-                g.fill(x, y, x + 1, y + 8, ac);
-                g.fill(x + size - 8, y + size - 1, x + size, y + size, ac);
-                g.fill(x + size - 1, y + size - 8, x + size, y + size, ac);
+                if (circle) {
+                    MapView.circleRing(g, cx, cy, half + 1, Draw.alpha(accent, 0xE0));
+                } else {
+                    int ac = Draw.alpha(accent, 0xFF);
+                    g.fill(x, y, x + 8, y + 1, ac);
+                    g.fill(x, y, x + 1, y + 8, ac);
+                    g.fill(x + size - 8, y + size - 1, x + size, y + size, ac);
+                    g.fill(x + size - 1, y + size - 8, x + size, y + size, ac);
+                }
                 // север
                 float[] n = MapView.toScreen(0, -1, 0, 0, 1F, rot);
                 float len = (float) Math.sqrt(n[0] * n[0] + n[1] * n[1]);
-                float k = (is / 2F - 5) / Math.max(Math.abs(n[0] / len), Math.abs(n[1] / len));
+                float edge = half - 5;
+                float k = circle ? edge : edge / Math.max(Math.abs(n[0] / len), Math.abs(n[1] / len));
                 float nx = cx + n[0] / len * k, ny = cy + n[1] / len * k;
                 g.fill((int) nx - 4, (int) ny - 4, (int) nx + 5, (int) ny + 5, 0xC0000000);
                 Draw.smallCentered(g, font, Component.translatable("archud.compass.N").getString(), nx + 0.5F, ny - 2.5F, 0xFFFF5252, 0.7F);
                 if (MapScanner.caveMode()) {
-                    Draw.small(g, font, Component.translatable("archud.map.cave").getString(), ix + 2, iy + 2, 0xFFFFB74D, 0.5F);
+                    Draw.small(g, font, Component.translatable("archud.map.cave").getString() + " " + p.getBlockY(), ix + 3, iy + 3, 0xFFFFB74D, 0.5F);
                 }
+                Draw.small(g, font, "×" + (zoom >= 1 ? String.format("%.1f", zoom) : String.format("%.2f", zoom)), ix + is - 16, iy + is - 6, 0x90FFFFFF, 0.5F);
                 // подпись
                 Draw.panel(g, x, y + size + 1, size, 10, Draw.PANEL, Draw.alpha(accent, 0x50));
                 String coords = p.getBlockX() + "  " + p.getBlockY() + "  " + p.getBlockZ();
+                if (cfg.minimapFacing) {
+                    String[] dirs = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+                    int idx = Math.floorMod(Math.round(yaw / 45F), 8);
+                    coords += "  " + Component.translatable("archud.compass." + dirs[idx]).getString();
+                }
                 Draw.smallCentered(g, font, coords, x + size / 2F, y + size + 3, Draw.TEXT, 0.65F);
             }
         };
+    }
+
+    // -------------------------------------------------------------- навигатор
+    private static Block navigator(Minecraft mc, LocalPlayer p, Font font, int accent) {
+        Waypoint t = Navigator.target();
+        if (t == null || !ArcConfig.get().navigator) return null;
+        String dim = mc.level.dimension().location().toString();
+        double[] target = Navigator.convertedTarget(dim);
+        boolean other = !t.dimension.equals(dim);
+        String title = t.name;
+        String line2;
+        double dist = -1;
+        float arrow = 0F;
+        if (target != null) {
+            double dx = target[0] - p.getX(), dz = target[1] - p.getZ();
+            dist = Math.sqrt(dx * dx + dz * dz);
+            float deg = (float) Math.toDegrees(Math.atan2(dx, -dz));
+            float heading = Mth.wrapDegrees(p.getYRot() + 180F);
+            arrow = Mth.wrapDegrees(deg - heading);
+            String dy = other ? "" : (t.y - p.getBlockY() > 2 ? "  ↑" + (t.y - p.getBlockY()) : t.y - p.getBlockY() < -2 ? "  ↓" + (p.getBlockY() - t.y) : "");
+            double speed = HudRenderer.speedBps();
+            String eta = speed > 1.5 ? "  ~" + fmtTime((long) (dist / speed)) : "";
+            line2 = Math.round(dist) + " m" + dy + eta;
+            if (other) line2 = Component.translatable("archud.nav.converted", (int) target[0], (int) target[1]).getString() + "  " + line2;
+        } else {
+            line2 = Component.translatable("archud.nav.other_dim", HudRenderer.pretty(t.dimension.substring(t.dimension.indexOf(':') + 1))).getString();
+        }
+        final String l2 = line2;
+        final float arrowDeg = arrow;
+        final boolean hasDir = target != null;
+        int bw = Math.max(110, Math.max(font.width(title), Math.round(font.width(l2) * 0.7F)) + 34);
+        return new Block() {
+            public int w() { return bw; }
+
+            public int h() { return 26; }
+
+            public void draw(GuiGraphics g, int x, int y, boolean right) {
+                Draw.panel(g, x, y, bw, 26, Draw.PANEL, Draw.alpha(t.color, 0xC0));
+                g.fill(x + 1, y + 1, x + 25, y + 25, 0x40000000);
+                if (hasDir) MapView.drawPlayerArrow(g, x + 13, y + 13, arrowDeg, 0xFF000000 | t.color);
+                else Draw.smallCentered(g, font, "⇄", x + 13, y + 9, 0xFF000000 | t.color, 1F);
+                g.drawString(font, title, x + 28, y + 4, 0xFF000000 | t.color, true);
+                Draw.small(g, font, l2, x + 28, y + 15, Draw.TEXT, 0.7F);
+                double prog = Navigator.progress(p);
+                g.fill(x + 1, y + 24, x + 1 + (int) ((bw - 2) * prog), y + 25, 0xFF000000 | t.color);
+            }
+        };
+    }
+
+    private static String fmtTime(long sec) {
+        if (sec >= 3600) return (sec / 3600) + ":" + String.format("%02d", (sec % 3600) / 60) + ":" + String.format("%02d", sec % 60);
+        return (sec / 60) + ":" + String.format("%02d", sec % 60);
     }
 
     // ----------------------------------------------------------------- компас
