@@ -81,7 +81,8 @@ public final class HudRenderer {
     private static long lastFrame;
     private static long healFlashUntil, hurtFlashUntil;
     private static float prevHealth = -1;
-    private static int frames, fps;
+    private static int frames;
+    static int fps;
     private static long fpsTimer;
     private static double speedBps;
     private static Vec3 lastPos;
@@ -89,15 +90,12 @@ public final class HudRenderer {
     private static Map<Item, Integer> lastCounts = new HashMap<>();
     private static boolean countsReady;
     private static final List<Popup> POPUPS = new ArrayList<>();
-    private static final List<Pickup> PICKUPS = new ArrayList<>();
-    private static final Map<MobEffect, Integer> EFFECT_MAX = new HashMap<>();
-    private static Field bossMapField;
-    private static boolean bossFieldSearched;
-    private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
+    static final List<Pickup> PICKUPS = new ArrayList<>();
+    static final Map<MobEffect, Integer> EFFECT_MAX = new HashMap<>();
 
     private record Popup(String text, int color, long start, int dx) {}
 
-    private static final class Pickup {
+    static final class Pickup {
         final ItemStack stack;
         int count;
         long time;
@@ -108,8 +106,6 @@ public final class HudRenderer {
             this.time = time;
         }
     }
-
-    private record InfoLine(int icon, Component text, int color) {}
 
     private HudRenderer() {}
 
@@ -253,24 +249,12 @@ public final class HudRenderer {
             if (cfg.customHotbar) hotbar(g, mc, p, w, h, partialTick, accent, k);
             if (survival) statusBars(g, mc, p, font, w, h, accent, k, now);
             xpRow(g, p, font, w, h, accent, hasXp, survival, k);
-            gearPanel(g, mc, p, font, h, accent, now);
             chips(g, p, font, w, h, accent);
             if (survival && cfg.fallWarning) fallWarning(g, p, font, w, h);
             if (cfg.damageNumbers) popups(g, font, w, h, now);
-            if (cfg.pickupNotifications) pickups(g, mc, font, w, h, accent, now);
-            if (cfg.movementStatus) movementStatus(g, p, font, h, accent);
             if (cfg.bhopHud && cfg.bunnyHop) bhopHud(g, font, w, h, accent);
         }
-        if (!debug) {
-            if (cfg.infoPanel) infoPanel(g, mc, p, font, accent);
-            int topY = 2 + bossCount(mc) * 19;
-            if (cfg.compass) {
-                compass(g, p, font, w, topY, accent);
-                topY += 16;
-            }
-            targetInfo(g, mc, font, w, topY, accent);
-            if (cfg.effectsPanel) effects(g, mc, p, font, w, accent);
-        }
+        HudBlocks.renderAnchored(g, mc, p, font, w, h, accent, now, debug, spectator);
     }
 
     // ---------------------------------------------------------------- хотбар
@@ -518,39 +502,6 @@ public final class HudRenderer {
         Draw.hGradient(g, w - edge, 0, w, h, 0x00FF1010, c);
     }
 
-    // ------------------------------------------------------------- снаряжение
-    private static void gearPanel(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int h, int accent, long now) {
-        ArcConfig cfg = ArcConfig.get();
-        List<ItemStack> list = new ArrayList<>();
-        if (cfg.armorDurability) {
-            for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
-                ItemStack s = p.getItemBySlot(slot);
-                if (s.isDamageableItem()) list.add(s);
-            }
-        }
-        if (cfg.heldDurability) {
-            if (p.getMainHandItem().isDamageableItem()) list.add(p.getMainHandItem());
-            if (p.getOffhandItem().isDamageableItem()) list.add(p.getOffhandItem());
-        }
-        if (list.isEmpty()) return;
-        int x = 2;
-        int y = h / 2 - list.size() * 10;
-        for (ItemStack s : list) {
-            int max = Math.max(1, s.getMaxDamage());
-            float frac = 1F - s.getDamageValue() / (float) max;
-            boolean low = frac < 0.1F;
-            int bg = low && cfg.lowDurabilityWarning ? Draw.mix(Draw.PANEL, 0xC0FF2020, Draw.pulse(700)) : Draw.PANEL;
-            Draw.panel(g, x, y, 54, 19, bg, Draw.alpha(accent, 0x40));
-            g.renderItem(s, x + 2, y + 1);
-            int color = Draw.mix(0xFFFF4040, 0xFF6BFF7A, frac);
-            Draw.small(g, font, Math.round(frac * 100) + "%", x + 20, y + 3, color, 0.75F);
-            Draw.small(g, font, Integer.toString(max - s.getDamageValue()), x + 20, y + 10, Draw.TEXT_DIM, 0.5F);
-            g.fill(x + 36, y + 14, x + 52, y + 16, 0xC0000000);
-            g.fill(x + 36, y + 14, x + 36 + Math.round(16 * frac), y + 16, color);
-            y += 20;
-        }
-    }
-
     // ------------------------------------------------- фишки справа от хотбара
     private static void chips(GuiGraphics g, LocalPlayer p, Font font, int w, int h, int accent) {
         ArcConfig cfg = ArcConfig.get();
@@ -657,44 +608,6 @@ public final class HudRenderer {
         }
     }
 
-    // ----------------------------------------------------- подбор предметов
-    private static void pickups(GuiGraphics g, Minecraft mc, Font font, int w, int h, int accent, long now) {
-        int y = h - 64;
-        for (int i = PICKUPS.size() - 1; i >= 0; i--) {
-            Pickup pk = PICKUPS.get(i);
-            float age = (now - pk.time) / 3500F;
-            float slide = Draw.easeOut(Math.min(1F, (now - pk.time) / 220F));
-            float fade = age > 0.8F ? 1F - (age - 0.8F) / 0.2F : 1F;
-            String txt = "+" + pk.count + " " + pk.stack.getHoverName().getString();
-            if (font.width(txt) > 110) txt = font.plainSubstrByWidth(txt, 104) + "…";
-            int pw = font.width(txt) + 26;
-            int x = (int) (w - 4 - pw + (1F - slide) * 40F);
-            int a = Math.max(8, (int) (255 * fade));
-            Draw.panel(g, x, y, pw, 18, Draw.scaleAlpha(Draw.PANEL, fade), Draw.alpha(accent, (int) (0x70 * fade)));
-            g.fill(x, y + 2, x + 2, y + 16, Draw.alpha(accent, a));
-            if (fade > 0.3F) g.renderItem(pk.stack, x + 4, y + 1);
-            g.drawString(font, txt, x + 22, y + 5, Draw.alpha(0xEAF2FA, a), true);
-            y -= 20;
-        }
-    }
-
-    // ------------------------------------------------------- статус движения
-    private static void movementStatus(GuiGraphics g, LocalPlayer p, Font font, int h, int accent) {
-        List<String> tags = new ArrayList<>();
-        if (p.isFallFlying()) tags.add(Component.translatable("archud.status.glide").getString());
-        else if (p.getAbilities().flying) tags.add(Component.translatable("archud.status.fly").getString());
-        if (p.isSwimming()) tags.add(Component.translatable("archud.status.swim").getString());
-        else if (p.isSprinting()) tags.add(Component.translatable("archud.status.sprint").getString());
-        if (p.isShiftKeyDown()) tags.add(Component.translatable("archud.status.sneak").getString());
-        int y = h - 14;
-        for (String t : tags) {
-            int tw = Math.round(font.width(t) * 0.75F);
-            Draw.panel(g, 4, y, tw + 8, 11, Draw.PANEL, Draw.alpha(accent, 0x80));
-            Draw.small(g, font, t, 8, y + 3, Draw.brighten(accent, 0.4F), 0.75F);
-            y -= 13;
-        }
-    }
-
     // --------------------------------------------------------- BunnyHop HUD
     private static void bhopHud(GuiGraphics g, Font font, int w, int h, int accent) {
         double speed = speedBps;
@@ -705,252 +618,6 @@ public final class HudRenderer {
         Draw.smallCentered(g, font, s, w / 2F, h / 2F + 28, color, 0.85F);
         if (chain >= 2) {
             Draw.smallCentered(g, font, "×" + chain + " BHOP", w / 2F, h / 2F + 37, Draw.alpha(0xFFFFFF, 0xC0), 0.6F);
-        }
-    }
-
-    // ------------------------------------------------------- панель информации
-    private static void infoPanel(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int accent) {
-        ArcConfig cfg = ArcConfig.get();
-        List<InfoLine> lines = new ArrayList<>();
-        BlockPos pos = p.blockPosition();
-        Level level = mc.level;
-
-        if (cfg.coordinates) lines.add(new InfoLine(Icons.PIN, Component.literal(pos.getX() + "  " + pos.getY() + "  " + pos.getZ()), Draw.TEXT));
-        if (cfg.facing) {
-            Direction d = p.getDirection();
-            int heading = Math.round(Mth.wrapDegrees(p.getYRot() + 180F) + 180F) % 360;
-            lines.add(new InfoLine(Icons.COMPASS, Component.translatable("archud.dir." + d.getName()).append(" " + heading + "°"), Draw.TEXT));
-        }
-        if (cfg.biome) {
-            Optional<ResourceKey<Biome>> key = level.getBiome(pos).unwrapKey();
-            key.ifPresent(k -> {
-                ResourceLocation id = k.location();
-                lines.add(new InfoLine(Icons.LEAF, Component.translatableWithFallback("biome." + id.getNamespace() + "." + id.getPath(), pretty(id.getPath())), 0xFFA5D6A7));
-            });
-        }
-        if (cfg.dimension) {
-            ResourceLocation dim = level.dimension().location();
-            Component name = Component.translatableWithFallback("archud.dim." + dim.getNamespace() + "." + dim.getPath(), pretty(dim.getPath()));
-            if (!dim.getNamespace().equals("minecraft") && cfg.modNames) {
-                name = name.copy().append(Component.literal("  " + ArcHud.platform().modName(dim.getNamespace())).withStyle(s -> s.withColor(0x8C9AAB)));
-            }
-            lines.add(new InfoLine(Icons.GLOBE, name, Draw.brighten(accent, 0.3F)));
-        }
-        StringBuilder perf = new StringBuilder();
-        if (cfg.fps) perf.append(fps).append(" FPS");
-        if (cfg.ping && mc.getConnection() != null) {
-            PlayerInfo info = mc.getConnection().getPlayerInfo(p.getUUID());
-            if (info != null && !mc.isLocalServer()) {
-                if (perf.length() > 0) perf.append("  ");
-                perf.append(info.getLatency()).append(" ms");
-            }
-        }
-        if (perf.length() > 0) lines.add(new InfoLine(Icons.CHIP, Component.literal(perf.toString()), fps < 30 && cfg.fps ? 0xFFFF8A65 : Draw.TEXT));
-
-        long dayTime = level.getDayTime();
-        StringBuilder time = new StringBuilder();
-        if (cfg.gameTime) {
-            long t = (dayTime + 6000L) % 24000L;
-            time.append(String.format("%02d:%02d", t / 1000L, (t % 1000L) * 60L / 1000L));
-        }
-        if (cfg.realTime) {
-            if (time.length() > 0) time.append("  |  ");
-            time.append(LocalTime.now().format(CLOCK));
-        }
-        if (time.length() > 0) lines.add(new InfoLine(Icons.CLOCK, Component.literal(time.toString()), Draw.TEXT));
-        if (cfg.dayCounter || cfg.weather) {
-            MutableLine ml = new MutableLine();
-            long tod = dayTime % 24000L;
-            boolean night = tod >= 13000L && tod < 23000L;
-            int icon = night ? Icons.MOON : Icons.SUN;
-            Component c = Component.empty();
-            if (cfg.dayCounter) c = Component.translatable("archud.info.day", dayTime / 24000L + 1);
-            if (cfg.weather) {
-                if (level.isThundering()) {
-                    icon = Icons.STORM;
-                    c = c.copy().append("  ").append(Component.translatable("archud.info.storm"));
-                } else if (level.isRaining()) {
-                    icon = Icons.RAIN;
-                    c = c.copy().append("  ").append(Component.translatable("archud.info.rain"));
-                }
-            }
-            ml.set(icon, c);
-            lines.add(new InfoLine(ml.icon, ml.text, Draw.TEXT));
-        }
-        if (cfg.speed) lines.add(new InfoLine(Icons.SPEED, Component.literal(String.format("%.2f", speedBps)).append(Component.translatable("archud.info.bps")), Draw.TEXT));
-        if (cfg.lightLevel) {
-            int block = level.getBrightness(LightLayer.BLOCK, pos);
-            int sky = level.getBrightness(LightLayer.SKY, pos);
-            int color = block <= 0 ? 0xFFFF7A7A : block < 8 ? 0xFFFFD54F : Draw.TEXT;
-            lines.add(new InfoLine(Icons.LIGHT, Component.translatable("archud.info.light", block, sky), color));
-        }
-        if (lines.isEmpty()) return;
-
-        int width = 0;
-        for (InfoLine l : lines) width = Math.max(width, font.width(l.text()));
-        int pw = width + 18, ph = lines.size() * 11 + 4;
-        Draw.accentPanel(g, 2, 2, pw, ph, accent);
-        int y = 4;
-        for (InfoLine l : lines) {
-            Draw.icon(g, l.icon(), 5, y);
-            g.drawString(font, l.text(), 16, y + 1, l.color(), true);
-            y += 11;
-        }
-    }
-
-    private static final class MutableLine {
-        int icon;
-        Component text;
-
-        void set(int icon, Component text) {
-            this.icon = icon;
-            this.text = text;
-        }
-    }
-
-    // ------------------------------------------------------------------ компас
-    private static void compass(GuiGraphics g, LocalPlayer p, Font font, int w, int y, int accent) {
-        int cw = 182, cx = w / 2, x = cx - cw / 2;
-        Draw.accentPanel(g, x, y, cw, 13, accent);
-        float heading = Mth.wrapDegrees(p.getYRot() + 180F); // 0 = север
-        g.enableScissor(x + 2, y, x + cw - 2, y + 13);
-        String[] names = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
-        for (int deg = 0; deg < 360; deg += 15) {
-            float diff = Mth.wrapDegrees(deg - heading);
-            if (Math.abs(diff) > 95) continue;
-            int px = cx + Math.round(diff * (cw / 2F) / 90F);
-            if (deg % 45 == 0) {
-                String n = Component.translatable("archud.compass." + names[deg / 45]).getString();
-                int col = deg == 0 ? 0xFFFF5252 : deg % 90 == 0 ? 0xFFFFFFFF : 0xFFB0BEC5;
-                float sc = deg % 90 == 0 ? 0.85F : 0.6F;
-                Draw.smallCentered(g, font, n, px, y + (deg % 90 == 0 ? 3 : 4), col, sc);
-            } else {
-                g.fill(px, y + 9, px + 1, y + 12, 0x80FFFFFF);
-            }
-        }
-        g.disableScissor();
-        // указатель
-        g.fill(cx, y + 1, cx + 1, y + 12, Draw.alpha(accent, 0xFF));
-        g.fill(cx - 1, y + 11, cx + 2, y + 13, Draw.alpha(accent, 0xFF));
-    }
-
-    private static int bossCount(Minecraft mc) {
-        try {
-            Object overlay = mc.gui.getBossOverlay();
-            if (!bossFieldSearched) {
-                bossFieldSearched = true;
-                for (Field f : overlay.getClass().getDeclaredFields()) {
-                    if (Map.class.isAssignableFrom(f.getType())) {
-                        f.setAccessible(true);
-                        bossMapField = f;
-                        break;
-                    }
-                }
-            }
-            if (bossMapField != null) return Math.min(4, ((Map<?, ?>) bossMapField.get(overlay)).size());
-        } catch (Exception ignored) {
-        }
-        return 0;
-    }
-
-    // ----------------------------------------------------------- цель/блок
-    private static void targetInfo(GuiGraphics g, Minecraft mc, Font font, int w, int y, int accent) {
-        ArcConfig cfg = ArcConfig.get();
-        Entity target = mc.crosshairPickEntity;
-        if (cfg.targetInfo && target instanceof LivingEntity living && !living.isInvisible()) {
-            Component name = living.getDisplayName();
-            String mod = BuiltInRegistries.ENTITY_TYPE.getKey(living.getType()).getNamespace();
-            float hp = living.getHealth(), max = Math.max(1, living.getMaxHealth());
-            int pw = Math.max(120, font.width(name) + 24);
-            int x = w / 2 - pw / 2;
-            Draw.accentPanel(g, x, y, pw, 26, accent);
-            Draw.icon(g, Icons.SKULL, x + 3, y + 3);
-            g.drawString(font, name, x + 14, y + 3, Draw.TEXT, true);
-            Draw.bar(g, x + 4, y + 14, pw - 8, 5, hp / max, 0xFFFF6B6B, 0xFFB71C1C);
-            Draw.smallCentered(g, font, fmt(hp) + " / " + fmt(max) + (living.getArmorValue() > 0 ? "   ◈ " + living.getArmorValue() : ""), w / 2F, y + 20, 0xFFE0E0E0, 0.5F);
-            if (cfg.modNames && !mod.equals("minecraft")) {
-                String mn = ArcHud.platform().modName(mod);
-                Draw.small(g, font, mn, x + pw - 4 - font.width(mn) * 0.5F, y + 4, 0xFF7FA7C9, 0.5F);
-            }
-            return;
-        }
-        if (cfg.blockInfo && mc.hitResult instanceof BlockHitResult bhr && bhr.getType() == HitResult.Type.BLOCK) {
-            BlockState state = mc.level.getBlockState(bhr.getBlockPos());
-            if (state.isAir()) return;
-            Component name = state.getBlock().getName();
-            String mod = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace();
-            String mn = cfg.modNames ? ArcHud.platform().modName(mod) : "";
-            int pw = Math.max(font.width(name), Math.round(font.width(mn) * 0.6F)) + 28;
-            int x = w / 2 - pw / 2;
-            Draw.accentPanel(g, x, y, pw, 20, accent);
-            ItemStack icon = new ItemStack(state.getBlock().asItem());
-            if (!icon.isEmpty()) g.renderItem(icon, x + 2, y + 2);
-            g.drawString(font, name, x + 21, y + 3, Draw.TEXT, true);
-            if (!mn.isEmpty()) Draw.small(g, font, mn, x + 21, y + 12.5F, 0xFF7FA7C9, 0.6F);
-        }
-    }
-
-    // ---------------------------------------------------------------- эффекты
-    private static void effects(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int w, int accent) {
-        ArcConfig cfg = ArcConfig.get();
-        Collection<MobEffectInstance> active = p.getActiveEffects();
-        if (active.isEmpty()) {
-            EFFECT_MAX.clear();
-            return;
-        }
-        List<MobEffectInstance> list = new ArrayList<>();
-        for (MobEffectInstance e : active) if (e.showIcon()) list.add(e);
-        list.sort((a, b) -> Boolean.compare(!a.getEffect().isBeneficial(), !b.getEffect().isBeneficial()));
-        for (Iterator<MobEffect> it = EFFECT_MAX.keySet().iterator(); it.hasNext(); ) {
-            MobEffect m = it.next();
-            if (!p.hasEffect(m)) it.remove();
-        }
-
-        boolean compact = list.size() > 7;
-        int y = 2;
-        int x = w - 2;
-        int col = 0;
-        for (MobEffectInstance e : list) {
-            MobEffect effect = e.getEffect();
-            int dur = e.getDuration();
-            int maxDur = EFFECT_MAX.merge(effect, dur, Math::max);
-            boolean blinking = !e.isInfiniteDuration() && dur < 200 && (dur / 5) % 2 == 0;
-            int color = 0xFF000000 | effect.getColor();
-            TextureAtlasSprite sprite = mc.getMobEffectTextures().get(effect);
-
-            if (compact) {
-                int ex = x - 22 - col * 24;
-                Draw.panel(g, ex, y, 22, 22, Draw.PANEL, Draw.alpha(color, 0xA0));
-                if (!blinking) g.blit(ex + 2, y + 2, 0, 18, 18, sprite);
-                if (cfg.effectTimers && !e.isInfiniteDuration()) {
-                    float f = Mth.clamp(dur / (float) Math.max(1, maxDur), 0, 1);
-                    g.fill(ex + 2, y + 20, ex + 2 + Math.round(18 * f), y + 21, color);
-                }
-                if (++col >= 6) {
-                    col = 0;
-                    y += 24;
-                }
-                continue;
-            }
-
-            Component name = effect.getDisplayName().copy();
-            if (e.getAmplifier() > 0) name = name.copy().append(" ").append(Component.translatable("enchantment.level." + (e.getAmplifier() + 1)));
-            String timeStr = e.isInfiniteDuration() ? "∞" : MobEffectUtil.formatDuration(e, 1.0F).getString();
-            int pw = Math.max(font.width(name), font.width(timeStr)) + 28;
-            int ex = x - pw;
-            Draw.panel(g, ex, y, pw, 22, Draw.PANEL, Draw.alpha(color, 0x90));
-            g.fill(ex, y + 2, ex + 2, y + 20, effect.isBeneficial() ? Draw.alpha(accent, 0xFF) : 0xFFFF5252);
-            if (!blinking) g.blit(ex + 4, y + 2, 0, 18, 18, sprite);
-            g.drawString(font, name, ex + 24, y + 3, effect.isBeneficial() ? Draw.TEXT : 0xFFFF8A80, true);
-            if (cfg.effectTimers) {
-                Draw.small(g, font, timeStr, ex + 24, y + 13, Draw.TEXT_DIM, 0.75F);
-                if (!e.isInfiniteDuration()) {
-                    float f = Mth.clamp(dur / (float) Math.max(1, maxDur), 0, 1);
-                    g.fill(ex + 24, y + 19, ex + pw - 3, y + 20, 0x60000000);
-                    g.fill(ex + 24, y + 19, ex + 24 + Math.round((pw - 27) * f), y + 20, color);
-                }
-            }
-            y += 24;
         }
     }
 

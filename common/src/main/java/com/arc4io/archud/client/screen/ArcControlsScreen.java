@@ -36,6 +36,7 @@ public class ArcControlsScreen extends Screen {
     private EditBox search;
     private KeyMapping listening;
     private double scroll;
+    private double catScroll;
     private int px, py, pw, ph, listX, listY, listW, listH, catW;
 
     public ArcControlsScreen(Screen parent, Options options) {
@@ -115,13 +116,32 @@ public class ArcControlsScreen extends Screen {
         g.drawString(font, title, px + 10, py + 8, Draw.TEXT, true);
         Draw.small(g, font, "Arc HUD", px + pw - 40, py + 9, Draw.alpha(accent, 0xFF), 0.75F);
 
-        // категории
-        int cy = py + 24;
+        // категории (с прокруткой — у модпаков их много)
+        int catTop = py + 24, catBottom = py + ph - 30;
+        int catContent = (categories.size() + 1) * 17;
+        double catMax = Math.max(0, catContent - (catBottom - catTop));
+        catScroll = Mth.clamp(catScroll, 0, catMax);
+        g.enableScissor(px + 2, catTop, px + catW + 2, catBottom);
+        int cy = catTop - (int) catScroll;
         cy = categoryRow(g, null, Component.translatable("archud.controls.all"), cy, mouseX, mouseY, accent);
         for (String c : categories) {
-            if (cy > py + ph - 34) break;
+            if (cy > catBottom) break;
+            if (cy + 17 < catTop) {
+                cy += 17;
+                continue;
+            }
             cy = categoryRow(g, c, Component.translatable(c), cy, mouseX, mouseY, accent);
         }
+        g.disableScissor();
+        if (catMax > 0) {
+            int ch = catBottom - catTop;
+            int barH = Math.max(14, (int) (ch * (ch / (double) catContent)));
+            int barY = catTop + (int) ((ch - barH) * (catScroll / catMax));
+            g.fill(px + 1, catTop, px + 2, catBottom, 0x30FFFFFF);
+            g.fill(px + 1, barY, px + 2, barY + barH, Draw.alpha(accent, 0xCC));
+        }
+        String total = all.size() + " " + Component.translatable("archud.controls.count").getString();
+        Draw.small(g, font, total, px + 8, py + ph - 20, Draw.TEXT_DIM, 0.75F);
         g.fill(px + catW + 3, py + 22, px + catW + 4, py + ph - 30, 0x30FFFFFF);
 
         // список
@@ -210,8 +230,8 @@ public class ArcControlsScreen extends Screen {
             return true;
         }
         // категории
-        int cy = py + 24;
-        if (mx >= px + 4 && mx < px + catW) {
+        int cy = py + 24 - (int) catScroll;
+        if (mx >= px + 4 && mx < px + catW && my >= py + 24 && my < py + ph - 30) {
             if (my >= cy && my < cy + 16) {
                 category = null;
                 scroll = 0;
@@ -265,6 +285,10 @@ public class ArcControlsScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
+        if (mx < px + catW + 4) {
+            catScroll -= delta * 17 * 2;
+            return true;
+        }
         scroll -= delta * ROW_H * 2;
         return true;
     }

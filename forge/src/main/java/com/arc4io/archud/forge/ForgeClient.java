@@ -7,6 +7,7 @@ import com.arc4io.archud.client.hud.HudRenderer;
 import com.arc4io.archud.client.screen.ArcConfigScreen;
 import com.arc4io.archud.client.screen.ChatStyler;
 import com.arc4io.archud.client.screen.InventoryExtras;
+import com.arc4io.archud.client.screen.RecipeChoiceUI;
 import com.arc4io.archud.client.screen.ScreenSwapper;
 import com.arc4io.archud.config.ArcConfig;
 import com.arc4io.archud.network.ArcPacket;
@@ -27,6 +28,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,6 +43,14 @@ public final class ForgeClient implements ClientPlatform {
             VanillaGuiOverlay.MOUNT_HEALTH.id(),
             VanillaGuiOverlay.JUMP_BAR.id(),
             VanillaGuiOverlay.EXPERIENCE_BAR.id());
+
+    /**
+     * Полосы других модов, которые дублируют то, что уже показывает Arc HUD (HP / броня).
+     * Legends Mod рисует свои HP и броню вместо ванильных — их скрываем, остальные его полосы
+     * (выносливость, мана, скорость...) Forge поднимет над Arc HUD через leftHeight/rightHeight.
+     */
+    private static final List<String> DUPLICATE_BARS = List.of(
+            "legendsmod:health", "legendsmod:legends_armor");
 
     public static void init(IEventBus modBus) {
         ArcClient.init(new ForgeClient());
@@ -57,6 +67,7 @@ public final class ForgeClient implements ClientPlatform {
         bus.addListener(ForgeClient::onScreenInit);
         bus.addListener(ForgeClient::onScreenRenderPre);
         bus.addListener(ForgeClient::onScreenRenderPost);
+        bus.addListener(ForgeClient::onScreenMouse);
     }
 
     private static void onRegisterKeys(RegisterKeyMappingsEvent event) {
@@ -76,9 +87,20 @@ public final class ForgeClient implements ClientPlatform {
         }
     }
 
+    private static void reserveSpace() {
+        if (HudRenderer.replacesStatusBars() && Minecraft.getInstance().gui instanceof ForgeGui gui) {
+            int occupied = HudRenderer.occupiedHeight();
+            gui.leftHeight = Math.max(gui.leftHeight, occupied);
+            gui.rightHeight = Math.max(gui.rightHeight, occupied);
+        }
+    }
+
     private static void onOverlayPre(RenderGuiOverlayEvent.Pre event) {
         ResourceLocation id = event.getOverlay().id();
-        if (ArcConfig.get().hiddenOverlays.contains(id.toString())) {
+        // место под Arc HUD резервируем ДО полос других модов (они регистрируются над хотбаром)
+        if (id.equals(VanillaGuiOverlay.HOTBAR.id()) || id.equals(VanillaGuiOverlay.VIGNETTE.id())) reserveSpace();
+        if (ArcConfig.get().hiddenOverlays.contains(id.toString())
+                || (ArcConfig.get().hideDuplicateModBars && HudRenderer.replacesStatusBars() && DUPLICATE_BARS.contains(id.toString()))) {
             event.setCanceled(true);
             return;
         }
@@ -113,12 +135,19 @@ public final class ForgeClient implements ClientPlatform {
     private static void onScreenRenderPost(ScreenEvent.Render.Post event) {
         ChatStyler.postRender(event.getScreen(), event.getGuiGraphics());
         InventoryExtras.onRender(event.getScreen(), event.getGuiGraphics());
+        RecipeChoiceUI.onRender(event.getScreen(), event.getGuiGraphics(), event.getMouseX(), event.getMouseY());
+    }
+
+    private static void onScreenMouse(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (RecipeChoiceUI.onClick(event.getScreen(), event.getMouseX(), event.getMouseY(), event.getButton())) {
+            event.setCanceled(true);
+        }
     }
 
     // ---- ClientPlatform ----
     @Override
-    public void sendToServer(ArcPacket packet) {
-        if (Minecraft.getInstance().getConnection() != null) ForgeNetwork.send(packet);
+    public void sendToServer(ArcPacket packet, ResourceLocation arg) {
+        if (Minecraft.getInstance().getConnection() != null) ForgeNetwork.send(packet, arg);
     }
 
     @Override

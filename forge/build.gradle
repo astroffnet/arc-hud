@@ -2,6 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 version = mod_version
@@ -37,7 +38,17 @@ sourceSets.main {
     resources.srcDir '../common/src/main/resources'
 }
 
+// Миксины (выбор рецепта при конфликте, новый вид чата)
+mixin {
+    add sourceSets.main, 'archud.refmap.json'
+    config 'archud.forge.mixins.json'
+}
+
 repositories {
+    maven {
+        name = 'Sponge'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
     maven {
         name = 'Curios'
         url = 'https://maven.theillusivec4.top/'
@@ -46,6 +57,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
@@ -69,7 +81,8 @@ tasks.named('jar', Jar).configure {
                 'Specification-Version'   : '1',
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.version,
-                'Implementation-Vendor'   : 'arc4io'
+                'Implementation-Vendor'   : 'arc4io',
+                'MixinConfigs'            : 'archud.forge.mixins.json'
         ])
     }
     finalizedBy 'reobfJar'

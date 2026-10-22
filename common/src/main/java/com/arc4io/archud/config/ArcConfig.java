@@ -89,6 +89,26 @@ public class ArcConfig {
     public boolean movementStatus = true;
     public boolean addonBars = true;
 
+    // ---- Расположение блоков HUD ----
+    public HudAnchor infoPanelAnchor = HudAnchor.TOP_LEFT;
+    public HudAnchor compassAnchor = HudAnchor.TOP_CENTER;
+    public HudAnchor effectsAnchor = HudAnchor.TOP_RIGHT;
+    public HudAnchor gearAnchor = HudAnchor.LEFT;
+    public HudAnchor pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
+    public HudAnchor statusAnchor = HudAnchor.BOTTOM_LEFT;
+
+    // ---- Совместимость ----
+    /** Не заменять главное меню, если его уже меняет другой мод (Aether, FancyMenu и т.п.). */
+    public boolean yieldTitleScreenToMods = true;
+    /** Скрывать полосы HP/брони других модов, которые дублируют Arc HUD (например Legends). */
+    public boolean hideDuplicateModBars = true;
+
+    // ---- Крафт ----
+    public boolean recipeChooser = true;
+
+    // ---- Чат ----
+    public boolean chatMessagesStyle = true;
+
     // ---- Экраны ----
     public boolean customTitleScreen = true;
     public boolean customControlsScreen = true;
@@ -127,6 +147,12 @@ public class ArcConfig {
                 }
             }
             if (instance.hiddenOverlays == null) instance.hiddenOverlays = new ArrayList<>();
+            if (instance.infoPanelAnchor == null) instance.infoPanelAnchor = HudAnchor.TOP_LEFT;
+            if (instance.compassAnchor == null) instance.compassAnchor = HudAnchor.TOP_CENTER;
+            if (instance.effectsAnchor == null) instance.effectsAnchor = HudAnchor.TOP_RIGHT;
+            if (instance.gearAnchor == null) instance.gearAnchor = HudAnchor.LEFT;
+            if (instance.pickupsAnchor == null) instance.pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
+            if (instance.statusAnchor == null) instance.statusAnchor = HudAnchor.BOTTOM_LEFT;
             save();
         } catch (Exception e) {
             ArcHud.LOGGER.error("Arc HUD: не удалось загрузить конфиг, используются значения по умолчанию", e);
