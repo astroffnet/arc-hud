@@ -17,7 +17,7 @@
   "archud.msg.bhop_off": "BunnyHop: ВЫКЛ",
   "archud.menu.mods": "Моды",
   "archud.menu.arc_settings": "Настройки Arc HUD",
-  "archud.title.tip.0": "Совет: K в игре открывает настройки Arc HUD",
+  "archud.title.tip.0": "Совет: J в игре открывает настройки Arc HUD",
   "archud.title.tip.1": "Совет: держите прыжок и стрейфьте мышью — это бхоп",
   "archud.title.tip.2": "Совет: наденьте рюкзак на спину и открывайте его на B",
   "archud.title.tip.3": "Совет: H переключает Arc HUD и ванильный HUD",
@@ -273,5 +273,9 @@
   "archud.config.waystonesIntegration": "Интеграция Waystones",
   "archud.config.tempadIntegration": "Интеграция Tempad",
   "archud.config.adAstraIntegration": "Интеграция Ad Astra",
-  "archud.config.regenerationIntegration": "Интеграция Regeneration"
+  "archud.config.regenerationIntegration": "Интеграция Regeneration",
+  "archud.options.shaders": "Шейдеры",
+  "archud.info.shader": "Шейдер: %s",
+  "archud.config.shaderInfo": "Название шейдера",
+  "archud.config.rendererInfo": "Рендер (Sodium/OptiFine…)"
 }

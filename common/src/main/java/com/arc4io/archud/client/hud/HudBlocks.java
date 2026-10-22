@@ -147,6 +147,13 @@ final class HudBlocks {
                 perf.append(info.getLatency()).append(" ms");
             }
         }
+        if (cfg.shaderInfo) {
+            String pack = com.arc4io.archud.compat.RenderCompat.shaderPack();
+            if (!pack.isEmpty()) {
+                lines.add(new InfoLine(Icons.SUN, Component.translatable("archud.info.shader", pack), 0xFFFFD54F));
+            }
+        }
+        if (cfg.rendererInfo && cfg.fps) perf.append("  ·  ").append(com.arc4io.archud.compat.RenderCompat.renderer());
         if (perf.length() > 0) lines.add(new InfoLine(Icons.CHIP, Component.literal(perf.toString()), cfg.fps && HudRenderer.fps < 30 ? 0xFFFF8A65 : Draw.TEXT));
 
         long dayTime = level.getDayTime();

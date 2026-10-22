@@ -125,6 +125,8 @@ public class ArcConfig {
     public boolean tempadIntegration = true;
     public boolean adAstraIntegration = true;
     public boolean regenerationIntegration = true;
+    public boolean shaderInfo = true;
+    public boolean rendererInfo = false;
 
     // ---- Совместимость ----
     /** Не заменять главное меню, если его уже меняет другой мод (Aether, FancyMenu и т.п.). */
