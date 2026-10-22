@@ -14,7 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 public enum ArcPacket {
     OPEN_BACKPACK("open_backpack"),
     SORT_INVENTORY("sort_inventory"),
-    SELECT_RECIPE("select_recipe");
+    SELECT_RECIPE("select_recipe"),
+    TEMPAD_OPEN("tempad_open");
 
     private final ResourceLocation id;
 
@@ -44,6 +45,7 @@ public enum ArcPacket {
             case SELECT_RECIPE -> {
                 if (arg != null) RecipeSelector.select(player, arg);
             }
+            case TEMPAD_OPEN -> com.arc4io.archud.server.TempadServer.openDoor(player, arg);
         }
     }
 }

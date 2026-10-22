@@ -107,6 +107,23 @@ public class ArcConfig {
     public boolean minimapWaypoints = true;
     public boolean compassWaypoints = true;
     public boolean deathWaypoint = true;
+    public boolean minimapCircle = false;
+    public boolean minimapNightTint = true;
+    public boolean minimapChunkGrid = false;
+    public boolean minimapSlimeChunks = false;
+    public boolean minimapTrail = true;
+    public boolean minimapPlayerNames = true;
+    public boolean minimapFacing = true;
+    public boolean worldWaypoints = true;
+    public boolean waypointBeams = true;
+    public boolean waypointLabels = true;
+    public boolean navigator = true;
+    public boolean navigateToDeath = false;
+    public boolean spawnWaypoint = true;
+    public boolean waystoneToasts = true;
+    public boolean netherCoordinates = true;
+    public int waypointMaxDistance = 0;
+    public List<String> hiddenWaypointSources = new ArrayList<>();
     public int minimapSize = 110;
     public double minimapZoom = 1.5;
 
@@ -178,6 +195,7 @@ public class ArcConfig {
                 }
             }
             if (instance.hiddenOverlays == null) instance.hiddenOverlays = new ArrayList<>();
+            if (instance.hiddenWaypointSources == null) instance.hiddenWaypointSources = new ArrayList<>();
             if (instance.infoPanelAnchor == null) instance.infoPanelAnchor = HudAnchor.TOP_LEFT;
             if (instance.compassAnchor == null) instance.compassAnchor = HudAnchor.TOP_CENTER;
             if (instance.effectsAnchor == null) instance.effectsAnchor = HudAnchor.TOP_RIGHT;

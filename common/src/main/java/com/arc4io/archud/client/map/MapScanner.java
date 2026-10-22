@@ -39,17 +39,34 @@ public final class MapScanner {
         return cave;
     }
 
+    private static boolean inWorld;
+
+    /** Вызывается каждый тик, даже вне мира: при выходе сохраняет и выгружает карту. */
+    public static void worldCheck(Minecraft mc) {
+        boolean now = mc.level != null;
+        if (inWorld && !now) {
+            MapCache.unloadAll();
+            Navigator.clear();
+            TrailManager.clear();
+            com.arc4io.archud.compat.TempadCompat.reset();
+            com.arc4io.archud.compat.WaystonesCompat.reset();
+        }
+        inWorld = now;
+    }
+
     public static void tick(Minecraft mc) {
         ClientLevel level = mc.level;
         LocalPlayer p = mc.player;
-        if (level == null || p == null || !ArcConfig.get().minimap) return;
+        if (level == null || p == null) return;
 
         BlockPos pos = p.blockPosition();
         boolean underground = !level.canSeeSky(pos.above()) && p.getY() < level.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ()) - 6;
-        cave = ArcConfig.get().minimapCaveMode && (level.dimensionType().hasCeiling() || underground);
+        boolean ceiling = level.dimensionType().hasCeiling();
+        cave = ceiling || (ArcConfig.get().minimapCaveMode && underground); // в Незере и подобных — всегда слой у игрока
         caveY = pos.getY();
-        String key = level.dimension().location() + (cave ? "|cave" + Math.floorDiv(caveY, 16) : "");
-        if (!key.equals(MapCache.key())) MapCache.reset(key);
+        String layerName = cave ? "cave_" + Math.floorDiv(caveY, 16) : "surface";
+        MapCache.activate(WaypointManager.worldKey(), level.dimension().location().toString(), layerName);
+        MapCache.tick();
 
         long now = Util.getMillis();
         int pcx = pos.getX() >> 4, pcz = pos.getZ() >> 4;
@@ -101,6 +118,10 @@ public final class MapScanner {
                 int wx = cx * 16 + dx, wz = cz * 16 + dz;
                 BlockState st = states[i];
                 m.set(wx, heights[i], wz);
+                if (st.isAir()) {
+                    out[dz * 16 + dx] = 0; // пустота (Энд, Эфир, небесные измерения) — прозрачно
+                    continue;
+                }
                 int rgb;
                 float shade = 1F;
                 if (st.getFluidState().is(FluidTags.WATER)) {
@@ -141,6 +162,7 @@ public final class MapScanner {
             return y;
         }
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+        if (y < minY) return minY;
         int limit = 6;
         while (limit-- > 0 && y > minY && level.getBlockState(m.set(x, y, z)).isAir()) y--;
         return y;

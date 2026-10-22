@@ -38,9 +38,21 @@ public class ArcHudForge {
         ITEMS.register(modBus);
         modBus.addListener(ArcHudForge::onCreativeTabs);
         ForgeNetwork.register();
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onServerTick);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(ArcHudForge::onLogout);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ForgeClient.init(modBus);
         }
+    }
+
+    private static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server != null) com.arc4io.archud.server.TempadServer.tick(server, ForgeNetwork::sendTo);
+    }
+
+    private static void onLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        com.arc4io.archud.server.TempadServer.forget(event.getEntity().getUUID());
     }
 
     private static void onCreativeTabs(BuildCreativeModeTabContentsEvent event) {

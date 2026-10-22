@@ -34,6 +34,17 @@ public final class WaypointManager {
 
     private WaypointManager() {}
 
+    static {
+        // точка спавна мира (только в Верхнем мире)
+        PROVIDERS.add(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (!ArcConfig.get().spawnWaypoint || mc.level == null) return List.of();
+            net.minecraft.core.BlockPos sp = mc.level.getSharedSpawnPos();
+            return List.of(new Waypoint(Component.translatable("archud.wp.spawn").getString(), sp.getX(), sp.getY(), sp.getZ(),
+                    0xFF9CFF5A, "minecraft:overworld", Waypoint.Source.SPAWN));
+        });
+    }
+
     /** Источник меток другого мода (вызывается раз в секунду). */
     public static void registerProvider(Supplier<List<Waypoint>> provider) {
         PROVIDERS.add(provider);
@@ -65,6 +76,14 @@ public final class WaypointManager {
     public static String currentDimension() {
         Minecraft mc = Minecraft.getInstance();
         return mc.level == null ? "" : mc.level.dimension().location().toString();
+    }
+
+    public static String worldKey() {
+        if (worldKey.isEmpty()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level != null) return computeWorldKey(mc);
+        }
+        return worldKey.isEmpty() ? "unknown" : worldKey;
     }
 
     private static String computeWorldKey(Minecraft mc) {
@@ -141,20 +160,53 @@ public final class WaypointManager {
         save();
     }
 
+    private static long lastDeath;
+
+    /** История смертей: последние 5 точек, новые — ярче. */
     public static void onDeath() {
         Minecraft mc = Minecraft.getInstance();
         if (!ArcConfig.get().deathWaypoint || mc.player == null) return;
-        USER.removeIf(w -> w.source == Waypoint.Source.DEATH);
+        long now = System.currentTimeMillis();
+        if (now - lastDeath < 3000) return; // экран смерти может открываться повторно
+        lastDeath = now;
         LocalPlayer p = mc.player;
-        USER.add(new Waypoint(Component.translatable("archud.wp.death").getString(), p.getBlockX(), p.getBlockY(), p.getBlockZ(),
-                0xFFFF5252, currentDimension(), Waypoint.Source.DEATH));
+        String time = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+        Waypoint w = new Waypoint(Component.translatable("archud.wp.death_at", time).getString(), p.getBlockX(), p.getBlockY(), p.getBlockZ(),
+                0xFFFF5252, currentDimension(), Waypoint.Source.DEATH);
+        USER.add(w);
+        List<Waypoint> deaths = new ArrayList<>();
+        for (Waypoint d : USER) if (d.source == Waypoint.Source.DEATH) deaths.add(d);
+        deaths.sort(java.util.Comparator.comparingLong(d -> d.created));
+        while (deaths.size() > 5) USER.remove(deaths.remove(0));
+        for (Waypoint d : deaths) if (d != w) d.color = 0xFF8E3B3B;
+        if (ArcConfig.get().navigateToDeath) Navigator.set(w);
         save();
     }
 
     public static List<Waypoint> inDimension() {
         String dim = currentDimension();
         List<Waypoint> out = new ArrayList<>();
-        for (Waypoint w : all()) if (w.visible && dim.equals(w.dimension)) out.add(w);
+        for (Waypoint w : all()) if (w.visible && dim.equals(w.dimension) && sourceVisible(w.source)) out.add(w);
+        Waypoint nav = Navigator.target();
+        if (nav != null && nav.source == Waypoint.Source.TEMP && dim.equals(nav.dimension)) out.add(nav);
         return Collections.unmodifiableList(out);
+    }
+
+    public static boolean sourceVisible(Waypoint.Source s) {
+        return !ArcConfig.get().hiddenWaypointSources.contains(s.name());
+    }
+
+    public static void toggleSource(Waypoint.Source s) {
+        List<String> h = ArcConfig.get().hiddenWaypointSources;
+        if (!h.remove(s.name())) h.add(s.name());
+        ArcConfig.save();
+    }
+
+    /** Отправить координаты метки в чат. */
+    public static void share(Waypoint w) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.getConnection() == null) return;
+        String dim = w.dimension.substring(w.dimension.indexOf(':') + 1);
+        mc.getConnection().sendChat("[" + w.name + "] x:" + w.x + " y:" + w.y + " z:" + w.z + " (" + dim + ")");
     }
 }

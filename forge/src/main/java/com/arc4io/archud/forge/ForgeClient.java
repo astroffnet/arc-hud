@@ -70,6 +70,7 @@ public final class ForgeClient implements ClientPlatform {
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(ForgeClient::onOverlayPre);
         bus.addListener(ForgeClient::onClientTick);
+        bus.addListener(ForgeClient::onRenderLevel);
         // самый низкий приоритет: срабатываем ПОСЛЕ модов, меняющих меню (Aether), и решаем последними
         bus.addListener(net.minecraftforge.eventbus.api.EventPriority.LOWEST, ForgeClient::onScreenOpening);
         bus.addListener(ForgeClient::onScreenInit);
@@ -184,5 +185,10 @@ public final class ForgeClient implements ClientPlatform {
     public Screen swapPlatformScreen(Screen next, Screen current) {
         if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new ArcModListScreen(current);
         return next;
+    }
+
+    private static void onRenderLevel(net.minecraftforge.client.event.RenderLevelStageEvent event) {
+        if (event.getStage() != net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+        com.arc4io.archud.client.map.WaypointWorldRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
     }
 }

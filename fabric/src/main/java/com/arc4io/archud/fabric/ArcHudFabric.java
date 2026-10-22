@@ -39,5 +39,14 @@ public class ArcHudFabric implements ModInitializer {
                         server.execute(() -> packet.handle(player, arg));
                     });
         }
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server ->
+                com.arc4io.archud.server.TempadServer.tick(server, (player, packet) -> {
+                    if (!ServerPlayNetworking.canSend(player, com.arc4io.archud.network.TempadSyncPacket.ID)) return;
+                    var buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+                    packet.write(buf);
+                    ServerPlayNetworking.send(player, com.arc4io.archud.network.TempadSyncPacket.ID, buf);
+                }));
+        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+                com.arc4io.archud.server.TempadServer.forget(handler.player.getUUID()));
     }
 }

@@ -16,9 +16,17 @@ import java.util.List;
 /**
  * Waystones: все известные игроку вэйстоуны показываются метками на мини-карте, карте мира и компасе.
  */
-final class WaystonesCompat {
+public final class WaystonesCompat {
     private static Method getData, getWaystones, getName, getPos, getDim;
     private static Object clientEnv;
+    private static final java.util.Set<String> KNOWN = new java.util.HashSet<>();
+    private static boolean primed;
+
+    /** Выход из мира. */
+    public static void reset() {
+        KNOWN.clear();
+        primed = false;
+    }
 
     private WaystonesCompat() {}
 
@@ -37,6 +45,20 @@ final class WaystonesCompat {
         ArcHud.LOGGER.info("Arc HUD: интеграция с Waystones включена");
     }
 
+    /** Тост «Открыт новый вэйстоун» (как xaeros_waystones_compatibility создаёт метку при активации). */
+    private static void notifyNew(Minecraft mc, List<Waypoint> list) {
+        boolean show = primed && ArcConfig.get().waystoneToasts;
+        for (Waypoint w : list) {
+            if (KNOWN.add(w.dimension + "|" + w.x + "|" + w.y + "|" + w.z) && show) {
+                net.minecraft.client.gui.components.toasts.SystemToast.add(mc.getToasts(),
+                        net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                        net.minecraft.network.chat.Component.translatable("archud.waystone.new"),
+                        net.minecraft.network.chat.Component.literal(w.name + "  (" + w.x + ", " + w.y + ", " + w.z + ")"));
+            }
+        }
+        if (!list.isEmpty() || mc.player.tickCount > 200) primed = true;
+    }
+
     private static List<Waypoint> waypoints() {
         Minecraft mc = Minecraft.getInstance();
         if (!ArcConfig.get().waystonesIntegration || mc.player == null) return List.of();
@@ -51,6 +73,7 @@ final class WaystonesCompat {
                 out.add(new Waypoint(name.isBlank() ? "Waystone" : name, pos.getX(), pos.getY(), pos.getZ(), 0xFFB388FF,
                         dim.location().toString(), Waypoint.Source.WAYSTONE));
             }
+            notifyNew(mc, out);
             return out;
         } catch (Throwable t) {
             return List.of();
