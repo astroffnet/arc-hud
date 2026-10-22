@@ -1,0 +1,43 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+issueTrackerURL=""
+
+[[mods]]
+modId="archud"
+version="${mod_version}"
+displayName="Arc HUD"
+logoFile="archud_logo.png"
+logoBlur=false
+credits="arc4io"
+authors="arc4io"
+description='''
+Красивый HUD, новый главный экран, новое окно управления, стиль чата,
+BunnyHop как в Source, рюкзаки со слотом на спине (Curios) и переработанный инвентарь.
+
+A beautiful HUD with 50 features, new title screen, controls screen, chat style,
+Source-style bunny hopping, wearable backpacks (Curios) and inventory upgrades.
+
+Author: arc4io
+'''
+
+[[dependencies.archud]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.archud]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.20.2)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.archud]]
+    modId="curios"
+    mandatory=false
+    versionRange="[5.2,)"
+    ordering="NONE"
+    side="BOTH"
