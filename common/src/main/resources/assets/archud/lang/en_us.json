@@ -448,5 +448,13 @@
   "archud.tp.need_tempad": "You need a Tempad in your inventory or bracelet slot",
   "archud.tp.need_server_or_op": "Needs a Tempad and Arc HUD on the server, or operator rights",
   "archud.wp.bed": "Bed",
-  "archud.wp.anchor": "Respawn anchor"
+  "archud.wp.anchor": "Respawn anchor",
+  "key.archud.camera": "Third-person camera (Arc)",
+  "key.archud.camera_shoulder": "Camera: swap shoulder",
+  "archud.camera.on": "Arc camera: on · Alt + wheel — distance",
+  "archud.camera.off": "Arc camera: off",
+  "archud.config.cameraFreeLook": "Camera: free look (character turns to movement)",
+  "archud.config.cameraSmoothing": "Camera: smooth follow",
+  "archud.config.cameraLeftShoulder": "Camera: left shoulder",
+  "archud.config.cameraCrosshair": "Camera: crosshair when attacking/aiming"
 }

@@ -32,7 +32,12 @@
     "EditGameRulesScreenAccessor",
     "PlayerTabOverlayAccessor",
     "PlayerTabOverlayMixin",
-    "ItemInHandInspectMixin"
+    "ItemInHandInspectMixin",
+    "CameraInvoker",
+    "CameraSetupMixin",
+    "EntityTurnMixin",
+    "KeyboardInputMixin",
+    "MouseScrollMixin"
   ],
   "injectors": {
     "defaultRequire": 1
