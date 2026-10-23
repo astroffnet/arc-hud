@@ -21,7 +21,7 @@ import java.util.Locale;
  * Экран настроек Arc HUD: все переключатели из ArcConfig, поиск, две колонки, прокрутка.
  * Открывается из главного меню, из списка модов (Forge Mods / Mod Menu) и клавишей K.
  */
-public class ArcConfigScreen extends Screen {
+public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int ROW_H = 18;
     private final Screen parent;
     private final List<Field> fields = new ArrayList<>();
@@ -48,6 +48,7 @@ public class ArcConfigScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 380, 240);
         pw = Math.min(width - 20, 460);
         ph = height - 30;
         px = (width - pw) / 2;

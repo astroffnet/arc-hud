@@ -28,7 +28,7 @@ import java.util.List;
  * Новый главный экран: панорама, тёмная боковая панель, анимированное меню слева,
  * логотип Arc HUD, частицы, сменяющиеся подсказки.
  */
-public class ArcTitleScreen extends Screen {
+public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final ResourceLocation LOGO = ArcHud.id("textures/gui/logo.png");
     private static final int TIPS = 8;
 
@@ -44,6 +44,7 @@ public class ArcTitleScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 400, 240);
         if (openTime == 0) openTime = Util.getMillis();
         panelW = Math.min(240, Math.max(190, width / 3));
         int bx = 26;

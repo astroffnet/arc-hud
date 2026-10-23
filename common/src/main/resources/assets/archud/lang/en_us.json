@@ -415,5 +415,14 @@
   "archud.config.hideFromMap": "Hide myself from other players' maps",
   "archud.config.tempadNoCooldown": "Tempad without cooldown",
   "archud.config.tempadKeepOnDeath": "Keep Tempad in bracelet slot on death",
-  "archud.wp.new_hint": "Enter / Done — save · Esc — cancel"
+  "archud.wp.new_hint": "Enter / Done — save · Esc — cancel",
+  "archud.rules.reset_all": "Reset all",
+  "archud.rules.only_changed": "Changed only",
+  "archud.rules.all": "All rules",
+  "archud.rules.all_cats": "All",
+  "archud.rules.empty": "Nothing found",
+  "archud.rules.changed": "Changed: %s",
+  "archud.rules.reset": "Reset (default: %s)",
+  "archud.config.customGameRules": "New Game Rules screen",
+  "archud.config.autoGuiScale": "Auto-scale screens (4:3, small windows)"
 }

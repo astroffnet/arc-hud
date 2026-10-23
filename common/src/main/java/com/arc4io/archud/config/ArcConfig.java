@@ -155,6 +155,9 @@ public class ArcConfig {
     public boolean customInventory = true;
     public boolean customWorldSelect = true;
     public boolean customMultiplayer = true;
+    public boolean customGameRules = true;
+    /** Автомасштаб экранов, если им не хватает места (мониторы 4:3, маленькие окна, крупный масштаб интерфейса). */
+    public boolean autoGuiScale = true;
     /** Последний сервер, на который заходили (для «Продолжить» в сетевой игре). */
     public String lastServerIp = "";
     public String lastServerName = "";

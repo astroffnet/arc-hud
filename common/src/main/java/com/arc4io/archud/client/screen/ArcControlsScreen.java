@@ -25,7 +25,7 @@ import java.util.Set;
  * назначение клавиш клавиатуры и кнопок мыши, сброс по одной и всех сразу.
  * Работает с клавишами всех модов (берёт их из Options.keyMappings).
  */
-public class ArcControlsScreen extends Screen {
+public class ArcControlsScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int ROW_H = 20;
     private final Screen parent;
     private final Options options;
@@ -47,6 +47,7 @@ public class ArcControlsScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 400, 240);
         all.clear();
         KeyMapping[] maps = Arrays.copyOf(options.keyMappings, options.keyMappings.length);
         Arrays.sort(maps);

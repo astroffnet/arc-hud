@@ -34,7 +34,7 @@ import java.util.Locale;
  *  - переход к координатам, список меток с поиском, фильтрами по типу и сортировкой по расстоянию;
  *  - след игрока, слизневые чанки, сетка, экспорт видимой карты в PNG.
  */
-public class WorldMapScreen extends Screen {
+public class WorldMapScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private final Screen parent;
     private double centerX, centerZ;
     private float zoom = 2F;
@@ -72,6 +72,7 @@ public class WorldMapScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 600, 300);
         if (minecraft.player != null && followPlayer) {
             centerX = minecraft.player.getX();
             centerZ = minecraft.player.getZ();
