@@ -36,15 +36,56 @@ public final class WaypointManager {
 
     private WaypointManager() {}
 
+    /** Точка возрождения: кровать или якорь возрождения (с сервера Arc HUD или запомненная, когда вы спали). */
+    private static String respawnDim;
+    private static net.minecraft.core.BlockPos respawnPos;
+    private static boolean respawnAnchor, respawnFromServer;
+
     static {
-        // точка спавна мира (только в Верхнем мире)
         PROVIDERS.add(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (!ArcConfig.get().spawnWaypoint || mc.level == null) return List.of();
-            net.minecraft.core.BlockPos sp = mc.level.getSharedSpawnPos();
-            return List.of(new Waypoint(Component.translatable("archud.wp.spawn").getString(), sp.getX(), sp.getY(), sp.getZ(),
-                    0xFF9CFF5A, "minecraft:overworld", Waypoint.Source.SPAWN));
+            if (!ArcConfig.get().spawnWaypoint || respawnPos == null || respawnDim == null) return List.of();
+            Waypoint w = new Waypoint(Component.translatable(respawnAnchor ? "archud.wp.anchor" : "archud.wp.bed").getString(),
+                    respawnPos.getX(), respawnPos.getY(), respawnPos.getZ(), respawnAnchor ? 0xFFB388FF : 0xFFFF6E6E, respawnDim,
+                    Waypoint.Source.SPAWN);
+            return List.of(w);
         });
+    }
+
+    public static void setRespawn(String dim, net.minecraft.core.BlockPos pos, boolean anchor, boolean fromServer) {
+        respawnDim = dim;
+        respawnPos = pos;
+        respawnAnchor = anchor;
+        if (fromServer) respawnFromServer = true;
+        modCacheTime = 0;
+        // запомнить для этого мира (если сервер без Arc HUD)
+        String key = worldKey();
+        if (pos == null) ArcConfig.get().respawnPoints.remove(key);
+        else ArcConfig.get().respawnPoints.put(key, dim + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ() + "|" + anchor);
+        ArcConfig.save();
+    }
+
+    /** Без сервера Arc HUD: кровать запоминается, когда вы на ней спите. */
+    private static void trackBed(Minecraft mc) {
+        if (respawnFromServer || mc.player == null || mc.level == null || !mc.player.isSleeping()) return;
+        mc.player.getSleepingPos().ifPresent(pos -> {
+            String dim = mc.level.dimension().location().toString();
+            if (!pos.equals(respawnPos) || !dim.equals(respawnDim)) setRespawn(dim, pos, false, false);
+        });
+    }
+
+    private static void loadRespawn() {
+        respawnFromServer = false;
+        respawnPos = null;
+        respawnDim = null;
+        String v = ArcConfig.get().respawnPoints.get(worldKey);
+        if (v == null) return;
+        try {
+            String[] p = v.split("\\|");
+            respawnDim = p[0];
+            respawnPos = new net.minecraft.core.BlockPos(Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3]));
+            respawnAnchor = p.length > 4 && Boolean.parseBoolean(p[4]);
+        } catch (Exception ignored) {
+        }
     }
 
     /** Источник меток другого мода (вызывается раз в секунду). */
@@ -118,7 +159,9 @@ public final class WaypointManager {
         if (!k.equals(worldKey)) {
             worldKey = k;
             load();
+            loadRespawn();
         }
+        trackBed(mc);
     }
 
     private static void load() {
