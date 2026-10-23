@@ -69,6 +69,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -76,5 +77,6 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: Arc HUD ${{ github.ref_name }}
+          body_path: docs/RELEASE_NOTES.md
           files: dist/*.jar
-          generate_release_notes: true
