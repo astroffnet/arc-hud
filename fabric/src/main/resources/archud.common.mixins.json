@@ -37,7 +37,8 @@
     "CameraSetupMixin",
     "EntityTurnMixin",
     "KeyboardInputMixin",
-    "MouseScrollMixin"
+    "MouseScrollMixin",
+    "PerspectiveCycleMixin"
   ],
   "injectors": {
     "defaultRequire": 1

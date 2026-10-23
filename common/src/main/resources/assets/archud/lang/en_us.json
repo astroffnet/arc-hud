@@ -456,5 +456,7 @@
   "archud.config.cameraFreeLook": "Camera: free look (character turns to movement)",
   "archud.config.cameraSmoothing": "Camera: smooth follow",
   "archud.config.cameraLeftShoulder": "Camera: left shoulder",
-  "archud.config.cameraCrosshair": "Camera: crosshair when attacking/aiming"
+  "archud.config.cameraCrosshair": "Camera: crosshair when attacking/aiming",
+  "archud.config.cameraInF5Cycle": "Arc camera in F5 cycle (first → Arc → third)",
+  "archud.config.cameraFrontView": "F5: keep front view"
 }

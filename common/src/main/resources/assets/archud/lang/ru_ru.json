@@ -518,5 +518,7 @@
   "archud.config.cameraFreeLook": "Камера: свободный обзор (персонаж идёт туда, куда жмёте)",
   "archud.config.cameraSmoothing": "Камера: плавное следование",
   "archud.config.cameraLeftShoulder": "Камера: за левым плечом",
-  "archud.config.cameraCrosshair": "Камера: прицел при атаке и стрельбе"
+  "archud.config.cameraCrosshair": "Камера: прицел при атаке и стрельбе",
+  "archud.config.cameraInF5Cycle": "Камера Arc в цикле F5 (первое лицо → Arc → третье)",
+  "archud.config.cameraFrontView": "F5: оставить вид спереди"
 }
