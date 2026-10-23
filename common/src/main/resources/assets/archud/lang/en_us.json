@@ -428,5 +428,8 @@
   "archud.tab.status": "Online: %s · ping ~%s ms",
   "archud.tab.you": "You",
   "archud.map.no_player": "Player not found or hidden",
-  "archud.config.customTabList": "New player list (Tab)"
+  "archud.config.customTabList": "New player list (Tab)",
+  "archud.layout.bars": "Hotbar & bars",
+  "archud.layout.size": "Size: %s%%",
+  "archud.layout.size_hint": "Mouse wheel — size of the selected block"
 }

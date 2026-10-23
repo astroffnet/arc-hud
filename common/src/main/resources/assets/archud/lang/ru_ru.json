@@ -490,5 +490,8 @@
   "archud.tab.status": "Онлайн: %s · пинг ~%s мс",
   "archud.tab.you": "Это вы",
   "archud.map.no_player": "Игрок не найден или скрыт",
-  "archud.config.customTabList": "Новый список игроков (Tab)"
+  "archud.config.customTabList": "Новый список игроков (Tab)",
+  "archud.layout.bars": "Хотбар и полосы",
+  "archud.layout.size": "Размер: %s%%",
+  "archud.layout.size_hint": "Колесо мыши — размер выбранного блока"
 }
