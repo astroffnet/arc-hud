@@ -143,6 +143,8 @@ public class ArcConfig {
     public List<String> hiddenWaypointSources = new ArrayList<>();
     /** Размер блоков HUD: id -> масштаб (0.5–2.0). */
     public java.util.Map<String, Float> hudScales = new java.util.HashMap<>();
+    /** Запомненные точки возрождения (кровать) по мирам: worldKey -> "dim|x|y|z|anchor". */
+    public java.util.Map<String, String> respawnPoints = new java.util.HashMap<>();
     public int minimapSize = 110;
     public double minimapZoom = 1.5;
 
@@ -239,6 +241,7 @@ public class ArcConfig {
             if (instance.hiddenOverlays == null) instance.hiddenOverlays = new ArrayList<>();
             if (instance.hiddenWaypointSources == null) instance.hiddenWaypointSources = new ArrayList<>();
             if (instance.hudScales == null) instance.hudScales = new java.util.HashMap<>();
+            if (instance.respawnPoints == null) instance.respawnPoints = new java.util.HashMap<>();
             if (instance.infoPanelAnchor == null) instance.infoPanelAnchor = HudAnchor.TOP_LEFT;
             if (instance.compassAnchor == null) instance.compassAnchor = HudAnchor.TOP_CENTER;
             if (instance.effectsAnchor == null) instance.effectsAnchor = HudAnchor.TOP_RIGHT;

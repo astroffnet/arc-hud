@@ -46,6 +46,8 @@ public final class ArcServer {
     private static final Map<UUID, Long> LAST_SHARE = new HashMap<>();
     /** Игроки, скрывшие себя с карт других. */
     private static final Set<UUID> HIDDEN = new HashSet<>();
+    /** Последняя отправленная точка возрождения игрока (кровать / якорь). */
+    private static final Map<UUID, String> LAST_RESPAWN = new HashMap<>();
     private static MinecraftServer current;
     private static boolean dirty;
     private static int tick;
@@ -132,6 +134,30 @@ public final class ArcServer {
                 ArcNet.sendToPlayer(p, buf);
             }
         }
+        // точка возрождения (кровать / якорь возрождения) — клиент сам её не знает
+        if (tick % 40 == 0) {
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                if (!ARC_PLAYERS.contains(p.getUUID())) continue;
+                net.minecraft.core.BlockPos pos = p.getRespawnPosition();
+                String dim = p.getRespawnDimension().location().toString();
+                boolean anchor = false;
+                if (pos != null) {
+                    net.minecraft.server.level.ServerLevel lvl = server.getLevel(p.getRespawnDimension());
+                    anchor = lvl != null && lvl.isLoaded(pos) && lvl.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.RespawnAnchorBlock;
+                }
+                String key = pos == null ? "none" : dim + "|" + pos.asLong() + "|" + anchor;
+                if (key.equals(LAST_RESPAWN.get(p.getUUID()))) continue;
+                LAST_RESPAWN.put(p.getUUID(), key);
+                FriendlyByteBuf buf = ArcNet.create("respawn");
+                buf.writeBoolean(pos != null);
+                if (pos != null) {
+                    buf.writeUtf(dim, 128);
+                    buf.writeBlockPos(pos);
+                    buf.writeBoolean(anchor);
+                }
+                ArcNet.sendToPlayer(p, buf);
+            }
+        }
         if (dirty && tick % (20 * 120) == 0) save(server);
     }
 
@@ -163,6 +189,7 @@ public final class ArcServer {
 
     public static void onLogout(ServerPlayer player) {
         HIDDEN.remove(player.getUUID());
+        LAST_RESPAWN.remove(player.getUUID());
         ARC_PLAYERS.remove(player.getUUID());
         UPLOAD_QUEUE.remove(player.getUUID());
         LAST_SHARE.remove(player.getUUID());
@@ -188,6 +215,7 @@ public final class ArcServer {
     private static void onHello(ServerPlayer player, FriendlyByteBuf buf) {
         int protocol = buf.readVarInt();
         ARC_PLAYERS.add(player.getUUID());
+        LAST_RESPAWN.remove(player.getUUID()); // отправить точку возрождения заново
         ArcConfig cfg = ArcConfig.get();
         FriendlyByteBuf w = ArcNet.create("welcome");
         w.writeVarInt(PROTOCOL);

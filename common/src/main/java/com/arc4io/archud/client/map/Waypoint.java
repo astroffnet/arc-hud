@@ -42,7 +42,7 @@ public class Waypoint {
     /** Буквы на значке метки (как в Xaero): первые буквы слов имени. */
     public String initials() {
         if (source == Source.DEATH) return "✝";
-        if (source == Source.SPAWN) return "⌂";
+        if (source == Source.SPAWN) return "⌂"; // кровать / якорь
         String n = name == null ? "" : name.trim();
         if (n.isEmpty()) return "?";
         String[] parts = n.split("\\s+");

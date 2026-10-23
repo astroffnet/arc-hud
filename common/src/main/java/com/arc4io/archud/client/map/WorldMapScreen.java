@@ -448,27 +448,66 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         menuPlayer = null;
         if (wp == null) findPlayerAt(mx, my);
         if (menuPlayer != null) {
+            menuItems.add("tp_smart");
             menuItems.add("nav_player");
-            if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && minecraft.player != null
-                    && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) menuItems.add("tempad_player");
-            if (minecraft.player != null && minecraft.player.hasPermissions(2) && minecraft.getConnection() != null) menuItems.add("tp_player");
             menuOpen = true;
             return;
         }
         if (wp != null) {
-            menuItems.add("edit");
+            menuItems.add("tp_smart");
             menuItems.add(Navigator.isTarget(wp) ? "nav_stop" : "nav");
+            menuItems.add("edit");
             menuItems.add("share");
-            if (com.arc4io.archud.compat.TempadCompat.canOpenDoor(wp)) menuItems.add("tempad_door");
         } else {
-            menuItems.add("add");
+            menuItems.add("tp_smart");
             menuItems.add("nav_here");
+            menuItems.add("add");
             menuItems.add("share_coords");
-            if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && minecraft.player != null
-                    && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) menuItems.add("tempad_door_here");
         }
-        if (minecraft.player != null && minecraft.player.hasPermissions(2)) menuItems.add("tp");
         menuOpen = true;
+    }
+
+    // ------------------------------------------------------------------ телепорт из меню (без создания метки)
+    /** 2 — Tempad, 1 — команда (оператор), 0 — недоступно. */
+    private int tpMode() {
+        if (minecraft.player == null) return 0;
+        if (com.arc4io.archud.client.ArcClientNet.tempadDoors() && com.arc4io.archud.compat.TempadCompat.find(minecraft.player) != null) return 2;
+        if (minecraft.player.hasPermissions(2)) return 1;
+        return 0;
+    }
+
+    private String tpKey() {
+        String base = menuPlayer != null ? "tp_to_player" : menuWaypoint != null ? "tp_to_wp" : "tp_here";
+        return base + switch (tpMode()) {
+            case 2 -> "_tempad";
+            case 1 -> "_op";
+            default -> "_none";
+        };
+    }
+
+    private void smartTeleport() {
+        int mode = tpMode();
+        if (mode == 0) {
+            // объяснить, почему нельзя
+            String why = !com.arc4io.archud.client.ArcClientNet.tempadDoors() ? "archud.tp.need_server_or_op" : "archud.tp.need_tempad";
+            if (minecraft.player != null) minecraft.player.displayClientMessage(Component.translatable(why), true);
+            return;
+        }
+        if (menuPlayer != null) {
+            if (mode == 2) com.arc4io.archud.client.ArcClientNet.tempadDoorToPlayer(menuPlayer);
+            else if (minecraft.getConnection() != null) minecraft.getConnection().sendCommand("tp @s " + menuPlayerName);
+        } else if (menuWaypoint != null) {
+            if (mode == 2) TempadCompat.openDoor(menuWaypoint);
+            else com.arc4io.archud.client.ArcClientNet.safeTeleport(menuWaypoint.dimension, menuWaypoint.x, menuWaypoint.y, menuWaypoint.z);
+        } else {
+            int noHint = com.arc4io.archud.server.TeleportSafety.NO_HINT;
+            if (mode == 2) {
+                TempadCompat.openDoor(new Waypoint(menuWX + ", " + menuWZ, menuWX, noHint, menuWZ, 0xFFFF8800, viewDim(), Waypoint.Source.TEMP));
+            } else {
+                com.arc4io.archud.client.ArcClientNet.safeTeleport(viewDim(), menuWX, noHint, menuWZ);
+            }
+        }
+        minecraft.setScreen(null);
     }
 
     /** Игрок под курсором (виден рядом или известен серверу Arc HUD). */
@@ -514,7 +553,10 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             int iy = y + 13 + i * 14;
             boolean hov = mouseX >= x && mouseX < x + w && mouseY >= iy && mouseY < iy + 14;
             if (hov) g.fill(x + 2, iy, x + w - 2, iy + 14, Draw.alpha(accent, 0x50));
-            g.drawString(font, Component.translatable("archud.map.menu." + menuItems.get(i)), x + 6, iy + 3, Draw.TEXT, true);
+            String item = menuItems.get(i);
+            boolean dim = item.equals("tp_smart") && tpMode() == 0;
+            g.drawString(font, Component.translatable("archud.map.menu." + (item.equals("tp_smart") ? tpKey() : item)), x + 6, iy + 3,
+                    dim ? Draw.TEXT_DIM : item.equals("tp_smart") ? 0xFF80DEEA : Draw.TEXT, true);
         }
         g.pose().popPose();
     }
@@ -528,6 +570,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         if (idx < 0 || idx >= menuItems.size()) return true;
         int ty = surfaceY(menuWX, menuWZ);
         switch (menuItems.get(idx)) {
+            case "tp_smart" -> smartTeleport();
             case "edit" -> minecraft.setScreen(new WaypointEditScreen(this, menuWaypoint, false));
             case "nav" -> Navigator.set(menuWaypoint);
             case "nav_stop" -> Navigator.clear();

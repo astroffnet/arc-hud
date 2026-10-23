@@ -62,6 +62,16 @@ public final class ArcClientNet {
             }
         });
         ArcNet.onClient("players", ArcClientNet::onPlayers);
+        ArcNet.onClient("respawn", buf -> {
+            if (buf.readBoolean()) {
+                String dim = buf.readUtf(128);
+                net.minecraft.core.BlockPos pos = buf.readBlockPos();
+                boolean anchor = buf.readBoolean();
+                com.arc4io.archud.client.map.WaypointManager.setRespawn(dim, pos, anchor, true);
+            } else {
+                com.arc4io.archud.client.map.WaypointManager.setRespawn(null, null, false, true);
+            }
+        });
         ArcNet.onClient("wp_shared", ArcClientNet::onShared);
     }
 
