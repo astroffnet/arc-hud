@@ -31,7 +31,8 @@
     "DynamicFpsMixin",
     "EditGameRulesScreenAccessor",
     "PlayerTabOverlayAccessor",
-    "PlayerTabOverlayMixin"
+    "PlayerTabOverlayMixin",
+    "ItemInHandInspectMixin"
   ],
   "injectors": {
     "defaultRequire": 1

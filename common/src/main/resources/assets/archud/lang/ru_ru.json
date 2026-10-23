@@ -493,5 +493,9 @@
   "archud.config.customTabList": "Новый список игроков (Tab)",
   "archud.layout.bars": "Хотбар и полосы",
   "archud.layout.size": "Размер: %s%%",
-  "archud.layout.size_hint": "Колесо мыши — размер выбранного блока"
+  "archud.layout.size_hint": "Колесо мыши — размер выбранного блока",
+  "key.archud.inspect": "Осмотр предмета",
+  "archud.inspect.title": "Осмотр",
+  "archud.config.weaponInspect": "Осмотр предмета (как в CS2)",
+  "archud.config.inspectCard": "Карточка предмета при осмотре"
 }
