@@ -73,20 +73,20 @@ final class HudBlocks {
         ArcConfig cfg = ArcConfig.get();
         Map<HudAnchor, List<Block>> map = new EnumMap<>(HudAnchor.class);
         if (!debug) {
-            if (cfg.minimap) add(map, cfg.minimapAnchor, minimap(mc, p, font, accent));
-            if (cfg.infoPanel) add(map, cfg.infoPanelAnchor, info(mc, p, font, accent));
-            if (cfg.compass) add(map, cfg.compassAnchor, compass(p, font, accent));
-            add(map, cfg.compassAnchor, navigator(mc, p, font, accent));
-            add(map, cfg.compassAnchor, target(mc, font, accent));
-            if (cfg.effectsPanel) add(map, cfg.effectsAnchor, effects(mc, p, font, accent));
+            if (cfg.minimap) add(map, cfg.minimapAnchor, "minimap", minimap(mc, p, font, accent));
+            if (cfg.infoPanel) add(map, cfg.infoPanelAnchor, "info", info(mc, p, font, accent));
+            if (cfg.compass) add(map, cfg.compassAnchor, "compass", compass(p, font, accent));
+            add(map, cfg.compassAnchor, "compass", navigator(mc, p, font, accent));
+            add(map, cfg.compassAnchor, "compass", target(mc, font, accent));
+            if (cfg.effectsPanel) add(map, cfg.effectsAnchor, "effects", effects(mc, p, font, accent));
         }
         if (!spectator && cfg.addonBars) {
-            for (ArcHudApi.Panel panel : ArcHudApi.panels()) add(map, cfg.addonPanelsAnchor, panel(panel, font, accent));
+            for (ArcHudApi.Panel panel : ArcHudApi.panels()) add(map, cfg.addonPanelsAnchor, "addons", panel(panel, font, accent));
         }
         if (!spectator) {
-            add(map, cfg.gearAnchor, gear(p, font, accent));
-            if (cfg.pickupNotifications) add(map, cfg.pickupsAnchor, pickups(font, accent, now));
-            if (cfg.movementStatus) add(map, cfg.statusAnchor, status(p, font, accent));
+            add(map, cfg.gearAnchor, "gear", gear(p, font, accent));
+            if (cfg.pickupNotifications) add(map, cfg.pickupsAnchor, "pickups", pickups(font, accent, now));
+            if (cfg.movementStatus) add(map, cfg.statusAnchor, "status", status(p, font, accent));
         }
         int boss = bossCount(mc) * 19;
         for (Map.Entry<HudAnchor, List<Block>> e : map.entrySet()) {
@@ -107,9 +107,31 @@ final class HudBlocks {
         }
     }
 
-    private static void add(Map<HudAnchor, List<Block>> map, HudAnchor anchor, Block b) {
+    private static void add(Map<HudAnchor, List<Block>> map, HudAnchor anchor, String id, Block b) {
         if (b == null || b.h() <= 0 || anchor == null) return;
+        float sc = HudScale.get(id);
+        if (Math.abs(sc - 1F) > 0.001F) b = new Scaled(b, sc);
         map.computeIfAbsent(anchor, k -> new ArrayList<>()).add(b);
+    }
+
+    /** Блок с другим размером (настройка «размер» в расположении HUD). */
+    private record Scaled(Block inner, float scale) implements Block {
+        @Override
+        public int w() {
+            return Math.round(inner.w() * scale);
+        }
+
+        @Override
+        public int h() {
+            return Math.round(inner.h() * scale);
+        }
+
+        @Override
+        public void draw(GuiGraphics g, int x, int y, boolean right) {
+            HudScale.begin(g, x, y, scale);
+            inner.draw(g, 0, 0, right);
+            HudScale.end(g);
+        }
     }
 
     // ------------------------------------------------------------ инфо-панель
@@ -247,7 +269,7 @@ final class HudBlocks {
                     MapView.drawRemotePlayers(g, mc, dim, cx, cy, wx, wz, zoom, rot, half, cfg.minimapPlayerNames, cfg.showLoadZones);
                     MapView.drawNavigatorLine(g, mc, cx, cy, wx, wz, zoom, rot, half);
                 };
-                g.enableScissor(ix, iy, ix + is, iy + is);
+                HudScale.scissor(g, ix, iy, ix + is, iy + is);
                 if (circle) MapView.circleBands(g, ix, iy, is, layer);
                 else layer.run();
                 if (cfg.minimapWaypoints) MapView.drawWaypoints(g, font, cx, cy, wx, wz, zoom, rot, circle ? half * 0.86F : half, true, false);
@@ -350,7 +372,7 @@ final class HudBlocks {
                 int cw = 182, cx = x + cw / 2;
                 Draw.accentPanel(g, x, y, cw, 13, accent);
                 float heading = Mth.wrapDegrees(p.getYRot() + 180F);
-                g.enableScissor(x + 2, y, x + cw - 2, y + 13);
+                HudScale.scissor(g, x + 2, y, x + cw - 2, y + 13);
                 String[] names = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
                 for (int deg = 0; deg < 360; deg += 15) {
                     float diff = Mth.wrapDegrees(deg - heading);

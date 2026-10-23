@@ -249,10 +249,20 @@ public final class HudRenderer {
 
         if (!spectator) {
             if (survival && cfg.lowHealthWarning) lowHealthVignette(g, p, w, h);
+            // основные полосы и хотбар — масштаб вокруг нижнего центра экрана
+            float bs = HudScale.get("bars");
+            boolean scaled = Math.abs(bs - 1F) > 0.001F;
+            if (scaled) {
+                g.pose().pushPose();
+                g.pose().translate(w / 2F, h, 0);
+                g.pose().scale(bs, bs, 1F);
+                g.pose().translate(-w / 2F, -h, 0);
+            }
             if (cfg.customHotbar) hotbar(g, mc, p, w, h, partialTick, accent, k);
             if (survival) statusBars(g, mc, p, font, w, h, accent, k, now);
             xpRow(g, p, font, w, h, accent, hasXp, survival, k);
             chips(g, p, font, w, h, accent);
+            if (scaled) g.pose().popPose();
             if (survival && cfg.fallWarning) fallWarning(g, p, font, w, h);
             if (cfg.damageNumbers) popups(g, font, w, h, now);
             if (cfg.bhopHud && cfg.bunnyHop) bhopHud(g, font, w, h, accent);

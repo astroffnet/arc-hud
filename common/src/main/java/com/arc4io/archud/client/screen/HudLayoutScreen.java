@@ -1,6 +1,7 @@
 package com.arc4io.archud.client.screen;
 
 import com.arc4io.archud.client.hud.Draw;
+import com.arc4io.archud.client.hud.HudScale;
 import com.arc4io.archud.client.hud.Theme;
 import com.arc4io.archud.config.ArcConfig;
 import com.arc4io.archud.config.HudAnchor;
@@ -19,6 +20,10 @@ import java.util.List;
 public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private final Screen parent;
     private final List<Field> elements = new ArrayList<>();
+    /** Поле расположения -> id размера блока. Последняя строка (null) — хотбар и основные полосы. */
+    private static final java.util.Map<String, String> SCALE_IDS = java.util.Map.of(
+            "minimapAnchor", "minimap", "infoPanelAnchor", "info", "compassAnchor", "compass", "effectsAnchor", "effects",
+            "gearAnchor", "gear", "pickupsAnchor", "pickups", "statusAnchor", "status", "addonPanelsAnchor", "addons");
     private int selected;
     private int px, py, pw, ph;
 
@@ -28,6 +33,7 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
         for (Field f : ArcConfig.class.getFields()) {
             if (f.getType() == HudAnchor.class) elements.add(f);
         }
+        elements.add(null); // хотбар и полосы — только размер
     }
 
     static Component anchorName(HudAnchor a) {
@@ -35,10 +41,23 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
     }
 
     static Component elementName(Field f) {
+        if (f == null) return Component.translatable("archud.layout.bars");
         return Component.translatable("archud.config." + f.getName());
     }
 
+    private static String scaleId(Field f) {
+        return f == null ? "bars" : SCALE_IDS.getOrDefault(f.getName(), f.getName());
+    }
+
+    private void changeScale(int dir) {
+        if (elements.isEmpty()) return;
+        String id = scaleId(elements.get(selected));
+        HudScale.set(id, HudScale.get(id) + dir * HudScale.STEP);
+        ArcConfig.save();
+    }
+
     private HudAnchor get(Field f) {
+        if (f == null) return null;
         try {
             return (HudAnchor) f.get(ArcConfig.get());
         } catch (IllegalAccessException e) {
@@ -47,6 +66,7 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
     }
 
     private void set(Field f, HudAnchor a) {
+        if (f == null) return;
         try {
             f.set(ArcConfig.get(), a);
             ArcConfig.save();
@@ -57,10 +77,19 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
     @Override
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 360, 240);
-        pw = Math.min(200, width / 3 - 8);
-        ph = elements.size() * 16 + 44;
+        pw = Math.max(170, Math.min(220, width / 3 - 8));
+        ph = elements.size() * 16 + 78;
         px = (width - pw) / 2;
-        py = (height - ph) / 2;
+        py = Math.max(4, (height - ph) / 2);
+        // размер выбранного блока: − / + / сброс
+        int cy = py + ph - 42;
+        addRenderableWidget(new ArcButton(px + 6, cy, 20, 16, Component.literal("−"), b -> changeScale(-1)));
+        addRenderableWidget(new ArcButton(px + pw - 50, cy, 20, 16, Component.literal("+"), b -> changeScale(1)));
+        addRenderableWidget(new ArcButton(px + pw - 26, cy, 20, 16, Component.literal("↺"), b -> {
+            if (elements.isEmpty()) return;
+            HudScale.set(scaleId(elements.get(selected)), 1F);
+            ArcConfig.save();
+        }));
         addRenderableWidget(new ArcButton(px + 6, py + ph - 22, pw - 12, 16, Component.translatable("gui.done"), b -> onClose()));
     }
 
@@ -81,6 +110,7 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
         boolean overPanel = mouseX >= px && mouseX < px + pw && mouseY >= py && mouseY < py + ph;
         HudAnchor hover = overPanel ? null : zoneAt(mouseX, mouseY);
         HudAnchor current = elements.isEmpty() ? null : get(elements.get(selected));
+        Field selField = elements.isEmpty() ? null : elements.get(selected);
 
         for (HudAnchor a : HudAnchor.values()) {
             int[] z = zone(a);
@@ -94,9 +124,9 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
             int step = a.row == 2 ? -10 : 10;
             g.drawCenteredString(font, anchorName(a), z[0] + z[2] / 2, a.row == 1 ? z[1] + z[3] / 2 - 4 : z[1] + z[3] / 2 - 4, isHover ? 0xFFFFFFFF : 0x90FFFFFF);
             for (Field f : elements) {
-                if (get(f) != a) continue;
+                if (f == null || get(f) != a) continue;
                 String s = elementName(f).getString();
-                int col = f == elements.get(selected) ? 0xFFFFE082 : 0xFFB0BEC5;
+                int col = f == selField ? 0xFFFFE082 : 0xFFB0BEC5;
                 int sx = a.col == 0 ? z[0] + 4 : a.col == 2 ? z[0] + z[2] - 4 - font.width(s) : z[0] + (z[2] - font.width(s)) / 2;
                 g.drawString(font, s, sx, ty, col, true);
                 ty += step;
@@ -116,11 +146,23 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
             else if (hov) g.fill(px + 4, y, px + pw - 4, y + 15, 0x20FFFFFF);
             if (sel) g.fill(px + 4, y, px + 6, y + 15, Draw.alpha(accent, 0xFF));
             g.drawString(font, elementName(f), px + 10, y + 4, sel ? 0xFFFFFFFF : 0xFFCFD8DC, true);
-            String an = anchorName(get(f)).getString();
+            int pct = Math.round(HudScale.get(scaleId(f)) * 100);
+            String an = (f == null ? "" : anchorName(get(f)).getString() + " · ") + pct + "%";
             Draw.small(g, font, an, px + pw - 8 - font.width(an) * 0.6F, y + 5, Draw.alpha(accent, 0xFF), 0.6F);
             y += 16;
         }
+        // строка размера выбранного блока
+        int cy = py + ph - 42;
+        String sz = Component.translatable("archud.layout.size", Math.round(HudScale.get(scaleId(selField)) * 100)).getString();
+        g.drawCenteredString(font, sz, px + (pw - 24) / 2, cy + 4, 0xFFFFFFFF);
+        Draw.smallCentered(g, font, Component.translatable("archud.layout.size_hint").getString(), px + pw / 2F, cy - 9, Draw.TEXT_DIM, 0.55F);
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        changeScale(delta > 0 ? 1 : -1);
+        return true;
     }
 
     private static void dashed(GuiGraphics g, int x, int y, int w, int h, int color) {
@@ -146,7 +188,7 @@ public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.
             return true;
         }
         HudAnchor a = zoneAt(mx, my);
-        if (a != null && !elements.isEmpty()) {
+        if (a != null && !elements.isEmpty() && elements.get(selected) != null) {
             set(elements.get(selected), a);
             return true;
         }

@@ -192,7 +192,7 @@ public final class MapView {
             float mid = y + step / 2F - cy;
             float hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
             if (hw < 1) continue;
-            g.enableScissor((int) (cx - hw), y, (int) Math.ceil(cx + hw), Math.min(y + step, iy + is));
+            com.arc4io.archud.client.hud.HudScale.scissor(g, (int) (cx - hw), y, (int) Math.ceil(cx + hw), Math.min(y + step, iy + is));
             draw.run();
             g.disableScissor();
         }
