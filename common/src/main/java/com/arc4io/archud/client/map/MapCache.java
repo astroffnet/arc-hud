@@ -178,13 +178,21 @@ public final class MapCache {
         int bx = cx * 16, bz = cz * 16;
         Region r = region(layer, Math.floorDiv(bx, REGION), Math.floorDiv(bz, REGION), true);
         int lx = Math.floorMod(bx, REGION), lz = Math.floorMod(bz, REGION);
+        boolean changed = false;
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
-                r.image.setPixelRGBA(lx + x, lz + z, abgr[z * 16 + x]);
+                int v = abgr[z * 16 + x];
+                if (r.image.getPixelRGBA(lx + x, lz + z) != v) {
+                    r.image.setPixelRGBA(lx + x, lz + z, v);
+                    changed = true;
+                }
             }
         }
-        r.dirty = true;
-        r.unsaved = true;
+        // сохраняем на диск только реально изменившиеся регионы (сохранение раз в 3 секунды)
+        if (changed) {
+            r.dirty = true;
+            r.unsaved = true;
+        }
     }
 
     /** Чанк от другого игрока (общая карта): пишет в слой поверхности измерения, не трогая прозрачные пиксели. */
@@ -273,7 +281,7 @@ public final class MapCache {
     /** Периодическое сохранение (раз в 30 сек) и выгрузка давно неиспользуемых слоёв. */
     public static void tick() {
         long now = System.currentTimeMillis();
-        if (now - lastSave < 15000) return;
+        if (now - lastSave < 3000) return;
         lastSave = now;
         for (Layer l : LAYERS.values()) saveLayer(l);
         LAYERS.values().removeIf(l -> {
