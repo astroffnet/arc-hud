@@ -141,6 +141,16 @@ public final class WaypointManager {
         }
     }
 
+    /** Новая метка на месте игрока — ещё НЕ сохранена (сохраняется кнопкой «Готово» в редакторе, Esc — отмена). */
+    public static Waypoint createHere() {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer p = mc.player;
+        if (p == null) return null;
+        int n = (int) USER.stream().filter(w -> w.source == Waypoint.Source.USER).count() + 1;
+        return new Waypoint(Component.translatable("archud.wp.default", n).getString(), p.getBlockX(), p.getBlockY(), p.getBlockZ(),
+                Waypoint.PALETTE[(n - 1) % Waypoint.PALETTE.length], currentDimension(), Waypoint.Source.USER);
+    }
+
     public static Waypoint addHere() {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;

@@ -27,7 +27,7 @@ public class WaypointEditScreen extends ArcScreen {
 
     @Override
     protected void init() {
-        layout(300, 224);
+        layout(300, isNew ? 164 : 224);
         int lx = px + 10, w = pw - 20;
         boolean editable = wp.editable();
         name = addRenderableWidget(new EditBox(font, lx + 60, py + 28, w - 60, 16, Component.translatable("archud.wp.name")));
@@ -47,28 +47,45 @@ public class WaypointEditScreen extends ArcScreen {
         })).active = editable;
         addRenderableWidget(CycleButton.onOffBuilder(wp.visible).create(lx, py + 96, w, 20, Component.translatable("archud.wp.visible"),
                 (b, v) -> wp.visible = v));
-        int bw = (w - 8) / 3;
-        addRenderableWidget(new ArcButton(lx, py + 120, bw, 18,
-                Component.translatable(Navigator.isTarget(wp) ? "archud.map.menu.nav_stop" : "archud.map.menu.nav"), b -> {
-            if (Navigator.isTarget(wp)) Navigator.clear();
-            else Navigator.set(wp);
-            onClose();
-        }));
-        addRenderableWidget(new ArcButton(lx + bw + 4, py + 120, bw, 18, Component.translatable("archud.map.menu.share"), b -> minecraft.setScreen(new ShareWaypointScreen(this, wp))));
-        ArcButton tp = addRenderableWidget(new ArcButton(lx + (bw + 4) * 2, py + 120, w - (bw + 4) * 2, 18, Component.translatable("archud.wp.teleport"), b -> teleport()));
-        if (com.arc4io.archud.compat.TempadCompat.canOpenDoor(wp)) {
-            addRenderableWidget(new ArcButton(lx, py + 142, w, 18, Component.translatable("archud.map.menu.tempad_door"), b -> {
-                com.arc4io.archud.compat.TempadCompat.openDoor(wp);
-                minecraft.setScreen(null);
+        if (!isNew) {
+            // действия — только для уже сохранённой метки
+            int bw = (w - 8) / 3;
+            addRenderableWidget(new ArcButton(lx, py + 120, bw, 18,
+                    Component.translatable(Navigator.isTarget(wp) ? "archud.map.menu.nav_stop" : "archud.map.menu.nav"), b -> {
+                if (Navigator.isTarget(wp)) Navigator.clear();
+                else Navigator.set(wp);
+                onClose();
             }));
+            addRenderableWidget(new ArcButton(lx + bw + 4, py + 120, bw, 18, Component.translatable("archud.map.menu.share"), b -> minecraft.setScreen(new ShareWaypointScreen(this, wp))));
+            ArcButton tp = addRenderableWidget(new ArcButton(lx + (bw + 4) * 2, py + 120, w - (bw + 4) * 2, 18, Component.translatable("archud.wp.teleport"), b -> teleport()));
+            if (com.arc4io.archud.compat.TempadCompat.canOpenDoor(wp)) {
+                addRenderableWidget(new ArcButton(lx, py + 142, w, 18, Component.translatable("archud.map.menu.tempad_door"), b -> {
+                    com.arc4io.archud.compat.TempadCompat.openDoor(wp);
+                    minecraft.setScreen(null);
+                }));
+            }
+            tp.active = minecraft.player != null && minecraft.player.hasPermissions(2);
         }
-        tp.active = minecraft.player != null && minecraft.player.hasPermissions(2);
-        ArcButton del = addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("archud.wp.delete"), b -> {
-            WaypointManager.remove(wp);
-            onClose();
-        }).danger());
-        del.active = !isNew && editable;
+        if (isNew) {
+            // новая метка: «Отмена» (как и Esc) — ничего не сохраняется
+            addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("gui.cancel"), b -> onClose()));
+        } else {
+            ArcButton del = addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("archud.wp.delete"), b -> {
+                WaypointManager.remove(wp);
+                onClose();
+            }).danger());
+            del.active = editable;
+        }
         addRenderableWidget(new ArcButton(px + pw - 108, py + ph - 24, 100, 18, Component.translatable("gui.done"), b -> save()));
+    }
+
+    @Override
+    public boolean keyPressed(int key, int scan, int mods) {
+        if (key == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || key == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) {
+            save();
+            return true;
+        }
+        return super.keyPressed(key, scan, mods);
     }
 
     private int parse(EditBox b, int def) {
@@ -103,6 +120,11 @@ public class WaypointEditScreen extends ArcScreen {
         g.drawString(font, Component.translatable("archud.wp.name"), lx, py + 32, Draw.TEXT_DIM, true);
         g.drawString(font, "X / Y / Z", lx, py + 54, Draw.TEXT_DIM, true);
         MapView.diamond(g, lx + 20, py + 81, 5, Waypoint.PALETTE[colorIndex]);
+        if (isNew) {
+            Draw.small(g, font, Component.translatable("archud.wp.new_hint").getString(), lx, py + 124, Draw.TEXT_DIM, 0.65F);
+            super.render(g, mouseX, mouseY, partialTick);
+            return;
+        }
         String src = Component.translatable("archud.wp.src." + wp.source.name().toLowerCase()).getString();
         if (wp.source == Waypoint.Source.SHARED && wp.sharedBy != null) {
             src += " · " + Component.translatable("archud.share.from", wp.sharedBy).getString() + " · "

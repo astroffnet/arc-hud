@@ -68,8 +68,8 @@ public final class ArcClient {
             if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WorldMapScreen(null));
         }
         while (ArcKeys.ADD_WAYPOINT.consumeClick()) {
-            com.arc4io.archud.client.map.Waypoint w = com.arc4io.archud.client.map.WaypointManager.addHere();
-            if (w != null && mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WaypointEditScreen(null, w, false));
+            com.arc4io.archud.client.map.Waypoint w = com.arc4io.archud.client.map.WaypointManager.createHere();
+            if (w != null && mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WaypointEditScreen(null, w, true));
         }
         while (ArcKeys.ZOOM_IN.consumeClick()) {
             cfg.minimapZoom = Math.min(6.0, cfg.minimapZoom * 1.25);

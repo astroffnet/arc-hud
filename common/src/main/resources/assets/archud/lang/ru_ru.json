@@ -476,5 +476,6 @@
   "archud.config.serverTempadToPlayers": "Сервер: двери Tempad к игрокам",
   "archud.config.hideFromMap": "Скрыть себя с карт других игроков",
   "archud.config.tempadNoCooldown": "Tempad без перезарядки",
-  "archud.config.tempadKeepOnDeath": "Tempad остаётся в браслете после смерти"
+  "archud.config.tempadKeepOnDeath": "Tempad остаётся в браслете после смерти",
+  "archud.wp.new_hint": "Enter / «Готово» — сохранить · Esc — отмена"
 }
