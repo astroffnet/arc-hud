@@ -162,6 +162,14 @@ public class ArcConfig {
     public boolean customGameRules = true;
     public boolean customTabList = true;
     public boolean weaponInspect = true;
+    // ---- Камера от третьего лица (F6) ----
+    public boolean cameraFreeLook = true;
+    public boolean cameraSmoothing = true;
+    public boolean cameraLeftShoulder = false;
+    public boolean cameraCrosshair = true;
+    public float cameraDistance = 4.0F;
+    public float cameraShoulder = 0.75F;
+    public float cameraHeight = 0.25F;
     public boolean inspectCard = true;
     /** Автомасштаб экранов, если им не хватает места (мониторы 4:3, маленькие окна, крупный масштаб интерфейса). */
     public boolean autoGuiScale = true;

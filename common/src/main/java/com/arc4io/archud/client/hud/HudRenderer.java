@@ -269,6 +269,15 @@ public final class HudRenderer {
         }
         HudBlocks.renderAnchored(g, mc, p, font, w, h, accent, now, debug, spectator);
         com.arc4io.archud.client.fx.InspectCard.render(g, font, w, h, partialTick);
+        if (com.arc4io.archud.client.camera.ArcCamera.active() && cfg.cameraCrosshair && com.arc4io.archud.client.camera.ArcCamera.aiming()) {
+            // прицел камеры Arc (в виде от третьего лица ванильного прицела нет)
+            int cx = w / 2, cy = h / 2;
+            g.fill(cx - 4, cy, cx - 1, cy + 1, 0xE0FFFFFF);
+            g.fill(cx + 2, cy, cx + 5, cy + 1, 0xE0FFFFFF);
+            g.fill(cx, cy - 4, cx + 1, cy - 1, 0xE0FFFFFF);
+            g.fill(cx, cy + 2, cx + 1, cy + 5, 0xE0FFFFFF);
+            g.fill(cx, cy, cx + 1, cy + 1, Draw.alpha(accent, 0xFF));
+        }
     }
 
     // ---------------------------------------------------------------- хотбар

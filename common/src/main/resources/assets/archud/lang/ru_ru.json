@@ -510,5 +510,13 @@
   "archud.tp.need_tempad": "Нужен Tempad в инвентаре или браслете",
   "archud.tp.need_server_or_op": "Нужен Tempad и Arc HUD на сервере, или права оператора",
   "archud.wp.bed": "Кровать",
-  "archud.wp.anchor": "Якорь возрождения"
+  "archud.wp.anchor": "Якорь возрождения",
+  "key.archud.camera": "Камера от третьего лица (Arc)",
+  "key.archud.camera_shoulder": "Камера: сменить плечо",
+  "archud.camera.on": "Камера Arc: вкл · Alt + колесо — расстояние",
+  "archud.camera.off": "Камера Arc: выкл",
+  "archud.config.cameraFreeLook": "Камера: свободный обзор (персонаж идёт туда, куда жмёте)",
+  "archud.config.cameraSmoothing": "Камера: плавное следование",
+  "archud.config.cameraLeftShoulder": "Камера: за левым плечом",
+  "archud.config.cameraCrosshair": "Камера: прицел при атаке и стрельбе"
 }
