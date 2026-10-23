@@ -96,8 +96,8 @@ public class WaypointListScreen extends ArcScreen {
                 b -> deleteSelected()).danger());
         int y2 = py + ph - 26;
         addRenderableWidget(new ArcButton(x, y2 + 2, 100, 18, Component.translatable("archud.wp.add_here"), b -> {
-            Waypoint wp = WaypointManager.addHere();
-            if (wp != null) minecraft.setScreen(new WaypointEditScreen(this, wp, false));
+            Waypoint wp = WaypointManager.createHere();
+            if (wp != null) minecraft.setScreen(new WaypointEditScreen(this, wp, true));
         }));
         addRenderableWidget(new ArcButton(x + 104, y2 + 2, 110, 18, Component.translatable("archud.wpl.clear_deaths"), b -> {
             int n = 0;

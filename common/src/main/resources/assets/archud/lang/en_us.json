@@ -414,5 +414,6 @@
   "archud.config.serverTempadToPlayers": "Server: Tempad doors to players",
   "archud.config.hideFromMap": "Hide myself from other players' maps",
   "archud.config.tempadNoCooldown": "Tempad without cooldown",
-  "archud.config.tempadKeepOnDeath": "Keep Tempad in bracelet slot on death"
+  "archud.config.tempadKeepOnDeath": "Keep Tempad in bracelet slot on death",
+  "archud.wp.new_hint": "Enter / Done — save · Esc — cancel"
 }

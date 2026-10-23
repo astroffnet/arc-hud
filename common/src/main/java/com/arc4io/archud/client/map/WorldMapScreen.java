@@ -92,8 +92,8 @@ public class WorldMapScreen extends Screen {
             layerIndex = 0;
         }));
         addRenderableWidget(new ArcButton(80, y, 104, 18, Component.translatable("archud.wp.add_here"), b -> {
-            Waypoint w = WaypointManager.addHere();
-            if (w != null) minecraft.setScreen(new WaypointEditScreen(this, w, false));
+            Waypoint w = WaypointManager.createHere();
+            if (w != null) minecraft.setScreen(new WaypointEditScreen(this, w, true));
         }));
         addRenderableWidget(new ArcButton(188, y, 120, 18, layerLabel(), b -> {
             if (layers.isEmpty()) return;
