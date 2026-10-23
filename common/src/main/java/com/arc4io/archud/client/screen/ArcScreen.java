@@ -20,11 +20,20 @@ public abstract class ArcScreen extends Screen implements ScreenFit.Fits {
 
     protected void layout(int maxW, int maxH) {
         // не хватает места при текущем масштабе интерфейса — уменьшаем масштаб, а не сжимаем кнопки друг на друга
-        ScreenFit.ensure(this, Math.min(maxW + 16, 640), Math.min(maxH + 16, 400));
+        ScreenFit.ensure(this, Math.min(maxW + 16, minFitWidth()), Math.min(maxH + 16, minFitHeight()));
         pw = Math.min(width - 16, maxW);
         ph = Math.min(height - 16, maxH);
         px = (width - pw) / 2;
         py = (height - ph) / 2;
+    }
+
+    /** Минимум места (в GUI-пикселях), при котором экран выглядит без наложений; меньше — масштаб уменьшается. */
+    protected int minFitWidth() {
+        return 400;
+    }
+
+    protected int minFitHeight() {
+        return 250;
     }
 
     protected void frame(GuiGraphics g) {

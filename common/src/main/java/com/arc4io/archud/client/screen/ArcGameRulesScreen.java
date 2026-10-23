@@ -148,6 +148,16 @@ public class ArcGameRulesScreen extends ArcScreen {
         refresh();
     }
 
+    @Override
+    protected int minFitWidth() {
+        return 460;
+    }
+
+    @Override
+    protected int minFitHeight() {
+        return 260;
+    }
+
     private Component changedLabel() {
         return Component.translatable(onlyChanged ? "archud.rules.only_changed" : "archud.rules.all");
     }
