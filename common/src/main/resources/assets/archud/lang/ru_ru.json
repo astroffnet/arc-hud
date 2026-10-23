@@ -281,7 +281,7 @@
   "archud.map.export": "Экспорт PNG",
   "archud.map.exported": "Карта сохранена в screenshots/%s",
   "archud.map.goto": "Перейти",
-  "archud.map.goto_hint": "x z  или  x y z",
+  "archud.map.goto_hint": "x z · x y z · ник",
   "archud.map.layer.none": "Карта пуста",
   "archud.map.layer.surface": "Поверхность",
   "archud.map.list_hint": "Клик — показать · ПКМ — действия",
@@ -486,5 +486,9 @@
   "archud.rules.changed": "Изменено: %s",
   "archud.rules.reset": "Сбросить (по умолчанию: %s)",
   "archud.config.customGameRules": "Новый экран «Игровые правила»",
-  "archud.config.autoGuiScale": "Автомасштаб экранов (4:3, маленькие окна)"
+  "archud.config.autoGuiScale": "Автомасштаб экранов (4:3, маленькие окна)",
+  "archud.tab.status": "Онлайн: %s · пинг ~%s мс",
+  "archud.tab.you": "Это вы",
+  "archud.map.no_player": "Игрок не найден или скрыт",
+  "archud.config.customTabList": "Новый список игроков (Tab)"
 }

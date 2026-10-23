@@ -113,6 +113,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         addRenderableWidget(new ArcButton(516, y, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
         gotoBox = addRenderableWidget(new EditBox(font, 6, height - 46, 120, 16, Component.translatable("archud.map.goto")));
         gotoBox.setHint(Component.translatable("archud.map.goto_hint"));
+        gotoBox.setMaxLength(64);
         addRenderableWidget(new ArcButton(130, height - 47, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
         addRenderableWidget(new ArcButton(188, height - 47, 80, 18, Component.translatable("archud.nav.go"), b -> gotoCoords(true)));
         int lw = listW();
@@ -155,7 +156,104 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             centerX = x;
             centerZ = z;
             if (navigate) Navigator.navigateTo(x, y, z, viewDim());
-        } catch (Exception ignored) {
+        } catch (Exception notCoords) {
+            // не координаты — ищем игрока по нику
+            List<FoundPlayer> found = findPlayers(gotoBox.getValue());
+            if (!found.isEmpty()) focusPlayer(found.get(0), navigate);
+        }
+    }
+
+    /** Игрок для поиска на карте: виден рядом или известен серверу Arc HUD (скрытые не попадают). */
+    private record FoundPlayer(java.util.UUID id, String name, String dim, double x, double y, double z) {}
+
+    private FoundPlayer highlighted;
+    private long highlightUntil;
+
+    private List<FoundPlayer> findPlayers(String query) {
+        String q = query.trim().toLowerCase(java.util.Locale.ROOT);
+        List<FoundPlayer> out = new ArrayList<>();
+        if (q.isEmpty() || q.matches("[-\\d\\s,;]+")) return out;
+        java.util.Set<java.util.UUID> seen = new java.util.HashSet<>();
+        if (minecraft.level != null) {
+            String dim = minecraft.level.dimension().location().toString();
+            for (net.minecraft.world.entity.player.Player p : minecraft.level.players()) {
+                if (p == minecraft.player || com.arc4io.archud.client.ArcClientNet.isHidden(p.getUUID())) continue;
+                if (!p.getGameProfile().getName().toLowerCase(java.util.Locale.ROOT).contains(q)) continue;
+                seen.add(p.getUUID());
+                out.add(new FoundPlayer(p.getUUID(), p.getGameProfile().getName(), dim, p.getX(), p.getY(), p.getZ()));
+            }
+        }
+        for (var rp : com.arc4io.archud.client.ArcClientNet.players()) {
+            if (seen.contains(rp.id()) || !rp.name().toLowerCase(java.util.Locale.ROOT).contains(q)) continue;
+            out.add(new FoundPlayer(rp.id(), rp.name(), rp.dimension(), rp.x(), rp.y(), rp.z()));
+        }
+        // сначала совпадения с начала ника
+        out.sort(java.util.Comparator.comparingInt((FoundPlayer f) -> f.name().toLowerCase(java.util.Locale.ROOT).startsWith(q) ? 0 : 1)
+                .thenComparing(FoundPlayer::name, String.CASE_INSENSITIVE_ORDER));
+        return out;
+    }
+
+    private void focusPlayer(FoundPlayer f, boolean navigate) {
+        String cur = minecraft.level == null ? "" : minecraft.level.dimension().location().toString();
+        if (!f.dim().equals(cur)) {
+            viewLayer = MapCache.layer(WaypointManager.worldKey(), f.dim(), "surface");
+        } else {
+            viewLayer = null;
+        }
+        followPlayer = false;
+        centerX = f.x();
+        centerZ = f.z();
+        if (zoom < 1F) zoom = 1F;
+        highlighted = f;
+        highlightUntil = net.minecraft.Util.getMillis() + 4000;
+        gotoBox.setValue("");
+        if (navigate) Navigator.navigateTo((int) Math.floor(f.x()), (int) Math.floor(f.y()), (int) Math.floor(f.z()), f.dim());
+    }
+
+    /** Подсказки игроков под полем поиска; возвращает true, если клик попал в подсказку. */
+    private boolean clickSuggestion(double mx, double my) {
+        if (!gotoBox.isFocused()) return false;
+        List<FoundPlayer> found = findPlayers(gotoBox.getValue());
+        int x = gotoBox.getX(), y = gotoBox.getY() - 14;
+        for (int i = 0; i < Math.min(5, found.size()); i++) {
+            int ry = y - i * 13;
+            if (mx >= x && mx < x + 140 && my >= ry && my < ry + 12) {
+                focusPlayer(found.get(i), false);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void renderSuggestions(GuiGraphics g, int mouseX, int mouseY, int accent) {
+        if (gotoBox.isFocused()) {
+            List<FoundPlayer> found = findPlayers(gotoBox.getValue());
+            int x = gotoBox.getX(), y = gotoBox.getY() - 14;
+            String cur = minecraft.level == null ? "" : minecraft.level.dimension().location().toString();
+            for (int i = 0; i < Math.min(5, found.size()); i++) {
+                FoundPlayer f = found.get(i);
+                int ry = y - i * 13;
+                boolean hov = mouseX >= x && mouseX < x + 140 && mouseY >= ry && mouseY < ry + 12;
+                Draw.panel(g, x, ry, 140, 12, hov ? Draw.PANEL_LIGHT : 0xE00B0F14, Draw.alpha(accent, hov ? 0xFF : 0x70));
+                Draw.small(g, font, "☺ " + f.name(), x + 3, ry + 3, 0xFF80DEEA, 0.7F);
+                String where = f.dim().equals(cur) && minecraft.player != null
+                        ? Math.round(Math.sqrt(Math.pow(f.x() - minecraft.player.getX(), 2) + Math.pow(f.z() - minecraft.player.getZ(), 2))) + " m"
+                        : HudRenderer.pretty(f.dim().substring(f.dim().indexOf(':') + 1));
+                Draw.small(g, font, where, x + 137 - font.width(where) * 0.6F, ry + 3.5F, Draw.TEXT_DIM, 0.6F);
+            }
+            if (found.isEmpty() && !gotoBox.getValue().isBlank() && !gotoBox.getValue().trim().matches("[-\\d\\s,;]+")) {
+                Draw.panel(g, x, y, 140, 12, 0xE00B0F14, 0x40FFFFFF);
+                Draw.small(g, font, Component.translatable("archud.map.no_player").getString(), x + 3, y + 3, Draw.TEXT_DIM, 0.65F);
+            }
+        }
+        // подсветка найденного игрока
+        if (highlighted != null && net.minecraft.Util.getMillis() < highlightUntil && highlighted.dim().equals(viewDim())) {
+            float cx = (width - listW()) / 2F, cy = height / 2F;
+            float[] s = MapView.toScreen(highlighted.x(), highlighted.z(), centerX, centerZ, zoom, 0F);
+            int hx = Math.round(cx + s[0]), hy = Math.round(cy + s[1]);
+            int r = 6 + Math.round(Draw.pulse(700) * 6);
+            Draw.outline(g, hx - r, hy - r, r * 2, r * 2, 0xFF80DEEA);
+            Draw.smallCentered(g, font, highlighted.name(), hx, hy - r - 8, 0xFF80DEEA, 0.75F);
         }
     }
 
@@ -243,6 +341,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
 
         if (showList) renderList(g, mapW, mouseX, mouseY, accent);
         super.render(g, mouseX, mouseY, partialTick);
+        renderSuggestions(g, mouseX, mouseY, accent);
         if (menuOpen) renderMenu(g, mouseX, mouseY, accent);
     }
 
@@ -529,6 +628,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (menuOpen) return clickMenu(mx, my);
+        if (clickSuggestion(mx, my)) return true;
         if (super.mouseClicked(mx, my, button)) return true;
         int mapW = width - listW();
         if (mx >= mapW && showList) {

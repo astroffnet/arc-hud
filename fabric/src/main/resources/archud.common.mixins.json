@@ -29,7 +29,9 @@
     "EntityCullingMixin",
     "BlockEntityCullingMixin",
     "DynamicFpsMixin",
-    "EditGameRulesScreenAccessor"
+    "EditGameRulesScreenAccessor",
+    "PlayerTabOverlayAccessor",
+    "PlayerTabOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

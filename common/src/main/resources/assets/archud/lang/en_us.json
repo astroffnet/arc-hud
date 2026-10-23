@@ -219,7 +219,7 @@
   "archud.map.export": "Export PNG",
   "archud.map.exported": "Map exported to screenshots/%s",
   "archud.map.goto": "Go",
-  "archud.map.goto_hint": "x z  or  x y z",
+  "archud.map.goto_hint": "x z · x y z · nickname",
   "archud.map.layer.none": "No map yet",
   "archud.map.layer.surface": "Surface",
   "archud.map.list_hint": "Click — show on map · RMB — actions",
@@ -424,5 +424,9 @@
   "archud.rules.changed": "Changed: %s",
   "archud.rules.reset": "Reset (default: %s)",
   "archud.config.customGameRules": "New Game Rules screen",
-  "archud.config.autoGuiScale": "Auto-scale screens (4:3, small windows)"
+  "archud.config.autoGuiScale": "Auto-scale screens (4:3, small windows)",
+  "archud.tab.status": "Online: %s · ping ~%s ms",
+  "archud.tab.you": "You",
+  "archud.map.no_player": "Player not found or hidden",
+  "archud.config.customTabList": "New player list (Tab)"
 }
