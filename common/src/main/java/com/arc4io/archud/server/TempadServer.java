@@ -27,6 +27,7 @@ import java.util.function.BiConsumer;
 public final class TempadServer {
     private static final int PERIOD = 100;
     private static Boolean available;
+    private static Method isDeletable;
     private static Method getLocations, getLocation, getName, getPos, getLevel, getId;
     private static Method findTempad, mayTeleport, getOption, canOpen, onOpen, summon;
     private static Class<?> tempadItem;
@@ -51,6 +52,10 @@ public final class TempadServer {
             getPos = data.getMethod("getBlockPos");
             getLevel = data.getMethod("getLevelKey");
             getId = data.getMethod("getId");
+            try {
+                isDeletable = data.getMethod("isDeletable");
+            } catch (NoSuchMethodException ignored) {
+            }
             findTempad = utils.getMethod("findTempad", net.minecraft.world.entity.player.Player.class);
             mayTeleport = utils.getMethod("mayTeleport", ResourceKey.class, net.minecraft.world.entity.player.Player.class);
             getOption = tempadItem.getMethod("getOption");
@@ -98,6 +103,7 @@ public final class TempadServer {
                 List<TempadSyncPacket.Entry> list = new ArrayList<>();
                 if (map != null) {
                     for (Object loc : map.values()) {
+                        if (fromOtherMod(loc)) continue; // вэйстоуны и т.п. — у них свои метки
                         ResourceKey<?> key = (ResourceKey<?>) getLevel.invoke(loc);
                         list.add(new TempadSyncPacket.Entry((UUID) getId.invoke(loc), String.valueOf(getName.invoke(loc)),
                                 (BlockPos) getPos.invoke(loc), key.location().toString()));
@@ -217,6 +223,15 @@ public final class TempadServer {
             summon.invoke(null, loc, player, 0xFF8800);
         } catch (Throwable t) {
             ArcHud.LOGGER.debug("Arc HUD: Tempad door failed", t);
+        }
+    }
+
+    /** Локации, которые Tempad берёт из других модов (Waystones): помечены как неудаляемые — у них уже есть свои метки. */
+    private static boolean fromOtherMod(Object loc) {
+        try {
+            return isDeletable != null && !(boolean) isDeletable.invoke(loc);
+        } catch (Throwable t) {
+            return false;
         }
     }
 }

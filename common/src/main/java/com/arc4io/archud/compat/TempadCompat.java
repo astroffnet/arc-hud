@@ -26,6 +26,7 @@ import java.util.UUID;
 public final class TempadCompat {
     private static final String SCREEN = "me.codexadrian.tempad.client.gui.ConsolidatedScreen";
     public static final int COLOR = 0xFFFF8A65;
+    private static Method isDeletable;
     private static Method getName, getPos, getLevel, getId;
     private static final List<Waypoint> LOCATIONS = new ArrayList<>();
     private static boolean ready, providerRegistered, serverSynced;
@@ -39,6 +40,10 @@ public final class TempadCompat {
         getLevel = data.getMethod("getLevelKey");
         try {
             getId = data.getMethod("getId");
+            try {
+                isDeletable = data.getMethod("isDeletable");
+            } catch (NoSuchMethodException ignored) {
+            }
         } catch (NoSuchMethodException ignored) {
         }
         ready = true;
@@ -188,6 +193,7 @@ public final class TempadCompat {
             List<?> list = (List<?>) f.get(screen);
             List<Waypoint> out = new ArrayList<>();
             for (Object loc : list) {
+                if (fromOtherMod(loc)) continue; // вэйстоуны и т.п. — у них свои метки
                 BlockPos pos = (BlockPos) getPos.invoke(loc);
                 ResourceKey<?> dim = (ResourceKey<?>) getLevel.invoke(loc);
                 Waypoint w = new Waypoint(String.valueOf(getName.invoke(loc)), pos.getX(), pos.getY(), pos.getZ(), COLOR,
@@ -201,6 +207,15 @@ public final class TempadCompat {
             }
         } catch (Throwable t) {
             ArcHud.LOGGER.debug("Arc HUD: не удалось прочитать локации Tempad", t);
+        }
+    }
+
+    /** Локации, которые Tempad берёт из других модов (Waystones): помечены как неудаляемые — у них уже есть свои метки. */
+    private static boolean fromOtherMod(Object loc) {
+        try {
+            return isDeletable != null && !(boolean) isDeletable.invoke(loc);
+        } catch (Throwable t) {
+            return false;
         }
     }
 }
