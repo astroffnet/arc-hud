@@ -31,7 +31,7 @@ public final class MapScanner {
     private static boolean cave, scanningCave, undergroundState;
     private static int caveY, lastCaveScanY = Integer.MIN_VALUE, ticksUnder, ticksAbove;
     private static MapCache.Layer surfaceLayer, caveLayer;
-    private static int slowTick;
+    private static int slowTick, cleanup;
 
     private MapScanner() {}
 
@@ -108,18 +108,28 @@ public final class MapScanner {
             if (++slowTick % step != 0) return;
         }
         // поверхность сканируется всегда (кроме измерений с потолком) — путь сохраняется и под землёй
-        if (surfaceLayer != null) scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, RADIUS, cave ? 3 : 6, now, false);
+        // вся прогруженная территория (в пределах прорисовки): сначала ещё не отсканированные чанки,
+        // потом периодическое обновление ближних — так при быстром полёте/телепорте ничего не теряется
+        int far = Math.max(4, Math.min(24, mc.options.getEffectiveRenderDistance()));
+        if (surfaceLayer != null) {
+            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, far, cave ? 6 : 12, now, false, true);
+            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, RADIUS, cave ? 2 : 4, now, false, false);
+        }
+        if (++cleanup % 200 == 0) {
+            // забыть далёкие чанки — при возвращении они пересканируются и карта обновится
+            SCANNED.keySet().removeIf(k -> Math.max(Math.abs((int) (k >> 32) - pcx), Math.abs((int) (long) k - pcz)) > far + 8);
+        }
         if (cave) {
             if (Math.abs(caveY - lastCaveScanY) >= 6) {
                 SCANNED_CAVE.clear(); // другая глубина — обновить пещеры вокруг
                 lastCaveScanY = caveY;
             }
-            scanArea(mc, level, caveLayer, SCANNED_CAVE, pcx, pcz, CAVE_RADIUS, 5, now, true);
+            scanArea(mc, level, caveLayer, SCANNED_CAVE, pcx, pcz, CAVE_RADIUS, 5, now, true, false);
         }
     }
 
     private static void scanArea(Minecraft mc, ClientLevel level, MapCache.Layer layer, Map<Long, Long> scanned, int pcx, int pcz, int radius,
-                                 int budget, long now, boolean caveScan) {
+                                 int budget, long now, boolean caveScan, boolean onlyNew) {
         for (int r = 0; r <= radius && budget > 0; r++) {
             long interval = r <= 1 ? 700L : r <= 3 ? 2500L : 15000L;
             for (int dx = -r; dx <= r && budget > 0; dx++) {
@@ -129,7 +139,7 @@ public final class MapScanner {
                     if (!level.hasChunk(cx, cz)) continue;
                     long k = ((long) cx << 32) ^ (cz & 0xFFFFFFFFL);
                     Long last = scanned.get(k);
-                    if (last != null && now - last < interval) continue;
+                    if (onlyNew ? last != null : last != null && now - last < interval) continue;
                     scanned.put(k, now);
                     scanningCave = caveScan;
                     scanChunk(mc, level, layer, cx, cz);

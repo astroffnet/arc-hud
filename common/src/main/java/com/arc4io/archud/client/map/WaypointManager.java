@@ -92,7 +92,15 @@ public final class WaypointManager {
     private static String computeWorldKey(Minecraft mc) {
         String k;
         if (mc.getSingleplayerServer() != null) k = "sp_" + mc.getSingleplayerServer().getWorldData().getLevelName();
-        else if (mc.getCurrentServer() != null) k = "mp_" + mc.getCurrentServer().ip;
+        else if (mc.getCurrentServer() != null) {
+            String ip = mc.getCurrentServer().ip;
+            // в локальной сети порт каждый раз новый — без него карта и метки не терялись бы между сессиями
+            if (mc.getCurrentServer().isLan() || ip.matches("(?i)(localhost|127\\..*|10\\..*|192\\.168\\..*|172\\.(1[6-9]|2\\d|3[01])\\..*|25\\..*|26\\..*)(:\\d+)?")) {
+                int c = ip.lastIndexOf(':');
+                if (c > 0 && ip.indexOf(':') == c) ip = ip.substring(0, c);
+            }
+            k = "mp_" + ip;
+        }
         else k = "unknown";
         return k.replaceAll("[^A-Za-z0-9_.\\-]", "_");
     }

@@ -98,6 +98,7 @@ public final class MapCache {
 
     /** Переключает активный слой (для сканирования). Старые слои остаются в памяти/на диске. */
     public static Layer activate(String world, String dim, String level) {
+        ensureShutdownHook();
         String key = world + "|" + dim + "|" + level;
         Layer l = LAYERS.computeIfAbsent(key, k -> new Layer(world, dim, level));
         if (active != l) {
@@ -272,7 +273,7 @@ public final class MapCache {
     /** Периодическое сохранение (раз в 30 сек) и выгрузка давно неиспользуемых слоёв. */
     public static void tick() {
         long now = System.currentTimeMillis();
-        if (now - lastSave < 30000) return;
+        if (now - lastSave < 15000) return;
         lastSave = now;
         for (Layer l : LAYERS.values()) saveLayer(l);
         LAYERS.values().removeIf(l -> {
@@ -280,6 +281,25 @@ public final class MapCache {
             release(l);
             return true;
         });
+    }
+
+    private static boolean hookAdded;
+
+    /** Сохранить всё несохранённое (например, при закрытии игры). */
+    public static synchronized void saveAll() {
+        for (Layer l : new java.util.ArrayList<>(LAYERS.values())) saveLayer(l);
+    }
+
+    /** При закрытии окна игры (без выхода из мира) — тоже сохранить карту. */
+    static void ensureShutdownHook() {
+        if (hookAdded) return;
+        hookAdded = true;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                saveAll();
+            } catch (Throwable ignored) {
+            }
+        }, "Arc HUD map save"));
     }
 
     /** Выход из мира: сохранить всё и освободить текстуры. */
