@@ -41,12 +41,7 @@ public final class ArcCamera {
         LocalPlayer p = mc.player;
         if (p == null) return;
         if (!active) {
-            active = true;
-            camYaw = p.getYRot();
-            camPitch = p.getXRot();
-            smoothEye = null;
-            curDist = 0.5F; // плавный «отъезд» камеры
-            curSide = 0F;
+            start(mc); // плавный «отъезд» камеры
             mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
             p.displayClientMessage(Component.translatable("archud.camera.on"), true);
         } else {
@@ -62,6 +57,38 @@ public final class ArcCamera {
             mc.player.setXRot(camPitch);
         }
         mc.options.setCameraType(CameraType.FIRST_PERSON);
+    }
+
+    /**
+     * Порядок F5: от первого лица → камера Arc → обычная от третьего лица → (вид спереди, если включён) → от первого лица.
+     */
+    public static CameraType nextPerspective(CameraType current) {
+        Minecraft mc = Minecraft.getInstance();
+        ArcConfig cfg = ArcConfig.get();
+        if (!cfg.cameraInF5Cycle || mc.player == null) return current.cycle();
+        if (current == CameraType.FIRST_PERSON) {
+            start(mc);
+            return CameraType.THIRD_PERSON_BACK;
+        }
+        if (current == CameraType.THIRD_PERSON_BACK && active) {
+            // камера Arc -> обычная от третьего лица, смотрим туда же, куда смотрела камера
+            active = false;
+            mc.player.setYRot(camYaw);
+            mc.player.setXRot(camPitch);
+            return CameraType.THIRD_PERSON_BACK;
+        }
+        if (current == CameraType.THIRD_PERSON_BACK) return cfg.cameraFrontView ? CameraType.THIRD_PERSON_FRONT : CameraType.FIRST_PERSON;
+        return CameraType.FIRST_PERSON;
+    }
+
+    private static void start(Minecraft mc) {
+        LocalPlayer p = mc.player;
+        active = true;
+        camYaw = p.getYRot();
+        camPitch = p.getXRot();
+        smoothEye = null;
+        curDist = 0.5F;
+        curSide = 0F;
     }
 
     public static void swapShoulder() {

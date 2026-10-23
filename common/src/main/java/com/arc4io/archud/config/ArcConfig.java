@@ -164,6 +164,9 @@ public class ArcConfig {
     public boolean weaponInspect = true;
     // ---- Камера от третьего лица (F6) ----
     public boolean cameraFreeLook = true;
+    /** F5: от первого лица → камера Arc → обычная от третьего → от первого. */
+    public boolean cameraInF5Cycle = true;
+    public boolean cameraFrontView = false;
     public boolean cameraSmoothing = true;
     public boolean cameraLeftShoulder = false;
     public boolean cameraCrosshair = true;
