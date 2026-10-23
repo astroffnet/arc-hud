@@ -27,11 +27,8 @@ public final class CuriosCompat {
                 .orElse(ItemStack.EMPTY);
     }
 
-    /** Tempad не выпадает из слота браслета после смерти. */
+    /** Tempad не выпадает из слота браслета после смерти (см. TempadKeeper). */
     public static void registerKeepTempad() {
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((top.theillusivec4.curios.api.event.DropRulesEvent e) ->
-                e.addOverride(stack -> com.arc4io.archud.config.ArcConfig.get().tempadKeepOnDeath
-                                && com.arc4io.archud.server.TempadServer.isTempadStack(stack),
-                        top.theillusivec4.curios.api.type.capability.ICurio.DropRule.ALWAYS_KEEP));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(TempadKeeper.class);
     }
 }
