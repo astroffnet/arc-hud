@@ -28,7 +28,8 @@
     "SelectWorldScreenAccessor",
     "EntityCullingMixin",
     "BlockEntityCullingMixin",
-    "DynamicFpsMixin"
+    "DynamicFpsMixin",
+    "EditGameRulesScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

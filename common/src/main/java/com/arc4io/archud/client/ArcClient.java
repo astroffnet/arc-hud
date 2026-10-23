@@ -30,6 +30,7 @@ public final class ArcClient {
     /** Вызывается в конце каждого клиентского тика. */
     public static void tick(Minecraft mc) {
         com.arc4io.archud.client.map.MapScanner.worldCheck(mc);
+        if (!(mc.screen instanceof com.arc4io.archud.client.screen.ScreenFit.Fits)) com.arc4io.archud.client.screen.ScreenFit.restore();
         ArcClientNet.tick(mc);
         if (mc.player == null) return;
         ArcConfig cfg = ArcConfig.get();

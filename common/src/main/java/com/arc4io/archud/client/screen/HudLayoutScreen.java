@@ -16,7 +16,7 @@ import java.util.List;
  * Расстановка блоков HUD по краям экрана. Экран прозрачный — в мире HUD видно вживую:
  * выбираешь блок в центре, кликаешь по нужной зоне экрана.
  */
-public class HudLayoutScreen extends Screen {
+public class HudLayoutScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private final Screen parent;
     private final List<Field> elements = new ArrayList<>();
     private int selected;
@@ -56,6 +56,7 @@ public class HudLayoutScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 360, 240);
         pw = Math.min(200, width / 3 - 8);
         ph = elements.size() * 16 + 44;
         px = (width - pw) / 2;

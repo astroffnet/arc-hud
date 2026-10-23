@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
  * серверы в локальной сети, быстрый вход на последний сервер (запоминается), добавление,
  * изменение, удаление, прямое подключение, перестановка (Shift + ↑/↓).
  */
-public class ArcMultiplayerScreen extends Screen {
+public class ArcMultiplayerScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int ROW = 44;
     private static final ExecutorService PING_POOL = Executors.newFixedThreadPool(5, r -> {
         Thread t = new Thread(r, "Arc HUD server ping");
@@ -91,6 +91,7 @@ public class ArcMultiplayerScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 400, 260);
         if (!initialized) {
             initialized = true;
             servers = new ServerList(minecraft);

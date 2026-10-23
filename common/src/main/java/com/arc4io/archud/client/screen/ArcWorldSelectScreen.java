@@ -44,7 +44,7 @@ import java.util.Optional;
  * «Одиночная игра» в стиле Arc: карточки миров с иконками, поиск, панель подробностей
  * (режим, читы, версия, дата) и действия — играть, создать, изменить, пересоздать, удалить.
  */
-public class ArcWorldSelectScreen extends Screen {
+public class ArcWorldSelectScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int ROW = 40;
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault());
     private final Screen parent;
@@ -143,6 +143,7 @@ public class ArcWorldSelectScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 480, 260);
         String old = search == null ? "" : search.getValue();
         search = addRenderableWidget(new EditBox(font, listX(), 28, listW(), 16, Component.translatable("selectWorld.search")));
         search.setHint(Component.translatable("selectWorld.search").withStyle(ChatFormatting.DARK_GRAY));

@@ -477,5 +477,14 @@
   "archud.config.hideFromMap": "Скрыть себя с карт других игроков",
   "archud.config.tempadNoCooldown": "Tempad без перезарядки",
   "archud.config.tempadKeepOnDeath": "Tempad остаётся в браслете после смерти",
-  "archud.wp.new_hint": "Enter / «Готово» — сохранить · Esc — отмена"
+  "archud.wp.new_hint": "Enter / «Готово» — сохранить · Esc — отмена",
+  "archud.rules.reset_all": "Сбросить всё",
+  "archud.rules.only_changed": "Только изменённые",
+  "archud.rules.all": "Все правила",
+  "archud.rules.all_cats": "Все",
+  "archud.rules.empty": "Ничего не найдено",
+  "archud.rules.changed": "Изменено: %s",
+  "archud.rules.reset": "Сбросить (по умолчанию: %s)",
+  "archud.config.customGameRules": "Новый экран «Игровые правила»",
+  "archud.config.autoGuiScale": "Автомасштаб экранов (4:3, маленькие окна)"
 }

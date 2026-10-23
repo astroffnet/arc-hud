@@ -18,7 +18,7 @@ import java.util.List;
  * Список HUD-элементов других модов (Forge-оверлеи) с возможностью скрыть любой.
  * Элементы, которые Arc HUD уже рисует в своём стиле, помечены «в Arc HUD».
  */
-public class ModOverlaysScreen extends Screen {
+public class ModOverlaysScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int ROW_H = 18;
     private final Screen parent;
     private final List<String> ids = new ArrayList<>();
@@ -33,6 +33,7 @@ public class ModOverlaysScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 360, 240);
         pw = Math.min(width - 20, 420);
         ph = height - 30;
         px = (width - pw) / 2;

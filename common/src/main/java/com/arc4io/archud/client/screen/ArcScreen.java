@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 /**
  * Базовый экран Arc: центральная стеклянная панель, заголовок, кнопка «Готово», возврат к родителю.
  */
-public abstract class ArcScreen extends Screen {
+public abstract class ArcScreen extends Screen implements ScreenFit.Fits {
     protected final Screen parent;
     protected int px, py, pw, ph;
 
@@ -19,6 +19,8 @@ public abstract class ArcScreen extends Screen {
     }
 
     protected void layout(int maxW, int maxH) {
+        // не хватает места при текущем масштабе интерфейса — уменьшаем масштаб, а не сжимаем кнопки друг на друга
+        ScreenFit.ensure(this, Math.min(maxW + 16, 640), Math.min(maxH + 16, 400));
         pw = Math.min(width - 16, maxW);
         ph = Math.min(height - 16, maxH);
         px = (width - pw) / 2;

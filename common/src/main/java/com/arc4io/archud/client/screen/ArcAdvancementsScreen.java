@@ -26,7 +26,7 @@ import java.util.Map;
  * Новое меню достижений: вкладки-категории слева с процентом, карточки достижений с описанием,
  * прогрессом и датой получения, фильтры «все / получены / не получены», поиск.
  */
-public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.Listener {
+public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.Listener, com.arc4io.archud.client.screen.ScreenFit.Fits {
     private static final int CARD_H = 34;
     private final ClientAdvancements advancements;
     private final List<Advancement> roots = new ArrayList<>();
@@ -45,6 +45,7 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 420, 260);
         pw = Math.min(width - 16, 560);
         ph = height - 16;
         px = (width - pw) / 2;

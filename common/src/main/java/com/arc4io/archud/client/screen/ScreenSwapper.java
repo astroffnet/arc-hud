@@ -62,6 +62,12 @@ public final class ScreenSwapper {
     }
 
     public static Screen swap(Screen next, Screen current) {
+        Screen result = swapInner(next, current);
+        ScreenFit.onScreenChange(result);
+        return result;
+    }
+
+    private static Screen swapInner(Screen next, Screen current) {
         if (next == null) return null;
         ArcConfig cfg = ArcConfig.get();
         if (next instanceof TitleScreen && titleScreenActive()) {
@@ -104,6 +110,10 @@ public final class ScreenSwapper {
         }
         if (cfg.customWorldSelect && c == net.minecraft.client.gui.screens.worldselection.SelectWorldScreen.class) {
             return new ArcWorldSelectScreen(((com.arc4io.archud.mixin.SelectWorldScreenAccessor) next).archud$lastScreen());
+        }
+        if (cfg.customGameRules && c == net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen.class) {
+            var acc = (com.arc4io.archud.mixin.EditGameRulesScreenAccessor) next;
+            return new ArcGameRulesScreen(acc.archud$gameRules(), acc.archud$exitCallback());
         }
         if (cfg.customMultiplayer && c == net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen.class) {
             Screen back = ((com.arc4io.archud.mixin.JoinMultiplayerScreenAccessor) next).archud$lastScreen();

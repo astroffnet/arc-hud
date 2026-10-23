@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 /**
  * Новое меню паузы: без «Оставить отзыв» и «Нашли ошибку?», с картой, модами, скином и Arc HUD.
  */
-public class ArcPauseScreen extends Screen {
+public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
     private int px, py, pw, ph;
 
     public ArcPauseScreen() {
@@ -29,6 +29,7 @@ public class ArcPauseScreen extends Screen {
 
     @Override
     protected void init() {
+        com.arc4io.archud.client.screen.ScreenFit.ensure(this, 240, 270);
         pw = 220;
         int bw = pw - 20;
         int half = (bw - 6) / 2;
