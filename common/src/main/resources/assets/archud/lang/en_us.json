@@ -431,5 +431,9 @@
   "archud.config.customTabList": "New player list (Tab)",
   "archud.layout.bars": "Hotbar & bars",
   "archud.layout.size": "Size: %s%%",
-  "archud.layout.size_hint": "Mouse wheel — size of the selected block"
+  "archud.layout.size_hint": "Mouse wheel — size of the selected block",
+  "key.archud.inspect": "Inspect item",
+  "archud.inspect.title": "Inspecting",
+  "archud.config.weaponInspect": "Item inspect (CS2-style)",
+  "archud.config.inspectCard": "Item card while inspecting"
 }

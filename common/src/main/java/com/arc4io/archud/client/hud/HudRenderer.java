@@ -268,6 +268,7 @@ public final class HudRenderer {
             if (cfg.bhopHud && cfg.bunnyHop) bhopHud(g, font, w, h, accent);
         }
         HudBlocks.renderAnchored(g, mc, p, font, w, h, accent, now, debug, spectator);
+        com.arc4io.archud.client.fx.InspectCard.render(g, font, w, h, partialTick);
     }
 
     // ---------------------------------------------------------------- хотбар

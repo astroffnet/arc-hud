@@ -62,6 +62,10 @@ public final class ArcClient {
                 mc.setScreen(new com.arc4io.archud.client.screen.HostPanelScreen(null));
             }
         }
+        while (ArcKeys.INSPECT.consumeClick()) {
+            if (mc.screen == null) com.arc4io.archud.client.fx.WeaponInspect.start(mc);
+        }
+        com.arc4io.archud.client.fx.WeaponInspect.tick(mc);
         while (ArcKeys.WAYPOINTS.consumeClick()) {
             if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.map.WaypointListScreen(null));
         }
