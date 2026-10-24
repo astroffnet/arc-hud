@@ -24,6 +24,11 @@ loom {
     mixin {
         defaultRefmapName = 'archud.refmap.json'
     }
+    runs {
+        client {
+            programArgs "--width", "1920", "--height", "1080"
+        }
+    }
 }
 
 // Общий код Forge + Fabric
