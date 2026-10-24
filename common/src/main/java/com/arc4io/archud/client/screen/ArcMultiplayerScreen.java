@@ -122,13 +122,14 @@ public class ArcMultiplayerScreen extends Screen implements com.arc4io.archud.cl
                 b -> minecraft.setScreen(new ArcServerEditScreen(this, null, true))).icon(Icons.SIGNAL));
         addRenderableWidget(new ArcButton(lx + (third + 4) * 2, y1, lw - (third + 4) * 2, 20, Component.translatable("selectServer.add"),
                 b -> minecraft.setScreen(new ArcServerEditScreen(this, null, false))).icon(Icons.STAR));
-        int q = (lw - 12 - 44) / 3;
+        int backW = Math.min(90, Math.max(60, lw / 6));
+        int q = (lw - 60 - backW) / 3;
         edit = addRenderableWidget(new ArcButton(lx, y2, q, 20, Component.translatable("selectServer.edit"), b -> editSelected()));
         delete = addRenderableWidget(new ArcButton(lx + q + 4, y2, q, 20, Component.translatable("selectServer.delete"), b -> deleteSelected()).danger());
         addRenderableWidget(new ArcButton(lx + (q + 4) * 2, y2, q, 20, Component.translatable("selectServer.refresh"), b -> refresh()));
         up = addRenderableWidget(new ArcButton(lx + (q + 4) * 3, y2, 20, 20, Component.literal("▲"), b -> move(-1)));
         down = addRenderableWidget(new ArcButton(lx + (q + 4) * 3 + 24, y2, 20, 20, Component.literal("▼"), b -> move(1)));
-        addRenderableWidget(new ArcButton(width - 12 - 90, height - 30, 90, 20, CommonComponents.GUI_BACK, b -> onClose()));
+        addRenderableWidget(new ArcButton(lx + lw - backW, y2, backW, 20, CommonComponents.GUI_BACK, b -> onClose()));
         updateButtons();
     }
 
