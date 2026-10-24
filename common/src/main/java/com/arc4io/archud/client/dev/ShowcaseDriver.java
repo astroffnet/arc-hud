@@ -69,7 +69,13 @@ public final class ShowcaseDriver {
     private static void build() {
         add(200, mc -> {
             mc.options.guiScale().set(3);
+            mc.options.onboardAccessibility = false;
+            mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
+            mc.options.save();
+            ArcConfig.get().fps = false; // в CI программный рендер — FPS на скринах не показываем
             mc.resizeDisplay();
+            mc.setScreen(new TitleScreen());
             title = mc.screen;
         }, null);
         add(60, mc -> {}, "01_title_screen");
@@ -102,7 +108,9 @@ public final class ShowcaseDriver {
         // ждём мир
         addWaitWorld();
         add(10, ShowcaseDriver::prepareWorld, null);
-        add(400, mc -> mc.setScreen(null), null); // прогрузка чанков и карты
+        add(200, mc -> mc.setScreen(null), null); // прогрузка чанков
+        add(10, ShowcaseDriver::addWaypoints, null);
+        add(300, mc -> mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE), null); // карта
         add(10, mc -> lookAt(mc, 1), null);
         add(40, mc -> {}, "05_hud_and_minimap");
         add(10, mc -> lookAt(mc, 0), null);
@@ -194,9 +202,27 @@ public final class ShowcaseDriver {
             sp.setHealth(15F);
             sp.getFoodData().setFoodLevel(16);
             sp.giveExperienceLevels(23);
-            sp.connection.teleport(sp.getX(), lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, sp.getBlockX(), sp.getBlockZ()) + 6,
-                    sp.getZ(), sp.getYRot(), 10F);
+            server.setDifficulty(Difficulty.PEACEFUL, true);
+            int tx = sp.getBlockX(), tz = sp.getBlockZ();
+            try {
+                var found = lvl.findClosestBiome3d(b -> b.is(net.minecraft.world.level.biome.Biomes.PLAINS)
+                        || b.is(net.minecraft.world.level.biome.Biomes.SUNFLOWER_PLAINS) || b.is(net.minecraft.world.level.biome.Biomes.MEADOW)
+                        || b.is(net.minecraft.world.level.biome.Biomes.SAVANNA), sp.blockPosition(), 3000, 32, 64);
+                if (found != null) {
+                    tx = found.getFirst().getX();
+                    tz = found.getFirst().getZ();
+                }
+            } catch (Throwable t) {
+                ArcHud.LOGGER.warn("[Showcase] biome search failed", t);
+            }
+            lvl.getChunk(tx >> 4, tz >> 4);
+            int ty = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
+            sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
         });
+    }
+
+    private static void addWaypoints(Minecraft mc) {
+        if (mc.player == null) return;
         // метки вокруг
         int x = mc.player.getBlockX(), y = mc.player.getBlockY(), z = mc.player.getBlockZ();
         String dim = WaypointManager.currentDimension();
@@ -247,6 +273,7 @@ public final class ShowcaseDriver {
         }
         if (--timer > 0) return;
         if (step.shot() != null) {
+            mc.getToasts().clear();
             Screenshot.grab(mc.gameDirectory, step.shot() + ".png", mc.getMainRenderTarget(), msg -> {});
             ArcHud.LOGGER.info("[Showcase] screenshot {}", step.shot());
         }
