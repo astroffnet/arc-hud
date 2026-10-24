@@ -55,6 +55,8 @@ public final class ShowcaseDriver {
     private static final List<Step> STEPS = new ArrayList<>();
     private static int index = -1, timer, guard;
     private static boolean enabled;
+    /** Показать Tab в одиночной игре (ванилла скрывает его, когда игрок один). */
+    public static boolean forceTab;
     private static Screen title;
 
     private ShowcaseDriver() {}
@@ -110,21 +112,23 @@ public final class ShowcaseDriver {
         add(10, ShowcaseDriver::prepareWorld, null);
         add(200, mc -> mc.setScreen(null), null); // прогрузка чанков
         add(10, ShowcaseDriver::addWaypoints, null);
-        add(300, mc -> mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE), null); // карта
+        add(600, mc -> mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE), null); // карта
         add(10, mc -> lookAt(mc, 1), null);
         add(40, mc -> {}, "05_hud_and_minimap");
         add(10, mc -> lookAt(mc, 0), null);
         add(40, mc -> {}, "06_waypoints_in_world");
-        add(10, mc -> mc.options.keyPlayerList.setDown(true), null);
+        add(10, mc -> forceTab = true, null);
         add(20, mc -> {}, "07_player_list");
         add(10, mc -> {
-            mc.options.keyPlayerList.setDown(false);
+            forceTab = false;
             ArcCamera.toggle(mc);
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.empty(), false);
         }, null);
         add(80, mc -> {}, "08_third_person_camera");
         add(10, mc -> {
             ArcCamera.toggle(mc);
             mc.options.setCameraType(CameraType.FIRST_PERSON);
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.empty(), false);
             WeaponInspect.start(mc);
         }, null);
         add(26, mc -> {}, "09_item_inspect");
@@ -196,9 +200,9 @@ public final class ShowcaseDriver {
             sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
             sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
             sp.getInventory().selected = 0;
-            sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 600, 0));
-            sp.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 600, 0));
-            sp.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 90, 1));
+            sp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 600, 0, false, false, true));
+            sp.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 600, 0, false, false, true));
+            sp.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 90, 1, false, false, true));
             sp.setHealth(15F);
             sp.getFoodData().setFoodLevel(16);
             sp.giveExperienceLevels(23);
@@ -248,7 +252,13 @@ public final class ShowcaseDriver {
             mc.player.setYRot(yaw);
             mc.player.setXRot(8F);
         } else {
-            mc.player.setXRot(12F);
+            var all = WaypointManager.all();
+            for (Waypoint t : all) {
+                if (!"Village".equals(t.name)) continue;
+                double dx = t.x + 0.5 - mc.player.getX(), dz = t.z + 0.5 - mc.player.getZ();
+                mc.player.setYRot((float) Math.toDegrees(Math.atan2(-dx, dz)));
+            }
+            mc.player.setXRot(10F);
         }
     }
 
