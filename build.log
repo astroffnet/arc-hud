@@ -1,0 +1,50 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+MixinGradle did not locate the diffplug APT plugin, skipping eclipse task configuration
+
+> Task :downloadMcpConfig
+> Task :extractSrg
+> Task :createMcpToSrg
+
+> Task :compileJava
+Note: SpongePowered MIXIN Annotation Processor Version=0.8.5 (MixinGradle Version=0.7.38)
+Note: Supported obfuscation types: ObfuscationServiceMCP supports [notch] ObfuscationServiceFG3 supports [searge]
+Note: Loading searge mappings from /home/runner/work/arc-hud/arc-hud/forge/build/createMcpToSrg/output.tsrg
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :addMixinsToJar
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :configureReobfTaskForReobfJar
+> Task :reobfJar
+> Task :configureReobfTaskForReobfJarJar
+> Task :addMixinsToJarJar
+> Task :jarJar SKIPPED
+> Task :reobfJarJar SKIPPED
+> Task :assemble
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1792846757744.json
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 26s
+11 actionable tasks: 11 executed
