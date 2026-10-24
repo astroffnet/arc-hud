@@ -58,6 +58,7 @@ public final class ShowcaseDriver {
     /** Показать Tab в одиночной игре (ванилла скрывает его, когда игрок один). */
     public static boolean forceTab;
     private static Screen title;
+    private static volatile double[] spot;
 
     private ShowcaseDriver() {}
 
@@ -113,7 +114,8 @@ public final class ShowcaseDriver {
         add(200, mc -> mc.setScreen(null), null); // прогрузка чанков
         add(10, ShowcaseDriver::addWaypoints, null);
         add(600, mc -> mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE), null); // карта
-        add(10, mc -> lookAt(mc, 1), null);
+        add(10, ShowcaseDriver::returnToSpot, null);
+        add(30, mc -> lookAt(mc, 1), null);
         add(40, mc -> {}, "05_hud_and_minimap");
         add(10, mc -> lookAt(mc, 0), null);
         add(40, mc -> {}, "06_waypoints_in_world");
@@ -222,6 +224,21 @@ public final class ShowcaseDriver {
             lvl.getChunk(tx >> 4, tz >> 4);
             int ty = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
+            spot = new double[]{tx + 0.5, ty + 1, tz + 0.5};
+        });
+    }
+
+    /** Вернуть игрока на выбранную точку (за время прогрузки его могло снести водой). */
+    private static void returnToSpot(Minecraft mc) {
+        var server = mc.getSingleplayerServer();
+        double[] p = spot;
+        if (server == null || mc.player == null || p == null) return;
+        var uuid = mc.player.getUUID();
+        server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(uuid);
+            if (sp == null) return;
+            sp.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            sp.teleportTo(server.overworld(), p[0], p[1], p[2], sp.getYRot(), 10F);
         });
     }
 
