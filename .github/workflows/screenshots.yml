@@ -1,0 +1,87 @@
+name: Arc HUD screenshots & smoke test
+
+# Запускается пушем в ветку "screenshots": настоящий клиент Minecraft на виртуальном экране,
+# мод сам проходит по экранам (ARCHUD_TOUR=1), снимает скриншоты и закрывает игру.
+on:
+  push:
+    branches: [ "screenshots" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tour:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - loader: forge
+            lang: en_us
+          - loader: fabric
+            lang: ru_ru
+    name: Tour (${{ matrix.loader }}, ${{ matrix.lang }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.8"
+
+      - name: Virtual display + software OpenGL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-utils libglu1-mesa > /dev/null
+
+      - name: Game options
+        run: |
+          mkdir -p ${{ matrix.loader }}/run
+          cat > ${{ matrix.loader }}/run/options.txt <<EOF
+          version:3465
+          lang:${{ matrix.lang }}
+          guiScale:3
+          renderDistance:6
+          simulationDistance:6
+          onboardAccessibility:false
+          skipMultiplayerWarning:true
+          joinedFirstServer:true
+          tutorialStep:none
+          narrator:0
+          soundCategory_master:0.0
+          maxFps:60
+          fullscreen:false
+          EOF
+
+      - name: Run client tour
+        working-directory: ${{ matrix.loader }}
+        env:
+          ARCHUD_TOUR: "1"
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          MESA_GL_VERSION_OVERRIDE: "4.5"
+        run: |
+          set -o pipefail
+          timeout 35m xvfb-run -a -s "-screen 0 1920x1080x24" gradle runClient --no-daemon --args="--width 1920 --height 1080" 2>&1 | tee tour.log || true
+
+      - name: Publish screenshots and logs
+        if: always()
+        run: |
+          mkdir -p /tmp/out
+          cp ${{ matrix.loader }}/run/screenshots/*.png /tmp/out/ 2>/dev/null || true
+          cp ${{ matrix.loader }}/run/logs/latest.log /tmp/out/latest.log 2>/dev/null || true
+          cp ${{ matrix.loader }}/tour.log /tmp/out/tour.log 2>/dev/null || true
+          cp -r ${{ matrix.loader }}/run/crash-reports /tmp/out/ 2>/dev/null || true
+          echo "${{ github.sha }}" > /tmp/out/STATUS.txt
+          cd /tmp/out
+          git init -q -b shots-${{ matrix.loader }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Screenshots ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:shots-${{ matrix.loader }}
