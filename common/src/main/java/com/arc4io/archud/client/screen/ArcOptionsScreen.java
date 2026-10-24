@@ -54,10 +54,10 @@ public class ArcOptionsScreen extends ArcScreen {
                 new Tile(Component.translatable("options.sounds"), Icons.SIGNAL, () -> minecraft.setScreen(ArcOptionListScreen.sound(this, options))),
                 new Tile(Component.translatable("options.controls"), Icons.COMPASS, () -> minecraft.setScreen(new ControlsScreen(this, options))),
                 new Tile(Component.translatable("options.language"), Icons.GLOBE, () -> minecraft.setScreen(new ArcLanguageScreen(this, options))),
-                new Tile(Component.translatable("options.chat"), Icons.CHIP, () -> minecraft.setScreen(ArcOptionListScreen.chat(this, options))),
+                new Tile(Component.translatable("options.chat.title"), Icons.CHIP, () -> minecraft.setScreen(ArcOptionListScreen.chat(this, options))),
                 new Tile(Component.translatable("options.skinCustomisation"), Icons.HEART, () -> minecraft.setScreen(new ArcAppearanceScreen(this, options))),
                 new Tile(Component.translatable("options.resourcepack"), Icons.BACKPACK, () -> minecraft.setScreen(new ArcPackScreen(this, options))),
-                new Tile(Component.translatable("options.accessibility"), Icons.LIGHT, () -> minecraft.setScreen(ArcOptionListScreen.accessibility(this, options))),
+                new Tile(Component.translatable("options.accessibility.title"), Icons.LIGHT, () -> minecraft.setScreen(ArcOptionListScreen.accessibility(this, options))),
                 new Tile(Component.translatable("archud.menu.arc_settings"), Icons.STAR, () -> minecraft.setScreen(new ArcConfigScreen(this))),
         };
         java.util.List<Tile> all = new java.util.ArrayList<>(java.util.List.of(base));

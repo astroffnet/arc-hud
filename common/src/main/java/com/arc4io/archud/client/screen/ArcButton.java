@@ -88,6 +88,26 @@ public class ArcButton extends AbstractButton {
         if (hover > 0.01F) g.fill(x + 2, y + h - 2, x + 2 + Math.round((w - 4) * hover), y + h - 1, Draw.alpha(accent, 0xFF));
         int color = !active ? 0xFF6A7380 : Draw.mix(0xFFDCE6F0, 0xFFFFFFFF, hover);
         int textW = font.width(getMessage());
+        int iconW = icon >= 0 ? 12 : 0;
+        int room = w - 6 - iconW;
+        if (textW > room && room > 0) {
+            // длинная подпись: уменьшить шрифт (до 60%), а если и так не влезает — обрезать с «…»
+            float s = Math.max(0.6F, room / (float) textW);
+            String text = getMessage().getString();
+            if (textW * s > room) text = font.plainSubstrByWidth(text, (int) (room / s) - font.width("…")) + "…";
+            float tw = font.width(text) * s;
+            float tx = x + (w - tw - iconW) / 2F;
+            if (icon >= 0) {
+                Draw.icon(g, icon, Math.round(tx), y + (h - 9) / 2);
+                tx += iconW;
+            }
+            g.pose().pushPose();
+            g.pose().translate(tx, y + (h - 8 * s) / 2F, 0);
+            g.pose().scale(s, s, 1F);
+            g.drawString(font, text, 0, 0, color, true);
+            g.pose().popPose();
+            return;
+        }
         int tx = x + (w - textW) / 2;
         if (icon >= 0) {
             tx -= 6;
