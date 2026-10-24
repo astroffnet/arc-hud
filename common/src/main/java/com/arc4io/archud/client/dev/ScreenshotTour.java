@@ -47,7 +47,7 @@ import java.util.function.BooleanSupplier;
 public final class ScreenshotTour {
     public static final boolean ENABLED = "1".equals(System.getenv("ARCHUD_TOUR"));
 
-    private record Step(String name, Runnable action, int wait, BooleanSupplier ready, String shot) {}
+    private record Step(String name, Runnable action, int delay, BooleanSupplier ready, String shot) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
     private static int index, timer, waitedForReady, totalTicks;
@@ -178,7 +178,7 @@ public final class ScreenshotTour {
                 }
                 return;
             }
-            if (++timer < s.wait()) return;
+            if (++timer < s.delay()) return;
             if (s.shot() != null) {
                 Screenshot.grab(mc.gameDirectory, s.shot() + ".png", mc.getMainRenderTarget(),
                         msg -> ArcHud.LOGGER.info("ARCHUD_TOUR: shot {} -> {}", s.shot(), msg.getString()));
