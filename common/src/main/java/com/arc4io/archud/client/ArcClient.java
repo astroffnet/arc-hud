@@ -21,6 +21,7 @@ public final class ArcClient {
         platform = p;
         com.arc4io.archud.compat.Integrations.init();
         ArcClientNet.init();
+        com.arc4io.archud.client.dev.ShowcaseDriver.init();
     }
 
     public static ClientPlatform platform() {
@@ -29,6 +30,7 @@ public final class ArcClient {
 
     /** Вызывается в конце каждого клиентского тика. */
     public static void tick(Minecraft mc) {
+        com.arc4io.archud.client.dev.ShowcaseDriver.tick(mc);
         com.arc4io.archud.client.dev.ScreenshotTour.tick(mc);
         com.arc4io.archud.client.map.MapScanner.worldCheck(mc);
         if (!(mc.screen instanceof com.arc4io.archud.client.screen.ScreenFit.Fits)) com.arc4io.archud.client.screen.ScreenFit.restore();
