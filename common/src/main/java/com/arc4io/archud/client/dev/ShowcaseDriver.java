@@ -50,7 +50,7 @@ import java.util.function.Consumer;
  * У обычных игроков не работает.
  */
 public final class ShowcaseDriver {
-    private record Step(int wait, Consumer<Minecraft> action, String shot) {}
+    private record Step(int delay, Consumer<Minecraft> action, String shot) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
     private static int index = -1, timer, guard;
@@ -149,8 +149,8 @@ public final class ShowcaseDriver {
         }, null);
     }
 
-    private static void add(int wait, Consumer<Minecraft> action, String shot) {
-        STEPS.add(new Step(wait, action, shot));
+    private static void add(int delay, Consumer<Minecraft> action, String shot) {
+        STEPS.add(new Step(delay, action, shot));
     }
 
     private static final Consumer<Minecraft> WAIT_WORLD = mc -> {};
@@ -239,7 +239,7 @@ public final class ShowcaseDriver {
             return;
         }
         Step step = STEPS.get(index);
-        if (step.wait() < 0) {
+        if (step.delay() < 0) {
             // ждать загрузки мира
             if (mc.level != null && mc.player != null && mc.screen == null) next(mc);
             else if (mc.level != null && mc.player != null && mc.screen != null && mc.screen.isPauseScreen()) mc.setScreen(null);
@@ -262,6 +262,6 @@ public final class ShowcaseDriver {
         } catch (Throwable t) {
             ArcHud.LOGGER.error("[Showcase] step {} failed", index, t);
         }
-        timer = Math.max(1, s.wait());
+        timer = Math.max(1, s.delay());
     }
 }
