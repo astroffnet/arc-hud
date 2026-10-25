@@ -50,8 +50,10 @@ public abstract class PlayerRendererBodyMixin {
             at = @At("RETURN"), cancellable = true, require = 0)
     private void archud$offset(AbstractClientPlayer p, float pt, CallbackInfoReturnable<Vec3> cir) {
         if (!archud$self(p)) return;
-        float yaw = Mth.lerp(pt, p.yBodyRotO, p.yBodyRot) * Mth.DEG_TO_RAD;
-        double back = 0.27;
+        // назад по направлению взгляда (а не тела), чтобы плечи не попадали в кадр; сильнее, когда смотрим вниз
+        float yaw = p.getViewYRot(pt) * Mth.DEG_TO_RAD;
+        float pitch = Math.max(0F, p.getViewXRot(pt));
+        double back = 0.3 + 0.22 * pitch / 90.0;
         cir.setReturnValue(cir.getReturnValue().add(Mth.sin(yaw) * back, 0, -Mth.cos(yaw) * back));
     }
 }

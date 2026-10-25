@@ -101,6 +101,10 @@ public class ArcEnchantmentScreen extends EnchantmentScreen {
             requestTimer = 3; // данные о стоимости приходят чуть позже предмета
         }
         if (requestTimer > 0 && --requestTimer == 0 && EnchantClient.serverSupports()) EnchantClient.requestPreview(menu.containerId);
+        // ответ мог потеряться (сервер ещё не открыл меню и т.п.) — повторяем, пока данных нет
+        if (!hasData() && EnchantClient.serverSupports() && minecraft.player != null && minecraft.player.tickCount % 40 == 0) {
+            EnchantClient.requestPreview(menu.containerId);
+        }
         int power = hasData() ? EnchantClient.power : 0;
         int ok = Objects.hash(itemKey, power);
         if (ok != optionsKey) {
