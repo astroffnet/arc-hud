@@ -552,5 +552,16 @@
   "archud.ench.conflict": "Несовместимо с: %s",
   "archud.ench.more_shelves": "Больше книжных полок — выше максимальный уровень",
   "archud.config.enchantSelective": "Стол: выбор зачарований",
-  "archud.config.enchantReroll": "Стол: переброс вариантов"
+  "archud.config.enchantReroll": "Стол: переброс вариантов",
+  "key.archud.fp_style": "Вид от первого лица",
+  "archud.fp.mode": "Первое лицо: %s",
+  "archud.fp.vanilla": "Обычный",
+  "archud.fp.enhanced": "Улучшенный",
+  "archud.fp.bodycam": "Бодикам",
+  "archud.config.firstPersonStyle": "Вид от первого лица (F7)",
+  "archud.config.firstPersonBody": "Своё тело от первого лица",
+  "archud.config.bodycamFov": "Бодикам: угол обзора",
+  "archud.config.bodycamLens": "Бодикам: эффект объектива",
+  "archud.config.bodycamOverlay": "Бодикам: надпись REC",
+  "archud.config.bodycamHideCrosshair": "Бодикам: скрыть прицел"
 }

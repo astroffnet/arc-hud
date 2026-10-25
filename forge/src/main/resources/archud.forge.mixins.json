@@ -9,6 +9,13 @@
     "CraftingMenuMixin"
   ],
   "client": [
+    "GameRendererCamMixin",
+    "GuiCrosshairMixin",
+    "LevelRendererBodyMixin",
+    "PlayerRendererBodyMixin",
+    "BodyLayersMixin",
+    "HeldItemLayerMixin",
+    "HeadLayerMixin",
     "EnchantmentScreenInvoker",
     "ChatComponentAccessor",
     "ChatComponentMixin",

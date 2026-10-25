@@ -533,6 +533,16 @@ public class ArcEnchantmentScreen extends EnchantmentScreen {
         return false;
     }
 
+    /** Для автоматических скриншотов: вкладка «Выбор» с парой выбранных зачарований. */
+    public void showcasePick() {
+        tab = 1;
+        containerTick();
+        for (EnchantLogic.Option o : options) {
+            String id = String.valueOf(net.minecraft.core.registries.BuiltInRegistries.ENCHANTMENT.getKey(o.enchantment()));
+            if (id.endsWith(":protection") || id.endsWith(":unbreaking")) chosen.put(o.enchantment(), o.maxLevel());
+        }
+    }
+
     private void setTab(int t) {
         if (tab != t) click();
         tab = t;

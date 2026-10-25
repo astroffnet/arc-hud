@@ -134,6 +134,17 @@ public final class ShowcaseDriver {
             WeaponInspect.start(mc);
         }, null);
         add(26, mc -> {}, "09_item_inspect");
+        add(10, mc -> {
+            ArcConfig.get().firstPersonStyle = 1;
+            if (mc.player != null) mc.player.setXRot(62F);
+        }, null);
+        add(40, mc -> {}, "09b_first_person_enhanced");
+        add(10, mc -> {
+            ArcConfig.get().firstPersonStyle = 2;
+            lookAt(mc, 0);
+        }, null);
+        add(60, mc -> {}, "09c_bodycam");
+        add(10, mc -> ArcConfig.get().firstPersonStyle = 0, null);
         add(60, mc -> mc.setScreen(new WorldMapScreen(null)), null);
         add(60, mc -> {}, "10_world_map");
         add(10, mc -> mc.setScreen(new WaypointListScreen(null)), null);
@@ -151,6 +162,10 @@ public final class ShowcaseDriver {
             openEnchanting(mc);
         }, null);
         add(60, mc -> {}, "15b_enchanting");
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.screen.ArcEnchantmentScreen s) s.showcasePick();
+        }, null);
+        add(30, mc -> {}, "15c_enchanting_pick");
         add(10, mc -> {
             if (mc.player != null) mc.player.closeContainer();
         }, null);
@@ -260,7 +275,7 @@ public final class ShowcaseDriver {
                     net.minecraft.network.chat.Component.translatable("container.enchant")));
             if (sp.containerMenu instanceof net.minecraft.world.inventory.EnchantmentMenu m) {
                 m.getSlot(0).set(new ItemStack(Items.DIAMOND_CHESTPLATE));
-                m.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI, 2));
+                m.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI, 10));
                 m.broadcastChanges();
             }
         });

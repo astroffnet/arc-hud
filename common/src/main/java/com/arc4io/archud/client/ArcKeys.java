@@ -32,7 +32,9 @@ public final class ArcKeys {
     public static final KeyMapping CAMERA = new KeyMapping("key.archud.camera", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F6, CATEGORY);
     public static final KeyMapping CAMERA_SHOULDER = new KeyMapping("key.archud.camera_shoulder", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
 
-    public static final List<KeyMapping> ALL = List.of(CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
+    public static final KeyMapping FP_STYLE = new KeyMapping("key.archud.fp_style", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F7, CATEGORY);
+
+    public static final List<KeyMapping> ALL = List.of(CAMERA, FP_STYLE, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
             WORLD_MAP, ADD_WAYPOINT, WAYPOINTS, ZOOM_IN, ZOOM_OUT, HOST_PANEL);
 
     private ArcKeys() {}
