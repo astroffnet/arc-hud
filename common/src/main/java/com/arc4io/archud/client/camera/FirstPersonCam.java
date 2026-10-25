@@ -281,20 +281,19 @@ public final class FirstPersonCam {
         g.fill(m, h - m - l, m + 1, h - m, c);
         g.fill(w - m - l, h - m - 1, w - m, h - m, c);
         g.fill(w - m - 1, h - m - l, w - m, h - m, c);
-        // REC
+        // REC и время — внизу слева (сверху и по бокам место занято HUD)
         boolean blink = (Util.getMillis() / 600) % 2 == 0;
-        int rx = w / 2 - 70, ry = 16;
+        int rx = m + 4, ry = h - m - 20;
         if (blink) g.fill(rx, ry + 1, rx + 5, ry + 6, 0xFFFF3030);
         Draw.small(g, font, "REC", rx + 8, ry, 0xFFFFFFFF, 0.75F);
         String stamp = LocalDateTime.now().format(STAMP);
-        Draw.small(g, font, stamp, rx + 30, ry, 0xFFFFFFFF, 0.75F);
-        // подпись внизу
+        Draw.small(g, font, stamp, rx + 28, ry, 0xFFFFFFFF, 0.75F);
         String unit = "ARC BODYCAM · " + mc.player.getGameProfile().getName().toUpperCase(java.util.Locale.ROOT);
         Draw.small(g, font, unit, m + 4, h - m - 10, 0xD0FFFFFF, 0.6F);
         String coords = String.format(java.util.Locale.ROOT, "%d %d %d", mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ());
         Draw.small(g, font, coords, w - m - 4 - font.width(coords) * 0.6F, h - m - 10, 0xD0FFFFFF, 0.6F);
         // батарея
-        int bx = w - m - 26, by = m + 5;
+        int bx = w - m - 22, by = h - m - 21;
         g.fill(bx, by, bx + 16, by + 1, c);
         g.fill(bx, by + 7, bx + 16, by + 8, c);
         g.fill(bx, by, bx + 1, by + 8, c);

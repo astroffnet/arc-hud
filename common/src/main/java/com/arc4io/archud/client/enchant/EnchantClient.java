@@ -56,6 +56,7 @@ public final class EnchantClient {
     }
 
     public static void requestPreview(int id) {
+        if ("1".equals(System.getenv("ARCHUD_SHOWCASE"))) com.arc4io.archud.ArcHud.LOGGER.info("[Showcase] enchant preview request {}", id);
         FriendlyByteBuf b = ArcNet.create("ench_preview");
         b.writeVarInt(id);
         ArcNet.sendToServer(b);

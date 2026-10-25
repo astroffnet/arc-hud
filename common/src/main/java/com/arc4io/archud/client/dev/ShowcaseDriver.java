@@ -244,6 +244,25 @@ public final class ShowcaseDriver {
             } catch (Throwable t) {
                 ArcHud.LOGGER.warn("[Showcase] biome search failed", t);
             }
+            // сухая точка (не на воде): ищем вокруг найденного места
+            int bestX = tx, bestZ = tz;
+            search:
+            for (int r = 0; r <= 48; r += 2) {
+                for (int dx = -r; dx <= r; dx += 2) for (int dz = -r; dz <= r; dz += 2) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                    int x = tx + dx, z = tz + dz;
+                    lvl.getChunk(x >> 4, z >> 4);
+                    int h = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                    var below = new net.minecraft.core.BlockPos(x, h - 1, z);
+                    if (lvl.getFluidState(below).isEmpty() && lvl.getBlockState(below).isSolid() && h > lvl.getSeaLevel()) {
+                        bestX = x;
+                        bestZ = z;
+                        break search;
+                    }
+                }
+            }
+            tx = bestX;
+            tz = bestZ;
             lvl.getChunk(tx >> 4, tz >> 4);
             int ty = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);

@@ -36,6 +36,9 @@ public final class ArcNet {
     private static Consumer<FriendlyByteBuf> toServer;
     private static java.util.function.BooleanSupplier serverHasMod = () -> false;
 
+    /** Первые ошибки разбора пакетов пишутся в лог (дальше молча, чтобы не засорять). */
+    private static int errors;
+
     private ArcNet() {}
 
     public static void setServerSide(BiConsumer<ServerPlayer, FriendlyByteBuf> sender, Predicate<ServerPlayer> hasMod) {
@@ -87,7 +90,7 @@ public final class ArcNet {
             ServerHandler h = SERVER.get(type);
             if (h != null && player != null) h.handle(player, buf);
         } catch (Throwable t) {
-            ArcHud.LOGGER.debug("Arc HUD: bad packet from {}", player == null ? "?" : player.getGameProfile().getName(), t);
+            if (errors++ < 10) ArcHud.LOGGER.warn("Arc HUD: bad packet from {}", player == null ? "?" : player.getGameProfile().getName(), t);
         }
     }
 
@@ -98,7 +101,7 @@ public final class ArcNet {
             Consumer<FriendlyByteBuf> h = CLIENT.get(type);
             if (h != null) h.accept(buf);
         } catch (Throwable t) {
-            ArcHud.LOGGER.debug("Arc HUD: bad server packet", t);
+            if (errors++ < 10) ArcHud.LOGGER.warn("Arc HUD: bad server packet", t);
         }
     }
 
