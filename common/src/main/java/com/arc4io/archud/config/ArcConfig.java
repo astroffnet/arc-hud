@@ -158,6 +158,10 @@ public class ArcConfig {
     public boolean customModList = true;
     public boolean customInventory = true;
     public boolean customEnchanting = true;
+    /** Новое креатив-меню Arc HUD. */
+    public boolean customCreative = true;
+    /** Избранные предметы креатив-меню (NBT стака одной строкой). */
+    public java.util.List<String> creativeFavorites = new java.util.ArrayList<>();
     /** Выборочное зачарование (решает хост / сервер). */
     public boolean enchantSelective = true;
     /** Переброс вариантов зачарования за 1 лазурит (решает хост / сервер). */
