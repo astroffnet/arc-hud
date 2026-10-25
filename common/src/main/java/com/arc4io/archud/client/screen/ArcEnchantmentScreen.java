@@ -537,6 +537,8 @@ public class ArcEnchantmentScreen extends EnchantmentScreen {
     public void showcasePick() {
         tab = 1;
         containerTick();
+        com.arc4io.archud.ArcHud.LOGGER.info("[Showcase] enchant data: has={} menu={} got={} power={} canSend={}", hasData(), menu.containerId,
+                EnchantClient.containerId, EnchantClient.power, EnchantClient.serverSupports());
         for (EnchantLogic.Option o : options) {
             String id = String.valueOf(net.minecraft.core.registries.BuiltInRegistries.ENCHANTMENT.getKey(o.enchantment()));
             if (id.endsWith(":protection") || id.endsWith(":unbreaking")) chosen.put(o.enchantment(), o.maxLevel());

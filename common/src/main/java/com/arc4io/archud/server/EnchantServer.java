@@ -55,7 +55,10 @@ public final class EnchantServer {
 
     public static void sendPreview(ServerPlayer p, int containerId) {
         EnchantmentMenu m = menu(p, containerId);
-        if (m == null) return;
+        if (m == null) {
+            com.arc4io.archud.ArcHud.LOGGER.debug("Arc HUD: enchant preview for closed menu {} (open: {})", containerId, p.containerMenu.containerId);
+            return;
+        }
         EnchantmentMenuAccessor acc = (EnchantmentMenuAccessor) m;
         ItemStack stack = acc.archud$slots().getItem(0);
         FriendlyByteBuf out = ArcNet.create("ench_data");
@@ -74,6 +77,7 @@ public final class EnchantServer {
         ArcConfig cfg = ArcConfig.get();
         out.writeBoolean(cfg.enchantSelective);
         out.writeBoolean(cfg.enchantReroll);
+        if ("1".equals(System.getenv("ARCHUD_SHOWCASE"))) com.arc4io.archud.ArcHud.LOGGER.info("[Showcase] enchant preview sent {} hasMod={}", containerId, ArcNet.hasMod(p));
         ArcNet.sendToPlayer(p, out);
     }
 
