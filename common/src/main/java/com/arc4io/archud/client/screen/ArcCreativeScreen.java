@@ -5,16 +5,21 @@ import com.arc4io.archud.client.hud.Draw;
 import com.arc4io.archud.client.hud.Icons;
 import com.arc4io.archud.client.hud.Theme;
 import com.arc4io.archud.config.ArcConfig;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,70 +28,93 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
- * Креатив-меню Arc HUD, написанное с нуля (не ванильный экран с новой текстурой):
- *  - слева — список вкладок: «Все предметы», «Избранное», «Недавние», «Наборы» и все категории
- *    (ванильные и из модов) с иконками и количеством предметов;
- *  - сверху — поиск, работающий в любой вкладке (текст, «@мод», «#тег»), счётчик и сортировка
- *    (по умолчанию / по имени / по моду);
- *  - в центре — сетка предметов на всю ширину окна, колесо и полоса прокрутки;
- *  - справа — карточка предмета (крупная иконка, название, id, мод, стак, теги) и кнопки «Дать ×1»,
- *    «Дать стак», «В избранное»;
- *  - снизу — инвентарь игрока с бронёй, второй рукой и корзиной.
- * Управление: ЛКМ — взять 1 (повторный клик добавляет), ПКМ / СКМ — стак, Shift+ЛКМ — стак сразу в инвентарь,
- * 1–9 — положить в слот хотбара, Q — выбросить, F — в избранное. Наборы — сохранение и загрузка хотбаров (как C+1…9).
+ * Креатив-меню Arc HUD — своё окно, а не ванильное с новой текстурой.
+ *
+ * Вид: верхняя панель (название, поиск, вид «сетка / список», размер плиток, сортировка), под ней лента
+ * вкладок-«чипов» с иконками (активная раскрывается с названием), рабочая область и «док» снизу — хотбар,
+ * броня, вторая рука, корзина и кнопка, раскрывающая весь инвентарь поверх области. Справа — карточка
+ * выбранного предмета.
+ *
+ * Вкладки: Главная (недавние, избранное, плитки категорий), Все предметы, Избранное, Недавние, Зачарования
+ * (книги на максимальный уровень и полностью зачарованное снаряжение), Зелья (обычные, взрывные, туманные,
+ * стрелы), Головы (голова любого игрока по нику и всех игроков на сервере), Оператор (командные блоки,
+ * барьер, свет 0–15, отладочная палка и т.п.), Моды (предметы по модам), Мастерская (название, описание,
+ * количество, неразрушимость, свечение, скрытие характеристик), Наборы (хотбары) и все категории игры и модов.
  */
 public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
-    private enum Kind { ALL, FAVORITES, RECENT, KITS, CATEGORY }
+    private enum Kind { HOME, ALL, FAVORITES, RECENT, ENCHANTS, POTIONS, HEADS, OPERATOR, MODS, MOD, WORKSHOP, KITS, CATEGORY }
 
-    private record Tab(Kind kind, CreativeModeTab tab, Component name, ItemStack icon) {}
+    private record Tab(Kind kind, CreativeModeTab tab, Component name, ItemStack icon, String mod) {}
 
-    private static final int T = 18;            // размер ячейки
-    private static final int SIDE_W = 116, INFO_W = 120;
-    private static final int INV_H = 4 * T + 4 + 12;
+    /** Область, по которой можно кликнуть (собирается при каждой отрисовке). */
+    private record Hit(int x, int y, int w, int h, ItemStack stack, Runnable action, Component tip) {
+        boolean in(double mx, double my) {
+            return mx >= x && mx < x + w && my >= y && my < y + h;
+        }
+    }
+
+    private static final int[] TILE = {18, 22, 28};
+    private static final int S = 20;                 // ячейка дока
+    private static final int INFO_W = 128;
     private static final int RECENT_MAX = 45;
     private static final List<ItemStack> RECENT = new ArrayList<>();
-    private static String lastTab = "";
-    private static int sortMode;
+    private static String lastTab = "HOME";
+    private static int sortMode, tileIdx = 1;
+    private static boolean listView, invOpen;
+    // мастерская
+    private static ItemStack work = ItemStack.EMPTY;
+    private static int workCount = 1;
+    private static boolean workUnbreakable, workGlint, workHide;
+    private static String workName = "", workLore = "";
 
     private final LocalPlayer player;
     private final List<Tab> tabs = new ArrayList<>();
+    private final List<Hit> hits = new ArrayList<>();
+    private final Map<ItemStack, String> haystack = new IdentityHashMap<>();
     private Tab tab;
     private List<ItemStack> items = List.of();
-    private final Map<ItemStack, String> haystack = new IdentityHashMap<>();
-    private EditBox search;
-    private ArcButton sortBtn, give1Btn, giveStackBtn, favBtn;
+    private EditBox search, nickBox, nameBox, loreBox;
+    private ArcButton give1Btn, giveStackBtn, favBtn, toWorkBtn;
     private ItemStack carried = ItemStack.EMPTY;
     private ItemStack focus = ItemStack.EMPTY;
-    private int scroll, sideScroll;
+    private int scroll, maxScroll, stripScroll;
     private boolean draggingBar;
+    private int barX, barY, barH;
 
     // геометрия
-    private int px, py, pw, ph;
-    private int sx, cx, cw, ix;
-    private int gx, gy, cols, rows;
-    private int invTop, invX;
+    private int left, right, top, bottom;   // рабочая область
+    private int stripY, dockTop, infoX;
 
     public ArcCreativeScreen(LocalPlayer player) {
         super(Component.translatable("archud.creative.title"));
         this.player = player;
     }
 
-    // ------------------------------------------------------------------ инициализация
+    // ================================================================== инициализация
 
     @Override
     protected void init() {
@@ -94,86 +122,195 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         Minecraft mc = Minecraft.getInstance();
         boolean op = player.canUseGameMasterBlocks() && mc.options.operatorItemsTab().get();
         CreativeModeTabs.tryRebuildTabContents(player.connection.enabledFeatures(), op, player.level().registryAccess());
-        buildTabs();
+        if (tabs.isEmpty()) buildTabs();
+        if (tab == null) tab = tabs.stream().filter(t -> key(t).equals(lastTab)).findFirst().orElse(tabs.get(0));
 
-        px = 8;
-        py = 8;
-        pw = width - 16;
-        ph = height - 16;
-        sx = px;
-        ix = px + pw - INFO_W;
-        cx = sx + SIDE_W + 6;
-        cw = ix - 6 - cx;
-        invTop = py + ph - INV_H;
-        gy = py + 34;
-        cols = Math.max(1, (cw - 10) / T);
-        rows = Math.max(1, (invTop - 6 - gy) / T);
-        gx = cx + (cw - 8 - cols * T) / 2;
-        invX = cx + (cw - (T + 6 + 9 * T + 6 + T)) / 2;
+        stripY = 34;
+        dockTop = height - 6 - (S + 10);
+        infoX = width - 6 - INFO_W;
+        left = 10;
+        right = infoX - 6;
+        top = stripY + 28;
+        bottom = dockTop - 6;
 
+        // верхняя панель
         String prev = search != null ? search.getValue() : "";
-        search = new EditBox(font, cx + 1, py + 14, cw - 70, 14, Component.translatable("archud.creative.search"));
+        int sw = Math.min(260, width - 360);
+        search = new EditBox(font, width / 2 - sw / 2, 11, sw, 14, Component.translatable("archud.creative.search"));
         search.setHint(Component.translatable("archud.creative.search").withStyle(s -> s.withColor(0x6A7380)));
         search.setMaxLength(64);
         search.setValue(prev);
         search.setResponder(s -> {
+            if (!s.isEmpty() && !hasItemList(tab.kind()) && tab.kind() != Kind.MODS) {
+                selectTab(tabs.get(1), false); // с Главной — во «Все»
+                setFocused(search);
+                search.setFocused(true);
+                search.moveCursorToEnd();
+                return;
+            }
             scroll = 0;
             refresh();
         });
         addRenderableWidget(search);
-        sortBtn = addRenderableWidget(new ArcButton(cx + cw - 66, py + 13, 66, 16, sortLabel(), b -> {
+        int bx = width - 8;
+        bx -= 62;
+        addRenderableWidget(new ArcButton(bx, 10, 62, 16, Component.translatable("archud.creative.sort." + sortMode), b -> {
             sortMode = (sortMode + 1) % 3;
-            b.setMessage(sortLabel());
+            b.setMessage(Component.translatable("archud.creative.sort." + sortMode));
             refresh();
         }));
-        int by = py + 112;
-        give1Btn = addRenderableWidget(new ArcButton(ix + 6, by, INFO_W - 12, 16, Component.translatable("archud.creative.give_one"),
-                b -> give(focus, 1)));
-        giveStackBtn = addRenderableWidget(new ArcButton(ix + 6, by + 19, INFO_W - 12, 16, Component.translatable("archud.creative.give_stack"),
-                b -> give(focus, focus.getMaxStackSize())));
-        favBtn = addRenderableWidget(new ArcButton(ix + 6, by + 38, INFO_W - 12, 16, Component.empty(), b -> toggleFavorite(focus))).icon(Icons.STAR);
+        bx -= 22;
+        addRenderableWidget(new ArcButton(bx, 10, 20, 16, Component.literal(new String[]{"S", "M", "L"}[tileIdx]), b -> {
+            tileIdx = (tileIdx + 1) % TILE.length;
+            b.setMessage(Component.literal(new String[]{"S", "M", "L"}[tileIdx]));
+            scroll = 0;
+        }));
+        bx -= 22;
+        addRenderableWidget(new ArcButton(bx, 10, 20, 16, Component.literal(listView ? "≡" : "▦"), b -> {
+            listView = !listView;
+            b.setMessage(Component.literal(listView ? "≡" : "▦"));
+            scroll = 0;
+        }));
 
-        Tab sel = tabs.stream().filter(t -> key(t).equals(lastTab)).findFirst().orElse(tabs.get(0));
-        selectTab(sel, false);
+        // карточка предмета
+        int iy = top + 118;
+        give1Btn = addRenderableWidget(new ArcButton(infoX + 6, iy, INFO_W - 12, 15, Component.translatable("archud.creative.give_one"), b -> give(focus, 1)));
+        giveStackBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 18, INFO_W - 12, 15, Component.translatable("archud.creative.give_stack"),
+                b -> give(focus, focus.getMaxStackSize())));
+        favBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 36, INFO_W - 12, 15, Component.empty(), b -> toggleFavorite(focus))).icon(Icons.STAR);
+        toWorkBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 54, INFO_W - 12, 15, Component.translatable("archud.creative.to_workshop"), b -> {
+            loadWork(focus);
+            selectTab(tabs.stream().filter(t -> t.kind() == Kind.WORKSHOP).findFirst().orElse(tab), true);
+        }));
+
+        // поля вкладок
+        if (tab.kind() == Kind.HEADS) {
+            nickBox = new EditBox(font, left + 4, top + 4, 140, 14, Component.translatable("archud.creative.nick"));
+            nickBox.setHint(Component.translatable("archud.creative.nick").withStyle(s -> s.withColor(0x6A7380)));
+            nickBox.setMaxLength(16);
+            addRenderableWidget(nickBox);
+            addRenderableWidget(new ArcButton(left + 148, top + 3, 80, 16, Component.translatable("archud.creative.head_give"), b -> {
+                String n = nickBox.getValue().trim();
+                if (n.isEmpty()) return;
+                ItemStack h = head(n);
+                give(h, 1);
+                List<String> saved = ArcConfig.get().creativeHeads;
+                saved.remove(n);
+                saved.add(0, n);
+                while (saved.size() > 36) saved.remove(saved.size() - 1);
+                ArcConfig.save();
+                refresh();
+            }));
+        }
+        if (tab.kind() == Kind.WORKSHOP) {
+            int fx = left + 150, fw = Math.max(120, right - fx - 10);
+            nameBox = new EditBox(font, fx, top + 20, fw, 14, Component.translatable("archud.creative.w_name"));
+            nameBox.setHint(Component.translatable("archud.creative.w_name").withStyle(s -> s.withColor(0x6A7380)));
+            nameBox.setMaxLength(50);
+            nameBox.setValue(workName);
+            nameBox.setResponder(s -> workName = s);
+            addRenderableWidget(nameBox);
+            loreBox = new EditBox(font, fx, top + 52, fw, 14, Component.translatable("archud.creative.w_lore"));
+            loreBox.setHint(Component.translatable("archud.creative.w_lore").withStyle(s -> s.withColor(0x6A7380)));
+            loreBox.setMaxLength(80);
+            loreBox.setValue(workLore);
+            loreBox.setResponder(s -> workLore = s);
+            addRenderableWidget(loreBox);
+            int ty = top + 96;
+            addRenderableWidget(toggle(fx, ty, fw, "archud.creative.w_unbreakable", () -> workUnbreakable, v -> workUnbreakable = v));
+            addRenderableWidget(toggle(fx, ty + 18, fw, "archud.creative.w_glint", () -> workGlint, v -> workGlint = v));
+            addRenderableWidget(toggle(fx, ty + 36, fw, "archud.creative.w_hide", () -> workHide, v -> workHide = v));
+            addRenderableWidget(new ArcButton(fx, ty + 60, (fw - 4) / 2, 16, Component.translatable("archud.creative.w_give"), b -> {
+                if (!work.isEmpty()) give(buildWork(), workCount);
+            }).icon(Icons.STAR));
+            addRenderableWidget(new ArcButton(fx + (fw - 4) / 2 + 4, ty + 60, (fw - 4) / 2, 16, Component.translatable("archud.creative.w_reset"), b -> {
+                work = ItemStack.EMPTY;
+                workCount = 1;
+                workUnbreakable = workGlint = workHide = false;
+                workName = workLore = "";
+                rebuildWidgets();
+            }).danger());
+        }
+        refresh();
+    }
+
+    private static Component toggleLabel(String key, boolean on) {
+        return Component.translatable(key).append(": ").append(Component.translatable(on ? "options.on" : "options.off"));
+    }
+
+    private ArcButton toggle(int x, int y, int w, String key, java.util.function.BooleanSupplier get, java.util.function.Consumer<Boolean> set) {
+        return new ArcButton(x, y, w, 16, toggleLabel(key, get.getAsBoolean()), btn -> {
+            set.accept(!get.getAsBoolean());
+            btn.setMessage(toggleLabel(key, get.getAsBoolean()));
+        });
     }
 
     private void buildTabs() {
         tabs.clear();
-        tabs.add(new Tab(Kind.ALL, null, Component.translatable("archud.creative.all"), new ItemStack(Items.COMPASS)));
-        tabs.add(new Tab(Kind.FAVORITES, null, Component.translatable("archud.creative.favorites"), new ItemStack(Items.NETHER_STAR)));
-        tabs.add(new Tab(Kind.RECENT, null, Component.translatable("archud.creative.recent"), new ItemStack(Items.CLOCK)));
-        tabs.add(new Tab(Kind.KITS, null, Component.translatable("archud.creative.kits"), new ItemStack(Items.BUNDLE)));
+        tabs.add(special(Kind.HOME, "home", Items.BEACON));
+        tabs.add(special(Kind.ALL, "all", Items.COMPASS));
+        tabs.add(special(Kind.FAVORITES, "favorites", Items.NETHER_STAR));
+        tabs.add(special(Kind.RECENT, "recent", Items.CLOCK));
+        tabs.add(special(Kind.ENCHANTS, "enchants", Items.ENCHANTED_BOOK));
+        tabs.add(special(Kind.POTIONS, "potions", Items.DRAGON_BREATH));
+        tabs.add(special(Kind.HEADS, "heads", Items.PLAYER_HEAD));
+        tabs.add(special(Kind.OPERATOR, "operator", Items.COMMAND_BLOCK));
+        tabs.add(special(Kind.MODS, "mods", Items.KNOWLEDGE_BOOK));
+        tabs.add(special(Kind.WORKSHOP, "workshop", Items.ANVIL));
+        tabs.add(special(Kind.KITS, "kits", Items.BUNDLE));
         for (CreativeModeTab t : CreativeModeTabs.tabs()) {
             if (t.getType() != CreativeModeTab.Type.CATEGORY || !t.shouldDisplay()) continue;
-            tabs.add(new Tab(Kind.CATEGORY, t, t.getDisplayName(), t.getIconItem()));
+            tabs.add(new Tab(Kind.CATEGORY, t, t.getDisplayName(), t.getIconItem(), null));
         }
     }
 
-    private static String key(Tab t) {
-        return t.kind() == Kind.CATEGORY ? "cat:" + t.name().getString() : t.kind().name();
+    private static Tab special(Kind k, String key, Item icon) {
+        return new Tab(k, null, Component.translatable("archud.creative." + key), new ItemStack(icon), null);
     }
 
-    private Component sortLabel() {
-        return Component.translatable("archud.creative.sort." + sortMode);
+    private static String key(Tab t) {
+        return t.kind() == Kind.CATEGORY ? "cat:" + t.name().getString() : t.kind() == Kind.MOD ? "mod:" + t.mod() : t.kind().name();
+    }
+
+    private static boolean hasItemList(Kind k) {
+        return switch (k) {
+            case ALL, FAVORITES, RECENT, ENCHANTS, POTIONS, HEADS, OPERATOR, MOD, CATEGORY -> true;
+            default -> false;
+        };
     }
 
     private void selectTab(Tab t, boolean sound) {
         if (sound && t != tab) click();
+        boolean widgetsChange = tab == null || t.kind() != tab.kind() || tab.kind() == Kind.HEADS || tab.kind() == Kind.WORKSHOP;
         tab = t;
         lastTab = key(t);
         scroll = 0;
-        refresh();
+        if (widgetsChange) rebuildWidgets();
+        else refresh();
     }
 
-    // ------------------------------------------------------------------ содержимое и поиск
+    private void openMod(String ns) {
+        selectTab(new Tab(Kind.MOD, null, Component.literal(ArcHud.platform().modName(ns)), modIcon(ns), ns), true);
+    }
+
+    // ================================================================== содержимое
 
     private List<ItemStack> source() {
         return switch (tab.kind()) {
             case ALL -> new ArrayList<>(CreativeModeTabs.searchTab().getDisplayItems());
             case FAVORITES -> favorites();
             case RECENT -> new ArrayList<>(RECENT);
-            case KITS -> List.of();
+            case ENCHANTS -> enchantItems();
+            case POTIONS -> potionItems();
+            case HEADS -> headItems();
+            case OPERATOR -> operatorItems();
+            case MOD -> {
+                List<ItemStack> out = new ArrayList<>();
+                for (ItemStack s : CreativeModeTabs.searchTab().getDisplayItems()) if (id(s).getNamespace().equals(tab.mod())) out.add(s);
+                yield out;
+            }
             case CATEGORY -> new ArrayList<>(tab.tab().getDisplayItems());
+            default -> List.of();
         };
     }
 
@@ -190,7 +327,6 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         if (sortMode == 1) out.sort(Comparator.comparing(s -> s.getHoverName().getString().toLowerCase(Locale.ROOT)));
         else if (sortMode == 2) out.sort(Comparator.comparing((ItemStack s) -> id(s).getNamespace()).thenComparing(s -> s.getHoverName().getString()));
         items = out;
-        scroll = Mth.clamp(scroll, 0, maxScroll());
     }
 
     private boolean matches(ItemStack s, String[] parts) {
@@ -224,15 +360,131 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         return BuiltInRegistries.ITEM.getKey(s.getItem());
     }
 
-    private int totalRows() {
-        return (items.size() + cols - 1) / cols;
+    // ---------- наборы для новых вкладок
+
+    private static List<ItemStack> enchantItems() {
+        List<ItemStack> out = new ArrayList<>();
+        // полностью зачарованное снаряжение
+        Item[] gear = {Items.NETHERITE_SWORD, Items.NETHERITE_AXE, Items.NETHERITE_PICKAXE, Items.NETHERITE_SHOVEL, Items.NETHERITE_HOE,
+                Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS,
+                Items.BOW, Items.CROSSBOW, Items.TRIDENT, Items.FISHING_ROD, Items.ELYTRA, Items.SHIELD, Items.SHEARS};
+        for (Item it : gear) if (it != null) out.add(maxEnchanted(it));
+        // книги на максимальный уровень
+        List<Enchantment> list = new ArrayList<>();
+        for (Enchantment e : BuiltInRegistries.ENCHANTMENT) list.add(e);
+        list.sort(Comparator.comparing(e -> Component.translatable(e.getDescriptionId()).getString()));
+        for (Enchantment e : list) out.add(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(e, e.getMaxLevel())));
+        return out;
     }
 
-    private int maxScroll() {
-        return Math.max(0, totalRows() - rows);
+    private static ItemStack maxEnchanted(Item item) {
+        ItemStack s = new ItemStack(item);
+        List<Enchantment> taken = new ArrayList<>();
+        for (Enchantment e : BuiltInRegistries.ENCHANTMENT) {
+            if (e.isCurse() || !e.canEnchant(s)) continue;
+            boolean ok = true;
+            for (Enchantment t : taken) if (!t.isCompatibleWith(e)) ok = false;
+            if (!ok) continue;
+            taken.add(e);
+            s.enchant(e, e.getMaxLevel());
+        }
+        return s;
     }
 
-    // ------------------------------------------------------------------ избранное и недавние
+    private static List<ItemStack> potionItems() {
+        List<ItemStack> out = new ArrayList<>();
+        Item[] kinds = {Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION, Items.TIPPED_ARROW};
+        for (Item k : kinds) {
+            for (Potion p : BuiltInRegistries.POTION) {
+                if (p == Potions.EMPTY) continue;
+                out.add(PotionUtils.setPotion(new ItemStack(k), p));
+            }
+        }
+        return out;
+    }
+
+    private List<ItemStack> headItems() {
+        List<ItemStack> out = new ArrayList<>();
+        List<String> seen = new ArrayList<>();
+        if (player.connection != null) {
+            for (PlayerInfo info : player.connection.getOnlinePlayers()) {
+                String n = info.getProfile().getName();
+                if (seen.contains(n.toLowerCase(Locale.ROOT))) continue;
+                seen.add(n.toLowerCase(Locale.ROOT));
+                out.add(head(n));
+            }
+        }
+        for (String n : ArcConfig.get().creativeHeads) {
+            if (seen.contains(n.toLowerCase(Locale.ROOT))) continue;
+            seen.add(n.toLowerCase(Locale.ROOT));
+            out.add(head(n));
+        }
+        for (Item it : new Item[]{Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, Items.ZOMBIE_HEAD, Items.CREEPER_HEAD,
+                Items.PIGLIN_HEAD, Items.DRAGON_HEAD, Items.PLAYER_HEAD}) out.add(new ItemStack(it));
+        return out;
+    }
+
+    private static ItemStack head(String nick) {
+        ItemStack h = new ItemStack(Items.PLAYER_HEAD);
+        h.getOrCreateTag().putString("SkullOwner", nick);
+        return h;
+    }
+
+    private static List<ItemStack> operatorItems() {
+        List<ItemStack> out = new ArrayList<>();
+        for (Item it : new Item[]{Items.COMMAND_BLOCK, Items.CHAIN_COMMAND_BLOCK, Items.REPEATING_COMMAND_BLOCK, Items.COMMAND_BLOCK_MINECART,
+                Items.STRUCTURE_BLOCK, Items.STRUCTURE_VOID, Items.JIGSAW, Items.BARRIER, Items.DEBUG_STICK, Items.KNOWLEDGE_BOOK,
+                Items.SPAWNER, Items.PETRIFIED_OAK_SLAB, Items.DRAGON_EGG, Items.BEDROCK, Items.END_PORTAL_FRAME, Items.REINFORCED_DEEPSLATE,
+                Items.BUDDING_AMETHYST, Items.FARMLAND, Items.DIRT_PATH, Items.FROGSPAWN, Items.SUSPICIOUS_SAND, Items.SUSPICIOUS_GRAVEL,
+                Items.WRITABLE_BOOK, Items.FILLED_MAP}) out.add(new ItemStack(it));
+        for (int lvl = 0; lvl <= 15; lvl++) {
+            ItemStack light = new ItemStack(Items.LIGHT);
+            light.getOrCreateTagElement("BlockStateTag").putString("level", Integer.toString(lvl));
+            out.add(light);
+        }
+        return out;
+    }
+
+    private static ItemStack modIcon(String ns) {
+        for (ItemStack s : CreativeModeTabs.searchTab().getDisplayItems()) if (id(s).getNamespace().equals(ns)) return s;
+        return new ItemStack(Items.BOOK);
+    }
+
+    private static Map<String, Integer> modCounts() {
+        Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("minecraft", 0);
+        for (ItemStack s : CreativeModeTabs.searchTab().getDisplayItems()) m.merge(id(s).getNamespace(), 1, Integer::sum);
+        return m;
+    }
+
+    // ---------- мастерская
+
+    private static void loadWork(ItemStack s) {
+        if (s.isEmpty()) return;
+        work = s.copyWithCount(1);
+        workCount = 1;
+        workName = s.hasCustomHoverName() ? s.getHoverName().getString() : "";
+    }
+
+    private static ItemStack buildWork() {
+        ItemStack r = work.copyWithCount(1);
+        if (!workName.isBlank()) r.setHoverName(Component.literal(workName).withStyle(s -> s.withItalic(false)));
+        if (!workLore.isBlank()) {
+            ListTag lore = new ListTag();
+            lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(workLore).withStyle(s -> s.withItalic(false).withColor(ChatFormatting.GRAY)))));
+            r.getOrCreateTagElement("display").put("Lore", lore);
+        }
+        if (workUnbreakable) r.getOrCreateTag().putBoolean("Unbreakable", true);
+        if (workGlint && !r.isEnchanted()) {
+            ListTag l = new ListTag();
+            l.add(new CompoundTag());
+            r.getOrCreateTag().put("Enchantments", l);
+        }
+        if (workHide) r.getOrCreateTag().putInt("HideFlags", 127);
+        return r;
+    }
+
+    // ================================================================== избранное / недавние
 
     private static List<ItemStack> favorites() {
         List<ItemStack> out = new ArrayList<>();
@@ -247,7 +499,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
     }
 
     private static String serialize(ItemStack s) {
-        return s.copyWithCount(1).save(new net.minecraft.nbt.CompoundTag()).toString();
+        return s.copyWithCount(1).save(new CompoundTag()).toString();
     }
 
     private boolean isFavorite(ItemStack s) {
@@ -271,14 +523,13 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         while (RECENT.size() > RECENT_MAX) RECENT.remove(RECENT.size() - 1);
     }
 
-    // ------------------------------------------------------------------ инвентарь игрока
+    // ================================================================== инвентарь
 
-    /** Индекс в Inventory → индекс слота в InventoryMenu (для пакета креатива). */
     private static int menuSlot(int inv) {
         if (inv < 9) return 36 + inv;
         if (inv < 36) return inv;
-        if (inv < 40) return 8 - (inv - 36); // броня: 36 ботинки … 39 шлем → 8 … 5
-        return 45;                           // вторая рука
+        if (inv < 40) return 8 - (inv - 36);
+        return 45;
     }
 
     private void setInv(int inv, ItemStack s) {
@@ -297,31 +548,23 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         return Mob.getEquipmentSlotForItem(s) == want;
     }
 
-    /** Положить в инвентарь (сначала докладываем к таким же, потом в пустые; хотбар первым). */
     private boolean give(ItemStack proto, int count) {
         if (proto.isEmpty()) return false;
         ItemStack s = proto.copyWithCount(Math.min(count, proto.getMaxStackSize()));
         remember(s);
         Inventory inv = player.getInventory();
-        int[] order = new int[36];
-        for (int i = 0; i < 36; i++) order[i] = i; // 0..8 — хотбар, затем основной
-        for (int i : order) {
+        for (int i = 0; i < 36 && !s.isEmpty(); i++) {
             ItemStack cur = inv.getItem(i);
             if (!cur.isEmpty() && ItemStack.isSameItemSameTags(cur, s) && cur.getCount() < cur.getMaxStackSize()) {
                 int add = Math.min(s.getCount(), cur.getMaxStackSize() - cur.getCount());
-                ItemStack n = cur.copyWithCount(cur.getCount() + add);
-                setInv(i, n);
+                setInv(i, cur.copyWithCount(cur.getCount() + add));
                 s.shrink(add);
-                if (s.isEmpty()) break;
             }
         }
-        if (!s.isEmpty()) {
-            for (int i : order) {
-                if (inv.getItem(i).isEmpty()) {
-                    setInv(i, s.copy());
-                    s = ItemStack.EMPTY;
-                    break;
-                }
+        for (int i = 0; i < 36 && !s.isEmpty(); i++) {
+            if (inv.getItem(i).isEmpty()) {
+                setInv(i, s.copy());
+                s = ItemStack.EMPTY;
             }
         }
         if (!s.isEmpty()) {
@@ -332,293 +575,550 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         return true;
     }
 
+    /** Позиция слота: док (хотбар, броня, вторая рука, корзина) и раскрытый инвентарь над доком. */
     private int[] slotXY(int inv) {
-        int mainX = invX + T + 6;
-        int top = invTop + 12;
-        if (inv < 9) return new int[]{mainX + inv * T, top + 3 * T + 4};
-        if (inv < 36) return new int[]{mainX + ((inv - 9) % 9) * T, top + ((inv - 9) / 9) * T};
-        if (inv < 40) return new int[]{invX, top + (39 - inv) * T};
-        if (inv == 40) return new int[]{mainX + 9 * T + 6, top};
-        return new int[]{mainX + 9 * T + 6, top + 3 * T + 4}; // 41 — корзина
+        int dockW = 4 * S + 8 + 9 * S + 8 + S + 4 + S + 4 + 18;
+        int dx = (left + right) / 2 - dockW / 2;
+        int y = dockTop + 5;
+        int hotX = dx + 4 * S + 8;
+        if (inv >= 36 && inv <= 39) return new int[]{dx + (39 - inv) * S, y};
+        if (inv < 9) return new int[]{hotX + inv * S, y};
+        if (inv == 40) return new int[]{hotX + 9 * S + 8, y};
+        if (inv == 41) return new int[]{hotX + 9 * S + 8 + S + 4, y};
+        if (inv == 42) return new int[]{hotX + 9 * S + 8 + 2 * S + 8, y}; // кнопка «инвентарь»
+        // 9..35 — раскрытый инвентарь
+        int oy = dockTop - 4 - 3 * S - 4;
+        return new int[]{hotX + ((inv - 9) % 9) * S, oy + ((inv - 9) / 9) * S};
     }
 
     private int invAt(double mx, double my) {
-        for (int i = 0; i <= 41; i++) {
+        for (int i = 0; i <= 42; i++) {
+            if (i >= 9 && i < 36 && !invOpen) continue;
             int[] p = slotXY(i);
-            if (mx >= p[0] && mx < p[0] + T && my >= p[1] && my < p[1] + T) return i;
+            int w = i == 42 ? 18 : S;
+            if (mx >= p[0] && mx < p[0] + w && my >= p[1] && my < p[1] + S) return i;
         }
         return -1;
     }
 
-    private int gridAt(double mx, double my) {
-        if (tab.kind() == Kind.KITS) return -1;
-        if (mx < gx || mx >= gx + cols * T || my < gy || my >= gy + rows * T) return -1;
-        int c = (int) ((mx - gx) / T), r = (int) ((my - gy) / T);
-        int idx = (scroll + r) * cols + c;
-        return idx < items.size() ? idx : -1;
-    }
-
-    // ------------------------------------------------------------------ отрисовка
+    // ================================================================== отрисовка
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
         renderBackground(g);
         int accent = Theme.accent();
-        int grid = gridAt(mx, my);
-        int inv = invAt(mx, my);
-        if (grid >= 0) focus = items.get(grid);
-        else if (inv >= 0 && inv <= 40 && !player.getInventory().getItem(inv).isEmpty()) focus = player.getInventory().getItem(inv);
+        hits.clear();
 
-        renderSidebar(g, mx, my, accent);
-        // центр
-        Draw.panel(g, cx - 3, py, cw + 6, ph, 0xE00C1015, Draw.alpha(accent, 0x70));
-        g.fill(cx, py, cx + cw, py + 1, Draw.alpha(accent, 0xE0));
-        g.drawString(font, tab.name(), cx + 2, py + 3, Draw.alpha(accent, 0xFF), true);
-        String count = tab.kind() == Kind.KITS ? "" : Component.translatable("archud.creative.count", items.size()).getString();
-        Draw.small(g, font, count, cx + cw - font.width(count) * 0.65F - 2, py + 4, Draw.TEXT_DIM, 0.65F);
-        if (tab.kind() == Kind.KITS) renderKits(g, mx, my, accent);
-        else renderGrid(g, mx, my, grid, accent);
-        renderInventory(g, mx, my, inv, accent);
+        renderTopBar(g, accent);
+        renderStrip(g, mx, my, accent);
+        // рабочая область
+        Draw.panel(g, left - 4, top - 4, right - left + 8, bottom - top + 8, 0xD80B0F14, Draw.alpha(accent, 0x50));
+        switch (tab.kind()) {
+            case HOME -> renderHome(g, mx, my, accent);
+            case MODS -> renderMods(g, mx, my, accent);
+            case WORKSHOP -> renderWorkshop(g, mx, my, accent);
+            case KITS -> renderKits(g, mx, my, accent);
+            default -> renderItems(g, mx, my, accent, tab.kind() == Kind.HEADS ? 24 : tab.kind() == Kind.MOD ? 18 : 0);
+        }
+        renderDock(g, mx, my, accent);
+
+        // фокус: предмет под курсором
+        int inv = invAt(mx, my);
+        Hit hov = inv >= 0 ? null : hitAt(mx, my);
+        if (hov != null && hov.stack() != null && !hov.stack().isEmpty()) focus = hov.stack();
+        else if (inv >= 0 && inv <= 40 && !player.getInventory().getItem(inv).isEmpty()) focus = player.getInventory().getItem(inv);
         renderInfo(g, accent);
 
         super.render(g, mx, my, pt);
 
-        // предмет на курсоре / подсказка
         if (!carried.isEmpty()) {
             g.pose().pushPose();
             g.pose().translate(0, 0, 232);
             g.renderItem(carried, mx - 8, my - 8);
             g.renderItemDecorations(font, carried, mx - 8, my - 8);
             g.pose().popPose();
-        } else if (grid >= 0) {
-            g.renderTooltip(font, items.get(grid), mx, my);
+        } else if (hov != null && hov.stack() != null && !hov.stack().isEmpty()) {
+            g.renderTooltip(font, hov.stack(), mx, my);
         } else if (inv >= 0 && inv <= 40 && !player.getInventory().getItem(inv).isEmpty()) {
             g.renderTooltip(font, player.getInventory().getItem(inv), mx, my);
         } else if (inv == 41) {
             g.renderTooltip(font, Component.translatable("archud.creative.trash"), mx, my);
-        } else {
-            Tab t = tabAt(mx, my);
-            if (t != null) g.renderTooltip(font, t.name(), mx, my);
+        } else if (inv == 42) {
+            g.renderTooltip(font, Component.translatable(invOpen ? "archud.creative.inv_hide" : "archud.creative.inv_show"), mx, my);
+        } else if (hov != null && hov.tip() != null) {
+            g.renderTooltip(font, hov.tip(), mx, my);
         }
     }
 
-    private int sideRows() {
-        return (ph - 26) / 18;
+    private Hit hitAt(double mx, double my) {
+        for (int i = hits.size() - 1; i >= 0; i--) if (hits.get(i).in(mx, my)) return hits.get(i);
+        return null;
     }
 
-    private Tab tabAt(double mx, double my) {
-        if (mx < sx || mx >= sx + SIDE_W || my < py + 22) return null;
-        int r = (int) ((my - py - 22) / 18);
-        if (r >= sideRows()) return null;
-        int idx = sideScroll + r;
-        return idx < tabs.size() ? tabs.get(idx) : null;
+    private void renderTopBar(GuiGraphics g, int accent) {
+        Draw.hGradient(g, 0, 0, width, 32, Draw.alpha(accent, 0x38), 0x20000000);
+        g.fill(0, 31, width, 32, Draw.alpha(accent, 0x90));
+        // логотип: ромб + название
+        int lx = 12, ly = 9;
+        for (int i = 0; i < 7; i++) g.fill(lx + 6 - i, ly + i, lx + 7 + i, ly + i + 1, accent);
+        for (int i = 0; i < 7; i++) g.fill(lx + i, ly + 7 + i, lx + 13 - i, ly + 8 + i, Draw.darken(accent, 0.3F));
+        g.drawString(font, title, lx + 20, 8, 0xFFFFFFFF, true);
+        Draw.small(g, font, tab.name().getString(), lx + 20, 19, Draw.alpha(accent, 0xFF), 0.65F);
     }
 
-    private void renderSidebar(GuiGraphics g, int mx, int my, int accent) {
-        Draw.panel(g, sx, py, SIDE_W, ph, 0xE00C1015, Draw.alpha(accent, 0x70));
-        g.fill(sx + 3, py, sx + SIDE_W - 3, py + 1, Draw.alpha(accent, 0xE0));
-        Draw.small(g, font, Component.translatable("archud.creative.title").getString(), sx + 6, py + 6, Draw.TEXT_DIM, 0.75F);
-        int rowsVis = sideRows();
-        sideScroll = Mth.clamp(sideScroll, 0, Math.max(0, tabs.size() - rowsVis));
-        for (int r = 0; r < rowsVis && sideScroll + r < tabs.size(); r++) {
-            Tab t = tabs.get(sideScroll + r);
-            int ty = py + 22 + r * 18;
-            boolean sel = t == tab;
-            boolean hov = mx >= sx && mx < sx + SIDE_W && my >= ty && my < ty + 18;
-            if (sel) {
-                Draw.hGradient(g, sx + 2, ty, sx + SIDE_W - 2, ty + 17, Draw.alpha(accent, 0x55), Draw.alpha(accent, 0x08));
-                g.fill(sx + 2, ty + 1, sx + 4, ty + 16, accent);
-            } else if (hov) g.fill(sx + 2, ty, sx + SIDE_W - 2, ty + 17, 0x18FFFFFF);
-            g.renderItem(t.icon(), sx + 7, ty + 1);
-            String name = t.name().getString();
-            int max = (int) ((SIDE_W - 30) / 0.8F);
-            if (font.width(name) > max) name = font.plainSubstrByWidth(name, max - font.width("…")) + "…";
-            Draw.small(g, font, name, sx + 27, ty + 5, sel ? 0xFFFFFFFF : hov ? Draw.TEXT : 0xFFB4C0CE, 0.8F);
-            if (sideScroll + r == 3) g.fill(sx + 6, ty + 17, sx + SIDE_W - 6, ty + 18, 0x30FFFFFF);
+    /** Лента вкладок: иконки, активная раскрыта с названием, колесо — прокрутка. */
+    private void renderStrip(GuiGraphics g, int mx, int my, int accent) {
+        int x0 = left - 4, x1 = right + 4;
+        g.enableScissor(x0, stripY, x1, stripY + 24);
+        int x = x0 - stripScroll;
+        int total = 0;
+        for (int i = 0; i < tabs.size(); i++) {
+            Tab t = tabs.get(i);
+            boolean sel = key(t).equals(key(tab)) || (tab.kind() == Kind.MOD && t.kind() == Kind.MODS);
+            String label = t.name().getString();
+            int w = sel ? 26 + (int) (font.width(label) * 0.75F) + 8 : 22;
+            boolean hov = mx >= x && mx < x + w && my >= stripY && my < stripY + 22 && mx >= x0 && mx < x1;
+            int bg = sel ? Draw.alpha(accent, 0x55) : hov ? 0x30FFFFFF : 0x18FFFFFF;
+            Draw.panel(g, x, stripY, w, 22, bg, sel ? accent : hov ? Draw.alpha(accent, 0x90) : 0x25FFFFFF);
+            g.renderItem(t.icon(), x + 3, stripY + 3);
+            if (sel) Draw.small(g, font, label, x + 23, stripY + 8, 0xFFFFFFFF, 0.75F);
+            int fx = x;
+            hits.add(new Hit(Math.max(x, x0), stripY, Math.min(w, x1 - Math.max(x, x0)), 22, null, () -> selectTab(t, true), t.name()));
+            x += w + 3;
+            total += w + 3;
+            if (i == 10) { // разделитель между вкладками Arc и категориями игры
+                g.fill(x, stripY + 4, x + 1, stripY + 18, 0x40FFFFFF);
+                x += 5;
+                total += 5;
+            }
+            if (fx > x1) break;
         }
-        if (tabs.size() > rowsVis) {
-            int trackH = rowsVis * 18;
-            int th = Math.max(12, trackH * rowsVis / tabs.size());
-            int ty = py + 22 + (trackH - th) * sideScroll / Math.max(1, tabs.size() - rowsVis);
-            g.fill(sx + SIDE_W - 3, ty, sx + SIDE_W - 1, ty + th, Draw.alpha(accent, 0xA0));
+        g.disableScissor();
+        stripMax = Math.max(0, total - (x1 - x0));
+        if (stripMax > 0) {
+            int w = x1 - x0;
+            int th = Math.max(20, w * w / (w + stripMax));
+            int tx = x0 + (w - th) * stripScroll / stripMax;
+            g.fill(tx, stripY + 23, tx + th, stripY + 24, Draw.alpha(accent, 0xA0));
         }
     }
 
-    private void renderGrid(GuiGraphics g, int mx, int my, int hovered, int accent) {
+    private int stripMax;
+
+    // ---------- сетка / список предметов
+
+    private void renderItems(GuiGraphics g, int mx, int my, int accent, int header) {
+        int y0 = top + header;
+        if (tab.kind() == Kind.MOD) {
+            Draw.small(g, font, Component.translatable("archud.creative.mod_view", tab.name()).getString(), left + 2, top + 3, Draw.TEXT_DIM, 0.7F);
+            String back = "< " + Component.translatable("archud.creative.mods").getString();
+            int bw = (int) (font.width(back) * 0.7F) + 8;
+            Draw.panel(g, right - bw, top, bw, 12, 0x30FFFFFF, Draw.alpha(accent, 0x80));
+            Draw.small(g, font, back, right - bw + 4, top + 3, 0xFFFFFFFF, 0.7F);
+            Tab mods = tabs.stream().filter(t -> t.kind() == Kind.MODS).findFirst().orElse(tabs.get(0));
+            hits.add(new Hit(right - bw, top, bw, 12, null, () -> selectTab(mods, true), null));
+        }
+        if (tab.kind() == Kind.HEADS && nickBox != null && !nickBox.getValue().isBlank()) {
+            // предпросмотр головы по нику
+            ItemStack h = head(nickBox.getValue().trim());
+            g.renderItem(h, left + 234, top + 2);
+            hits.add(new Hit(left + 233, top + 1, 18, 18, h, null, null));
+        }
         if (items.isEmpty()) {
             String key = tab.kind() == Kind.FAVORITES && search.getValue().isEmpty() ? "archud.creative.empty_fav"
                     : tab.kind() == Kind.RECENT && search.getValue().isEmpty() ? "archud.creative.empty_recent" : "archud.creative.nothing";
-            Draw.smallCentered(g, font, Component.translatable(key).getString(), cx + cw / 2F, gy + rows * T / 2F - 4, Draw.TEXT_DIM, 0.75F);
+            Draw.smallCentered(g, font, Component.translatable(key).getString(), (left + right) / 2F, (y0 + bottom) / 2F - 4, Draw.TEXT_DIM, 0.75F);
+            maxScroll = 0;
             return;
         }
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
+        int areaW = right - left - 8;
+        int areaH = bottom - y0;
+        if (listView) {
+            int rowH = 20;
+            int colW = Math.max(160, areaW / Math.max(1, areaW / 200));
+            int cols = Math.max(1, areaW / colW);
+            int rows = Math.max(1, areaH / rowH);
+            int total = (items.size() + cols - 1) / cols;
+            maxScroll = Math.max(0, total - rows);
+            scroll = Mth.clamp(scroll, 0, maxScroll);
+            for (int r = 0; r < rows; r++) for (int c = 0; c < cols; c++) {
                 int idx = (scroll + r) * cols + c;
                 if (idx >= items.size()) break;
-                int x = gx + c * T, y = gy + r * T;
-                boolean hov = idx == hovered;
-                g.fill(x + 1, y + 1, x + T - 1, y + T - 1, hov ? Draw.alpha(accent, 0x50) : 0x40000000);
-                if (hov) Draw.outline(g, x, y, T, T, Draw.alpha(accent, 0xFF));
                 ItemStack s = items.get(idx);
-                g.renderItem(s, x + 1, y + 1);
-                g.renderItemDecorations(font, s, x + 1, y + 1);
-                if (isFavorite(s) && tab.kind() != Kind.FAVORITES) g.fill(x + T - 4, y + 2, x + T - 2, y + 4, 0xFFFFD54F);
+                int x = left + c * colW, y = y0 + r * rowH;
+                boolean hov = mx >= x && mx < x + colW - 4 && my >= y && my < y + rowH - 2;
+                Draw.panel(g, x, y, colW - 4, rowH - 2, hov ? Draw.alpha(accent, 0x40) : 0x22FFFFFF, hov ? accent : 0x18FFFFFF);
+                g.renderItem(s, x + 2, y + 1);
+                String name = s.getHoverName().getString();
+                int max = (int) ((colW - 4 - 24 - 34) / 0.75F);
+                if (font.width(name) > max) name = font.plainSubstrByWidth(name, max - font.width("…")) + "…";
+                Draw.small(g, font, name, x + 22, y + 3, 0xFFFFFFFF, 0.75F);
+                Draw.small(g, font, ArcHud.platform().modName(id(s).getNamespace()), x + 22, y + 11, Draw.TEXT_DIM, 0.5F);
+                hits.add(new Hit(x, y, colW - 38, rowH - 2, s, null, null));
+                // быстрые кнопки +1 / +стак
+                mini(g, x + colW - 36, y + 3, "+1", mx, my, accent, () -> give(s, 1));
+                mini(g, x + colW - 20, y + 3, "+" + s.getMaxStackSize(), mx, my, accent, () -> give(s, s.getMaxStackSize()));
             }
+            scrollbar(g, y0, areaH, rows, total, accent);
+            return;
         }
-        // полоса прокрутки
-        int max = maxScroll();
-        int bx = gx + cols * T + 3, top = gy, h = rows * T;
-        g.fill(bx, top, bx + 3, top + h, 0x30FFFFFF);
-        if (max > 0) {
-            int th = Math.max(14, h * rows / Math.max(rows, totalRows()));
-            int ty = top + (h - th) * scroll / max;
-            g.fill(bx, ty, bx + 3, ty + th, Draw.alpha(accent, draggingBar ? 0xFF : 0xB0));
+        int t = TILE[tileIdx];
+        int cols = Math.max(1, areaW / t);
+        int rows = Math.max(1, areaH / t);
+        int total = (items.size() + cols - 1) / cols;
+        maxScroll = Math.max(0, total - rows);
+        scroll = Mth.clamp(scroll, 0, maxScroll);
+        int gx = left + (areaW - cols * t) / 2;
+        float scale = t >= 28 ? 1.4F : 1F;
+        for (int r = 0; r < rows; r++) for (int c = 0; c < cols; c++) {
+            int idx = (scroll + r) * cols + c;
+            if (idx >= items.size()) break;
+            ItemStack s = items.get(idx);
+            int x = gx + c * t, y = y0 + r * t;
+            boolean hov = mx >= x && mx < x + t && my >= y && my < y + t;
+            g.fill(x + 1, y + 1, x + t - 1, y + t - 1, hov ? Draw.alpha(accent, 0x45) : 0x1EFFFFFF);
+            if (hov) Draw.outline(g, x, y, t, t, accent);
+            float sc = hov ? scale * 1.15F : scale;
+            g.pose().pushPose();
+            g.pose().translate(x + t / 2F - 8 * sc, y + t / 2F - 8 * sc, hov ? 50 : 0);
+            g.pose().scale(sc, sc, 1F);
+            g.renderItem(s, 0, 0);
+            g.renderItemDecorations(font, s, 0, 0);
+            g.pose().popPose();
+            if (isFavorite(s) && tab.kind() != Kind.FAVORITES) g.fill(x + t - 4, y + 2, x + t - 2, y + 4, 0xFFFFD54F);
+            hits.add(new Hit(x, y, t, t, s, null, null));
+        }
+        scrollbar(g, y0, areaH, rows, total, accent);
+    }
+
+    private void scrollbar(GuiGraphics g, int y0, int h, int rows, int total, int accent) {
+        barX = right + 1;
+        barY = y0;
+        barH = rows * (listView ? 20 : TILE[tileIdx]);
+        g.fill(barX, barY, barX + 2, barY + barH, 0x25FFFFFF);
+        if (maxScroll > 0) {
+            int th = Math.max(14, barH * rows / Math.max(rows, total));
+            int ty = barY + (barH - th) * scroll / maxScroll;
+            g.fill(barX, ty, barX + 2, ty + th, Draw.alpha(accent, draggingBar ? 0xFF : 0xB0));
         }
     }
+
+    private void mini(GuiGraphics g, int x, int y, String label, int mx, int my, int accent, Runnable action) {
+        int w = Math.max(14, (int) (font.width(label) * 0.55F) + 4);
+        boolean hov = mx >= x && mx < x + w && my >= y && my < y + 12;
+        Draw.panel(g, x, y, w, 12, hov ? Draw.alpha(accent, 0x70) : 0x30FFFFFF, hov ? accent : 0x30FFFFFF);
+        Draw.smallCentered(g, font, label, x + w / 2F, y + 4, 0xFFFFFFFF, 0.55F);
+        hits.add(new Hit(x, y, w, 12, null, action, null));
+    }
+
+    // ---------- Главная
+
+    private void renderHome(GuiGraphics g, int mx, int my, int accent) {
+        int y = top;
+        int w = right - left;
+        y = homeRow(g, mx, my, accent, y, "archud.creative.recent", RECENT, "archud.creative.empty_recent");
+        y = homeRow(g, mx, my, accent, y + 4, "archud.creative.favorites", favorites(), "archud.creative.empty_fav");
+        // плитки категорий
+        Draw.small(g, font, Component.translatable("archud.creative.categories").getString(), left, y + 6, Draw.alpha(accent, 0xFF), 0.75F);
+        y += 16;
+        int cardW = 92, cardH = 30;
+        int cols = Math.max(1, (w + 4) / (cardW + 4));
+        cardW = (w + 4) / cols - 4;
+        int i = 0;
+        for (Tab t : tabs) {
+            if (t.kind() == Kind.HOME) continue;
+            int cx = left + (i % cols) * (cardW + 4), cy = y + (i / cols) * (cardH + 4);
+            if (cy + cardH > bottom) break;
+            boolean hov = mx >= cx && mx < cx + cardW && my >= cy && my < cy + cardH;
+            Draw.panel(g, cx, cy, cardW, cardH, hov ? Draw.alpha(accent, 0x45) : 0x26FFFFFF, hov ? accent : 0x25FFFFFF);
+            if (hov) g.fill(cx + 1, cy + cardH - 2, cx + cardW - 1, cy + cardH - 1, accent);
+            g.renderItem(t.icon(), cx + 6, cy + 7);
+            String n = t.name().getString();
+            int max = (int) ((cardW - 30) / 0.7F);
+            if (font.width(n) > max) n = font.plainSubstrByWidth(n, max - font.width("…")) + "…";
+            Draw.small(g, font, n, cx + 26, cy + 8, 0xFFFFFFFF, 0.7F);
+            String sub = t.kind() == Kind.CATEGORY ? Component.translatable("archud.creative.count", t.tab().getDisplayItems().size()).getString()
+                    : Component.translatable("archud.creative.sub." + t.kind().name().toLowerCase(Locale.ROOT)).getString();
+            Draw.small(g, font, sub, cx + 26, cy + 17, Draw.TEXT_DIM, 0.5F);
+            hits.add(new Hit(cx, cy, cardW, cardH, null, () -> selectTab(t, true), null));
+            i++;
+        }
+        maxScroll = 0;
+    }
+
+    private int homeRow(GuiGraphics g, int mx, int my, int accent, int y, String title, List<ItemStack> list, String empty) {
+        Draw.small(g, font, Component.translatable(title).getString(), left, y + 2, Draw.alpha(accent, 0xFF), 0.75F);
+        y += 11;
+        int t = 20;
+        int cols = (right - left) / t;
+        Draw.panel(g, left, y, right - left, t + 4, 0x18FFFFFF, 0x18FFFFFF);
+        if (list.isEmpty()) {
+            Draw.small(g, font, Component.translatable(empty).getString(), left + 6, y + 9, Draw.TEXT_DIM, 0.6F);
+        }
+        for (int i = 0; i < Math.min(cols, list.size()); i++) {
+            ItemStack s = list.get(i);
+            int x = left + 2 + i * t;
+            boolean hov = mx >= x && mx < x + t && my >= y + 2 && my < y + 2 + t;
+            if (hov) g.fill(x, y + 2, x + t, y + 2 + t, Draw.alpha(accent, 0x50));
+            g.renderItem(s, x + 2, y + 4);
+            g.renderItemDecorations(font, s, x + 2, y + 4);
+            hits.add(new Hit(x, y + 2, t, t, s, null, null));
+        }
+        return y + t + 4;
+    }
+
+    // ---------- Моды
+
+    private void renderMods(GuiGraphics g, int mx, int my, int accent) {
+        String q = search.getValue().trim().toLowerCase(Locale.ROOT);
+        List<Map.Entry<String, Integer>> mods = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : modCounts().entrySet()) {
+            if (e.getValue() == 0) continue;
+            String name = ArcHud.platform().modName(e.getKey());
+            if (!q.isEmpty() && !name.toLowerCase(Locale.ROOT).contains(q) && !e.getKey().contains(q)) continue;
+            mods.add(e);
+        }
+        int w = right - left;
+        int cardW = 120, cardH = 34;
+        int cols = Math.max(1, (w + 4) / (cardW + 4));
+        cardW = (w + 4) / cols - 4;
+        int rows = Math.max(1, (bottom - top + 4) / (cardH + 4));
+        int total = (mods.size() + cols - 1) / cols;
+        maxScroll = Math.max(0, total - rows);
+        scroll = Mth.clamp(scroll, 0, maxScroll);
+        for (int r = 0; r < rows; r++) for (int c = 0; c < cols; c++) {
+            int idx = (scroll + r) * cols + c;
+            if (idx >= mods.size()) break;
+            Map.Entry<String, Integer> e = mods.get(idx);
+            int x = left + c * (cardW + 4), y = top + r * (cardH + 4);
+            boolean hov = mx >= x && mx < x + cardW && my >= y && my < y + cardH;
+            Draw.panel(g, x, y, cardW, cardH, hov ? Draw.alpha(accent, 0x45) : 0x26FFFFFF, hov ? accent : 0x25FFFFFF);
+            g.pose().pushPose();
+            g.pose().translate(x + 5, y + 5, 0);
+            g.pose().scale(1.5F, 1.5F, 1F);
+            g.renderItem(modIcon(e.getKey()), 0, 0);
+            g.pose().popPose();
+            String name = ArcHud.platform().modName(e.getKey());
+            int max = (int) ((cardW - 38) / 0.75F);
+            if (font.width(name) > max) name = font.plainSubstrByWidth(name, max - font.width("…")) + "…";
+            Draw.small(g, font, name, x + 34, y + 8, 0xFFFFFFFF, 0.75F);
+            Draw.small(g, font, Component.translatable("archud.creative.count", e.getValue()).getString(), x + 34, y + 19, Draw.TEXT_DIM, 0.55F);
+            String ns = e.getKey();
+            hits.add(new Hit(x, y, cardW, cardH, null, () -> openMod(ns), null));
+        }
+        scrollbar(g, top, bottom - top, rows, total, accent);
+    }
+
+    // ---------- Мастерская
+
+    private void renderWorkshop(GuiGraphics g, int mx, int my, int accent) {
+        // слот предмета
+        int sx = left + 10, sy = top + 6;
+        Draw.small(g, font, Component.translatable("archud.creative.w_item").getString(), sx, sy, Draw.TEXT_DIM, 0.65F);
+        int bx = sx, by = sy + 10;
+        boolean hov = mx >= bx && mx < bx + 40 && my >= by && my < by + 40;
+        Draw.panel(g, bx, by, 40, 40, hov ? Draw.alpha(accent, 0x40) : 0x30000000, hov ? accent : Draw.alpha(accent, 0x70));
+        if (!work.isEmpty()) {
+            g.pose().pushPose();
+            g.pose().translate(bx + 4, by + 4, 0);
+            g.pose().scale(2F, 2F, 1F);
+            g.renderItem(work, 0, 0);
+            g.pose().popPose();
+        } else Draw.smallCentered(g, font, "+", bx + 20, by + 16, 0x60FFFFFF, 1.2F);
+        hits.add(new Hit(bx, by, 40, 40, null, () -> {
+            if (!carried.isEmpty()) {
+                loadWork(carried);
+                carried = ItemStack.EMPTY;
+                rebuildWidgets();
+            }
+        }, Component.translatable("archud.creative.w_drop")));
+        // количество
+        int cy = by + 48;
+        Draw.small(g, font, Component.translatable("archud.creative.w_count").getString(), sx, cy, Draw.TEXT_DIM, 0.65F);
+        int max = work.isEmpty() ? 64 : work.getMaxStackSize();
+        workCount = Mth.clamp(workCount, 1, max);
+        mini(g, sx, cy + 10, "-", mx, my, accent, () -> workCount = Math.max(1, workCount - (hasShiftDown() ? 10 : 1)));
+        Draw.smallCentered(g, font, Integer.toString(workCount), sx + 30, cy + 13, 0xFFFFFFFF, 0.9F);
+        mini(g, sx + 46, cy + 10, "+", mx, my, accent, () -> workCount = Math.min(work.isEmpty() ? 64 : work.getMaxStackSize(), workCount + (hasShiftDown() ? 10 : 1)));
+        mini(g, sx + 66, cy + 10, "max", mx, my, accent, () -> workCount = work.isEmpty() ? 64 : work.getMaxStackSize());
+        // подписи полей
+        int fx = left + 150;
+        Draw.small(g, font, Component.translatable("archud.creative.w_name").getString(), fx, top + 10, Draw.TEXT_DIM, 0.65F);
+        Draw.small(g, font, Component.translatable("archud.creative.w_lore").getString(), fx, top + 42, Draw.TEXT_DIM, 0.65F);
+        Draw.small(g, font, Component.translatable("archud.creative.w_flags").getString(), fx, top + 84, Draw.TEXT_DIM, 0.65F);
+        // предпросмотр результата
+        int py = cy + 32;
+        Draw.small(g, font, Component.translatable("archud.creative.w_result").getString(), sx, py, Draw.TEXT_DIM, 0.65F);
+        if (!work.isEmpty()) {
+            ItemStack r = buildWork();
+            Draw.panel(g, sx, py + 10, 130, Math.max(24, bottom - py - 14), 0x30000000, 0x25FFFFFF);
+            g.renderItem(r, sx + 4, py + 14);
+            hits.add(new Hit(sx + 3, py + 13, 18, 18, r.copyWithCount(workCount), null, null));
+            int ly = py + 14;
+            for (Component c : r.getTooltipLines(player, TooltipFlag.NORMAL)) {
+                if (ly > bottom - 10) break;
+                String s = c.getString();
+                if (font.width(s) * 0.6F > 100) s = font.plainSubstrByWidth(s, (int) (100 / 0.6F)) + "…";
+                Draw.small(g, font, s, sx + 24, ly + 1, 0xFFE0E6EE, 0.6F);
+                ly += 7;
+            }
+        } else {
+            Draw.small(g, font, Component.translatable("archud.creative.w_hint").getString(), sx, py + 12, 0xFF6A7682, 0.55F);
+        }
+    }
+
+    // ---------- Наборы
 
     private void renderKits(GuiGraphics g, int mx, int my, int accent) {
         var mgr = Minecraft.getInstance().getHotbarManager();
-        int rowH = Math.max(T + 2, Math.min(24, (invTop - 6 - gy) / 9));
+        int rowH = Math.max(20, Math.min(26, (bottom - top) / 9));
         for (int k = 0; k < 9; k++) {
             Hotbar hb = mgr.get(k);
-            int y = gy + k * rowH;
-            Draw.small(g, font, Component.translatable("archud.creative.kit", k + 1).getString(), cx + 2, y + 6, Draw.TEXT_DIM, 0.7F);
-            int x0 = cx + 46;
+            int y = top + k * rowH;
+            Draw.panel(g, left, y, right - left, rowH - 2, 0x1EFFFFFF, 0x18FFFFFF);
+            Draw.small(g, font, Component.translatable("archud.creative.kit", k + 1).getString(), left + 6, y + rowH / 2 - 4, Draw.TEXT_DIM, 0.7F);
+            int x0 = left + 52;
             for (int i = 0; i < 9; i++) {
-                int x = x0 + i * T;
-                g.fill(x + 1, y + 1, x + T - 1, y + T - 1, 0x40000000);
                 ItemStack s = hb.get(i);
+                int x = x0 + i * 19;
+                g.fill(x, y + 1, x + 18, y + 19, 0x30000000);
                 if (!s.isEmpty()) {
-                    g.renderItem(s, x + 1, y + 1);
-                    g.renderItemDecorations(font, s, x + 1, y + 1);
+                    g.renderItem(s, x + 1, y + 2);
+                    g.renderItemDecorations(font, s, x + 1, y + 2);
+                    hits.add(new Hit(x, y + 1, 18, 18, s, null, null));
                 }
             }
-            int bx = x0 + 9 * T + 6;
-            kitButton(g, bx, y + 2, Component.translatable("archud.creative.kit_save"), mx, my, accent);
-            kitButton(g, bx + 52, y + 2, Component.translatable("archud.creative.kit_load"), mx, my, accent);
+            final int kk = k;
+            int bx = x0 + 9 * 19 + 8;
+            kitBtn(g, bx, y + 3, "archud.creative.kit_save", mx, my, accent, () -> {
+                for (int i = 0; i < 9; i++) hb.set(i, player.getInventory().getItem(i).copy());
+                mgr.save();
+                click();
+                player.displayClientMessage(Component.translatable("archud.creative.kit_saved", kk + 1), true);
+            });
+            kitBtn(g, bx + 58, y + 3, "archud.creative.kit_load", mx, my, accent, () -> {
+                for (int i = 0; i < 9; i++) setInv(i, hb.get(i).copy());
+                click();
+            });
         }
+        maxScroll = 0;
     }
 
-    private void kitButton(GuiGraphics g, int x, int y, Component label, int mx, int my, int accent) {
-        boolean hov = mx >= x && mx < x + 48 && my >= y && my < y + 14;
-        Draw.panel(g, x, y, 48, 14, hov ? Draw.alpha(accent, 0x50) : 0xE0141B24, Draw.alpha(accent, hov ? 0xFF : 0x70));
-        Draw.smallCentered(g, font, label.getString(), x + 24, y + 4, 0xFFFFFFFF, 0.65F);
+    private void kitBtn(GuiGraphics g, int x, int y, String key, int mx, int my, int accent, Runnable action) {
+        boolean hov = mx >= x && mx < x + 54 && my >= y && my < y + 14;
+        Draw.panel(g, x, y, 54, 14, hov ? Draw.alpha(accent, 0x55) : 0x30FFFFFF, hov ? accent : Draw.alpha(accent, 0x60));
+        Draw.smallCentered(g, font, Component.translatable(key).getString(), x + 27, y + 4, 0xFFFFFFFF, 0.65F);
+        hits.add(new Hit(x, y, 54, 14, null, action, null));
     }
 
-    private void renderInventory(GuiGraphics g, int mx, int my, int hovered, int accent) {
-        g.fill(cx + 4, invTop - 3, cx + cw - 4, invTop - 2, Draw.alpha(accent, 0x40));
-        Draw.small(g, font, Component.translatable("container.inventory").getString(), invX, invTop + 2, Draw.TEXT_DIM, 0.7F);
+    // ---------- док
+
+    private void renderDock(GuiGraphics g, int mx, int my, int accent) {
+        int[] a = slotXY(39), b = slotXY(42);
+        int dx = a[0] - 6, dw = b[0] + 18 + 6 - dx;
+        Draw.panel(g, dx, dockTop, dw, S + 10, 0xF0101419, Draw.alpha(accent, 0x90));
+        g.fill(dx + 3, dockTop, dx + dw - 3, dockTop + 1, accent);
         Inventory inv = player.getInventory();
-        for (int i = 0; i <= 41; i++) {
+        if (invOpen) {
+            int[] p = slotXY(9);
+            Draw.panel(g, p[0] - 5, p[1] - 5, 9 * S + 10, 3 * S + 10, 0xF4101419, Draw.alpha(accent, 0x90));
+        }
+        int hovered = invAt(mx, my);
+        for (int i = 0; i <= 42; i++) {
+            if (i >= 9 && i < 36 && !invOpen) continue;
             int[] p = slotXY(i);
             int x = p[0], y = p[1];
             boolean hov = i == hovered;
+            if (i == 42) {
+                Draw.panel(g, x, y, 18, S, hov ? Draw.alpha(accent, 0x60) : 0x30FFFFFF, hov ? accent : 0x40FFFFFF);
+                Draw.smallCentered(g, font, invOpen ? "v" : "^", x + 9, y + 7, 0xFFFFFFFF, 0.8F);
+                continue;
+            }
             boolean sel = i == inv.selected;
-            int bg = i == 41 ? 0x50FF5252 : sel ? Draw.alpha(accent, 0x40) : 0x60000000;
-            g.fill(x + 1, y + 1, x + T - 1, y + T - 1, hov ? Draw.alpha(i == 41 ? 0xFFFF5252 : accent, 0x60) : bg);
-            Draw.outline(g, x, y, T, T, hov || sel ? Draw.alpha(i == 41 ? 0xFFFF5252 : accent, 0xE0) : 0x30FFFFFF);
+            int bg = i == 41 ? 0x40FF5252 : sel ? Draw.alpha(accent, 0x45) : 0x50000000;
+            g.fill(x + 1, y + 1, x + S - 1, y + S - 1, hov ? Draw.alpha(i == 41 ? 0xFFFF5252 : accent, 0x60) : bg);
+            Draw.outline(g, x, y, S, S, hov || sel ? Draw.alpha(i == 41 ? 0xFFFF5252 : accent, 0xE0) : 0x28FFFFFF);
             if (i == 41) {
-                // корзина: крестик
                 for (int d = 0; d < 8; d++) {
-                    g.fill(x + 5 + d, y + 5 + d, x + 6 + d, y + 6 + d, 0xFFFF8A80);
-                    g.fill(x + 12 - d, y + 5 + d, x + 13 - d, y + 6 + d, 0xFFFF8A80);
+                    g.fill(x + 6 + d, y + 6 + d, x + 7 + d, y + 7 + d, 0xFFFF8A80);
+                    g.fill(x + 13 - d, y + 6 + d, x + 14 - d, y + 7 + d, 0xFFFF8A80);
                 }
                 continue;
             }
             ItemStack s = inv.getItem(i);
             if (s.isEmpty() && i >= 36) {
-                // силуэты пустых слотов брони и второй руки (ванильные спрайты)
                 ResourceLocation icon = switch (i) {
-                    case 39 -> net.minecraft.world.inventory.InventoryMenu.EMPTY_ARMOR_SLOT_HELMET;
-                    case 38 -> net.minecraft.world.inventory.InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE;
-                    case 37 -> net.minecraft.world.inventory.InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS;
-                    case 36 -> net.minecraft.world.inventory.InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS;
-                    default -> net.minecraft.world.inventory.InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD;
+                    case 39 -> InventoryMenu.EMPTY_ARMOR_SLOT_HELMET;
+                    case 38 -> InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE;
+                    case 37 -> InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS;
+                    case 36 -> InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS;
+                    default -> InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD;
                 };
-                g.setColor(1F, 1F, 1F, 0.45F);
-                com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-                g.blit(x + 1, y + 1, 0, 16, 16, Minecraft.getInstance().getTextureAtlas(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS).apply(icon));
+                g.setColor(1F, 1F, 1F, 0.4F);
+                RenderSystem.enableBlend();
+                g.blit(x + 2, y + 2, 0, 16, 16, Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(icon));
                 g.setColor(1F, 1F, 1F, 1F);
             }
-            g.renderItem(s, x + 1, y + 1);
-            g.renderItemDecorations(font, s, x + 1, y + 1);
+            if (i < 9 && s.isEmpty()) Draw.small(g, font, Integer.toString(i + 1), x + 2, y + 2, 0x40FFFFFF, 0.5F);
+            g.renderItem(s, x + 2, y + 2);
+            g.renderItemDecorations(font, s, x + 2, y + 2);
         }
     }
 
+    // ---------- карточка
+
     private void renderInfo(GuiGraphics g, int accent) {
-        Draw.panel(g, ix, py, INFO_W, ph, 0xE00C1015, Draw.alpha(accent, 0x70));
-        g.fill(ix + 3, py, ix + INFO_W - 3, py + 1, Draw.alpha(accent, 0xE0));
+        int iy = top - 4, ih = bottom - top + 8;
+        Draw.panel(g, infoX, iy, INFO_W, ih, 0xE00E1218, Draw.alpha(accent, 0x60));
         boolean has = !focus.isEmpty();
-        give1Btn.active = giveStackBtn.active = favBtn.active = has;
-        give1Btn.visible = giveStackBtn.visible = favBtn.visible = has;
+        give1Btn.visible = giveStackBtn.visible = favBtn.visible = toWorkBtn.visible = has;
         if (!has) {
-            Draw.smallCentered(g, font, Component.translatable("archud.creative.hover_hint").getString(), ix + INFO_W / 2F, py + 60, Draw.TEXT_DIM, 0.65F);
-        } else {
-            // крупная иконка
-            Draw.panel(g, ix + INFO_W / 2 - 20, py + 8, 40, 40, 0xC0060A10, Draw.alpha(accent, 0x60));
-            g.pose().pushPose();
-            g.pose().translate(ix + INFO_W / 2F - 16, py + 12, 0);
-            g.pose().scale(2F, 2F, 1F);
-            g.renderItem(focus, 0, 0);
-            g.pose().popPose();
-            int y = py + 52;
-            for (var line : font.split(focus.getHoverName(), INFO_W - 12)) {
-                g.drawString(font, line, ix + INFO_W / 2 - font.width(line) / 2, y, 0xFFFFFFFF, true);
-                y += 10;
-                if (y > py + 72) break;
-            }
-            ResourceLocation id = id(focus);
-            Draw.smallCentered(g, font, id.toString(), ix + INFO_W / 2F, y + 1, Draw.TEXT_DIM, 0.55F);
-            String mod = ArcHud.platform().modName(id.getNamespace());
-            Draw.smallCentered(g, font, mod, ix + INFO_W / 2F, y + 8, Draw.alpha(accent, 0xFF), 0.6F);
-            favBtn.setMessage(Component.translatable(isFavorite(focus) ? "archud.creative.unfav" : "archud.creative.fav"));
-            // характеристики
-            int sy = py + 172;
+            Draw.smallCentered(g, font, Component.translatable("archud.creative.hover_hint").getString(), infoX + INFO_W / 2F, iy + 50, Draw.TEXT_DIM, 0.65F);
+            return;
+        }
+        // крупная иконка на подсвеченном фоне
+        int cx = infoX + INFO_W / 2;
+        Draw.hGradient(g, infoX + 1, iy + 1, infoX + INFO_W - 1, iy + 54, Draw.alpha(accent, 0x30), 0x00000000);
+        g.pose().pushPose();
+        g.pose().translate(cx - 20, iy + 8, 0);
+        g.pose().scale(2.5F, 2.5F, 1F);
+        g.renderItem(focus, 0, 0);
+        g.pose().popPose();
+        int y = iy + 58;
+        for (var line : font.split(focus.getHoverName(), INFO_W - 10)) {
+            g.drawString(font, line, cx - font.width(line) / 2, y, 0xFFFFFFFF, true);
+            y += 10;
+            if (y > iy + 78) break;
+        }
+        ResourceLocation id = id(focus);
+        Draw.smallCentered(g, font, id.toString(), cx, y + 1, Draw.TEXT_DIM, 0.5F);
+        Draw.smallCentered(g, font, ArcHud.platform().modName(id.getNamespace()), cx, y + 8, Draw.alpha(accent, 0xFF), 0.6F);
+        favBtn.setMessage(Component.translatable(isFavorite(focus) ? "archud.creative.unfav" : "archud.creative.fav"));
+        int sy = top + 192;
+        if (sy + 30 < bottom) {
             stat(g, sy, "archud.creative.stack", Integer.toString(focus.getMaxStackSize()));
             stat(g, sy + 9, "archud.creative.rarity", focus.getRarity().name().charAt(0) + focus.getRarity().name().substring(1).toLowerCase(Locale.ROOT));
             stat(g, sy + 18, "archud.creative.tags", Long.toString(focus.getTags().count()));
             if (focus.isDamageableItem()) stat(g, sy + 27, "archud.creative.durability", Integer.toString(focus.getMaxDamage()));
-            else if (focus.isEdible()) stat(g, sy + 27, "archud.creative.food",
-                    Integer.toString(focus.getItem().getFoodProperties() == null ? 0 : focus.getItem().getFoodProperties().getNutrition()));
-        }
-        // подсказка по управлению
-        int hy = py + ph - 52;
-        g.fill(ix + 6, hy - 4, ix + INFO_W - 6, hy - 3, 0x30FFFFFF);
-        for (String k : new String[]{"archud.creative.help1", "archud.creative.help2", "archud.creative.help3", "archud.creative.help4", "archud.creative.help5"}) {
-            Draw.small(g, font, Component.translatable(k).getString(), ix + 6, hy, 0xFF6A7682, 0.5F);
-            hy += 9;
         }
     }
 
     private void stat(GuiGraphics g, int y, String key, String value) {
-        Draw.small(g, font, Component.translatable(key).getString(), ix + 8, y, Draw.TEXT_DIM, 0.6F);
-        Draw.small(g, font, value, ix + INFO_W - 8 - font.width(value) * 0.6F, y, Draw.TEXT, 0.6F);
+        Draw.small(g, font, Component.translatable(key).getString(), infoX + 8, y, Draw.TEXT_DIM, 0.6F);
+        Draw.small(g, font, value, infoX + INFO_W - 8 - font.width(value) * 0.6F, y, Draw.TEXT, 0.6F);
     }
 
-    // ------------------------------------------------------------------ мышь
+    // ================================================================== мышь
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (super.mouseClicked(mx, my, button)) return true;
-        if (search.isFocused() && !(mx >= search.getX() && mx < search.getX() + search.getWidth() && my >= search.getY() && my < search.getY() + search.getHeight())) {
-            search.setFocused(false);
+        for (EditBox b : new EditBox[]{search, nickBox, nameBox, loreBox}) {
+            if (b != null && b.isFocused() && !b.isMouseOver(mx, my)) b.setFocused(false);
         }
-        Tab t = tabAt(mx, my);
-        if (t != null) {
-            selectTab(t, true);
-            return true;
-        }
-        // полоса прокрутки
-        int bx = gx + cols * T + 2;
-        if (tab.kind() != Kind.KITS && mx >= bx && mx < bx + 5 && my >= gy && my < gy + rows * T) {
+        if (maxScroll > 0 && mx >= barX - 2 && mx < barX + 4 && my >= barY && my < barY + barH) {
             draggingBar = true;
             dragBar(my);
-            return true;
-        }
-        if (tab.kind() == Kind.KITS && clickKits(mx, my)) return true;
-        int grid = gridAt(mx, my);
-        if (grid >= 0 || (mx >= gx && mx < gx + cols * T && my >= gy && my < gy + rows * T)) {
-            clickGrid(grid, button);
             return true;
         }
         int inv = invAt(mx, my);
@@ -626,8 +1126,23 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             clickInventory(inv, button);
             return true;
         }
-        // клик мимо окон с предметом на курсоре — выбросить
-        boolean outside = mx < px || mx >= px + pw || my < py || my >= py + ph;
+        Hit h = hitAt(mx, my);
+        if (h != null) {
+            if (h.action() != null) {
+                if (button == 0) h.action().run();
+                return true;
+            }
+            if (h.stack() != null) {
+                clickItem(h.stack(), button);
+                return true;
+            }
+        }
+        // пустое место рабочей области с предметом на курсоре — убрать его
+        if (!carried.isEmpty() && mx >= left && mx < right && my >= top && my < bottom) {
+            carried = ItemStack.EMPTY;
+            return true;
+        }
+        boolean outside = my > 32 && (mx < left - 4 || mx >= infoX + INFO_W || my >= height - 4);
         if (outside && !carried.isEmpty()) {
             ItemStack drop = button == 1 ? carried.split(1) : carried;
             Minecraft.getInstance().gameMode.handleCreativeModeItemDrop(drop.copy());
@@ -637,16 +1152,12 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         return false;
     }
 
-    private void clickGrid(int idx, int button) {
+    private void clickItem(ItemStack s, int button) {
         if (!carried.isEmpty()) {
-            // предмет на курсоре над сеткой: тот же — +1, иначе убрать с курсора
-            if (idx >= 0 && button == 0 && ItemStack.isSameItemSameTags(carried, items.get(idx)) && carried.getCount() < carried.getMaxStackSize()) {
-                carried.grow(1);
-            } else carried = ItemStack.EMPTY;
+            if (button == 0 && ItemStack.isSameItemSameTags(carried, s) && carried.getCount() < carried.getMaxStackSize()) carried.grow(1);
+            else carried = ItemStack.EMPTY;
             return;
         }
-        if (idx < 0) return;
-        ItemStack s = items.get(idx);
         if (button == 0 && hasShiftDown()) {
             give(s, s.getMaxStackSize());
             return;
@@ -657,7 +1168,12 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
     private void clickInventory(int i, int button) {
         Inventory inv = player.getInventory();
-        if (i == 41) { // корзина
+        if (i == 42) {
+            invOpen = !invOpen;
+            click();
+            return;
+        }
+        if (i == 41) {
             if (!carried.isEmpty()) carried = ItemStack.EMPTY;
             else if (hasShiftDown()) {
                 for (int k = 0; k <= 40; k++) if (!inv.getItem(k).isEmpty()) setInv(k, ItemStack.EMPTY);
@@ -666,14 +1182,13 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             return;
         }
         ItemStack cur = inv.getItem(i);
-        if (button == 2) { // СКМ — копия стака на курсор
+        if (button == 2) {
             if (!cur.isEmpty() && carried.isEmpty()) carried = cur.copyWithCount(cur.getMaxStackSize());
             return;
         }
         if (carried.isEmpty()) {
             if (cur.isEmpty()) return;
             if (button == 0 && hasShiftDown()) {
-                // быстрый перенос между хотбаром и основным инвентарём
                 int from = i < 9 ? 9 : 0, to = i < 9 ? 36 : 9;
                 for (int k = from; k < to; k++) {
                     if (inv.getItem(k).isEmpty()) {
@@ -695,7 +1210,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             return;
         }
         if (!fits(i, carried)) return;
-        if (button == 1) { // по одному
+        if (button == 1) {
             if (cur.isEmpty()) {
                 setInv(i, carried.copyWithCount(1));
                 carried.shrink(1);
@@ -721,41 +1236,10 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         }
     }
 
-    private boolean clickKits(double mx, double my) {
-        var mgr = Minecraft.getInstance().getHotbarManager();
-        int rowH = Math.max(T + 2, Math.min(24, (invTop - 6 - gy) / 9));
-        int x0 = cx + 46, bx = x0 + 9 * T + 6;
-        for (int k = 0; k < 9; k++) {
-            int y = gy + k * rowH + 2;
-            if (my < y || my >= y + 14) continue;
-            Hotbar hb = mgr.get(k);
-            if (mx >= bx && mx < bx + 48) {
-                for (int i = 0; i < 9; i++) hb.set(i, player.getInventory().getItem(i).copy());
-                mgr.save();
-                click();
-                player.displayClientMessage(Component.translatable("archud.creative.kit_saved", k + 1), true);
-                return true;
-            }
-            if (mx >= bx + 52 && mx < bx + 100) {
-                for (int i = 0; i < 9; i++) setInv(i, hb.get(i).copy());
-                click();
-                return true;
-            }
-            // клик по предмету набора — взять его
-            if (mx >= x0 && mx < x0 + 9 * T) {
-                ItemStack s = hb.get((int) ((mx - x0) / T));
-                if (!s.isEmpty() && carried.isEmpty()) carried = s.copy();
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void dragBar(double my) {
-        int max = maxScroll();
-        if (max <= 0) return;
-        float f = (float) ((my - gy) / (rows * T));
-        scroll = Mth.clamp(Math.round(f * max), 0, max);
+        if (maxScroll <= 0) return;
+        float f = (float) ((my - barY) / Math.max(1, barH));
+        scroll = Mth.clamp(Math.round(f * maxScroll), 0, maxScroll);
     }
 
     @Override
@@ -775,25 +1259,22 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        if (mx >= sx && mx < sx + SIDE_W) {
-            sideScroll = Mth.clamp(sideScroll - (int) Math.signum(delta), 0, Math.max(0, tabs.size() - sideRows()));
+        if (my >= stripY && my < stripY + 24) {
+            stripScroll = Mth.clamp(stripScroll - (int) (delta * 30), 0, stripMax);
             return true;
         }
-        if (mx >= cx && mx < cx + cw && my < invTop) {
-            scroll = Mth.clamp(scroll - (int) Math.signum(delta) * (hasShiftDown() ? rows : 1), 0, maxScroll());
+        if (mx >= left - 4 && mx < right + 4 && my >= top && my < bottom) {
+            scroll = Mth.clamp(scroll - (int) Math.signum(delta) * (hasShiftDown() ? 5 : 1), 0, maxScroll);
             return true;
         }
         return super.mouseScrolled(mx, my, delta);
     }
 
-    // ------------------------------------------------------------------ клавиатура
+    // ================================================================== клавиатура
 
-    private ItemStack hoveredStack(double mx, double my) {
-        int grid = gridAt(mx, my);
-        if (grid >= 0) return items.get(grid);
-        int inv = invAt(mx, my);
-        if (inv >= 0 && inv <= 40) return player.getInventory().getItem(inv);
-        return ItemStack.EMPTY;
+    private boolean typing() {
+        for (EditBox b : new EditBox[]{search, nickBox, nameBox, loreBox}) if (b != null && b.isFocused()) return true;
+        return false;
     }
 
     @Override
@@ -803,16 +1284,17 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             onClose();
             return true;
         }
-        if (!search.isFocused()) {
+        if (!typing()) {
             double mx = mc.mouseHandler.xpos() * width / mc.getWindow().getScreenWidth();
             double my = mc.mouseHandler.ypos() * height / mc.getWindow().getScreenHeight();
-            ItemStack hov = hoveredStack(mx, my);
-            int grid = gridAt(mx, my), inv = invAt(mx, my);
+            Hit h = hitAt(mx, my);
+            ItemStack grid = h != null && h.stack() != null ? h.stack() : ItemStack.EMPTY;
+            int inv = invAt(mx, my);
             for (int n = 0; n < 9; n++) {
                 if (!mc.options.keyHotbarSlots[n].matches(key, scan)) continue;
-                if (grid >= 0) {
-                    setInv(n, hov.copyWithCount(hov.getMaxStackSize()));
-                    remember(hov);
+                if (!grid.isEmpty()) {
+                    setInv(n, grid.copyWithCount(grid.getMaxStackSize()));
+                    remember(grid);
                 } else if (inv >= 0 && inv <= 40 && inv != n) {
                     ItemStack a = player.getInventory().getItem(inv).copy(), b = player.getInventory().getItem(n).copy();
                     if (fits(inv, b)) {
@@ -822,9 +1304,9 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
                 }
                 return true;
             }
-            if (mc.options.keyDrop.matches(key, scan) && !hov.isEmpty()) {
-                if (grid >= 0) mc.gameMode.handleCreativeModeItemDrop(hov.copyWithCount(hasControlDown() ? hov.getMaxStackSize() : 1));
-                else if (inv >= 0 && inv <= 40) {
+            if (mc.options.keyDrop.matches(key, scan)) {
+                if (!grid.isEmpty()) mc.gameMode.handleCreativeModeItemDrop(grid.copyWithCount(hasControlDown() ? grid.getMaxStackSize() : 1));
+                else if (inv >= 0 && inv <= 40 && !player.getInventory().getItem(inv).isEmpty()) {
                     ItemStack cur = player.getInventory().getItem(inv);
                     int n = hasControlDown() ? cur.getCount() : 1;
                     mc.gameMode.handleCreativeModeItemDrop(cur.copyWithCount(n));
@@ -832,22 +1314,33 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
                 }
                 return true;
             }
+            ItemStack hov = !grid.isEmpty() ? grid : inv >= 0 && inv <= 40 ? player.getInventory().getItem(inv) : ItemStack.EMPTY;
             if (key == GLFW.GLFW_KEY_F && !hov.isEmpty()) {
                 toggleFavorite(hov);
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_W && !hov.isEmpty()) { // в мастерскую
+                loadWork(hov);
+                selectTab(tabs.stream().filter(t -> t.kind() == Kind.WORKSHOP).findFirst().orElse(tab), true);
+                return true;
+            }
+            if (key == GLFW.GLFW_KEY_TAB) { // следующая вкладка
+                int i = tabs.indexOf(tab);
+                selectTab(tabs.get(Math.floorMod(i + (hasShiftDown() ? -1 : 1), tabs.size())), true);
                 return true;
             }
             if (mc.options.keyInventory.matches(key, scan)) {
                 onClose();
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_SLASH || (key == GLFW.GLFW_KEY_F && hasControlDown())) {
+            if (key == GLFW.GLFW_KEY_SLASH) {
                 setFocused(search);
                 search.setFocused(true);
                 return true;
             }
         }
-        if (search.isFocused() && key == GLFW.GLFW_KEY_ENTER) {
-            search.setFocused(false);
+        if (typing() && key == GLFW.GLFW_KEY_ENTER) {
+            for (EditBox b : new EditBox[]{search, nickBox, nameBox, loreBox}) if (b != null) b.setFocused(false);
             return true;
         }
         return super.keyPressed(key, scan, mods);
@@ -855,16 +1348,15 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
     @Override
     public boolean charTyped(char c, int mods) {
-        if (!search.isFocused() && !Character.isWhitespace(c) && c != '/' && !Character.isDigit(c)
-                && Character.toLowerCase(c) != 'q' && Character.toLowerCase(c) != 'f' && Character.toLowerCase(c) != 'e') {
-            // начали печатать — сразу в поиск
+        if (!typing() && !Character.isWhitespace(c) && c != '/' && !Character.isDigit(c)
+                && "qfewQFEW".indexOf(c) < 0 && tab.kind() != Kind.WORKSHOP) {
             setFocused(search);
             search.setFocused(true);
         }
         return super.charTyped(c, mods);
     }
 
-    // ------------------------------------------------------------------ жизненный цикл
+    // ================================================================== жизненный цикл
 
     @Override
     public void tick() {
@@ -873,12 +1365,11 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             mc.setScreen(new InventoryScreen(player));
             return;
         }
-        search.tick();
+        for (EditBox b : new EditBox[]{search, nickBox, nameBox, loreBox}) if (b != null) b.tick();
     }
 
     @Override
     public void removed() {
-        // предмет с курсора — в инвентарь, если некуда — на землю
         if (!carried.isEmpty() && Minecraft.getInstance().gameMode != null) {
             if (!give(carried, carried.getCount())) Minecraft.getInstance().gameMode.handleCreativeModeItemDrop(carried);
             carried = ItemStack.EMPTY;
@@ -889,6 +1380,25 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    /** Для автоматических скриншотов: мастерская с примером. */
+    public void showcaseWorkshop() {
+        loadWork(new ItemStack(Items.DIAMOND_SWORD));
+        workName = "Excalibur";
+        workLore = "Arc HUD";
+        workGlint = true;
+        workUnbreakable = true;
+        showcaseTab("WORKSHOP");
+    }
+
+    public void showcaseList(boolean list) {
+        listView = list;
+    }
+
+    /** Для автоматических скриншотов. */
+    public void showcaseTab(String kind) {
+        tabs.stream().filter(t -> t.kind().name().equals(kind)).findFirst().ifPresent(t -> selectTab(t, false));
     }
 
     private void click() {

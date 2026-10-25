@@ -162,6 +162,8 @@ public class ArcConfig {
     public boolean customCreative = true;
     /** Избранные предметы креатив-меню (NBT стака одной строкой). */
     public java.util.List<String> creativeFavorites = new java.util.ArrayList<>();
+    /** Ники, для которых брали головы в креатив-меню. */
+    public java.util.List<String> creativeHeads = new java.util.ArrayList<>();
     /** Выборочное зачарование (решает хост / сервер). */
     public boolean enchantSelective = true;
     /** Переброс вариантов зачарования за 1 лазурит (решает хост / сервер). */
