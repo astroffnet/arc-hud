@@ -633,5 +633,7 @@
   "archud.creative.w_give": "Получить",
   "archud.creative.w_reset": "Сбросить",
   "archud.creative.w_result": "Результат",
-  "archud.creative.w_hint": "Положите предмет в ячейку, чтобы изменить его"
+  "archud.creative.w_hint": "Положите предмет в ячейку, чтобы изменить его",
+  "archud.creative.view.grid": "Сетка",
+  "archud.creative.view.list": "Список"
 }
