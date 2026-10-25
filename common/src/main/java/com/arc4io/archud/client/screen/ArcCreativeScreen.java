@@ -135,7 +135,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
         // верхняя панель
         String prev = search != null ? search.getValue() : "";
-        int sw = Math.min(260, width - 360);
+        int sw = Math.min(260, width - 400);
         search = new EditBox(font, width / 2 - sw / 2, 11, sw, 14, Component.translatable("archud.creative.search"));
         search.setHint(Component.translatable("archud.creative.search").withStyle(s -> s.withColor(0x6A7380)));
         search.setMaxLength(64);
@@ -165,10 +165,10 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             b.setMessage(Component.literal(new String[]{"S", "M", "L"}[tileIdx]));
             scroll = 0;
         }));
-        bx -= 22;
-        addRenderableWidget(new ArcButton(bx, 10, 20, 16, Component.literal(listView ? "≡" : "▦"), b -> {
+        bx -= 52;
+        addRenderableWidget(new ArcButton(bx, 10, 50, 16, Component.translatable(listView ? "archud.creative.view.list" : "archud.creative.view.grid"), b -> {
             listView = !listView;
-            b.setMessage(Component.literal(listView ? "≡" : "▦"));
+            b.setMessage(Component.translatable(listView ? "archud.creative.view.list" : "archud.creative.view.grid"));
             scroll = 0;
         }));
 
@@ -606,6 +606,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
         renderBackground(g);
+        g.fill(0, 0, width, height, 0xB0060A0E); // плотнее ванильного затемнения — мир и HUD не просвечивают
         int accent = Theme.accent();
         hits.clear();
 
@@ -757,7 +758,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
                 hits.add(new Hit(x, y, colW - 38, rowH - 2, s, null, null));
                 // быстрые кнопки +1 / +стак
                 mini(g, x + colW - 36, y + 3, "+1", mx, my, accent, () -> give(s, 1));
-                mini(g, x + colW - 20, y + 3, "+" + s.getMaxStackSize(), mx, my, accent, () -> give(s, s.getMaxStackSize()));
+                if (s.getMaxStackSize() > 1) mini(g, x + colW - 20, y + 3, "+" + s.getMaxStackSize(), mx, my, accent, () -> give(s, s.getMaxStackSize()));
             }
             scrollbar(g, y0, areaH, rows, total, accent);
             return;

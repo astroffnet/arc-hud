@@ -571,5 +571,7 @@
   "archud.creative.w_give": "Give",
   "archud.creative.w_reset": "Reset",
   "archud.creative.w_result": "Result",
-  "archud.creative.w_hint": "Put an item into the slot to edit it"
+  "archud.creative.w_hint": "Put an item into the slot to edit it",
+  "archud.creative.view.grid": "Grid",
+  "archud.creative.view.list": "List"
 }
