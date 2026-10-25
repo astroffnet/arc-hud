@@ -36,7 +36,6 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
             "backgroundFps", new int[]{1, 5, 10, 15, 30, 60},
             "waypointMaxDistance", new int[]{0, 250, 500, 1000, 2000, 5000},
             "minimapSize", new int[]{80, 96, 110, 128, 150, 180},
-            "firstPersonStyle", new int[]{0, 1, 2},
             "bodycamFov", new int[]{80, 90, 100, 110, 120});
 
     public ArcConfigScreen(Screen parent) {

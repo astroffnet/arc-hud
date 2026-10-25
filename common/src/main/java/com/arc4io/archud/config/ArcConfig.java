@@ -176,13 +176,14 @@ public class ArcConfig {
     public boolean cameraLeftShoulder = false;
     public boolean cameraCrosshair = true;
     public float cameraDistance = 4.0F;
-    /** Вид от первого лица: 0 — обычный, 1 — улучшенный, 2 — бодикам (клавиша F7). */
+    /** Текущий вид от первого лица: 0 — обычный, 1 — улучшенный, 2 — бодикам (меняется по F5). */
     public int firstPersonStyle = 0;
-    /** Своё тело в улучшенном виде и бодикаме. */
-    public boolean firstPersonBody = true;
+    /** Улучшенный вид от первого лица в цикле F5. */
+    public boolean fpEnhancedInF5Cycle = true;
+    /** Бодикам в цикле F5. */
+    public boolean fpBodycamInF5Cycle = true;
     public int bodycamFov = 100;
     public boolean bodycamLens = true;
-    public boolean bodycamOverlay = true;
     public boolean bodycamHideCrosshair = true;
     public float cameraShoulder = 0.75F;
     public float cameraHeight = 0.25F;

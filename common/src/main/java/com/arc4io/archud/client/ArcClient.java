@@ -71,9 +71,6 @@ public final class ArcClient {
         }
         while (ArcKeys.CAMERA_SHOULDER.consumeClick()) com.arc4io.archud.client.camera.ArcCamera.swapShoulder();
         com.arc4io.archud.client.camera.ArcCamera.tick(mc);
-        while (ArcKeys.FP_STYLE.consumeClick()) {
-            if (mc.screen == null) com.arc4io.archud.client.camera.FirstPersonCam.cycle(mc);
-        }
         com.arc4io.archud.client.camera.FirstPersonCam.tick(mc);
         while (ArcKeys.INSPECT.consumeClick()) {
             if (mc.screen == null) com.arc4io.archud.client.fx.WeaponInspect.start(mc);
