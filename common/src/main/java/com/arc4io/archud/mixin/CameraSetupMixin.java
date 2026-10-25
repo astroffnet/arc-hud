@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CameraSetupMixin {
     @Inject(method = "setup", at = @At("RETURN"), require = 0)
     private void archud$setup(BlockGetter level, Entity entity, boolean detached, boolean mirror, float partialTick, CallbackInfo ci) {
-        if (!mirror) ArcCamera.setupCamera((Camera) (Object) this, entity, detached, partialTick);
+        if (mirror) return;
+        ArcCamera.setupCamera((Camera) (Object) this, entity, detached, partialTick);
+        com.arc4io.archud.client.camera.FirstPersonCam.setupCamera((Camera) (Object) this, entity, detached, partialTick);
     }
 }

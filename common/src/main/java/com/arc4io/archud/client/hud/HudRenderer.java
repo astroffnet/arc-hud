@@ -221,6 +221,7 @@ public final class HudRenderer {
         LocalPlayer p = mc.player;
         if (p == null || mc.level == null) return;
         ArcConfig cfg = ArcConfig.get();
+        com.arc4io.archud.client.camera.FirstPersonCam.renderOverlay(g);
         com.arc4io.archud.client.map.WaypointWorldRenderer.renderOverlay(g);
         if (!cfg.enabled) return;
         if (com.arc4io.archud.client.dev.ShowcaseDriver.forceTab && ArcTabList.enabled()) {
