@@ -458,5 +458,10 @@
   "archud.config.cameraLeftShoulder": "Camera: left shoulder",
   "archud.config.cameraCrosshair": "Camera: crosshair when attacking/aiming",
   "archud.config.cameraInF5Cycle": "Arc camera in F5 cycle (first → Arc → third)",
-  "archud.config.cameraFrontView": "F5: keep front view"
+  "archud.config.cameraFrontView": "F5: keep front view",
+  "archud.config.customEnchanting": "New enchanting table",
+  "archud.ench.cost": "Needs %1$s lvl · takes %2$s lvl",
+  "archud.ench.info": "Lapis: %1$s · Level: %2$s",
+  "archud.ench.place": "Place an item to enchant",
+  "archud.ench.cannot": "This item can't be enchanted"
 }

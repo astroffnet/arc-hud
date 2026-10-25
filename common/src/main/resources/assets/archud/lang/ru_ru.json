@@ -520,5 +520,10 @@
   "archud.config.cameraLeftShoulder": "Камера: за левым плечом",
   "archud.config.cameraCrosshair": "Камера: прицел при атаке и стрельбе",
   "archud.config.cameraInF5Cycle": "Камера Arc в цикле F5 (первое лицо → Arc → третье)",
-  "archud.config.cameraFrontView": "F5: оставить вид спереди"
+  "archud.config.cameraFrontView": "F5: оставить вид спереди",
+  "archud.config.customEnchanting": "Новый стол зачарования",
+  "archud.ench.cost": "Нужно %1$s ур. · спишется %2$s",
+  "archud.ench.info": "Лазурит: %1$s · Уровень: %2$s",
+  "archud.ench.place": "Положите предмет для зачарования",
+  "archud.ench.cannot": "Этот предмет нельзя зачаровать"
 }
