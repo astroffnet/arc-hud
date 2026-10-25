@@ -100,7 +100,15 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
     private EditBox search, nickBox, nameBox, loreBox;
     private ArcButton give1Btn, giveStackBtn, favBtn, toWorkBtn;
     private ItemStack carried = ItemStack.EMPTY;
-    private ItemStack focus = ItemStack.EMPTY;
+    /** Выбранный предмет (карточка справа). Меняется только по клику, а не при наведении. */
+    private static ItemStack focus = ItemStack.EMPTY;
+    private static int amount = 1;
+    // нажатие на предмет: перетаскивание на курсор и двойной клик
+    private ItemStack pressStack;
+    private double pressX, pressY;
+    private boolean dragPicked;
+    private ItemStack lastClickStack = ItemStack.EMPTY;
+    private long lastClickTime;
     private int scroll, maxScroll, stripScroll;
     private boolean draggingBar;
     private int barX, barY, barH;
@@ -174,9 +182,15 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
         // карточка предмета
         int iy = top + 118;
-        give1Btn = addRenderableWidget(new ArcButton(infoX + 6, iy, INFO_W - 12, 15, Component.translatable("archud.creative.give_one"), b -> give(focus, 1)));
-        giveStackBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 18, INFO_W - 12, 15, Component.translatable("archud.creative.give_stack"),
-                b -> give(focus, focus.getMaxStackSize())));
+        give1Btn = addRenderableWidget(new ArcButton(infoX + 6, iy, INFO_W - 12, 15, Component.translatable("archud.creative.give"),
+                b -> give(focus, amount)).icon(Icons.BACKPACK));
+        giveStackBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 18, INFO_W - 12, 15, Component.translatable("archud.creative.to_cursor"),
+                b -> {
+                    if (!focus.isEmpty()) {
+                        carried = focus.copyWithCount(Math.min(amount, focus.getMaxStackSize()));
+                        remember(focus);
+                    }
+                }));
         favBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 36, INFO_W - 12, 15, Component.empty(), b -> toggleFavorite(focus))).icon(Icons.STAR);
         toWorkBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 54, INFO_W - 12, 15, Component.translatable("archud.creative.to_workshop"), b -> {
             loadWork(focus);
@@ -629,8 +643,6 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         // фокус: предмет под курсором
         int inv = invAt(mx, my);
         Hit hov = inv >= 0 ? null : hitAt(mx, my);
-        if (hov != null && hov.stack() != null && !hov.stack().isEmpty()) focus = hov.stack();
-        else if (inv >= 0 && inv <= 40 && !player.getInventory().getItem(inv).isEmpty()) focus = player.getInventory().getItem(inv);
         renderInfo(g, accent);
 
         super.render(g, mx, my, pt);
@@ -751,7 +763,9 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
                 ItemStack s = items.get(idx);
                 int x = left + c * colW, y = y0 + r * rowH;
                 boolean hov = mx >= x && mx < x + colW - 4 && my >= y && my < y + rowH - 2;
-                Draw.panel(g, x, y, colW - 4, rowH - 2, hov ? Draw.alpha(accent, 0x40) : 0x22FFFFFF, hov ? accent : 0x18FFFFFF);
+                boolean selRow = !focus.isEmpty() && ItemStack.isSameItemSameTags(s, focus);
+                Draw.panel(g, x, y, colW - 4, rowH - 2, hov || selRow ? Draw.alpha(accent, selRow ? 0x55 : 0x40) : 0x22FFFFFF,
+                        selRow ? 0xFFFFFFFF : hov ? accent : 0x18FFFFFF);
                 g.renderItem(s, x + 2, y + 1);
                 String name = s.getHoverName().getString();
                 int max = (int) ((colW - 4 - 24 - 34) / 0.75F);
@@ -790,6 +804,10 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             g.renderItemDecorations(font, s, 0, 0);
             g.pose().popPose();
             if (isFavorite(s) && tab.kind() != Kind.FAVORITES) g.fill(x + t - 4, y + 2, x + t - 2, y + 4, 0xFFFFD54F);
+            if (!focus.isEmpty() && ItemStack.isSameItemSameTags(s, focus)) {
+                Draw.outline(g, x, y, t, t, 0xFFFFFFFF);
+                Draw.outline(g, x + 1, y + 1, t - 2, t - 2, accent);
+            }
             hits.add(new Hit(x, y, t, t, s, null, null));
         }
         scrollbar(g, y0, areaH, rows, total, accent);
@@ -1080,6 +1098,29 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             Draw.smallCentered(g, font, Component.translatable("archud.creative.hover_hint").getString(), infoX + INFO_W / 2F, iy + 50, Draw.TEXT_DIM, 0.65F);
             return;
         }
+        // количество: − N + и быстрые 1 / 16 / максимум
+        int max = focus.getMaxStackSize();
+        amount = Mth.clamp(amount, 1, max);
+        int ay = top + 99;
+        Draw.small(g, font, Component.translatable("archud.creative.amount").getString(), infoX + 8, ay - 9, Draw.TEXT_DIM, 0.55F);
+        int ax = infoX + 6;
+        mini(g, ax, ay, "-", -1, -1, accent, () -> amount = Math.max(1, amount - (hasShiftDown() ? 10 : 1)));
+        Draw.panel(g, ax + 16, ay, 26, 12, 0x40000000, Draw.alpha(accent, 0x80));
+        Draw.smallCentered(g, font, Integer.toString(amount), ax + 29, ay + 3, 0xFFFFFFFF, 0.75F);
+        mini(g, ax + 44, ay, "+", -1, -1, accent, () -> amount = Math.min(focus.getMaxStackSize(), amount + (hasShiftDown() ? 10 : 1)));
+        int px = ax + 62;
+        for (int v : new int[]{1, 16, max}) {
+            if (v > max || (v == max && v <= 16 && v != 1 && max == 16)) continue;
+            String l = Integer.toString(v);
+            int w = Math.max(14, (int) (font.width(l) * 0.55F) + 4);
+            boolean on = amount == v;
+            Draw.panel(g, px, ay, w, 12, on ? Draw.alpha(accent, 0x70) : 0x30FFFFFF, on ? accent : 0x30FFFFFF);
+            Draw.smallCentered(g, font, l, px + w / 2F, ay + 4, 0xFFFFFFFF, 0.55F);
+            final int val = v;
+            hits.add(new Hit(px, ay, w, 12, null, () -> amount = val, null));
+            px += w + 2;
+            if (max == 1) break;
+        }
         // крупная иконка на подсвеченном фоне
         int cx = infoX + INFO_W / 2;
         Draw.hGradient(g, infoX + 1, iy + 1, infoX + INFO_W - 1, iy + 54, Draw.alpha(accent, 0x30), 0x00000000);
@@ -1137,6 +1178,8 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
                 return true;
             }
             if (h.stack() != null) {
+                pressX = mx;
+                pressY = my;
                 clickItem(h.stack(), button);
                 return true;
             }
@@ -1166,7 +1209,23 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             give(s, s.getMaxStackSize());
             return;
         }
-        carried = s.copyWithCount(button == 0 ? 1 : s.getMaxStackSize());
+        if (button == 0) {
+            // ЛКМ — выбрать (карточка справа). Двойной клик — стак в инвентарь. Потянуть — взять на курсор.
+            long now = net.minecraft.Util.getMillis();
+            if (now - lastClickTime < 300 && ItemStack.isSameItemSameTags(lastClickStack, s)) {
+                give(s, s.getMaxStackSize());
+                lastClickTime = 0;
+                return;
+            }
+            lastClickTime = now;
+            lastClickStack = s;
+            if (focus.isEmpty() || !ItemStack.isSameItemSameTags(focus, s)) click();
+            focus = s.copyWithCount(1);
+            pressStack = s;
+            return;
+        }
+        // ПКМ — 1 на курсор, СКМ — стак на курсор
+        carried = s.copyWithCount(button == 1 ? 1 : s.getMaxStackSize());
         remember(s);
     }
 
@@ -1248,6 +1307,15 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (pressStack != null && carried.isEmpty() && button == 0) {
+            if (Math.abs(mx - pressX) + Math.abs(my - pressY) > 5) {
+                carried = pressStack.copyWithCount(pressStack.getMaxStackSize());
+                remember(pressStack);
+                pressStack = null;
+                dragPicked = true;
+            }
+            return true;
+        }
         if (draggingBar) {
             dragBar(my);
             return true;
@@ -1258,6 +1326,16 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
         draggingBar = false;
+        pressStack = null;
+        if (dragPicked) {
+            // перетащили предмет — отпустили над слотом инвентаря: положить
+            dragPicked = false;
+            int inv = invAt(mx, my);
+            if (inv >= 0 && inv != 42 && !carried.isEmpty()) {
+                clickInventory(inv, 0);
+                return true;
+            }
+        }
         return super.mouseReleased(mx, my, button);
     }
 
@@ -1394,6 +1472,13 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         workGlint = true;
         workUnbreakable = true;
         showcaseTab("WORKSHOP");
+    }
+
+    public void showcaseSelect() {
+        if (items.size() > 20) {
+            focus = items.get(20).copyWithCount(1);
+            amount = 16;
+        }
     }
 
     public void showcaseInventory(boolean open) {
