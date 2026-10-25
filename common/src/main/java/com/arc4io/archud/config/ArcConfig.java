@@ -158,6 +158,10 @@ public class ArcConfig {
     public boolean customModList = true;
     public boolean customInventory = true;
     public boolean customEnchanting = true;
+    /** Выборочное зачарование (решает хост / сервер). */
+    public boolean enchantSelective = true;
+    /** Переброс вариантов зачарования за 1 лазурит (решает хост / сервер). */
+    public boolean enchantReroll = true;
     public boolean customWorldSelect = true;
     public boolean customMultiplayer = true;
     public boolean customGameRules = true;
