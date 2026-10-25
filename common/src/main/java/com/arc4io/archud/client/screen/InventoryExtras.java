@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.function.Consumer;
 
 /**
- * Переработка инвентаря: кнопки «Сортировать» и «Рюкзак» рядом с окном,
+ * Переработка инвентаря: кнопки «Сортировать» и «Рюкзак» над окном (не пересекаются с эффектами),
  * панель характеристик игрока слева. Доп. слоты (спина, пояс, амулеты) дают Curios / Trinkets.
  */
 public final class InventoryExtras {
@@ -55,8 +55,9 @@ public final class InventoryExtras {
     private static void position(InventoryScreen s) {
         int left = leftPos(s);
         int top = (s.height - 166) / 2;
-        if (sortBtn != null) sortBtn.setPosition(left + 176 + 2, top + 4);
-        if (packBtn != null) packBtn.setPosition(left + 176 + 2, top + 24);
+        // панель кнопок над окном справа: справа от окна рисуются эффекты, и раньше они перекрывали кнопки
+        if (sortBtn != null) sortBtn.setPosition(left + 176 - 40, top - 20);
+        if (packBtn != null) packBtn.setPosition(left + 176 - 20, top - 20);
     }
 
     public static void onRender(Screen screen, GuiGraphics g) {

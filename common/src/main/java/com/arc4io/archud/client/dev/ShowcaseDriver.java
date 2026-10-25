@@ -146,6 +146,14 @@ public final class ShowcaseDriver {
         add(30, mc -> {}, "14_hud_layout");
         add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
         add(30, mc -> {}, "15_inventory");
+        add(10, mc -> {
+            if (mc.player != null) mc.player.closeContainer();
+            openEnchanting(mc);
+        }, null);
+        add(60, mc -> {}, "15b_enchanting");
+        add(10, mc -> {
+            if (mc.player != null) mc.player.closeContainer();
+        }, null);
         add(10, mc -> mc.setScreen(new HostPanelScreen(null)), null);
         add(40, mc -> {}, "16_host_panel");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.OptionsScreen(null, mc.options)), null);
@@ -225,6 +233,36 @@ public final class ShowcaseDriver {
             int ty = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
             spot = new double[]{tx + 0.5, ty + 1, tz + 0.5};
+        });
+    }
+
+    /** Стол зачарования с книжными полками рядом, предмет и лазурит внутри. */
+    private static void openEnchanting(Minecraft mc) {
+        var server = mc.getSingleplayerServer();
+        if (server == null || mc.player == null) return;
+        var uuid = mc.player.getUUID();
+        server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(uuid);
+            if (sp == null) return;
+            ServerLevel lvl = sp.serverLevel();
+            net.minecraft.core.BlockPos c = sp.blockPosition().offset(0, 0, -6);
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                lvl.setBlockAndUpdate(c.offset(dx, -1, dz), net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState());
+                for (int dy = 0; dy <= 2; dy++) {
+                    boolean ring = Math.max(Math.abs(dx), Math.abs(dz)) == 2 && dy <= 1;
+                    lvl.setBlockAndUpdate(c.offset(dx, dy, dz), ring ? net.minecraft.world.level.block.Blocks.BOOKSHELF.defaultBlockState()
+                            : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                }
+            }
+            lvl.setBlockAndUpdate(c, net.minecraft.world.level.block.Blocks.ENCHANTING_TABLE.defaultBlockState());
+            var access = net.minecraft.world.inventory.ContainerLevelAccess.create(lvl, c);
+            sp.openMenu(new net.minecraft.world.SimpleMenuProvider((id, inv, pl) -> new net.minecraft.world.inventory.EnchantmentMenu(id, inv, access),
+                    net.minecraft.network.chat.Component.translatable("container.enchant")));
+            if (sp.containerMenu instanceof net.minecraft.world.inventory.EnchantmentMenu m) {
+                m.getSlot(0).set(new ItemStack(Items.DIAMOND_CHESTPLATE));
+                m.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI, 2));
+                m.broadcastChanges();
+            }
         });
     }
 

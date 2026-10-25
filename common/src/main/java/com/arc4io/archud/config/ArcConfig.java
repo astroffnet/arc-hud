@@ -157,6 +157,7 @@ public class ArcConfig {
     public boolean customLanScreen = true;
     public boolean customModList = true;
     public boolean customInventory = true;
+    public boolean customEnchanting = true;
     public boolean customWorldSelect = true;
     public boolean customMultiplayer = true;
     public boolean customGameRules = true;
