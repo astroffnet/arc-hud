@@ -179,6 +179,9 @@ public final class ShowcaseDriver {
         add(40, mc -> {}, "15d_creative_home");
         add(5, mc -> creative(mc, s -> s.showcaseTab("ALL")), null);
         add(20, mc -> {}, "15e_creative_all");
+        add(5, mc -> creative(mc, s -> s.showcaseInventory(true)), null);
+        add(20, mc -> {}, "15e2_creative_inventory");
+        add(5, mc -> creative(mc, s -> s.showcaseInventory(false)), null);
         add(5, mc -> creative(mc, s -> s.showcaseTab("ENCHANTS")), null);
         add(20, mc -> {}, "15f_creative_enchants");
         add(5, mc -> creative(mc, s -> {

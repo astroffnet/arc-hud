@@ -609,6 +609,9 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         g.fill(0, 0, width, height, 0xB0060A0E); // плотнее ванильного затемнения — мир и HUD не просвечивают
         int accent = Theme.accent();
         hits.clear();
+        // раскрытый инвентарь: рабочая область заканчивается над ним (иначе иконки предметов, которые
+        // рисуются на верхнем слое, проступают сквозь панель инвентаря)
+        bottom = invOpen ? slotXY(9)[1] - 12 : dockTop - 6;
 
         renderTopBar(g, accent);
         renderStrip(g, mx, my, accent);
@@ -1391,6 +1394,10 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         workGlint = true;
         workUnbreakable = true;
         showcaseTab("WORKSHOP");
+    }
+
+    public void showcaseInventory(boolean open) {
+        invOpen = open;
     }
 
     public void showcaseList(boolean list) {
