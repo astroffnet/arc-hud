@@ -104,6 +104,11 @@ public final class FirstPersonCam {
         }
         if (onGround || p.isInWater() || p.getAbilities().flying) airFall = onGround ? 0 : airFall;
         wasOnGround = onGround;
+        // своё тело смотрит туда же, куда взгляд (только отрисовка) — плечи не лезут в кадр
+        if (bodyVisible() && !p.isPassenger()) {
+            p.yBodyRot = p.getYRot();
+            p.yBodyRotO = p.yRotO;
+        }
     }
 
     private static float landOffset() {
