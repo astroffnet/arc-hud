@@ -53,7 +53,7 @@ public abstract class PlayerRendererBodyMixin {
         // назад по направлению взгляда (а не тела), чтобы плечи не попадали в кадр; сильнее, когда смотрим вниз
         float yaw = p.getViewYRot(pt) * Mth.DEG_TO_RAD;
         float pitch = Math.max(0F, p.getViewXRot(pt));
-        double back = 0.3 + 0.22 * pitch / 90.0;
+        double back = 0.2 + 0.08 * pitch / 90.0;
         cir.setReturnValue(cir.getReturnValue().add(Mth.sin(yaw) * back, 0, -Mth.cos(yaw) * back));
     }
 }
