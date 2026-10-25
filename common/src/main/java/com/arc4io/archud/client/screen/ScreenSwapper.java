@@ -122,6 +122,9 @@ public final class ScreenSwapper {
         if (cfg.customInventory && c == net.minecraft.client.gui.screens.inventory.InventoryScreen.class && mc.player != null) {
             return new ArcInventoryScreen(mc.player);
         }
+        if (cfg.customCreative && c == net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen.class && mc.player != null) {
+            return new ArcCreativeScreen(mc.player);
+        }
         if (cfg.customEnchanting && c == net.minecraft.client.gui.screens.inventory.EnchantmentScreen.class && mc.player != null) {
             var e = (net.minecraft.client.gui.screens.inventory.EnchantmentScreen) next;
             return new ArcEnchantmentScreen(e.getMenu(), mc.player.getInventory(), e.getTitle());

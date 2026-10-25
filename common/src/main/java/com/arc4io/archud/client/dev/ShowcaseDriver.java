@@ -171,6 +171,22 @@ public final class ShowcaseDriver {
         }, null);
         add(60, mc -> {}, "15b_enchanting");
         add(5, mc -> {
+            if (mc.player != null) mc.player.closeContainer();
+            setMode(mc, net.minecraft.world.level.GameType.CREATIVE);
+        }, null);
+        add(20, mc -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player,
+                mc.player.connection.enabledFeatures(), false)), null);
+        add(40, mc -> {}, "15d_creative");
+        add(5, mc -> {
+            for (char ch : "sword".toCharArray()) if (mc.screen != null) mc.screen.charTyped(ch, 0);
+        }, null);
+        add(20, mc -> {}, "15e_creative_search");
+        add(5, mc -> {
+            mc.setScreen(null);
+            setMode(mc, net.minecraft.world.level.GameType.SURVIVAL);
+        }, null);
+        add(20, mc -> openEnchanting(mc), null);
+        add(5, mc -> {
             if (mc.screen instanceof com.arc4io.archud.client.screen.ArcEnchantmentScreen s) s.showcasePick();
         }, null);
         add(30, mc -> {}, "15c_enchanting_pick");
@@ -275,6 +291,16 @@ public final class ShowcaseDriver {
             int ty = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, tx, tz);
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
             spot = new double[]{tx + 0.5, ty + 1, tz + 0.5};
+        });
+    }
+
+    private static void setMode(Minecraft mc, net.minecraft.world.level.GameType type) {
+        var server = mc.getSingleplayerServer();
+        if (server == null || mc.player == null) return;
+        var uuid = mc.player.getUUID();
+        server.execute(() -> {
+            ServerPlayer sp = server.getPlayerList().getPlayer(uuid);
+            if (sp != null) sp.setGameMode(type);
         });
     }
 
