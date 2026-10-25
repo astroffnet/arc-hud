@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "archud.refmap.json",
   "mixins": [
+    "EnchantmentMenuAccessor",
     "CraftingMenuMixin"
   ],
   "client": [

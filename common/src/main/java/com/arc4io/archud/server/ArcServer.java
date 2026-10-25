@@ -61,6 +61,7 @@ public final class ArcServer {
         ArcNet.onServer("map_chunks", ArcServer::onChunks);
         ArcNet.onServer("wp_share", ArcServer::onShare);
         TempadServer.init();
+        EnchantServer.init();
         ArcNet.onServer("privacy", (player, buf) -> {
             if (buf.readBoolean()) HIDDEN.add(player.getUUID());
             else HIDDEN.remove(player.getUUID());

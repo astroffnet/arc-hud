@@ -21,6 +21,7 @@ public final class ArcClient {
         platform = p;
         com.arc4io.archud.compat.Integrations.init();
         ArcClientNet.init();
+        com.arc4io.archud.client.enchant.EnchantClient.init();
         com.arc4io.archud.client.dev.ShowcaseDriver.init();
     }
 
