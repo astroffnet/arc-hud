@@ -176,11 +176,24 @@ public final class ShowcaseDriver {
         }, null);
         add(20, mc -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player,
                 mc.player.connection.enabledFeatures(), false)), null);
-        add(40, mc -> {}, "15d_creative");
-        add(5, mc -> {
-            for (char ch : "sword".toCharArray()) if (mc.screen != null) mc.screen.charTyped(ch, 0);
-        }, null);
-        add(20, mc -> {}, "15e_creative_search");
+        add(40, mc -> {}, "15d_creative_home");
+        add(5, mc -> creative(mc, s -> s.showcaseTab("ALL")), null);
+        add(20, mc -> {}, "15e_creative_all");
+        add(5, mc -> creative(mc, s -> s.showcaseTab("ENCHANTS")), null);
+        add(20, mc -> {}, "15f_creative_enchants");
+        add(5, mc -> creative(mc, s -> {
+            s.showcaseList(true);
+            s.showcaseTab("POTIONS");
+        }), null);
+        add(20, mc -> {}, "15g_creative_potions_list");
+        add(5, mc -> creative(mc, s -> {
+            s.showcaseList(false);
+            s.showcaseTab("MODS");
+        }), null);
+        add(20, mc -> {}, "15h_creative_mods");
+        add(5, mc -> creative(mc, s -> s.showcaseWorkshop()), null);
+        add(20, mc -> {}, "15i_creative_workshop");
+        add(5, mc -> creative(mc, s -> s.showcaseTab("HOME")), null);
         add(5, mc -> {
             mc.setScreen(null);
             setMode(mc, net.minecraft.world.level.GameType.SURVIVAL);
@@ -292,6 +305,10 @@ public final class ShowcaseDriver {
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
             spot = new double[]{tx + 0.5, ty + 1, tz + 0.5};
         });
+    }
+
+    private static void creative(Minecraft mc, Consumer<com.arc4io.archud.client.screen.ArcCreativeScreen> action) {
+        if (mc.screen instanceof com.arc4io.archud.client.screen.ArcCreativeScreen s) action.accept(s);
     }
 
     private static void setMode(Minecraft mc, net.minecraft.world.level.GameType type) {
