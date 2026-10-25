@@ -1,7 +1,6 @@
 package com.arc4io.archud.client.camera;
 
 import com.arc4io.archud.ArcHud;
-import com.arc4io.archud.client.hud.Draw;
 import com.arc4io.archud.config.ArcConfig;
 import com.arc4io.archud.mixin.CameraInvoker;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,7 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.network.chat.Component;
@@ -23,16 +21,14 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
- * Дополнительные виды от первого лица (переключаются отдельной клавишей, обычный вид остаётся):
- *  - «Улучшенный»: видно своё тело (ноги, торс), мягкое покачивание при ходьбе, лёгкий наклон при стрейфе,
+ * Дополнительные виды от первого лица — входят в цикл F5 (обычный → улучшенный → бодикам → третье лицо):
+ *  - «Улучшенный»: мягкое покачивание при ходьбе, лёгкий наклон при стрейфе,
  *    проседание камеры при приземлении. Прицел и управление как в ванилле.
  *  - «Бодикам»: камера закреплена на груди — ниже и чуть впереди глаз, широкий угол обзора, инерция поворота,
  *    сильная тряска и крен при ходьбе и поворотах, эффект объектива (бочкообразное искажение, хроматические
- *    аберрации, виньетка, шум) и надпись записи с датой и временем. Прицел скрыт.
+ *    аберрации, виньетка, шум). Прицел скрыт.
  */
 public final class FirstPersonCam {
     public enum Style { VANILLA, ENHANCED, BODYCAM }
@@ -52,8 +48,6 @@ public final class FirstPersonCam {
     private static PostChain chain;
     private static boolean chainFailed;
     private static int chainW, chainH;
-    /** Сейчас рисуется собственное тело игрока в мире (для скрытия головы, рук и предметов в руках). */
-    public static boolean renderingBody;
 
     private FirstPersonCam() {}
 
@@ -73,17 +67,15 @@ public final class FirstPersonCam {
         return active(Style.ENHANCED) || active(Style.BODYCAM);
     }
 
-    public static void cycle(Minecraft mc) {
+    /** Смена стиля по F5 (0 — обычный, 1 — улучшенный, 2 — бодикам). */
+    public static void setStyle(Minecraft mc, int style) {
         ArcConfig cfg = ArcConfig.get();
-        cfg.firstPersonStyle = (cfg.firstPersonStyle + 1) % 3;
+        if (cfg.firstPersonStyle == style) return;
+        cfg.firstPersonStyle = style;
         ArcConfig.save();
         init = false;
-        if (mc.player != null) {
-            String key = switch (style()) {
-                case VANILLA -> "archud.fp.vanilla";
-                case ENHANCED -> "archud.fp.enhanced";
-                case BODYCAM -> "archud.fp.bodycam";
-            };
+        if (mc.player != null && style != 0) {
+            String key = style == 1 ? "archud.fp.enhanced" : "archud.fp.bodycam";
             mc.player.displayClientMessage(Component.translatable("archud.fp.mode", Component.translatable(key)).withStyle(ChatFormatting.AQUA), true);
         }
     }
@@ -104,11 +96,6 @@ public final class FirstPersonCam {
         }
         if (onGround || p.isInWater() || p.getAbilities().flying) airFall = onGround ? 0 : airFall;
         wasOnGround = onGround;
-        // своё тело смотрит туда же, куда взгляд (только отрисовка) — плечи не лезут в кадр
-        if (bodyVisible() && !p.isPassenger()) {
-            p.yBodyRot = p.getYRot();
-            p.yBodyRotO = p.yRotO;
-        }
     }
 
     private static float landOffset() {
@@ -116,18 +103,6 @@ public final class FirstPersonCam {
         float t = (Util.getMillis() - landTime) / 1000F;
         if (t > 0.45F) return 0;
         return landStrength * Mth.sin((float) Math.PI * t / 0.45F);
-    }
-
-    /** Тело видно в этом режиме (не в полёте на элитрах, не во сне, не при плавании). */
-    public static boolean bodyVisible() {
-        if (!ArcConfig.get().firstPersonBody || !anyActive()) return false;
-        Player p = Minecraft.getInstance().player;
-        return p != null && !p.isSleeping() && !p.isFallFlying() && !p.isVisuallySwimming() && !p.isAutoSpinAttack()
-                && !p.isSpectator() && !p.isInvisible();
-    }
-
-    public static boolean isSelf(Entity e) {
-        return e != null && e == Minecraft.getInstance().getCameraEntity();
     }
 
     // ------------------------------------------------------------------ камера
@@ -264,46 +239,5 @@ public final class FirstPersonCam {
         if (chain != null) chain.close();
         chain = null;
         chainFailed = false;
-    }
-
-    // ------------------------------------------------------------------ надпись записи
-
-    private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd  HH:mm:ss");
-
-    public static void renderOverlay(GuiGraphics g) {
-        if (!active(Style.BODYCAM) || !ArcConfig.get().bodycamOverlay) return;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.player == null) return;
-        var font = mc.font;
-        int w = g.guiWidth(), h = g.guiHeight();
-        // рамка-уголки
-        int c = 0xB0FFFFFF, m = 10, l = 14;
-        g.fill(m, m, m + l, m + 1, c);
-        g.fill(m, m, m + 1, m + l, c);
-        g.fill(w - m - l, m, w - m, m + 1, c);
-        g.fill(w - m - 1, m, w - m, m + l, c);
-        g.fill(m, h - m - 1, m + l, h - m, c);
-        g.fill(m, h - m - l, m + 1, h - m, c);
-        g.fill(w - m - l, h - m - 1, w - m, h - m, c);
-        g.fill(w - m - 1, h - m - l, w - m, h - m, c);
-        // REC и время — внизу слева (сверху и по бокам место занято HUD)
-        boolean blink = (Util.getMillis() / 600) % 2 == 0;
-        int rx = m + 4, ry = h - m - 20;
-        if (blink) g.fill(rx, ry + 1, rx + 5, ry + 6, 0xFFFF3030);
-        Draw.small(g, font, "REC", rx + 8, ry, 0xFFFFFFFF, 0.75F);
-        String stamp = LocalDateTime.now().format(STAMP);
-        Draw.small(g, font, stamp, rx + 28, ry, 0xFFFFFFFF, 0.75F);
-        String unit = "ARC BODYCAM · " + mc.player.getGameProfile().getName().toUpperCase(java.util.Locale.ROOT);
-        Draw.small(g, font, unit, m + 4, h - m - 10, 0xD0FFFFFF, 0.6F);
-        String coords = String.format(java.util.Locale.ROOT, "%d %d %d", mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ());
-        Draw.small(g, font, coords, w - m - 4 - font.width(coords) * 0.6F, h - m - 10, 0xD0FFFFFF, 0.6F);
-        // батарея
-        int bx = w - m - 22, by = h - m - 21;
-        g.fill(bx, by, bx + 16, by + 1, c);
-        g.fill(bx, by + 7, bx + 16, by + 8, c);
-        g.fill(bx, by, bx + 1, by + 8, c);
-        g.fill(bx + 15, by, bx + 16, by + 8, c);
-        g.fill(bx + 16, by + 2, bx + 18, by + 6, c);
-        g.fill(bx + 2, by + 2, bx + 12, by + 6, 0xFFE0E0E0);
     }
 }

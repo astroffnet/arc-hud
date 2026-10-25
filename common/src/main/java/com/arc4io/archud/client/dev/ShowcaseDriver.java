@@ -135,16 +135,24 @@ public final class ShowcaseDriver {
         }, null);
         add(26, mc -> {}, "09_item_inspect");
         add(10, mc -> {
-            ArcConfig.get().firstPersonStyle = 1;
+            ArcConfig.get().firstPersonStyle = 0;
+            mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: улучшенный
+            ArcHud.LOGGER.info("[Showcase] F5 -> {} style {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle);
             if (mc.player != null) mc.player.setXRot(62F);
         }, null);
         add(40, mc -> {}, "09b_first_person_enhanced");
         add(10, mc -> {
-            ArcConfig.get().firstPersonStyle = 2;
+            mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: бодикам
+            ArcHud.LOGGER.info("[Showcase] F5 -> {} style {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle);
             lookAt(mc, 0);
         }, null);
         add(60, mc -> {}, "09c_bodycam");
-        add(10, mc -> ArcConfig.get().firstPersonStyle = 0, null);
+        add(10, mc -> {
+            mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: камера Arc
+            ArcHud.LOGGER.info("[Showcase] F5 -> {} style {} arc {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle, ArcCamera.active());
+            ArcCamera.toggle(mc); // обратно к первому лицу
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.empty(), false);
+        }, null);
         add(60, mc -> mc.setScreen(new WorldMapScreen(null)), null);
         add(60, mc -> {}, "10_world_map");
         add(10, mc -> mc.setScreen(new WaypointListScreen(null)), null);

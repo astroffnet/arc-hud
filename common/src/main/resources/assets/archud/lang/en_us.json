@@ -491,15 +491,13 @@
   "archud.ench.more_shelves": "More bookshelves raise the max level",
   "archud.config.enchantSelective": "Enchanting: pick enchantments",
   "archud.config.enchantReroll": "Enchanting: reroll offers",
-  "key.archud.fp_style": "First-person style",
   "archud.fp.mode": "First person: %s",
   "archud.fp.vanilla": "Normal",
   "archud.fp.enhanced": "Enhanced",
   "archud.fp.bodycam": "Bodycam",
-  "archud.config.firstPersonStyle": "First-person style (F7)",
-  "archud.config.firstPersonBody": "Show own body in first person",
   "archud.config.bodycamFov": "Bodycam field of view",
   "archud.config.bodycamLens": "Bodycam lens effect",
-  "archud.config.bodycamOverlay": "Bodycam REC overlay",
-  "archud.config.bodycamHideCrosshair": "Bodycam: hide crosshair"
+  "archud.config.bodycamHideCrosshair": "Bodycam: hide crosshair",
+  "archud.config.fpEnhancedInF5Cycle": "F5: enhanced first person",
+  "archud.config.fpBodycamInF5Cycle": "F5: bodycam"
 }

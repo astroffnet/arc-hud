@@ -60,16 +60,26 @@ public final class ArcCamera {
     }
 
     /**
-     * Порядок F5: от первого лица → камера Arc → обычная от третьего лица → (вид спереди, если включён) → от первого лица.
+     * Порядок F5: от первого лица (обычный → улучшенный → бодикам) → камера Arc → обычная от третьего лица → (вид спереди, если включён) → от первого лица.
      */
     public static CameraType nextPerspective(CameraType current) {
         Minecraft mc = Minecraft.getInstance();
         ArcConfig cfg = ArcConfig.get();
-        if (!cfg.cameraInF5Cycle || mc.player == null) return current.cycle();
+        if (mc.player == null) return current.cycle();
         if (current == CameraType.FIRST_PERSON) {
+            // сначала виды от первого лица: обычный → улучшенный → бодикам
+            int s = cfg.firstPersonStyle;
+            int next = s == 0 && cfg.fpEnhancedInF5Cycle ? 1 : s < 2 && cfg.fpBodycamInF5Cycle ? 2 : -1;
+            if (next > 0) {
+                FirstPersonCam.setStyle(mc, next);
+                return CameraType.FIRST_PERSON;
+            }
+            FirstPersonCam.setStyle(mc, 0);
+            if (!cfg.cameraInF5Cycle) return CameraType.THIRD_PERSON_BACK;
             start(mc);
             return CameraType.THIRD_PERSON_BACK;
         }
+        if (!cfg.cameraInF5Cycle) return current.cycle();
         if (current == CameraType.THIRD_PERSON_BACK && active) {
             // камера Arc -> обычная от третьего лица, смотрим туда же, куда смотрела камера
             active = false;
