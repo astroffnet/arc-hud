@@ -181,7 +181,8 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         }));
 
         // карточка предмета
-        int iy = top + 118;
+        int iy = infoBottom() - 4 - 4 * 18; // кнопки прижаты к низу карточки
+
         give1Btn = addRenderableWidget(new ArcButton(infoX + 6, iy, INFO_W - 12, 15, Component.translatable("archud.creative.give"),
                 b -> give(focus, amount)).icon(Icons.BACKPACK));
         giveStackBtn = addRenderableWidget(new ArcButton(infoX + 6, iy + 18, INFO_W - 12, 15, Component.translatable("archud.creative.to_cursor"),
@@ -1089,8 +1090,13 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
 
     // ---------- карточка
 
+    /** Низ карточки справа: она всегда во всю высоту (раскрытый инвентарь её не задевает). */
+    private int infoBottom() {
+        return dockTop - 6;
+    }
+
     private void renderInfo(GuiGraphics g, int accent) {
-        int iy = top - 4, ih = bottom - top + 8;
+        int iy = top - 4, ih = infoBottom() - top + 8;
         Draw.panel(g, infoX, iy, INFO_W, ih, 0xE00E1218, Draw.alpha(accent, 0x60));
         boolean has = !focus.isEmpty();
         give1Btn.visible = giveStackBtn.visible = favBtn.visible = toWorkBtn.visible = has;
@@ -1101,7 +1107,7 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
         // количество: − N + и быстрые 1 / 16 / максимум
         int max = focus.getMaxStackSize();
         amount = Mth.clamp(amount, 1, max);
-        int ay = top + 99;
+        int ay = infoBottom() - 4 - 4 * 18 - 16; // над кнопками
         Draw.small(g, font, Component.translatable("archud.creative.amount").getString(), infoX + 8, ay - 9, Draw.TEXT_DIM, 0.55F);
         int ax = infoX + 6;
         mini(g, ax, ay, "-", -1, -1, accent, () -> amount = Math.max(1, amount - (hasShiftDown() ? 10 : 1)));
@@ -1121,26 +1127,32 @@ public class ArcCreativeScreen extends Screen implements ScreenFit.Fits {
             px += w + 2;
             if (max == 1) break;
         }
-        // крупная иконка на подсвеченном фоне
+        // иконка и название; на низких экранах — компактно, чтобы не залезать на количество
         int cx = infoX + INFO_W / 2;
-        Draw.hGradient(g, infoX + 1, iy + 1, infoX + INFO_W - 1, iy + 54, Draw.alpha(accent, 0x30), 0x00000000);
+        boolean compact = ay - 12 - iy < 96;
+        float isc = compact ? 1.5F : 2.5F;
+        int iconH = Math.round(16 * isc);
+        Draw.hGradient(g, infoX + 1, iy + 1, infoX + INFO_W - 1, iy + iconH + 14, Draw.alpha(accent, 0x30), 0x00000000);
         g.pose().pushPose();
-        g.pose().translate(cx - 20, iy + 8, 0);
-        g.pose().scale(2.5F, 2.5F, 1F);
+        g.pose().translate(cx - iconH / 2F, iy + 6, 0);
+        g.pose().scale(isc, isc, 1F);
         g.renderItem(focus, 0, 0);
         g.pose().popPose();
-        int y = iy + 58;
+        int y = iy + iconH + 10;
+        int maxLines = compact ? 1 : 2;
         for (var line : font.split(focus.getHoverName(), INFO_W - 10)) {
             g.drawString(font, line, cx - font.width(line) / 2, y, 0xFFFFFFFF, true);
             y += 10;
-            if (y > iy + 78) break;
+            if (--maxLines <= 0) break;
         }
         ResourceLocation id = id(focus);
-        Draw.smallCentered(g, font, id.toString(), cx, y + 1, Draw.TEXT_DIM, 0.5F);
-        Draw.smallCentered(g, font, ArcHud.platform().modName(id.getNamespace()), cx, y + 8, Draw.alpha(accent, 0xFF), 0.6F);
+        if (y + 14 < ay - 10) {
+            Draw.smallCentered(g, font, id.toString(), cx, y + 1, Draw.TEXT_DIM, 0.5F);
+            Draw.smallCentered(g, font, ArcHud.platform().modName(id.getNamespace()), cx, y + 8, Draw.alpha(accent, 0xFF), 0.6F);
+        }
         favBtn.setMessage(Component.translatable(isFavorite(focus) ? "archud.creative.unfav" : "archud.creative.fav"));
-        int sy = top + 192;
-        if (sy + 30 < bottom) {
+        int sy = y + 20; // характеристики — только если остаётся место над количеством
+        if (sy + 30 < ay - 12) {
             stat(g, sy, "archud.creative.stack", Integer.toString(focus.getMaxStackSize()));
             stat(g, sy + 9, "archud.creative.rarity", focus.getRarity().name().charAt(0) + focus.getRarity().name().substring(1).toLowerCase(Locale.ROOT));
             stat(g, sy + 18, "archud.creative.tags", Long.toString(focus.getTags().count()));
