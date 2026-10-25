@@ -582,14 +582,14 @@
   "archud.creative.empty_fav": "Пока пусто — наведите на предмет и нажмите F",
   "archud.creative.empty_recent": "Здесь появятся взятые предметы",
   "archud.creative.nothing": "Ничего не найдено",
-  "archud.creative.hover_hint": "Наведите на предмет",
+  "archud.creative.hover_hint": "Нажмите на предмет, чтобы выбрать",
   "archud.creative.stack": "Стак",
   "archud.creative.rarity": "Редкость",
   "archud.creative.tags": "Тегов",
   "archud.creative.durability": "Прочность",
   "archud.creative.food": "Сытость",
-  "archud.creative.help1": "ЛКМ — взять 1, ПКМ — стак",
-  "archud.creative.help2": "Shift+ЛКМ — стак в инвентарь",
+  "archud.creative.help1": "ЛКМ — выбрать, двойной — стак",
+  "archud.creative.help2": "Потянуть — взять, ПКМ — 1, СКМ — стак",
   "archud.creative.help3": "1–9 — положить в хотбар",
   "archud.creative.help4": "Q — выбросить, F — в избранное",
   "archud.creative.help5": "Печатайте для поиска, / — поиск",
@@ -635,5 +635,8 @@
   "archud.creative.w_result": "Результат",
   "archud.creative.w_hint": "Положите предмет в ячейку, чтобы изменить его",
   "archud.creative.view.grid": "Сетка",
-  "archud.creative.view.list": "Список"
+  "archud.creative.view.list": "Список",
+  "archud.creative.give": "Дать",
+  "archud.creative.to_cursor": "На курсор",
+  "archud.creative.amount": "Количество"
 }

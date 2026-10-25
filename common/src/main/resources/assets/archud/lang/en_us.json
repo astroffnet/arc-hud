@@ -520,14 +520,14 @@
   "archud.creative.empty_fav": "No favorites yet — hover an item and press F",
   "archud.creative.empty_recent": "Items you take will show up here",
   "archud.creative.nothing": "Nothing found",
-  "archud.creative.hover_hint": "Hover an item",
+  "archud.creative.hover_hint": "Click an item to select it",
   "archud.creative.stack": "Stack",
   "archud.creative.rarity": "Rarity",
   "archud.creative.tags": "Tags",
   "archud.creative.durability": "Durability",
   "archud.creative.food": "Nutrition",
-  "archud.creative.help1": "LMB — take 1, RMB — stack",
-  "archud.creative.help2": "Shift+LMB — stack to inventory",
+  "archud.creative.help1": "LMB — select, double — stack",
+  "archud.creative.help2": "Drag — pick up, RMB — 1, MMB — stack",
   "archud.creative.help3": "1–9 — put into hotbar",
   "archud.creative.help4": "Q — drop, F — favorite",
   "archud.creative.help5": "Type to search, / — focus",
@@ -573,5 +573,8 @@
   "archud.creative.w_result": "Result",
   "archud.creative.w_hint": "Put an item into the slot to edit it",
   "archud.creative.view.grid": "Grid",
-  "archud.creative.view.list": "List"
+  "archud.creative.view.list": "List",
+  "archud.creative.give": "Give",
+  "archud.creative.to_cursor": "To cursor",
+  "archud.creative.amount": "Amount"
 }

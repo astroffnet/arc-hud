@@ -177,7 +177,10 @@ public final class ShowcaseDriver {
         add(20, mc -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(mc.player,
                 mc.player.connection.enabledFeatures(), false)), null);
         add(40, mc -> {}, "15d_creative_home");
-        add(5, mc -> creative(mc, s -> s.showcaseTab("ALL")), null);
+        add(5, mc -> creative(mc, s -> {
+            s.showcaseTab("ALL");
+            s.showcaseSelect();
+        }), null);
         add(20, mc -> {}, "15e_creative_all");
         add(5, mc -> creative(mc, s -> s.showcaseInventory(true)), null);
         add(20, mc -> {}, "15e2_creative_inventory");
