@@ -33,6 +33,7 @@ public abstract class GameRendererCamMixin {
     @Inject(method = "render", require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
     private void archud$scaleBegin(float partialTick, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+        com.arc4io.archud.client.perf.AdaptiveDistance.frame();
         com.arc4io.archud.client.fx.Waving.update();
         com.arc4io.archud.client.fx.RenderScale.begin();
     }

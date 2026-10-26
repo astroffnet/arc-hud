@@ -38,7 +38,7 @@ public final class Perf {
     private static final int[] ONOFF = {0, 1};
     public static final List<Opt> ALL = new ArrayList<>();
     private static final Map<String, Opt> BY_ID = new LinkedHashMap<>();
-    public static final String[] GROUPS = {"entities", "layers", "details", "blockentities", "particles", "world", "system", "archud"};
+    public static final String[] GROUPS = {"distance", "tps", "entities", "layers", "details", "blockentities", "particles", "world", "system", "archud"};
 
     private static void dist(String group, String id, int bal, int max) {
         add(new Opt(id, group, Kind.DIST, DIST, bal, max, null, null));
@@ -58,6 +58,15 @@ public final class Perf {
     }
 
     static {
+        // ---- дальность прорисовки без потери FPS (2)
+        add(new Opt("r_adaptive", "distance", Kind.COUNT, new int[]{0, 30, 45, 60, 75, 90, 120, 144}, 0, 60, null, null));
+        toggle("distance", "r_upload_budget", 1, 1);
+        // ---- TPS: мир на своём компьютере работает ровнее, когда сервер не успевает (5)
+        add(new Opt("t_activation", "tps", Kind.DIST, new int[]{0, 24, 32, 48, 64}, 48, 32, null, null));
+        toggle("tps", "t_dyn_sim", 1, 1);
+        toggle("tps", "t_spawn", 1, 1);
+        toggle("tps", "t_random", 0, 1);
+        toggle("tps", "t_smooth_entities", 1, 1);
         // ---- сущности: дальность отрисовки по типам (15) + лимит, динамика, невидимые (3)
         dist("entities", "e_item", 32, 16);
         dist("entities", "e_xp", 24, 12);

@@ -24,7 +24,7 @@ public final class ArcEffects {
 
     public static boolean active() {
         ArcConfig c = ArcConfig.get();
-        if (!c.shaderEnabled || failed || ShaderPacks.inUse()) return false;
+        if (!c.shaderEnabled || failed || ShaderPacks.inUse() || com.arc4io.archud.client.gfx.GlContext.vulkan()) return false;
         return c.shaderHdr || c.shaderBloom || c.shaderFxaa || c.shaderSharpen > 0 || c.shaderVibrance != 0 || c.shaderContrast != 0
                 || c.shaderTemperature != 0;
     }

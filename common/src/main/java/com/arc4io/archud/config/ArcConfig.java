@@ -324,6 +324,11 @@ public class ArcConfig {
     public int decorCullDistance = 48;
     public boolean dynamicFps = true;
     public int backgroundFps = 15;
+    /** Автосохранение мира (одиночная игра / «Открыть для сети») по реальному времени. */
+    public boolean autosave = true;
+    public int autosaveMinutes = 3;
+    /** Сообщение над хотбаром после сохранения. */
+    public boolean autosaveNotify = true;
     public boolean adaptiveMapScan = true;
     public boolean foodPreview = true;
     public boolean exhaustionBar = true;

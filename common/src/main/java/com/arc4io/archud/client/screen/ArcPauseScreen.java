@@ -33,9 +33,15 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
 
     private int modsStamp;
 
+    private ArcButton saveBtn;
+
     @Override
     public void tick() {
         super.tick();
+        if (saveBtn != null) {
+            saveBtn.setMessage(com.arc4io.archud.client.WorldSaveClient.buttonLabel(minecraft));
+            saveBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(com.arc4io.archud.client.WorldSaveClient.tooltip(minecraft)));
+        }
         if (com.arc4io.archud.client.mods.ModWatcher.stamp() != modsStamp) rebuildWidgets();
     }
 
@@ -46,7 +52,7 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
         pw = 220;
         int bw = pw - 20;
         int half = (bw - 6) / 2;
-        int rows = 8;
+        int rows = 9;
         ph = 34 + rows * 24 + 6;
         lw = width >= pw + 8 + 170 + 16 ? Math.min(200, width - pw - 8 - 16) : 0;
         int total = pw + (lw > 0 ? 8 + lw : 0);
@@ -101,6 +107,13 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
             addRenderableWidget(new ArcButton(x + half + 6, y, half, 20, Component.translatable("archud.skin.short"),
                     b -> minecraft.setScreen(new SkinRestorerScreen(this))).icon(Icons.HEART));
         }
+        y += 24;
+        // сохранить мир: свой мир — сразу после текущего тика сервера (даже при низком TPS); на сервере — /save-all для операторов
+        saveBtn = new ArcButton(x, y, bw, 20, com.arc4io.archud.client.WorldSaveClient.buttonLabel(minecraft), b ->
+                com.arc4io.archud.client.WorldSaveClient.saveNow(minecraft)).icon(Icons.SHIELD);
+        saveBtn.active = com.arc4io.archud.client.WorldSaveClient.canSave(minecraft);
+        saveBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(com.arc4io.archud.client.WorldSaveClient.tooltip(minecraft)));
+        addRenderableWidget(saveBtn);
         y += 30;
         Component quit = minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
         addRenderableWidget(new ArcButton(x, y, bw, 20, quit, b -> {

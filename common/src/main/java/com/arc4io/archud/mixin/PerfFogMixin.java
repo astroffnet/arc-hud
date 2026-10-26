@@ -15,7 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PerfFogMixin {
     @Inject(method = "setupFog", at = @At("TAIL"), require = 0)
     private static void archud$fog(Camera camera, FogRenderer.FogMode mode, float far, boolean thick, float pt, CallbackInfo ci) {
-        if (!Perf.on("w_fog") || camera.getFluidInCamera() != FogType.NONE || thick) return;
+        if (camera.getFluidInCamera() != FogType.NONE || thick) return;
+        float adaptive = com.arc4io.archud.client.perf.AdaptiveDistance.fogEnd();
+        if (adaptive > 0 && mode == FogRenderer.FogMode.FOG_TERRAIN && adaptive < RenderSystem.getShaderFogEnd()) {
+            // адаптивная дальность: туман у края радиуса, чтобы не было видно обреза
+            RenderSystem.setShaderFogStart(adaptive - Math.max(4F, Math.min(64F, adaptive / 10F)));
+            RenderSystem.setShaderFogEnd(adaptive);
+            return;
+        }
+        if (!Perf.on("w_fog")) return;
         if (camera.getEntity() instanceof net.minecraft.world.entity.LivingEntity le
                 && (le.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS) || le.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS))) return;
         RenderSystem.setShaderFogStart(far * 4F);

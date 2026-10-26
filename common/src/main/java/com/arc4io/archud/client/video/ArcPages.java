@@ -18,6 +18,7 @@ public final class ArcPages {
         List<VideoPage> out = new ArrayList<>(pages);
         out.add(optimization());
         out.add(EffectsPage.page());
+        out.add(GraphicsApiPage.page());
         return out;
     }
 
@@ -108,6 +109,11 @@ public final class ArcPages {
         @Override
         public Component valueText() {
             int v = opt.get();
+            if (opt.id().equals("r_adaptive")) {
+                if (v == 0) return Component.translatable("options.off");
+                String now = com.arc4io.archud.client.perf.AdaptiveDistance.info();
+                return Component.literal(v + " FPS" + (now.isEmpty() ? "" : " · " + now));
+            }
             return switch (opt.kind()) {
                 case TOGGLE -> Component.translatable(v != 0 ? "options.on" : "options.off");
                 case DIST -> v == 0 ? Component.translatable("archud.perf.unlimited") : Component.translatable("archud.perf.blocks", v);
