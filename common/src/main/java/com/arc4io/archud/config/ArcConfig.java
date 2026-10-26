@@ -326,6 +326,8 @@ public class ArcConfig {
     public int backgroundFps = 15;
     /** Автосохранение мира (одиночная игра / «Открыть для сети») по реальному времени. */
     public boolean autosave = true;
+    /** Версия набора оптимизаций: новым переключателям при обновлении один раз ставятся значения «Баланса». */
+    public int perfVersion = 0;
     public int autosaveMinutes = 3;
     /** Сообщение над хотбаром после сохранения. */
     public boolean autosaveNotify = true;
