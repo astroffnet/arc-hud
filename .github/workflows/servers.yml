@@ -78,8 +78,9 @@ jobs:
               cp $GITHUB_WORKSPACE/fabric/build/libs/archud-server-fabric-*.jar mods/
               echo 'java -Xmx2G -jar server.jar nogui' > start.sh ;;
             paper-*)
-              B=$(curl -s "https://api.papermc.io/v2/projects/paper/versions/${{ matrix.mc }}/builds" | jq '.builds[-1].build')
-              curl -sSLo paper.jar "https://api.papermc.io/v2/projects/paper/versions/${{ matrix.mc }}/builds/$B/downloads/paper-${{ matrix.mc }}-$B.jar"
+              URL=$(curl -s "https://fill.papermc.io/v3/projects/paper/versions/${{ matrix.mc }}/builds/latest" | jq -r '.downloads."server:default".url')
+              echo "Paper: $URL"
+              curl -sSLo paper.jar -H "User-Agent: arc-hud-ci (github.com/astroffnet/arc-hud)" "$URL"
               mkdir -p plugins && cp $GITHUB_WORKSPACE/bukkit/build/libs/archud-server-bukkit-*.jar plugins/
               echo 'java -Xmx2G -jar paper.jar nogui' > start.sh ;;
           esac
