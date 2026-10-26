@@ -1,0 +1,14 @@
+[16:10:40] [Render thread/INFO] (ArcHud) [E2E] connecting to 127.0.0.1:25565
+[16:10:48] [Render thread/INFO] (ArcHud) [E2E] welcomed=true modServer=false positions=true mapSync=true waypointsOnServer=true adminAllowed=true
+[16:10:57] [Render thread/INFO] (ArcHud) [E2E] waypoint added
+[16:11:04] [Render thread/INFO] (ArcHud) [E2E] adminAllowed=true adminState=true
+[16:11:09] [Render thread/INFO] (ArcHud) [E2E] admin result='✔' time=6010
+[16:11:22] [Render thread/INFO] (ArcHud) [E2E] done
+[16:09:20] [Server thread/INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+[16:09:32] [Server thread/INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+[16:09:32] [Server thread/INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+[16:11:09] [Server thread/INFO]: [ArcHUD] [admin] 16:11:09  Player840: w_noon
+[16:11:23] [Server thread/INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
+ArcHUD/config.yml
+ArcHUD/map/minecraft~overworld.bin
+ArcHUD/waypoints/player840@1.json.gz
