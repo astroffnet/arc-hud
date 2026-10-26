@@ -45,6 +45,12 @@ public abstract class GameRendererCamMixin {
         FirstPersonCam.postProcess(partialTick);
     }
 
+    /** Arc TSR: сдвиг проекции на долю пикселя (каждый кадр — своя точка внутри пикселя). */
+    @Inject(method = "getProjectionMatrix(D)Lorg/joml/Matrix4f;", at = @At("RETURN"), require = 0)
+    private void archud$taauJitter(double fov, CallbackInfoReturnable<org.joml.Matrix4f> cir) {
+        com.arc4io.archud.client.fx.Taau.jitter(cir.getReturnValue());
+    }
+
     @Inject(method = "getNightVisionScale", at = @At("HEAD"), cancellable = true, require = 0)
     private static void archud$fullbright(net.minecraft.world.entity.LivingEntity e, float pt, CallbackInfoReturnable<Float> cir) {
         if (com.arc4io.archud.client.extras.Extras.fullbright() && e instanceof net.minecraft.client.player.LocalPlayer

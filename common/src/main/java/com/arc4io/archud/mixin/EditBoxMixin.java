@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /** Поля ввода в стиле Arc: вместо белой рамки и чёрной заливки — стеклянная панель с акцентом при фокусе. */
-@Mixin(EditBox.class)
+@Mixin(value = EditBox.class, priority = 500)
 public abstract class EditBoxMixin {
     @Redirect(method = "renderWidget", require = 0,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;fill(IIIII)V"))

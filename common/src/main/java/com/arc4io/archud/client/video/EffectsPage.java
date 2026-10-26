@@ -33,11 +33,20 @@ final class EffectsPage {
         p.group(Component.translatable("archud.fx.group.shader"), shader);
 
         List<VideoEntry> scale = new ArrayList<>();
-        scale.add(new Slider("render_scale", 25, 100, 5, () -> c.renderScale, v -> c.renderScale = v, "%"));
-        scale.add(new Cycle("upscaler", 2, () -> c.upscaler, v -> c.upscaler = v));
+        // «DLSS» в привычном виде: пресеты качества → временной апскейл Arc TSR с нужным масштабом
+        scale.add(new Cycle("dlss", DLSS_SCALES.length + 1, () -> dlssIndex(c), v -> {
+            if (v == 0) {
+                if (c.upscaler == 2) c.upscaler = 1;
+                c.renderScale = 100;
+            } else {
+                c.upscaler = 2;
+                c.renderScale = DLSS_SCALES[v - 1];
+            }
+        }));
+        scale.add(new Slider("render_scale", 25, 100, 1, () -> c.renderScale, v -> c.renderScale = v, "%"));
+        scale.add(new Cycle("upscaler", 3, () -> c.upscaler, v -> c.upscaler = v));
         scale.add(new Slider("upscale_sharpness", 0, 100, 5, () -> c.upscaleSharpness, v -> c.upscaleSharpness = v, "%"));
         scale.add(new Info("resolution", () -> Component.literal(RenderScale.info())));
-        scale.add(new Info("dlss", () -> Component.translatable("archud.fx.dlss.value")));
         p.group(Component.translatable("archud.fx.group.scale"), scale);
 
         List<VideoEntry> plants = new ArrayList<>();
@@ -50,6 +59,22 @@ final class EffectsPage {
         }
         p.group(Component.translatable("archud.fx.group.plants"), plants);
         return p;
+    }
+
+    /** DLAA, Качество, Баланс, Производительность, Ультра-производительность — как у DLSS. */
+    private static final int[] DLSS_SCALES = {100, 67, 58, 50, 33};
+
+    private static int dlssIndex(ArcConfig c) {
+        if (c.upscaler != 2) return 0;
+        int best = 1, diff = Integer.MAX_VALUE;
+        for (int i = 0; i < DLSS_SCALES.length; i++) {
+            int d = Math.abs(DLSS_SCALES[i] - c.renderScale);
+            if (d < diff) {
+                diff = d;
+                best = i + 1;
+            }
+        }
+        return best;
     }
 
     private static Component name(String id) {
@@ -98,7 +123,8 @@ final class EffectsPage {
         }
 
         public Component valueText() {
-            if (id.equals("render_scale") && get.getAsInt() >= 100) return Component.translatable("archud.fx.render_scale.off");
+            if (id.equals("render_scale") && get.getAsInt() >= 100)
+                return Component.translatable(ArcConfig.get().upscaler == 2 ? "archud.fx.render_scale.native" : "archud.fx.render_scale.off");
             return Component.literal(get.getAsInt() + suffix);
         }
 

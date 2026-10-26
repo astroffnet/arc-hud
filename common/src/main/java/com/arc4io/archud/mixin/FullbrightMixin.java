@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /** Полная яркость: освещение считается как с ночным зрением. */
-@Mixin(LightTexture.class)
+@Mixin(value = LightTexture.class, priority = 500)
 public abstract class FullbrightMixin {
     @Redirect(method = "updateLightTexture", require = 0,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;hasEffect(Lnet/minecraft/world/effect/MobEffect;)Z"))

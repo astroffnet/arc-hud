@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /** F5: камера Arc встаёт в цикл видов (первое лицо → Arc → обычное третье → первое лицо). */
-@Mixin(Minecraft.class)
+@Mixin(value = Minecraft.class, priority = 500)
 public abstract class PerspectiveCycleMixin {
     @Redirect(method = "handleKeybinds", require = 0,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;cycle()Lnet/minecraft/client/CameraType;"))

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /** playerdata/&lt;ник&gt;.dat вместо playerdata/&lt;uuid&gt;.dat (см. {@link NicknameStorage}). */
-@Mixin(PlayerDataStorage.class)
+@Mixin(value = PlayerDataStorage.class, priority = 500)
 public abstract class PlayerDataStorageMixin {
     @Inject(method = "load", at = @At("HEAD"))
     private void archud$migrate(Player player, CallbackInfoReturnable<?> cir) {
