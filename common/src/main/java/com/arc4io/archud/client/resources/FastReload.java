@@ -64,6 +64,7 @@ public final class FastReload {
      * Замена Options.updateResourcePacks (любой экран пакетов, в т.ч. ванильный и из модов).
      */
     public static void applyPacks(Minecraft mc, PackRepository repo) {
+        dedupeBuiltin(repo);
         Options options = mc.options;
         List<String> before = new ArrayList<>(options.resourcePacks);
         options.resourcePacks.clear();
@@ -82,6 +83,29 @@ public final class FastReload {
             return;
         }
         mc.reloadResourcePacks();
+    }
+
+    /**
+     * «Родное слово» встроено в мод. Если игрок включил тот же пак из папки resourcepacks (zip), встроенная
+     * копия выключается: два одинаковых пака с книгами Patchouli / Mantle одновременно — лишняя нагрузка
+     * и источник конфликтов при перезагрузке ресурсов.
+     */
+    private static void dedupeBuiltin(PackRepository repo) {
+        try {
+            String builtin = null;
+            boolean fileCopy = false;
+            for (Pack p : repo.getSelectedPacks()) {
+                if (p.getId().contains("rodnoe_slovo") && !p.getId().startsWith("file/")) builtin = p.getId();
+                else if (p.getId().startsWith("file/") && p.getDescription().getString().contains("Родное слово")) fileCopy = true;
+            }
+            if (builtin != null && fileCopy) {
+                List<String> ids = new ArrayList<>(repo.getSelectedIds());
+                ids.remove(builtin);
+                repo.setSelected(ids);
+                ArcHud.LOGGER.info("Arc HUD: «Родное слово» enabled from resourcepacks — built-in copy disabled");
+            }
+        } catch (Throwable ignored) {
+        }
     }
 
     /** Без языковых пакетов оба списка совпадают — значит, менялись только переводы. */

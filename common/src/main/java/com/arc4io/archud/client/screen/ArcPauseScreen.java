@@ -110,6 +110,12 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
         // моды в папке поменялись — «Перезапустить» под панелью (или над ней, если снизу нет места)
         int ry = py + ph + 12 + 18 <= height - 2 ? py + ph + 12 : Math.max(2, py - 22);
         com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, px, ry, pw);
+        // админ-панель сервера — операторам, вошедшим в аккаунт (сервер с Arc HUD или плагином)
+        if (com.arc4io.archud.client.ArcClientNet.adminAllowed()) {
+            int ax = lw > 0 ? lx + 8 : px + 10, aw = lw > 0 ? lw - 16 : pw - 20, ay = lw > 0 ? py + ph - 26 : py + ph + 34;
+            addRenderableWidget(new ArcButton(ax, ay, aw, 18, Component.translatable("archud.adminp.open"),
+                    b -> minecraft.setScreen(new AdminPanelScreen(this))).icon(Icons.STAR));
+        }
     }
 
     // ------------------------------------------------------------------ «Сейчас играют»
@@ -127,7 +133,7 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
     }
 
     private int listBottom() {
-        return py + ph - 8;
+        return py + ph - 8 - (com.arc4io.archud.client.ArcClientNet.adminAllowed() ? 22 : 0);
     }
 
     private void renderPlayers(GuiGraphics g, int mouseX, int mouseY, int accent) {
@@ -142,7 +148,7 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
                 ? Component.translatable("archud.pause.lan_open").getString() : Component.translatable("archud.pause.solo").getString();
         Draw.small(g, font, sub, lx + 8, py + 19, Draw.TEXT_DIM, 0.62F);
         int top = listTop(), bottom = listBottom();
-        if (minecraft.getSingleplayerServer() != null && !minecraft.getSingleplayerServer().isPublished()) bottom -= 26;
+        if (minecraft.getSingleplayerServer() != null && !minecraft.getSingleplayerServer().isPublished() && !com.arc4io.archud.client.ArcClientNet.adminAllowed()) bottom -= 26;
         listScroll = net.minecraft.util.Mth.clamp(listScroll, 0, Math.max(0, list.size() * ROW - (bottom - top)));
         g.enableScissor(lx + 2, top, lx + lw - 2, bottom);
         java.util.UUID me = minecraft.player == null ? null : minecraft.player.getUUID();
@@ -177,7 +183,7 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
             y += ROW;
         }
         g.disableScissor();
-        if (minecraft.getSingleplayerServer() != null && !minecraft.getSingleplayerServer().isPublished()) {
+        if (minecraft.getSingleplayerServer() != null && !minecraft.getSingleplayerServer().isPublished() && !com.arc4io.archud.client.ArcClientNet.adminAllowed()) {
             Draw.wrapped(g, font, Component.translatable("archud.pause.invite_hint").getString(), lx + 8, bottom + 4, lw - 16, Draw.TEXT_DIM, 0.6F);
         }
     }

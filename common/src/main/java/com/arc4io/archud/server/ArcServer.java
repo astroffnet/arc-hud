@@ -44,6 +44,8 @@ public final class ArcServer {
     private static final List<String> DIM_INDEX = new ArrayList<>();
     private static final List<Pending> RELAY = new ArrayList<>();
     private static final Map<UUID, Long> LAST_SHARE = new HashMap<>();
+    /** Игроки с Arc HUD, ещё не вошедшие в аккаунт (/login): протокол из их «привета». */
+    private static final Map<UUID, Integer> PENDING_HELLO = new HashMap<>();
     /** Игроки, скрывшие себя с карт других. */
     private static final Set<UUID> HIDDEN = new HashSet<>();
     /** Последняя отправленная точка возрождения игрока (кровать / якорь). */
@@ -62,8 +64,10 @@ public final class ArcServer {
         ArcNet.onServer("wp_share", ArcServer::onShare);
         TempadServer.init();
         WaypointStore.init();
+        AdminServer.init();
         EnchantServer.init();
         ArcNet.onServer("privacy", (player, buf) -> {
+            if (!ARC_PLAYERS.contains(player.getUUID())) return;
             if (buf.readBoolean()) HIDDEN.add(player.getUUID());
             else HIDDEN.remove(player.getUUID());
         });
@@ -79,6 +83,23 @@ public final class ArcServer {
         }
         tick++;
         ArcConfig cfg = ArcConfig.get();
+        AuthGate.tick(server);
+        AntiEsp.tick();
+        AdminServer.tick(server, tick);
+        // AntiESP: перепроверка видимости, даже если игрок стоит на месте (ванилла пересчитывает только при движении)
+        if (AntiEsp.enabled() && tick % 5 == 0) {
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) p.serverLevel().getChunkSource().move(p);
+        }
+        // «привет» от игроков, которые ещё не вошли (/login) — ответить, как только войдут
+        if (!PENDING_HELLO.isEmpty()) {
+            PENDING_HELLO.entrySet().removeIf(e -> {
+                ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+                if (p == null) return true;
+                if (!AuthGate.isAuthenticated(p)) return false;
+                completeHello(p, e.getValue());
+                return true;
+            });
+        }
         // рассылка новых чанков
         if (!RELAY.isEmpty()) {
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -116,7 +137,11 @@ public final class ArcServer {
                 FriendlyByteBuf buf = ArcNet.create("players");
                 buf.writeVarInt(vd);
                 List<ServerPlayer> visible = new ArrayList<>();
-                for (ServerPlayer o : all) if (o != p && !HIDDEN.contains(o.getUUID())) visible.add(o);
+                for (ServerPlayer o : all) {
+                    // скрывшие себя, под зельем невидимости и наблюдатели на карте не показываются
+                    if (o == p || HIDDEN.contains(o.getUUID()) || o.isInvisible() || o.isSpectator()) continue;
+                    visible.add(o);
+                }
                 buf.writeVarInt(visible.size());
                 for (ServerPlayer o : visible) {
                     buf.writeUUID(o.getUUID());
@@ -163,6 +188,11 @@ public final class ArcServer {
         if (dirty && tick % (20 * 120) == 0) save(server);
     }
 
+    /** Игрок с Arc HUD, прошедший авторизацию (ему можно отдавать и от него принимать данные). */
+    public static boolean isArcPlayer(UUID id) {
+        return ARC_PLAYERS.contains(id);
+    }
+
     public static boolean isHidden(UUID id) {
         return HIDDEN.contains(id);
     }
@@ -171,7 +201,7 @@ public final class ArcServer {
     private static void onSafeTp(ServerPlayer player, FriendlyByteBuf buf) {
         String dim = buf.readUtf(128);
         int x = buf.readInt(), yHint = buf.readInt(), z = buf.readInt();
-        if (!player.hasPermissions(2) || player.getServer() == null) {
+        if (!player.hasPermissions(2) || player.getServer() == null || !ARC_PLAYERS.contains(player.getUUID())) {
             player.displayClientMessage(Component.translatable("archud.tp.no_permission"), true);
             return;
         }
@@ -196,6 +226,9 @@ public final class ArcServer {
         UPLOAD_QUEUE.remove(player.getUUID());
         LAST_SHARE.remove(player.getUUID());
         WaypointStore.onLogout(player);
+        PENDING_HELLO.remove(player.getUUID());
+        AuthGate.onLogout(player);
+        AdminServer.onLogout(player);
     }
 
     public static void onStop(MinecraftServer server) {
@@ -205,6 +238,8 @@ public final class ArcServer {
 
     private static void reset() {
         ARC_PLAYERS.clear();
+        PENDING_HELLO.clear();
+        AuthGate.reset();
         HIDDEN.clear();
         MAP.clear();
         UPLOAD_QUEUE.clear();
@@ -217,6 +252,14 @@ public final class ArcServer {
     // ------------------------------------------------------------------ пакеты
     private static void onHello(ServerPlayer player, FriendlyByteBuf buf) {
         int protocol = buf.readVarInt();
+        if (!AuthGate.isAuthenticated(player)) {
+            PENDING_HELLO.put(player.getUUID(), protocol);
+            return;
+        }
+        completeHello(player, protocol);
+    }
+
+    private static void completeHello(ServerPlayer player, int protocol) {
         ARC_PLAYERS.add(player.getUUID());
         LAST_RESPAWN.remove(player.getUUID()); // отправить точку возрождения заново
         ArcConfig cfg = ArcConfig.get();
@@ -242,7 +285,7 @@ public final class ArcServer {
     }
 
     private static void onChunks(ServerPlayer player, FriendlyByteBuf buf) {
-        if (!ArcConfig.get().serverMapSync) return;
+        if (!ArcConfig.get().serverMapSync || !ARC_PLAYERS.contains(player.getUUID())) return;
         List<MapCodec.Chunk> list = MapCodec.read(buf, 64);
         String dim = player.level().dimension().location().toString();
         int pcx = player.getBlockX() >> 4, pcz = player.getBlockZ() >> 4;
@@ -258,7 +301,7 @@ public final class ArcServer {
     }
 
     private static void onShare(ServerPlayer player, FriendlyByteBuf buf) {
-        if (!ArcConfig.get().serverWaypointSharing) return;
+        if (!ArcConfig.get().serverWaypointSharing || !ARC_PLAYERS.contains(player.getUUID())) return;
         long now = System.currentTimeMillis();
         Long last = LAST_SHARE.get(player.getUUID());
         if (last != null && now - last < 750) return;

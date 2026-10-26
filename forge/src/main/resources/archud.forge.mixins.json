@@ -6,6 +6,9 @@
   "refmap": "archud.refmap.json",
   "mixins": [
     "PlayerDataStorageMixin",
+    "ChatMuteMixin",
+    "EntityAntiEspMixin",
+    "CommandsAuthMixin",
     "PlayerDataStorageAccessor",
     "PlayerListStorageMixin",
     "EnchantmentMenuAccessor",
