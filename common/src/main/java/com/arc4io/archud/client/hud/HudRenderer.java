@@ -222,6 +222,7 @@ public final class HudRenderer {
         if (p == null || mc.level == null) return;
         ArcConfig cfg = ArcConfig.get();
         com.arc4io.archud.client.map.WaypointWorldRenderer.renderOverlay(g);
+        com.arc4io.archud.client.extras.Extras.renderOverlay(g);
         if (!cfg.enabled) return;
         if (com.arc4io.archud.client.dev.ShowcaseDriver.forceTab && ArcTabList.enabled()) {
             ArcTabList.render(mc.gui.getTabList(), g, g.guiWidth(), mc.level.getScoreboard(), null);

@@ -37,6 +37,9 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
     private final RandomSource random = RandomSource.create();
     private long openTime;
     private int panelW;
+    // карточка профиля справа
+    private net.minecraft.client.gui.components.EditBox nickBox;
+    private int cardX, cardY, cardW = 150, cardH = 196;
 
     public ArcTitleScreen() {
         super(Component.translatable("narrator.screen.title"));
@@ -75,6 +78,32 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         i++;
         addRenderableWidget(new ArcButton(bx, by + step * (i - 1) + 10, bw, 20, Component.translatable("menu.quit"),
                 b -> minecraft.stop()).menu(80 * i).icon(Icons.WARNING).danger());
+
+        // профиль: персонаж и смена ника
+        com.arc4io.archud.client.profile.NicknameManager.applySaved();
+        cardX = width - cardW - 16;
+        cardY = Math.max(36, height / 2 - cardH / 2 - 10);
+        if (cardX < panelW + 20) cardX = -1000; // слишком узкий экран — карточку не показываем
+        String prevNick = nickBox != null ? nickBox.getValue() : minecraft.getUser().getName();
+        nickBox = new net.minecraft.client.gui.components.EditBox(font, cardX + 8, cardY + cardH - 58, cardW - 16, 14, Component.translatable("archud.profile.nick"));
+        nickBox.setMaxLength(16);
+        nickBox.setValue(prevNick);
+        nickBox.setFilter(s -> s.matches("[A-Za-z0-9_]*"));
+        if (cardX > 0) addRenderableWidget(nickBox);
+        ArcButton apply = new ArcButton(cardX + 8, cardY + cardH - 40, (cardW - 20) / 2, 16, Component.translatable("archud.profile.apply"), b -> {
+            String n = nickBox.getValue().trim();
+            if (!com.arc4io.archud.client.profile.NicknameManager.isValid(n)) return;
+            com.arc4io.archud.client.profile.NicknameManager.set(n, true);
+            nickBox.setValue(minecraft.getUser().getName());
+        });
+        ArcButton reset = new ArcButton(cardX + 12 + (cardW - 20) / 2, cardY + cardH - 40, (cardW - 20) / 2, 16, Component.translatable("archud.profile.reset"), b -> {
+            com.arc4io.archud.client.profile.NicknameManager.reset();
+            nickBox.setValue(minecraft.getUser().getName());
+        });
+        if (cardX > 0) {
+            addRenderableWidget(apply);
+            addRenderableWidget(reset);
+        }
     }
 
     @Override
@@ -150,10 +179,48 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         String copy = "Copyright Mojang AB. Do not distribute!";
         Draw.small(g, font, copy, width - font.width(copy) * 0.5F - 6, height - 9, 0x80FFFFFF, 0.5F);
 
+        renderProfileCard(g, mouseX, mouseY, accent, intro);
+
         super.render(g, mouseX, mouseY, partialTick);
 
         // плавное появление
         if (intro < 1F) g.fill(0, 0, width, height, Draw.alpha(0x000000, (int) (255 * (1F - intro))));
+    }
+
+    private void renderProfileCard(GuiGraphics g, int mouseX, int mouseY, int accent, float intro) {
+        if (cardX < 0) return;
+        int x = cardX, y = cardY;
+        Draw.panel(g, x, y, cardW, cardH, 0xC0060A10, Draw.alpha(accent, 0x90));
+        g.fill(x + 3, y, x + cardW - 3, y + 1, accent);
+        Draw.hGradient(g, x + 1, y + 1, x + cardW - 1, y + 110, Draw.alpha(accent, 0x30), 0x00000000);
+        Draw.small(g, font, Component.translatable("archud.profile.title").getString(), x + 8, y + 6, Draw.TEXT_DIM, 0.7F);
+        // подставка
+        int fx = x + cardW / 2, fy = y + 112;
+        g.fill(fx - 26, fy, fx + 26, fy + 2, Draw.alpha(accent, 0x70));
+        g.fillGradient(fx - 30, fy + 2, fx + 30, fy + 6, Draw.alpha(accent, 0x30), 0x00000000);
+        String name = minecraft.getUser().getName();
+        com.arc4io.archud.client.profile.PlayerPreview.render(g, name, fx, fy, 56F * Draw.easeOut(intro), mouseX, mouseY);
+        // имя и статус
+        int ny = y + 118;
+        g.drawCenteredString(font, name, fx, ny, 0xFFFFFFFF);
+        boolean custom = com.arc4io.archud.client.profile.NicknameManager.isCustom();
+        String sub = custom ? Component.translatable("archud.profile.offline", com.arc4io.archud.client.profile.NicknameManager.accountName()).getString()
+                : Component.translatable("archud.profile.account").getString();
+        Draw.smallCentered(g, font, sub, fx, ny + 11, custom ? 0xFFFFD54F : 0xFF9CFF5A, 0.55F);
+        // подсказка под кнопками
+        String hint = Component.translatable("archud.profile.hint").getString();
+        int hy = y + cardH - 20;
+        for (var line : font.split(Component.literal(hint), (int) ((cardW - 12) / 0.5F))) {
+            g.pose().pushPose();
+            g.pose().translate(x + 6, hy, 0);
+            g.pose().scale(0.5F, 0.5F, 1F);
+            g.drawString(font, line, 0, 0, 0xFF8C9AAB, false);
+            g.pose().popPose();
+            hy += 5;
+        }
+        if (nickBox != null && !nickBox.getValue().isEmpty() && !com.arc4io.archud.client.profile.NicknameManager.isValid(nickBox.getValue())) {
+            Draw.small(g, font, Component.translatable("archud.profile.invalid").getString(), x + 8, nickBox.getY() - 7, 0xFFFF8A80, 0.5F);
+        }
     }
 
     @Override

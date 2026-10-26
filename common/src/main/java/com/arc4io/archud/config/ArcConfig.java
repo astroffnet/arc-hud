@@ -158,6 +158,66 @@ public class ArcConfig {
     public boolean customModList = true;
     public boolean customInventory = true;
     public boolean customEnchanting = true;
+
+    // ---------------- сетевая игра
+    /** Избранные серверы (адреса). */
+    public java.util.List<String> favoriteServers = new java.util.ArrayList<>();
+    /** Заметки к серверам: адрес → текст. */
+    public java.util.Map<String, String> serverNotes = new java.util.HashMap<>();
+    /** Статистика серверов: адрес → время, входы, последний вход. */
+    public java.util.Map<String, ServerStat> serverStats = new java.util.HashMap<>();
+    /** Автопереподключение при обрыве связи. */
+    public boolean autoReconnect = false;
+
+    public static class ServerStat {
+        public String name = "";
+        public long playSeconds;
+        public long lastJoin;
+        public int joins;
+    }
+
+    // ---------------- главный экран
+    /** Свой ник (только одиночная игра и серверы без лицензии); пусто — ник аккаунта. */
+    public String customNickname = "";
+
+    // ---------------- 40 фишек
+    public boolean infoNetherCoords = true;
+    public boolean infoMoonPhase = true;
+    public boolean infoDayNightTimer = true;
+    public boolean infoSlimeChunk = true;
+    public boolean infoWeatherForecast = true;
+    public boolean infoSessionTime = true;
+    public boolean targetBlockDetails = true;
+    public boolean targetMobStats = true;
+    /** Прицел: 0 — ванильный, 1 — точка, 2 — крест, 3 — круг. */
+    public int crosshairStyle = 0;
+    public boolean hitMarker = true;
+    public boolean damageNumbers = true;
+    public boolean arrowCounter = true;
+    public boolean lowDurabilityCrosshair = true;
+    public boolean lowDurabilityWarning = true;
+    public boolean fallWarning = true;
+    public boolean elytraHud = true;
+    public boolean zoomEnabled = true;
+    public boolean freelookEnabled = true;
+    public boolean alwaysSprint = false;
+    public boolean fullbright = false;
+    public boolean chatTimestamps = true;
+    public boolean chatCollapse = true;
+    public boolean chatMentions = true;
+    public boolean deathCoordsChat = true;
+    public boolean containerSearch = true;
+    public boolean containerButtons = true;
+    public boolean tooltipDurability = true;
+    public boolean tooltipModName = true;
+    public boolean tooltipFood = true;
+    public boolean tooltipRepairCost = true;
+    public boolean biomeTitle = true;
+    public boolean hideRain = false;
+    public boolean afkOverlay = true;
+    /** Напоминание сделать перерыв, минут (0 — выкл.). */
+    public int breakReminder = 120;
+    public boolean fullInventoryWarning = true;
     /** Новое креатив-меню Arc HUD. */
     public boolean customCreative = true;
     /** Избранные предметы креатив-меню (NBT стака одной строкой). */

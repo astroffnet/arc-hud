@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MouseScrollMixin {
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true, require = 0)
     private void archud$scroll(long window, double x, double y, CallbackInfo ci) {
-        if (net.minecraft.client.Minecraft.getInstance().screen == null && ArcCamera.scroll(y)) ci.cancel();
+        if (net.minecraft.client.Minecraft.getInstance().screen != null) return;
+        if (com.arc4io.archud.client.extras.Extras.zoomScroll(y) || ArcCamera.scroll(y)) ci.cancel();
     }
 }

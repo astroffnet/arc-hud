@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiCrosshairMixin {
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true, require = 0)
     private void archud$crosshair(GuiGraphics g, CallbackInfo ci) {
-        if (FirstPersonCam.hideCrosshair()) ci.cancel();
+        if (FirstPersonCam.hideCrosshair() || com.arc4io.archud.client.extras.Extras.renderCrosshair(g)) ci.cancel();
     }
 }

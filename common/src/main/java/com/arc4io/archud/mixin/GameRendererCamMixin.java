@@ -26,6 +26,7 @@ public abstract class GameRendererCamMixin {
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true, require = 0)
     private void archud$fov(Camera camera, float partialTick, boolean world, CallbackInfoReturnable<Double> cir) {
         double v = FirstPersonCam.fov(cir.getReturnValue(), world);
+        if (world) v = com.arc4io.archud.client.extras.Extras.zoomFov(v);
         if (v != cir.getReturnValue()) cir.setReturnValue(v);
     }
 
@@ -33,6 +34,12 @@ public abstract class GameRendererCamMixin {
             target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
     private void archud$lens(float partialTick, long nanoTime, boolean renderLevel, CallbackInfo ci) {
         FirstPersonCam.postProcess(partialTick);
+    }
+
+    @Inject(method = "getNightVisionScale", at = @At("HEAD"), cancellable = true, require = 0)
+    private static void archud$fullbright(net.minecraft.world.entity.LivingEntity e, float pt, CallbackInfoReturnable<Float> cir) {
+        if (com.arc4io.archud.client.extras.Extras.fullbright() && e instanceof net.minecraft.client.player.LocalPlayer
+                && !e.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)) cir.setReturnValue(1.0F);
     }
 
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
