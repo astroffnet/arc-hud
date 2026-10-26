@@ -51,6 +51,8 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     private float xMouse, yMouse;
     private ArcButton sortBtn, packBtn;
     private final List<MobEffectInstance> hiddenEffects = new ArrayList<>();
+    private final List<int[]> chipHits = new ArrayList<>();
+    private final List<MobEffectInstance> chipList = new ArrayList<>();
     private int moreX = -1, moreY;
 
     public ArcSurvivalScreen(AbstractContainerMenu menu, Inventory inv, Component title) {
@@ -153,6 +155,13 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         renderTooltip(g, mouseX, mouseY);
         for (ModButtons.Entry e : modButtons) {
             if (e.inside(mouseX, mouseY) && !e.widget.isHovered()) g.renderTooltip(font, e.name, mouseX, mouseY);
+        }
+        for (int k = 0; k < chipHits.size(); k++) {
+            int[] r = chipHits.get(k);
+            if (mouseX >= r[0] && mouseX < r[0] + r[2] && mouseY >= r[1] && mouseY < r[1] + r[3]) {
+                MobEffectInstance e = chipList.get(k);
+                g.renderTooltip(font, effectName(e).copy().append(" ").append(MobEffectUtil.formatDuration(e, 1.0F)), mouseX, mouseY);
+            }
         }
         if (moreX >= 0 && mouseX >= moreX && mouseX < moreX + 40 && mouseY >= moreY && mouseY < moreY + 22) {
             List<Component> lines = new ArrayList<>();
@@ -278,6 +287,8 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     /** Эффекты: карточки 2 в ряд; что не помещается — в «+N» с подсказкой. */
     private void renderEffects(GuiGraphics g, int x, int y, int w, int maxY) {
         hiddenEffects.clear();
+        chipHits.clear();
+        chipList.clear();
         moreX = -1;
         LocalPlayer p = minecraft.player;
         if (p == null) return;
@@ -288,15 +299,12 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         list.sort(java.util.Comparator.comparingInt(MobEffectInstance::getDuration));
         int cardW = (w - 4) / 2, cardH = 22;
         int rows = Math.max(0, (maxY - y) / (cardH + 2));
-        int capacity = rows * 2;
-        boolean overflow = list.size() > capacity;
-        int shown = overflow ? Math.max(0, capacity - 1) : list.size();
+        if (list.size() > rows * 2) {
+            renderEffectChips(g, list, x, y, w, maxY);
+            return;
+        }
         for (int i = 0; i < list.size(); i++) {
             MobEffectInstance e = list.get(i);
-            if (i >= shown) {
-                hiddenEffects.add(e);
-                continue;
-            }
             int ex = x + (i % 2) * (cardW + 4), ey = y + (i / 2) * (cardH + 2);
             int col = e.getEffect().isBeneficial() ? 0xFF9CFF5A : 0xFFFF6B6B;
             Draw.panel(g, ex, ey, cardW, cardH, 0xB0060A10, Draw.alpha(col, 0x60));
@@ -308,12 +316,39 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             Draw.small(g, font, name, ex + 22, ey + 3, Draw.TEXT, 0.75F);
             Draw.small(g, font, MobEffectUtil.formatDuration(e, 1.0F).getString(), ex + 22, ey + 12, Draw.alpha(col, 0xFF), 0.75F);
         }
+    }
+
+    /** Много эффектов — компактные «фишки»: иконка + время, имя во всплывающей подсказке. */
+    private void renderEffectChips(GuiGraphics g, List<MobEffectInstance> list, int x, int y, int w, int maxY) {
+        int chipW = 39, chipH = 14, gap = 2;
+        int perRow = Math.max(1, (w + gap) / (chipW + gap));
+        int rows = Math.max(0, (maxY - y + gap) / (chipH + gap));
+        int capacity = perRow * rows;
+        boolean overflow = list.size() > capacity;
+        int shown = overflow ? Math.max(0, capacity - 1) : list.size();
+        for (int i = 0; i < list.size(); i++) {
+            MobEffectInstance e = list.get(i);
+            if (i >= shown) {
+                hiddenEffects.add(e);
+                continue;
+            }
+            int ex = x + (i % perRow) * (chipW + gap), ey = y + (i / perRow) * (chipH + gap);
+            int col = e.getEffect().isBeneficial() ? 0xFF9CFF5A : 0xFFFF6B6B;
+            Draw.panel(g, ex, ey, chipW, chipH, 0xB0060A10, Draw.alpha(col, 0x60));
+            TextureAtlasSprite sprite = minecraft.getMobEffectTextures().get(e.getEffect());
+            g.blit(ex + 1, ey + 1, 0, 12, 12, sprite);
+            String t = MobEffectUtil.formatDuration(e, 1.0F).getString();
+            if (e.getAmplifier() > 0 && t.length() <= 5) t = t + " " + (e.getAmplifier() + 1);
+            Draw.small(g, font, t, ex + 14, ey + 4.5F, Draw.alpha(col, 0xFF), 0.6F);
+            chipHits.add(new int[]{ex, ey, chipW, chipH, i});
+            chipList.add(e);
+        }
         if (overflow) {
             int i = shown;
-            moreX = x + (i % 2) * (cardW + 4);
-            moreY = y + (i / 2) * (cardH + 2);
-            Draw.panel(g, moreX, moreY, 40, cardH, 0xB0060A10, 0x60FFFFFF);
-            g.drawCenteredString(font, "+" + hiddenEffects.size(), moreX + 20, moreY + 7, Draw.TEXT);
+            moreX = x + (i % perRow) * (chipW + gap);
+            moreY = y + (i / perRow) * (chipH + gap);
+            Draw.panel(g, moreX, moreY, chipW, chipH, 0xB0060A10, 0x60FFFFFF);
+            g.drawCenteredString(font, "+" + hiddenEffects.size(), moreX + chipW / 2, moreY + 3, Draw.TEXT);
         }
     }
 
