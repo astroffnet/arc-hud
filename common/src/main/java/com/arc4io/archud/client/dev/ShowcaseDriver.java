@@ -160,8 +160,8 @@ public final class ShowcaseDriver {
         }, null);
         add(30, mc -> {}, "06d_fsr50");
         add(5, mc -> ArcConfig.get().upscaler = 2, null);
-        add(40, mc -> ArcHud.LOGGER.info("[Showcase] TSR on, temporal={} res={}", com.arc4io.archud.client.fx.RenderScale.temporal(),
-                com.arc4io.archud.client.fx.RenderScale.info()), "06e_tsr50");
+        add(40, mc -> ArcHud.LOGGER.info("[Showcase] TSR on, temporal={} res={} jitterCalls={}", com.arc4io.archud.client.fx.RenderScale.temporal(),
+                com.arc4io.archud.client.fx.RenderScale.info(), com.arc4io.archud.client.fx.Taau.jitterCalls), "06e_tsr50");
         add(5, mc -> {
             var c = ArcConfig.get();
             c.renderScale = 100;
