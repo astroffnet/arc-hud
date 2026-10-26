@@ -151,6 +151,38 @@ final class HudBlocks {
                 if (ml != null) start.put(mid, (h - total(ml)) / 2);
             }
         }
+        // средняя стопка края всё ещё не влезает (большой размер интерфейса, много панелей модов) —
+        // уменьшаем её, чтобы ничего не уходило за экран и не налезало на нижний угол
+        for (int col = 0; col <= 2; col++) {
+            HudAnchor top = HudAnchor.at(col, 0), mid = HudAnchor.at(col, 1), bot = HudAnchor.at(col, 2);
+            List<Block> ml = map.get(mid);
+            if (ml == null || ml.isEmpty()) continue;
+            int ceil = map.containsKey(top) ? start.get(top) + total(map.get(top)) + 3 : 2;
+            int floor = map.containsKey(bot) ? start.get(bot) - 3 : h - 2;
+            int avail = floor - ceil;
+            int tot = total(ml);
+            if (tot <= avail || avail < 24) {
+                if (start.get(mid) + tot > floor) start.put(mid, Math.max(ceil, floor - tot));
+                continue;
+            }
+            float f = Math.max(0.5F, avail / (float) tot);
+            ml.replaceAll(b -> scaled(b, f));
+            start.put(mid, ceil + Math.max(0, (avail - total(ml)) / 2));
+        }
+        // нижняя стопка не залезает выше верхней
+        for (int col = 0; col <= 2; col++) {
+            HudAnchor top = HudAnchor.at(col, 0), bot = HudAnchor.at(col, 2);
+            List<Block> bl = map.get(bot);
+            if (bl == null || bl.isEmpty() || !map.containsKey(top)) continue;
+            int ceil = start.get(top) + total(map.get(top)) + 3;
+            int tot = total(bl);
+            int avail = h - 2 - ceil;
+            if (tot > avail && avail >= 24) {
+                float f = Math.max(0.5F, avail / (float) tot);
+                bl.replaceAll(b -> scaled(b, f));
+                start.put(bot, h - 2 - total(bl));
+            }
+        }
         for (Map.Entry<HudAnchor, List<Block>> e : map.entrySet()) {
             HudAnchor a = e.getKey();
             List<Block> list = e.getValue();
@@ -172,11 +204,15 @@ final class HudBlocks {
     private static void add(Map<HudAnchor, List<Block>> map, HudAnchor anchor, String id, Block b) {
         if (b == null || b.h() <= 0 || anchor == null) return;
         float sc = id.startsWith("addon:") ? HudScale.get("addons") * HudScale.get(id) : HudScale.get(id);
-        if (Math.abs(sc - 1F) > 0.001F) b = new Scaled(b, sc);
+        if (Math.abs(sc - 1F) > 0.001F) b = scaled(b, sc);
         map.computeIfAbsent(anchor, k -> new ArrayList<>()).add(b);
     }
 
     /** Блок с другим размером (настройка «размер» в расположении HUD). */
+    private static Block scaled(Block b, float f) {
+        return b instanceof Scaled sc ? new Scaled(sc.inner(), sc.scale() * f) : new Scaled(b, f);
+    }
+
     private record Scaled(Block inner, float scale) implements Block {
         @Override
         public int w() {

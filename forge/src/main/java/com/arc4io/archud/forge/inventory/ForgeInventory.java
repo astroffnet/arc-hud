@@ -35,7 +35,12 @@ public final class ForgeInventory {
 
     /** Открыть новый инвентарь с аксессуарами (на сервере). */
     public static void open(ServerPlayer player) {
-        if (!curios() || player.containerMenu != player.inventoryMenu) return;
+        if (!curios()) return;
+        if (player.containerMenu != player.inventoryMenu) {
+            // у клиента экрана нет (он прислал запрос из игры) — значит, на сервере висит забытое меню
+            ArcHud.LOGGER.info("Arc HUD: closing stale menu {} before opening inventory", player.containerMenu.getClass().getName());
+            player.closeContainer();
+        }
         List<ArcInventoryMenu.Acc> acc;
         try {
             acc = CuriosSlots.list(player);
@@ -43,6 +48,7 @@ public final class ForgeInventory {
             ArcHud.LOGGER.warn("Arc HUD: cannot read Curios slots", t);
             return;
         }
+        ArcHud.LOGGER.debug("Arc HUD: opening inventory with {} accessory slots", acc.size());
         NetworkHooks.openScreen(player, new SimpleMenuProvider((id, inv, p) -> ArcInventoryMenu.server(id, inv, acc),
                 Component.translatable("archud.inv.title")), buf -> ArcInventoryMenu.write(buf, acc));
     }

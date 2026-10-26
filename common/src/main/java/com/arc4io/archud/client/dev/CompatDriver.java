@@ -79,7 +79,7 @@ public final class CompatDriver {
                 m.setScreen(null);
             }, null);
             add(10, m -> m.setScreen(new InventoryScreen(m.player)), null);
-            add(30, m -> ArcHud.LOGGER.info("[Compat] inventory screen at scale {}: {}", s, m.screen == null ? "none" : m.screen.getClass().getName()),
+            add(30, m -> ArcHud.LOGGER.info("[Compat] inventory screen at scale {}: {}", s, (m.screen == null ? "none" : m.screen.getClass().getName()) + " menu=" + m.player.containerMenu.getClass().getSimpleName()),
                     tag + "_s" + s);
         }
     }
@@ -154,11 +154,20 @@ public final class CompatDriver {
         add(10, mc -> mc.setScreen(null), null);
         // способности Legends: вид от третьего лица спереди, перчатки на руках
         add(20, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT), "c03_idle");
-        for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c04_ab2"}, {"legendsmod.key.ability_4", "c05_ab4"}, {"legendsmod.key.ability_1", "c06_ab1"}}) {
+        add(10, mc -> com.arc4io.archud.client.camera.ArcCamera.devView(mc, 90F, 10F), "c03_idle_side");
+        add(5, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT), null);
+        for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c04_ab2"}, {"legendsmod.key.ability_4", "c05_ab4"}, {"legendsmod.key.ability_1", "c06_ab1"},
+                {"legendsmod.key.ability_3", "c07_ab3"}}) {
             add(5, mc -> ability(mc, ab[0], true), null);
             add(6, mc -> {}, ab[1] + "_a");
             add(8, mc -> {}, ab[1] + "_b");
-            add(8, mc -> {}, ab[1] + "_c");
+            // сбоку и в три четверти — видно, остались ли перчатки на кистях
+            add(2, mc -> com.arc4io.archud.client.camera.ArcCamera.devView(mc, 90F, 5F), null);
+            add(4, mc -> {}, ab[1] + "_side");
+            add(2, mc -> com.arc4io.archud.client.camera.ArcCamera.devView(mc, 145F, 15F), null);
+            add(4, mc -> {}, ab[1] + "_34");
+            add(2, mc -> com.arc4io.archud.client.camera.ArcCamera.freelookEnd(mc), null);
+            add(2, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT), null);
             add(5, mc -> ability(mc, ab[0], false), null);
             add(60, mc -> {}, null);
         }

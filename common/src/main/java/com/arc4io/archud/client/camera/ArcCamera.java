@@ -139,6 +139,14 @@ public final class ArcCamera {
         mc.options.setCameraType(beforeFreelook == null ? CameraType.FIRST_PERSON : beforeFreelook);
     }
 
+    /** Для автотестов: свободная камера под заданным углом к персонажу (0 — сзади, 90 — сбоку, 180 — спереди). */
+    public static void devView(Minecraft mc, float yawOffset, float pitch) {
+        if (mc.player == null) return;
+        if (!freelook) freelookStart(mc);
+        camYaw = mc.player.getYRot() + yawOffset;
+        camPitch = pitch;
+    }
+
     public static boolean freelook() {
         return freelook;
     }
