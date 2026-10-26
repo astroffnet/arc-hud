@@ -14,4 +14,7 @@ public interface ParticleAccessor {
 
     @Accessor("z")
     double archud$z();
+
+    @Accessor("age")
+    int archud$age();
 }

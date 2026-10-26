@@ -149,6 +149,13 @@ public final class RenderScale {
         Taau.endFrame();
     }
 
+    /** Антикрашер: если краш случился посреди кадра — вернуть настоящий буфер кадра. */
+    public static void emergencyRestore() {
+        Taau.endFrame();
+        if (swapped && real != null) ((MinecraftTargetAccessor) Minecraft.getInstance()).archud$setMainRenderTarget(real);
+        swapped = false;
+    }
+
     public static void reset() {
         Taau.reset();
         if (upscale != null) upscale.close();

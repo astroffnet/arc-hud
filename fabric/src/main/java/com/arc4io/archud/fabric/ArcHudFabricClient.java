@@ -82,12 +82,24 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
 
     @Override
     public Screen createModListScreen(Screen parent) {
-        if (!FabricLoader.getInstance().isModLoaded("modmenu")) return null;
-        try {
-            Class<?> cls = Class.forName("com.terraformersmc.modmenu.gui.ModsScreen");
-            return (Screen) cls.getConstructor(Screen.class).newInstance(parent);
-        } catch (Throwable t) {
-            return null;
+        // свой список модов; Mod Menu — только если он установлен и в настройках выключен список Arc HUD
+        if (!com.arc4io.archud.config.ArcConfig.get().customModList && FabricLoader.getInstance().isModLoaded("modmenu")) {
+            try {
+                Class<?> cls = Class.forName("com.terraformersmc.modmenu.gui.ModsScreen");
+                return (Screen) cls.getConstructor(Screen.class).newInstance(parent);
+            } catch (Throwable ignored) {
+            }
         }
+        return new com.arc4io.archud.client.mods.ArcModListScreen(parent);
+    }
+
+    @Override
+    public java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
+        return FabricMods.mods();
+    }
+
+    @Override
+    public java.nio.file.Path modsDir() {
+        return FabricLoader.getInstance().getGameDir().resolve("mods");
     }
 }

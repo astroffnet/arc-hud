@@ -42,12 +42,15 @@ public final class ModWatcher {
     /** Изменения с момента запуска: имя файла → «+ Название» / «− Название». */
     private static final Map<String, String> changes = new LinkedHashMap<>();
     private static final Map<String, String> names = new LinkedHashMap<>();
+    /** Моды без кода, подгруженные без перезапуска. */
+    private static final Set<String> hot = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private ModWatcher() {}
 
     public static void tick(Minecraft mc) {
         if (thread != null || !ArcConfig.get().modWatcher) return;
-        dir = mc.gameDirectory.toPath().resolve("mods");
+        dir = com.arc4io.archud.client.ArcClient.platform().modsDir();
+        HotLoader.cleanup(mc);
         initial = list();
         for (String f : initial) names.put(f, readName(dir.resolve(f)));
         thread = new Thread(ModWatcher::loop, "ArcHud-ModWatcher");
@@ -75,7 +78,16 @@ public final class ModWatcher {
             now = list();
             Map<String, String> next = new LinkedHashMap<>();
             for (String f : now) {
-                if (!initial.contains(f)) next.put(f, "+ " + names.computeIfAbsent(f, k -> readName(dir.resolve(k))));
+                if (initial.contains(f)) continue;
+                String name = names.computeIfAbsent(f, k -> readName(dir.resolve(k)));
+                // мод без кода (только ресурсы) — подгружаем сразу, перезапуск не нужен
+                if (!hot.contains(f) && ArcConfig.get().hotLoad && HotLoader.resourceOnly(dir.resolve(f))) {
+                    hot.add(f);
+                    Path jar = dir.resolve(f);
+                    Minecraft.getInstance().execute(() -> HotLoader.load(jar, name));
+                }
+                if (hot.contains(f)) continue;
+                next.put(f, "+ " + name);
             }
             for (String f : initial) {
                 if (!now.contains(f)) next.put(f, "− " + names.getOrDefault(f, f));

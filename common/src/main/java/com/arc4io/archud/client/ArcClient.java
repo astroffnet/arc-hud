@@ -20,6 +20,7 @@ public final class ArcClient {
 
     public static void init(ClientPlatform p) {
         platform = p;
+        com.arc4io.archud.util.PacketLimits.client = true;
         com.arc4io.archud.compat.Integrations.init();
         ArcClientNet.init();
         com.arc4io.archud.client.enchant.EnchantClient.init();
@@ -42,7 +43,7 @@ public final class ArcClient {
             // первый запуск: пресет оптимизации «Баланс» (всё можно поменять во вкладке «Оптимизация»)
             ArcConfig.get().perfOffered = true;
             com.arc4io.archud.client.perf.Perf.preset(1);
-            ArcConfig.get().perfVersion = 2;
+            ArcConfig.get().perfVersion = 3;
         }
         if (ArcConfig.get().perfVersion < 2 && mc.options != null) {
             // обновление: новые переключатели (дальность, TPS) получают значения «Баланса»
@@ -53,6 +54,14 @@ public final class ArcClient {
             ArcConfig.get().perfVersion = 2;
             ArcConfig.save();
         }
+        if (ArcConfig.get().perfVersion < 3 && mc.options != null) {
+            for (String id : new String[]{"x_fast_paintings", "p_light_cache"}) {
+                var o = com.arc4io.archud.client.perf.Perf.opt(id);
+                if (o != null && o.get() == 0) o.set(o.balanced());
+            }
+            ArcConfig.get().perfVersion = 3;
+            ArcConfig.save();
+        }
         if (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen) {
             com.arc4io.archud.client.mods.GameRestarter.resumeIfPending(mc.screen);
         }
@@ -60,6 +69,7 @@ public final class ArcClient {
         if (!glChecked && mc.getOverlay() == null && mc.screen != null) {
             // игра дошла до меню — выбранная версия OpenGL работает
             glChecked = true;
+            com.arc4io.archud.client.crash.AntiCrash.markLoaded();
             com.arc4io.archud.client.gfx.GlContext.detect();
             com.arc4io.archud.client.gfx.GlContext.startupOk();
             if (com.arc4io.archud.client.gfx.GlContext.revertedAfterCrash()) {

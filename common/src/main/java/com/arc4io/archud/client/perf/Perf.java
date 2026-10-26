@@ -105,6 +105,7 @@ public final class Perf {
         toggle("details", "x_item_single", 1, 1);
         toggle("details", "x_item_spin", 0, 1);
         toggle("details", "x_glint", 0, 1);
+        toggle("details", "x_fast_paintings", 1, 1);
         // ---- блоки-сущности: дальность (17) + за стенами + текст табличек (2)
         dist("blockentities", "b_chest", 48, 24);
         dist("blockentities", "b_sign", 64, 32);
@@ -145,6 +146,8 @@ public final class Perf {
         toggle("particles", "p_social", 0, 1);
         toggle("particles", "p_dust", 0, 1);
         toggle("particles", "p_lava", 1, 1);
+        toggle("particles", "p_light_cache", 1, 1);
+        toggle("particles", "p_async", 0, 1);
         // ---- мир (13)
         toggle("world", "w_clouds", 0, 1);
         toggle("world", "w_stars", 0, 1);
