@@ -93,8 +93,9 @@ final class HudBlocks {
         if (arcF3) {
             List<Block> l = new ArrayList<>(), r = new ArrayList<>();
             ArcDebugScreen.build(mc, font, accent, w, l, r);
-            for (Block b : l) map.computeIfAbsent(HudAnchor.TOP_LEFT, k -> new ArrayList<>()).add(b);
-            for (Block b : r) map.computeIfAbsent(HudAnchor.TOP_RIGHT, k -> new ArrayList<>()).add(b);
+            // карточки F3 — в самом верху углов, блоки HUD этих углов уходят под них
+            map.computeIfAbsent(HudAnchor.TOP_LEFT, k -> new ArrayList<>()).addAll(0, l);
+            map.computeIfAbsent(HudAnchor.TOP_RIGHT, k -> new ArrayList<>()).addAll(0, r);
             ArcDebugScreen.markLaidOut();
         }
         int boss = bossCount(mc) * 19;
@@ -132,8 +133,16 @@ final class HudBlocks {
                     start.put(mid, my);
                     topEnd = my + total(ml) + 3;
                 }
-                if (topEnd <= floor + 3 || tl.isEmpty() || !(tl.get(tl.size() - 1) instanceof ArcDebugScreen.CardBlock)) break;
-                tl.remove(tl.size() - 1);
+                if (topEnd <= floor + 3) break;
+                // не влезает — убираем нижние карточки F3 (первая, «Позиция» / «Производительность», остаётся всегда)
+                int drop = -1, cards = 0;
+                for (int i = 0; i < tl.size(); i++) {
+                    if (tl.get(i) instanceof ArcDebugScreen.CardBlock) {
+                        if (cards++ > 0) drop = i;
+                    }
+                }
+                if (drop < 0) break;
+                tl.remove(drop);
                 if (ml != null) start.put(mid, (h - total(ml)) / 2);
             }
         }
