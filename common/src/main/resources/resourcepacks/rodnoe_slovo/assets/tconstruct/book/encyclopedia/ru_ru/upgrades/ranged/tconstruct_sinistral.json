@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:sinistral",
+  "text": [
+    {
+      "text": "Арбалет стреляет при атаке, а не использовании, и заряжается только без приседания. Позволяет использовать предмет во второй руке при арбалете."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Single level",
+    "Requires 1 upgrade slot"
+  ]
+}

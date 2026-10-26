@@ -1,0 +1,22 @@
+{
+  "item.hoverboards.hoverboard": "Ховерборд",
+  "item.hoverboards.hoverboard_white": "Белый ховерборд",
+  "item.hoverboards.hoverboard_orange": "Оранжевый ховерборд",
+  "item.hoverboards.hoverboard_magenta": "Пурпурный ховерборд",
+  "item.hoverboards.hoverboard_light_blue": "Голубой ховерборд",
+  "item.hoverboards.hoverboard_yellow": "Жёлтый ховерборд",
+  "item.hoverboards.hoverboard_lime": "Лаймовый ховерборд",
+  "item.hoverboards.hoverboard_pink": "Розовый ховерборд",
+  "item.hoverboards.hoverboard_gray": "Серый ховерборд",
+  "item.hoverboards.hoverboard_light_gray": "Светло-серый ховерборд",
+  "item.hoverboards.hoverboard_cyan": "Бирюзовый ховерборд",
+  "item.hoverboards.hoverboard_purple": "Фиолетовый ховерборд",
+  "item.hoverboards.hoverboard_blue": "Синий ховерборд",
+  "item.hoverboards.hoverboard_brown": "Коричневый ховерборд",
+  "item.hoverboards.hoverboard_green": "Зелёный ховерборд",
+  "item.hoverboards.hoverboard_red": "Красный ховерборд",
+  "item.hoverboards.hoverboard_black": "Чёрный ховерборд",
+  "subtitles.hoverboards.hoverboard_mount": "Ховерборд заводится",
+  "subtitles.hoverboards.hoverboard_dismount": "Ховерборд останавливается",
+  "subtitles.hoverboards.hoverboard_idle": "Ховерборд гудит"
+}

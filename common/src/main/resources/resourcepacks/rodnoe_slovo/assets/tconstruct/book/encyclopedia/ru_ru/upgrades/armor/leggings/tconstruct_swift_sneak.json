@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:swift_sneak",
+  "text": [
+    {
+      "text": "Уменьшает штраф скорости при приседании на 15% за уровень. На уровне 5 можно бежать, приседая."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 5 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

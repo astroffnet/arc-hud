@@ -45,6 +45,7 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
         this.parent = parent;
         for (Field f : ArcConfig.class.getFields()) {
             if (Modifier.isStatic(f.getModifiers())) continue;
+            if (f.getName().endsWith("Offered")) continue; // служебные флаги
             if (f.getType() == boolean.class || f.getType() == HudAnchor.class || (f.getType() == int.class && PRESETS.containsKey(f.getName()))) fields.add(f);
         }
     }

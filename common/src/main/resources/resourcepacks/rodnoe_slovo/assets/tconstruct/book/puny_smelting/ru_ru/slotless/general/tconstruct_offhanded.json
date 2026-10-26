@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:offhanded",
+  "text": [
+    {
+      "text": "Самый небрежный модификатор."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Disables interaction when offhand is occupied",
+    "Level 2 fully disables interactions",
+    "Slotless"
+  ]
+}

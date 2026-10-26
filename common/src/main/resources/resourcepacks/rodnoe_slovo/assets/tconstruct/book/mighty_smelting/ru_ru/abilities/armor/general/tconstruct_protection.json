@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:protection",
+  "text": [
+    {
+      "text": "Спустя столько лет я наконец собрал их все."
+    }
+  ],
+  "effects": [
+    "Increases protection against all damage",
+    "Single level",
+    "Requires 1 ability slot per level"
+  ]
+}

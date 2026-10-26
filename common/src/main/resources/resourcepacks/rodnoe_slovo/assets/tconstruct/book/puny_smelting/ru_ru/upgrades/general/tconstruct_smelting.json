@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:smelting",
+  "text": [
+    {
+      "text": "Как сильно надо шлёпнуть курицу, чтобы она приготовилась?"
+    }
+  ],
+  "effects": [
+    "Sneak while interacting to fill tool with items",
+    "Using the tool cooks the items",
+    "Multiple levels, each smelts more items at once",
+    "Requires 1 upgrade slot per level"
+  ]
+}

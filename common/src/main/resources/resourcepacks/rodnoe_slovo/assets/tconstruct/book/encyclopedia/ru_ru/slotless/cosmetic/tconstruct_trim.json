@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:trim",
+  "text": [
+    {
+      "text": "Объедините отделки брони с нужным материалом, чтобы добавить цветной вариант уникальной текстуры.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Swappable",
+    "Slotless"
+  ]
+}

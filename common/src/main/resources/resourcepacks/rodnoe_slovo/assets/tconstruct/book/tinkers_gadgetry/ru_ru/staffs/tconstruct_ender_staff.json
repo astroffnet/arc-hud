@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:ender_staff",
+  "text": [
+    {
+      "text": "Используя силу эндер-слизи, можно создать посох для захвата далёких целей. У него сильнее снаряд, но хуже точность."
+    }
+  ],
+  "properties": [
+    "High Durability",
+    "3 Upgrade Slots",
+    "1 Defense Slots",
+    "2 Ability Slots",
+    "Reach II"
+  ]
+}

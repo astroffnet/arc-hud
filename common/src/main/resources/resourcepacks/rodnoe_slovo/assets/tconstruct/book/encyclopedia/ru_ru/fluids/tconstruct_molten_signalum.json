@@ -1,0 +1,11 @@
+{
+  "text": "Расплавленный сигналум отлично подходит для обратного взрывного боя с минимальным вредом для окружающей среды.",
+  "entity": [
+    "Power 2 explosion",
+    "Up to 2 Explosion Damage",
+    "Inverted explosion knockback"
+  ],
+  "block": [
+    "Explosion ignores blocks"
+  ]
+}

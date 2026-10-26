@@ -73,6 +73,7 @@ public final class ShowcaseDriver {
         add(200, mc -> {
             mc.options.guiScale().set(3);
             ArcConfig.get().crosshairStyle = 2;
+            installCitTestPack(mc);
             mc.options.onboardAccessibility = false;
             mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
@@ -223,6 +224,18 @@ public final class ShowcaseDriver {
         add(30, mc -> {}, "17_options");
         add(10, mc -> {
             mc.setScreen(null);
+            long t = net.minecraft.Util.getMillis();
+            mc.getLanguageManager().setSelected("ru_ru");
+            mc.options.languageCode = "ru_ru";
+            com.arc4io.archud.client.resources.FastReload.applyLanguage(mc);
+            ArcHud.LOGGER.info("[Showcase] language ru_ru applied in {} ms, sample: {}", net.minecraft.Util.getMillis() - t,
+                    net.minecraft.network.chat.Component.translatable("item.twilightforest.naga_scale").getString() + " / "
+                            + net.minecraft.network.chat.Component.translatable("menu.options").getString());
+            mc.setScreen(new InventoryScreen(mc.player));
+        }, null);
+        add(30, mc -> {}, "17b_russian_fast");
+        add(10, mc -> {
+            mc.setScreen(null);
             if (mc.level != null) mc.level.disconnect();
             mc.clearLevel(new net.minecraft.client.gui.screens.GenericDirtMessageScreen(net.minecraft.network.chat.Component.literal("...")));
             mc.setScreen(new SelectWorldScreen(new TitleScreen()));
@@ -268,6 +281,9 @@ public final class ShowcaseDriver {
             sp.getInventory().setItem(4, new ItemStack(Items.TOTEM_OF_UNDYING));
             sp.getInventory().setItem(5, new ItemStack(Items.DIAMOND_PICKAXE));
             sp.getInventory().setItem(8, new ItemStack(Items.TORCH, 64));
+            ItemStack excalibur = new ItemStack(Items.DIAMOND_SWORD);
+            excalibur.setHoverName(net.minecraft.network.chat.Component.literal("Excalibur"));
+            sp.getInventory().setItem(6, excalibur);
             sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
             sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
             sp.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
@@ -316,6 +332,35 @@ public final class ShowcaseDriver {
             sp.teleportTo(lvl, tx + 0.5, ty + 1, tz + 0.5, 135F, 10F);
             spot = new double[]{tx + 0.5, ty + 1, tz + 0.5};
         });
+    }
+
+    /** Тестовый CIT-пакет: меч «Excalibur» получает золотую текстуру. */
+    private static void installCitTestPack(Minecraft mc) {
+        try {
+            java.nio.file.Path root = mc.getResourcePackDirectory().resolve("arc_cit_test");
+            java.nio.file.Path cit = root.resolve("assets/minecraft/optifine/cit/swords");
+            java.nio.file.Files.createDirectories(cit);
+            java.nio.file.Files.writeString(root.resolve("pack.mcmeta"), "{\"pack\":{\"pack_format\":15,\"description\":\"CIT test\"}}");
+            java.nio.file.Files.writeString(cit.resolve("excalibur.properties"), "type=item\nitems=diamond_sword\ntexture=excalibur\nnbt.display.Name=ipattern:*excalibur*\n");
+            try (com.mojang.blaze3d.platform.NativeImage img = new com.mojang.blaze3d.platform.NativeImage(16, 16, true)) {
+                for (int i = 0; i < 16; i++) {
+                    for (int d = -1; d <= 1; d++) {
+                        int x = i, y = 15 - i + d;
+                        if (y >= 0 && y < 16) img.setPixelRGBA(x, y, 0xFF20D4FF); // ABGR: золотой
+                    }
+                }
+                img.writeToFile(cit.resolve("excalibur.png"));
+            }
+            var repo = mc.getResourcePackRepository();
+            repo.reload();
+            java.util.List<String> ids = new java.util.ArrayList<>(repo.getSelectedIds());
+            if (!ids.contains("file/arc_cit_test")) ids.add("file/arc_cit_test");
+            repo.setSelected(ids);
+            mc.options.updateResourcePacks(repo);
+            ArcHud.LOGGER.info("[Showcase] CIT test pack installed, selected: {}", repo.getSelectedIds());
+        } catch (Exception e) {
+            ArcHud.LOGGER.error("[Showcase] CIT test pack failed", e);
+        }
     }
 
     private static void creative(Minecraft mc, Consumer<com.arc4io.archud.client.screen.ArcCreativeScreen> action) {

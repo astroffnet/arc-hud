@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:lightspeed",
+  "text": [
+    {
+      "text": "Свет течёт через ваши ботинки и помогает бегать быстрее быстрого."
+    }
+  ],
+  "tool_filter": "tconstruct:modifiable/armor/boots",
+  "effects": [
+    "Run faster in well lit areas",
+    "Multiple levels, increases speed further with each level",
+    "Requires 1 upgrade slot per level"
+  ]
+}

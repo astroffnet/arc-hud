@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:pathing",
+  "text": [
+    {
+      "text": "Надоело забывать дорогу домой? Почему бы не оставлять постоянный след? Вытаптывайте землю на ходу и никогда не забывайте, где вы были!"
+    }
+  ],
+  "tool_filter": "tconstruct:modifiable/armor/boots",
+  "effects": [
+    "Creates paths as you walk",
+    "Area boosted by expanded",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

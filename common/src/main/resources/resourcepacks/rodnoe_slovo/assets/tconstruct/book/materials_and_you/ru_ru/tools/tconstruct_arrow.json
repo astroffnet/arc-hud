@@ -1,0 +1,13 @@
+{
+  "tool": "tconstruct:arrow",
+  "text": [
+    {
+      "text": "Стрелы — основной снаряд для большинства луков. Можно использовать обычные стрелы, выпадающие из скелетов, но эти лучше."
+    }
+  ],
+  "properties": [
+    "Requires a bow or crossbow",
+    "Improvement over skeleton arrows",
+    "Has different effects based on materials"
+  ]
+}

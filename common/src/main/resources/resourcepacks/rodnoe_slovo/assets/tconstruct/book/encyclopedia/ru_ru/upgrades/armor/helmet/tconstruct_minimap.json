@@ -1,0 +1,16 @@
+{
+  "modifier_id": "tconstruct:minimap",
+  "text": [
+    {
+      "text": "Добавляет 3 слота за уровень для карт, которые можно просматривать на ходу. Ctrl + использование шлема меняет активную карту."
+    },
+    {
+      "text": "Инвентарь шлема открывается взаимодействием с ним в руке.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Requires 1 upgrade slot per level"
+  ]
+}

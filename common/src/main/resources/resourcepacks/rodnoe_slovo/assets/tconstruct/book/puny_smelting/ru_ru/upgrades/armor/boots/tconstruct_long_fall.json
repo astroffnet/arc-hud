@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:long_fall",
+  "text": [
+    {
+      "text": "Попробуйте приземлиться на голову. Ха! У вас не выйдет!"
+    }
+  ],
+  "effects": [
+    "Prevents all fall damage",
+    "Requires Feather Falling II",
+    "Single level",
+    "Requires 1 upgrade slot"
+  ]
+}

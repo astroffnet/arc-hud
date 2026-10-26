@@ -1,0 +1,13 @@
+{
+  "tool": "tconstruct:sky_staff",
+  "text": [
+    {
+      "text": "Посохи из небесной слизи оставляют много места для модификаций. Дают большую скорость натяжения ценой скорости снаряда."
+    }
+  ],
+  "properties": [
+    "Low Durability",
+    "5 Upgrade Slots",
+    "2 Ability Slots"
+  ]
+}

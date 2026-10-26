@@ -1,0 +1,16 @@
+{
+  "modifier_id": "tconstruct:crystalshot",
+  "text": [
+    {
+      "text": "Если в инвентаре нет боеприпасов, лук создаёт собственные кристальные стрелы."
+    },
+    {
+      "text": "Инструмент получает 4 доп. урона за каждую созданную стрелу."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 1 level",
+    "Requires 1 ability slot"
+  ]
+}

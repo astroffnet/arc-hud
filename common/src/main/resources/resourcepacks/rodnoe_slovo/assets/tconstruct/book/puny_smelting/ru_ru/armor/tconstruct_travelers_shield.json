@@ -1,0 +1,21 @@
+{
+  "tool": "tconstruct:travelers_shield",
+  "text": [
+    {
+      "text": "К сожалению, как фрисби не годится."
+    },
+    {
+      "text": "Щиты важны для защиты от атак в мире, так что берите один с собой в путешествие.",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Low Durability",
+    "Low Block Potential",
+    "High speed while shielding",
+    "2 Upgrade Slots",
+    "2 Defense Slots",
+    "1 Ability Slot",
+    "2 Material Traits"
+  ]
+}

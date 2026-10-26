@@ -63,6 +63,8 @@ public final class ForgeClient implements ClientPlatform {
         modBus.addListener(ForgeClient::onRegisterKeys);
         modBus.addListener(ForgeClient::onRegisterOverlays);
         modBus.addListener(ForgeClient::onClientSetup);
+        modBus.addListener(ForgeClient::onAddPacks);
+        modBus.addListener(ForgeClient::onRegisterModels);
 
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new ArcConfigScreen(parent)));
@@ -193,5 +195,40 @@ public final class ForgeClient implements ClientPlatform {
     private static void onRenderLevel(net.minecraftforge.client.event.RenderLevelStageEvent event) {
         if (event.getStage() != net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         com.arc4io.archud.client.map.WaypointWorldRenderer.capture(event.getPoseStack(), event.getProjectionMatrix(), event.getCamera());
+    }
+
+    /** Встроенные пакеты: «Родное слово» (русский перевод модов) и CIT (ресурспаки OptiFine). */
+    private static void onAddPacks(net.minecraftforge.event.AddPackFindersEvent event) {
+        if (event.getPackType() != net.minecraft.server.packs.PackType.CLIENT_RESOURCES) return;
+        com.arc4io.archud.config.ArcConfig cfg = com.arc4io.archud.config.ArcConfig.get();
+        event.addRepositorySource(consumer -> {
+            var cit = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(com.arc4io.archud.forge.cit.CitPack.ID,
+                    net.minecraft.network.chat.Component.translatable("archud.cit.pack"), true, id -> new com.arc4io.archud.forge.cit.CitPack(),
+                    net.minecraft.server.packs.PackType.CLIENT_RESOURCES, net.minecraft.server.packs.repository.Pack.Position.TOP,
+                    net.minecraft.server.packs.repository.PackSource.BUILT_IN);
+            if (cit != null) consumer.accept(cit);
+            if (cfg.builtinRussianPack) {
+                java.nio.file.Path path = net.minecraftforge.fml.ModList.get().getModFileById("archud").getFile().findResource("resourcepacks/rodnoe_slovo");
+                var ru = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(RU_PACK, net.minecraft.network.chat.Component.literal("Родное слово"), false,
+                        id -> new net.minecraft.server.packs.PathPackResources(id, path, true), net.minecraft.server.packs.PackType.CLIENT_RESOURCES,
+                        net.minecraft.server.packs.repository.Pack.Position.TOP, net.minecraft.server.packs.repository.PackSource.BUILT_IN);
+                if (ru != null) consumer.accept(ru);
+            }
+        });
+        // первый запуск: включить «Родное слово» (потом игрок может его выключить — больше не трогаем)
+        if (cfg.builtinRussianPack && !cfg.builtinRussianPackOffered) {
+            var options = net.minecraft.client.Minecraft.getInstance().options;
+            if (options != null) {
+                if (!options.resourcePacks.contains(RU_PACK)) options.resourcePacks.add(RU_PACK);
+                cfg.builtinRussianPackOffered = true;
+                com.arc4io.archud.config.ArcConfig.save();
+            }
+        }
+    }
+
+    private static final String RU_PACK = "archud_rodnoe_slovo";
+
+    private static void onRegisterModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+        for (var loc : com.arc4io.archud.forge.cit.CitManager.models()) event.register(loc);
     }
 }

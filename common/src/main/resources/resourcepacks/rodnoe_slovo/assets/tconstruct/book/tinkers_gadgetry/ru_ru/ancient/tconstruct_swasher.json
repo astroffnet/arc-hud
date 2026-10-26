@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:swasher",
+  "text": [
+    {
+      "text": "Свашер — это сочетание оружия ближнего боя и ручного жидкостного пистолета, встречающееся в разных пиратских местах."
+    }
+  ],
+  "properties": [
+    "Medium Damage",
+    "High Attack Speed",
+    "Fluid Pistol",
+    "3 Upgrade Slots",
+    "1 Ability Slot"
+  ]
+}

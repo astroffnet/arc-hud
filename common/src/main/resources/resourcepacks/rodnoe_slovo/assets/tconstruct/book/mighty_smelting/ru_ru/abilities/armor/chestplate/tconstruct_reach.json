@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:reach",
+  "text": [
+    {
+      "text": "Тянитесь к звёздам! Или к верхней полке... Или к полке средней высоты, если вы невысокого роста..."
+    }
+  ],
+  "effects": [
+    "Increases reach distance for blocks, mining, and attacking",
+    "Multiple levels, each level allows you to reach further",
+    "Requires 1 ability slot per level"
+  ]
+}

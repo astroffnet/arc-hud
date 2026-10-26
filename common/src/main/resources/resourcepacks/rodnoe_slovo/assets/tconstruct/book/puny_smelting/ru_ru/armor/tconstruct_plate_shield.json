@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:plate_shield",
+  "text": [
+    {
+      "text": "Блестящий прямоугольный щит для блестящих прямоугольных приключений."
+    },
+    {
+      "text": "Мощный щит, блокирующий сильнейшие атаки. Делается заливкой металла или керамики на сердечник щита.",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Higher Block Potential",
+    "Low speed while shielding",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Material Traits"
+  ]
+}

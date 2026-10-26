@@ -1,0 +1,16 @@
+{
+  "modifier_id": "tconstruct:throwing",
+  "text": [
+    {
+      "text": "Насколько эффективно бросать меч? Гораздо эффективнее, чем бросать лук!"
+    }
+  ],
+  "effects": [
+    "Allows throwing tools",
+    "Hit monsters for damage!",
+    "Hitting effective blocks may break them!",
+    "Must retrieve manually",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

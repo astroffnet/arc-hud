@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:wetting",
+  "text": [
+    {
+      "text": "Ничего страшного, если вы немного намокнете, получив урон. Постойте, вы не добавили этот модификатор на штаны?"
+    },
+    {
+      "text": "ПКМ по баку с инструментом наполняет его",
+      "paragraph": true
+    }
+  ],
+  "effects": [
+    "Chance per level to applies fluid effects when damaged",
+    "Various effects based on fluid, including healing or strength",
+    "Requires 1 ability slot per level"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "tool": "tconstruct:ichor_staff",
+  "text": [
+    {
+      "text": "Ихор встречается нечасто, но позволяет создавать одни из сильнейших посохов. Даёт большую скорость снаряда ценой скорости натяжения."
+    }
+  ],
+  "properties": [
+    "High Durability",
+    "2 Upgrade Slots",
+    "3 Ability Slots"
+  ]
+}

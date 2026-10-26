@@ -1,0 +1,18 @@
+{
+  "name": "Призматический раствор",
+  "icon": "terramity:prism_solution_bucket",
+  "category": "terramity:misc",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Призматический раствор — новая жидкость, добавленная Terramity.$(br2)Находясь в нём, вы получаете регенерацию, а брошенные в него предметы избавляются от проклятий.$(br2)Редкие пруды с ним можно найти глубоко под землёй."
+    },
+    {
+      "type": "patchouli:image",
+      "images": [
+        "terramity:textures/screens/prismatic_pond.png"
+      ],
+      "border": true
+    }
+  ]
+}

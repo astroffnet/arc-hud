@@ -1,0 +1,11 @@
+{
+  "name": "Отражение",
+  "icon": "minecraft:potion",
+  "category": "terramity:effects",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Отражение — новый эффект зелий/состояния, добавленный Terramity.$(br2)Из-за этого эффекта половина любого наносимого вами урона возвращается вам."
+    }
+  ]
+}

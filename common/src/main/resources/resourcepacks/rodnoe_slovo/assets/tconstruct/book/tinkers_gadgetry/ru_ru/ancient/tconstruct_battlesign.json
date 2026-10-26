@@ -1,0 +1,14 @@
+{
+  "tool": "tconstruct:battlesign",
+  "text": [
+    {
+      "text": "Боевая табличка — это сочетание оружия ближнего боя и щита. Обычно её можно найти в бастионах или получить от пиглинов."
+    }
+  ],
+  "properties": [
+    "Medium Damage",
+    "Medium Block Potential",
+    "3 Defense Slots",
+    "1 Ability Slot"
+  ]
+}

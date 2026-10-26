@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:longbow",
+  "text": [
+    {
+      "text": "Длинный лук полезен тем, кто готов стоять на своём и сражаться со всей мощью"
+    },
+    {
+      "text": "\n"
+    },
+    {
+      "text": "Длиннее лука, но короче очень длинного лука",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "A slower but more powerful bow",
+    "Designed for higher damage"
+  ]
+}

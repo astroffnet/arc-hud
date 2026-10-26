@@ -1,0 +1,16 @@
+{
+  "modifier_id": "tconstruct:fiery",
+  "text": [
+    {
+      "text": "Поджигает выпущенные стрелы, цели горят по 5 секунд за уровень."
+    }
+  ],
+  "more_text_space": true,
+  "tool_filter": "tconstruct:modifiable/ranged",
+  "effects": [
+    "Can apply levels incrementally",
+    "Maximum of 5 levels",
+    "Does not work well with freezing",
+    "Requires 1 upgrade slot per level"
+  ]
+}

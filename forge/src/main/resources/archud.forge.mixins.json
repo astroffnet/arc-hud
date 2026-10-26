@@ -9,6 +9,10 @@
     "CraftingMenuMixin"
   ],
   "client": [
+    "ItemModelCitMixin",
+    "OptionsPacksMixin",
+    "LanguageSelectMixin",
+    "ReloadableResourceManagerAccessor",
     "ChatAddMixin",
     "ItemTooltipMixin",
     "AttackHookMixin",

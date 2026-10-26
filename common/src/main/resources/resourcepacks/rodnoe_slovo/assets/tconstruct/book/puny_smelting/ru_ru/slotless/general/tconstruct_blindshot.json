@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:blindshot",
+  "text": [
+    {
+      "text": "Я брошу вам грязь в глаза."
+    }
+  ],
+  "effects": [
+    "Decreases accuracy of fired projectiles",
+    "Multiple levels, each level decreases accuracy further",
+    "Slotless"
+  ]
+}

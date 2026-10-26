@@ -1,0 +1,17 @@
+{
+  "tool": "tconstruct:battlesign",
+  "text": [
+    {
+      "text": "Боевой знак — нечто среднее между щитом и мечом; встречается в бастионах, при бартере и в руках пиглинов всех видов."
+    }
+  ],
+  "properties": [
+    "+2 Attack Damage",
+    "1.4 Attack Speed",
+    "Blocks 50 damage",
+    "120° block angle",
+    "20% block speed",
+    "3 Defense Slots",
+    "1 Ability Slot"
+  ]
+}

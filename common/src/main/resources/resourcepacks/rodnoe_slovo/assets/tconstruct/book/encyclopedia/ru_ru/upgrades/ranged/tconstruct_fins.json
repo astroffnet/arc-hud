@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:fins",
+  "text": [
+    {
+      "text": "Позволяет инструменту при броске или выстреле из баллисты двигаться под водой на полной скорости вместо 60%."
+    },
+    {
+      "text": "На луках не влияет на выпущенные стрелы. Луки выигрывают, только если сами являются снарядом."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 1 level",
+    "Requires 1 upgrade slot",
+    "Requires throwing or a ballista bow"
+  ]
+}

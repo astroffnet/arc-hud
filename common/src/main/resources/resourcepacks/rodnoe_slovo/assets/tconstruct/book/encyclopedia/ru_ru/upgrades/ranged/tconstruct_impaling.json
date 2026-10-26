@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:impaling",
+  "text": [
+    {
+      "text": "Стрелы продолжают лететь после первой цели и могут поразить несколько. Проходят сквозь одну сущность за уровень."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 4 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

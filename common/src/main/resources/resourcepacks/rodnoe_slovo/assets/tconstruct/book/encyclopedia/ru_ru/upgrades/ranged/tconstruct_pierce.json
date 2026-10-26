@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:pierce",
+  "text": [
+    {
+      "text": "Стрелы снимают 2 очка брони за уровень на 5 секунд после попадания."
+    }
+  ],
+  "more_text_space": true,
+  "tool_filter": "tconstruct:modifiable/ranged",
+  "effects": [
+    "Can apply levels incrementally",
+    "Maximum of 3 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

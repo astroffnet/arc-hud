@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:forecast",
+  "text": [
+    {
+      "text": "Мечта шахтёра: превратить рудные блоки в слоты улучшений."
+    }
+  ],
+  "effects": [
+    "Adds an upgrade slot",
+    "Single level",
+    "Slotless"
+  ]
+}

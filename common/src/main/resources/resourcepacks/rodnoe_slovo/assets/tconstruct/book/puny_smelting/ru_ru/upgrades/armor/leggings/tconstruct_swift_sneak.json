@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:swift_sneak",
+  "text": [
+    {
+      "text": "Надо красться быстро."
+    }
+  ],
+  "effects": [
+    "Increases movement speed while crouching",
+    "Multiple levels, each level increases speed further",
+    "Requires 1 upgrade slot per level"
+  ]
+}

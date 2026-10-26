@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:freezing",
+  "text": [
+    {
+      "text": "Замораживает любую сущность, пораженную стрелой, на 4 секунды (плюс 4 за уровень), нанося урон со временем и замедляя."
+    }
+  ],
+  "more_text_space": true,
+  "tool_filter": "tconstruct:modifiable/ranged",
+  "effects": [
+    "Maximum of 3 levels",
+    "Does not work well with fiery",
+    "Requires 1 upgrade slot per level"
+  ]
+}

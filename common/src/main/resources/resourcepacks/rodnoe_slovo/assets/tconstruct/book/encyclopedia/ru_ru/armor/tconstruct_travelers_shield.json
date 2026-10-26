@@ -1,0 +1,18 @@
+{
+  "tool": "tconstruct:travelers_shield",
+  "text": [
+    {
+      "text": "Щит путешественника — лёгкий щит с ограниченной блокировкой, но быстрым передвижением при блокировании."
+    }
+  ],
+  "properties": [
+    "200 Durability",
+    "Blocks 10 damage",
+    "90° block angle",
+    "80% block speed",
+    "2 Upgrade Slots",
+    "2 Defense Slots",
+    "1 Ability Slot",
+    "2 Material Traits"
+  ]
+}

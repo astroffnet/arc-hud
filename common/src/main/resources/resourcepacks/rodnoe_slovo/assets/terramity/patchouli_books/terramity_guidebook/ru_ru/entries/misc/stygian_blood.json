@@ -1,0 +1,18 @@
+{
+  "name": "Стигийская кровь",
+  "icon": "terramity:stygian_blood_bucket",
+  "category": "terramity:misc",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Стигийская кровь — новая жидкость, добавленная Terramity.$(br2)В ней вас сглазит и сильно ранит, а брошенные в неё незачарованные, но пригодные для зачарования предметы получают «Проклятие утраты».$(br2)Талисман стигийской безопасности может защитить вас в ней."
+    },
+    {
+      "type": "patchouli:image",
+      "images": [
+        "terramity:textures/screens/blood.png"
+      ],
+      "border": true
+    }
+  ]
+}

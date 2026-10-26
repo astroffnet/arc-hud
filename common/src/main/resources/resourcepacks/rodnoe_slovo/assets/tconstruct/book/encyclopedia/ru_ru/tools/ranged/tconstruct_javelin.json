@@ -1,0 +1,14 @@
+{
+  "tool": "tconstruct:javelin",
+  "text": [
+    {
+      "text": "Дротик — гибрид ближнего и дальнего оружия: им можно бить вблизи и метать на расстояние."
+    }
+  ],
+  "properties": [
+    "+3 Attack Damage",
+    "1.1 Attack Speed",
+    "Sums stats of all parts",
+    "Throwing"
+  ]
+}

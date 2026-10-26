@@ -1,0 +1,12 @@
+{
+  "modifier_id": "tconstruct:shield_strap",
+  "text": [
+    {
+      "text": "Добавляет +1 слот второй руки за уровень, позволяя менять предмет во второй руке взаимодействием с поножами."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Requires 1 upgrade slot per level"
+  ]
+}

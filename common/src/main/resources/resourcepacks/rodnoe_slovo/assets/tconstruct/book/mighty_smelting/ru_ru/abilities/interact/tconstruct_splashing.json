@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:splashing",
+  "text": [
+    {
+      "text": "Как вечеринка у бассейна, только без бассейна."
+    },
+    {
+      "text": "ПКМ по баку с инструментом наполняет его.",
+      "paragraph": true
+    }
+  ],
+  "effects": [
+    "Drains fluid on interaction",
+    "Various effects based on fluid, including fire and poison",
+    "Requires 1 ability slot per level"
+  ]
+}

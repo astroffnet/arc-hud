@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:multishot",
+  "text": [
+    {
+      "text": "Позволяет выпускать 2 дополнительные стрелы за уровень. Положение дополнительных стрел зависит от лука."
+    },
+    {
+      "text": "Для выстрела дополнительные стрелы должны быть в инвентаре; если их мало, лук выпустит меньше стрел.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "No max level",
+    "Requires 1 ability slot per level"
+  ]
+}
