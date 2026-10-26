@@ -130,10 +130,24 @@ public final class WaypointManager {
         return worldKey.isEmpty() ? "unknown" : worldKey;
     }
 
+    private static final java.util.Set<String> MIGRATED = new java.util.HashSet<>();
+
+    /**
+     * Ключ мира для карты и меток. В одиночной игре — имя ПАПКИ мира (уникально), а не отображаемое имя:
+     * раньше все не-латинские буквы заменялись на «_», и миры «Новый мир» / «Мой дом 1» или два
+     * «New World» делили одну карту. Старые данные один раз переносятся под новый ключ.
+     */
     private static String computeWorldKey(Minecraft mc) {
+        if (mc.getSingleplayerServer() != null) {
+            var server = mc.getSingleplayerServer();
+            String folder = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).toAbsolutePath().normalize().getFileName().toString();
+            String key = "sp_" + folder.replaceAll("[\\\\/:*?\"<>|\\x00-\\x1F]", "_");
+            String legacy = ("sp_" + server.getWorldData().getLevelName()).replaceAll("[^A-Za-z0-9_.\\-]", "_");
+            if (!legacy.equals(key) && MIGRATED.add(key)) migrate(legacy, key);
+            return key;
+        }
         String k;
-        if (mc.getSingleplayerServer() != null) k = "sp_" + mc.getSingleplayerServer().getWorldData().getLevelName();
-        else if (mc.getCurrentServer() != null) {
+        if (mc.getCurrentServer() != null) {
             String ip = mc.getCurrentServer().ip;
             // в локальной сети порт каждый раз новый — без него карта и метки не терялись бы между сессиями
             if (mc.getCurrentServer().isLan() || ip.matches("(?i)(localhost|127\\..*|10\\..*|192\\.168\\..*|172\\.(1[6-9]|2\\d|3[01])\\..*|25\\..*|26\\..*)(:\\d+)?")) {
@@ -144,6 +158,19 @@ public final class WaypointManager {
         }
         else k = "unknown";
         return k.replaceAll("[^A-Za-z0-9_.\\-]", "_");
+    }
+
+    /** Перенос карты и меток со старого ключа, если под новым ещё ничего нет. */
+    private static void migrate(String from, String to) {
+        try {
+            Path base = ArcHud.platform().configDir().resolve("archud");
+            Path mFrom = base.resolve("map").resolve(from), mTo = base.resolve("map").resolve(to);
+            if (Files.isDirectory(mFrom) && !Files.exists(mTo)) Files.move(mFrom, mTo);
+            Path wFrom = base.resolve("waypoints").resolve(from + ".json"), wTo = base.resolve("waypoints").resolve(to + ".json");
+            if (Files.exists(wFrom) && !Files.exists(wTo)) Files.move(wFrom, wTo);
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("Arc HUD: map migration " + from + " -> " + to + " failed", e);
+        }
     }
 
     private static Path file() {

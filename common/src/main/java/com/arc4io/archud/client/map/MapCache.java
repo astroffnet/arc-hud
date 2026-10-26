@@ -182,7 +182,10 @@ public final class MapCache {
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
                 int v = abgr[z * 16 + x];
-                if (r.image.getPixelRGBA(lx + x, lz + z) != v) {
+                int old = r.image.getPixelRGBA(lx + x, lz + z);
+                // «пусто» (воздух/не найдено) никогда не стирает уже изученное — иначе на карте появлялись дыры
+                if (v == 0 && old != 0) continue;
+                if (old != v) {
                     r.image.setPixelRGBA(lx + x, lz + z, v);
                     changed = true;
                 }

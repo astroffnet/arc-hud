@@ -101,19 +101,20 @@ public final class MapScanner {
 
         long now = Util.getMillis();
         int pcx = pos.getX() >> 4, pcz = pos.getZ() >> 4;
-        // при низком FPS сканируем реже (карта всё равно догонит), при высоком — как обычно
+        // Сканирование ограничено временем, а не числом чанков: все прогруженные, но ещё не отсканированные
+        // чанки (в пределах прорисовки) успевают попасть на карту до выгрузки — даже при полёте на элитрах.
+        // При низком FPS бюджет меньше, но не ноль: раньше тики пропускались, и чанки выгружались неотсканированными.
+        long budgetNs = 3_000_000L;
         if (ArcConfig.get().adaptiveMapScan) {
             int fps = mc.getFps();
-            int step = fps < 25 ? 4 : fps < 45 ? 2 : 1;
-            if (++slowTick % step != 0) return;
+            budgetNs = fps < 25 ? 1_000_000L : fps < 45 ? 2_000_000L : 3_000_000L;
         }
-        // поверхность сканируется всегда (кроме измерений с потолком) — путь сохраняется и под землёй
-        // вся прогруженная территория (в пределах прорисовки): сначала ещё не отсканированные чанки,
-        // потом периодическое обновление ближних — так при быстром полёте/телепорте ничего не теряется
-        int far = Math.max(4, Math.min(24, mc.options.getEffectiveRenderDistance()));
+        long deadline = System.nanoTime() + budgetNs;
+        int far = Math.max(4, Math.min(32, mc.options.getEffectiveRenderDistance()));
         if (surfaceLayer != null) {
-            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, far, cave ? 6 : 12, now, false, true);
-            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, RADIUS, cave ? 2 : 4, now, false, false);
+            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, far, Integer.MAX_VALUE, now, false, true, deadline);
+            // ближние — периодически обновляются (постройки, вырубка); пару чанков даже без бюджета
+            scanArea(mc, level, surfaceLayer, SCANNED, pcx, pcz, RADIUS, cave ? 2 : 4, now, false, false, Long.MAX_VALUE);
         }
         if (++cleanup % 200 == 0) {
             // забыть далёкие чанки — при возвращении они пересканируются и карта обновится
@@ -124,27 +125,42 @@ public final class MapScanner {
                 SCANNED_CAVE.clear(); // другая глубина — обновить пещеры вокруг
                 lastCaveScanY = caveY;
             }
-            scanArea(mc, level, caveLayer, SCANNED_CAVE, pcx, pcz, CAVE_RADIUS, 5, now, true, false);
+            scanArea(mc, level, caveLayer, SCANNED_CAVE, pcx, pcz, CAVE_RADIUS, 5, now, true, false, Long.MAX_VALUE);
         }
     }
 
     private static void scanArea(Minecraft mc, ClientLevel level, MapCache.Layer layer, Map<Long, Long> scanned, int pcx, int pcz, int radius,
-                                 int budget, long now, boolean caveScan, boolean onlyNew) {
+                                 int budget, long now, boolean caveScan, boolean onlyNew, long deadline) {
+        // по кольцам от игрока: обходится только периметр кольца
         for (int r = 0; r <= radius && budget > 0; r++) {
             long interval = r <= 1 ? 700L : r <= 3 ? 2500L : 15000L;
-            for (int dx = -r; dx <= r && budget > 0; dx++) {
-                for (int dz = -r; dz <= r && budget > 0; dz++) {
-                    if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
-                    int cx = pcx + dx, cz = pcz + dz;
-                    if (!level.hasChunk(cx, cz)) continue;
-                    long k = ((long) cx << 32) ^ (cz & 0xFFFFFFFFL);
-                    Long last = scanned.get(k);
-                    if (onlyNew ? last != null : last != null && now - last < interval) continue;
-                    scanned.put(k, now);
-                    scanningCave = caveScan;
-                    scanChunk(mc, level, layer, cx, cz);
-                    budget--;
+            int n = r == 0 ? 1 : 8 * r;
+            for (int i = 0; i < n && budget > 0; i++) {
+                int dx, dz;
+                if (r == 0) {
+                    dx = 0;
+                    dz = 0;
+                } else {
+                    int side = i / (2 * r), off = i % (2 * r);
+                    switch (side) {
+                        case 0 -> { dx = -r + off; dz = -r; }
+                        case 1 -> { dx = r; dz = -r + off; }
+                        case 2 -> { dx = r - off; dz = r; }
+                        default -> { dx = -r; dz = r - off; }
+                    }
                 }
+                int cx = pcx + dx, cz = pcz + dz;
+                long k = ((long) cx << 32) ^ (cz & 0xFFFFFFFFL);
+                Long last = scanned.get(k);
+                if (onlyNew ? last != null : last != null && now - last < interval) continue;
+                if (!level.hasChunk(cx, cz)) continue;
+                if (System.nanoTime() > deadline) return;
+                // чанк на краю прогрузки без соседа с севера даст ложные тени — подождём соседа
+                if (onlyNew && !caveScan && !level.hasChunk(cx, cz - 1) && r < radius) continue;
+                scanned.put(k, now);
+                scanningCave = caveScan;
+                scanChunk(mc, level, layer, cx, cz);
+                budget--;
             }
         }
     }

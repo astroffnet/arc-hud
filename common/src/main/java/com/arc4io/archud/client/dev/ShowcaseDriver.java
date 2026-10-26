@@ -127,6 +127,20 @@ public final class ShowcaseDriver {
         add(10, ShowcaseDriver::returnToSpot, null);
         add(30, mc -> lookAt(mc, 1), null);
         add(40, mc -> {}, "05_hud_and_minimap");
+        add(60, mc -> ArcHud.LOGGER.info("[Showcase] FPS square minimap: " + mc.getFps()), null);
+        add(5, mc -> {
+            var c = com.arc4io.archud.config.ArcConfig.get();
+            c.minimapCircle = true;
+            c.minimapChunkGrid = true;
+            c.minimapSlimeChunks = true;
+        }, null);
+        add(60, mc -> ArcHud.LOGGER.info("[Showcase] FPS round minimap + grid + slime: " + mc.getFps()), "05b_minimap_round");
+        add(5, mc -> {
+            var c = com.arc4io.archud.config.ArcConfig.get();
+            c.minimapCircle = false;
+            c.minimapChunkGrid = false;
+            c.minimapSlimeChunks = false;
+        }, null);
         add(10, mc -> lookAt(mc, 0), null);
         add(40, mc -> {}, "06_waypoints_in_world");
         add(5, mc -> mc.options.renderDebug = true, null);
