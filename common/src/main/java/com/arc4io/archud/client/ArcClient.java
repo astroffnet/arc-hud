@@ -42,6 +42,16 @@ public final class ArcClient {
             // первый запуск: пресет оптимизации «Баланс» (всё можно поменять во вкладке «Оптимизация»)
             ArcConfig.get().perfOffered = true;
             com.arc4io.archud.client.perf.Perf.preset(1);
+            ArcConfig.get().perfVersion = 2;
+        }
+        if (ArcConfig.get().perfVersion < 2 && mc.options != null) {
+            // обновление: новые переключатели (дальность, TPS) получают значения «Баланса»
+            for (String id : new String[]{"r_upload_budget", "t_activation", "t_dyn_sim", "t_spawn", "t_smooth_entities"}) {
+                var o = com.arc4io.archud.client.perf.Perf.opt(id);
+                if (o != null && o.get() == 0) o.set(o.balanced());
+            }
+            ArcConfig.get().perfVersion = 2;
+            ArcConfig.save();
         }
         if (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen) {
             com.arc4io.archud.client.mods.GameRestarter.resumeIfPending(mc.screen);
