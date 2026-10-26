@@ -133,5 +133,5 @@ def bundleJarJar = tasks.register('bundleJarJar') {
         out.renameTo(jarFile)
     }
 }
-tasks.named('reobfJar') { finalizedBy bundleJarJar }
+tasks.matching { it.name == 'reobfJar' }.configureEach { finalizedBy bundleJarJar }
 tasks.named('build') { dependsOn bundleJarJar }
