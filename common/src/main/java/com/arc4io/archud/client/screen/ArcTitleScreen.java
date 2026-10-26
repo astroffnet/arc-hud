@@ -172,7 +172,7 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         g.drawString(font, tipText, 26, tipY, Draw.alpha(0xB0BEC5, Math.max(8, (int) (220 * tipAlpha))), true);
 
         // подвал
-        String left = "Arc HUD " + "· Minecraft " + SharedConstants.getCurrentVersion().getName();
+        String left = "Arc HUD · Minecraft " + SharedConstants.getCurrentVersion().getName() + " · " + ArcHud.platform().loaderName();
         g.drawString(font, left, 26, height - 20, 0xFF8C9AAB, true);
         String right = ArcHud.platform().loaderName() + " · " + ArcHud.platform().modCount() + " mods";
         g.drawString(font, right, width - font.width(right) - 6, height - 20, 0xFF8C9AAB, true);

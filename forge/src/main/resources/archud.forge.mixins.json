@@ -9,6 +9,13 @@
     "CraftingMenuMixin"
   ],
   "client": [
+    "OptionInstanceAccessor",
+    "DebugOverlayMixin",
+    "ParticleAccessor",
+    "ParticleCullMixin",
+    "ShadowCullMixin",
+    "SignTextCullMixin",
+    "LazyAnimationMixin",
     "ItemModelCitMixin",
     "OptionsPacksMixin",
     "LanguageSelectMixin",

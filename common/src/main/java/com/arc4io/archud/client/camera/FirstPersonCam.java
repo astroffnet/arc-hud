@@ -24,14 +24,12 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Дополнительные виды от первого лица — входят в цикл F5 (обычный → улучшенный → бодикам → третье лицо):
- *  - «Улучшенный»: мягкое покачивание при ходьбе, лёгкий наклон при стрейфе,
- *    проседание камеры при приземлении. Прицел и управление как в ванилле.
  *  - «Бодикам»: камера закреплена на груди — ниже и чуть впереди глаз, широкий угол обзора, инерция поворота,
  *    сильная тряска и крен при ходьбе и поворотах, эффект объектива (бочкообразное искажение, хроматические
  *    аберрации, виньетка, шум). Прицел скрыт.
  */
 public final class FirstPersonCam {
-    public enum Style { VANILLA, ENHANCED, BODYCAM }
+    public enum Style { VANILLA, BODYCAM }
 
     private static final ResourceLocation SHADER = ArcHud.id("shaders/post/bodycam.json");
 
@@ -53,7 +51,7 @@ public final class FirstPersonCam {
 
     public static Style style() {
         int s = ArcConfig.get().firstPersonStyle;
-        return s == 1 ? Style.ENHANCED : s == 2 ? Style.BODYCAM : Style.VANILLA;
+        return s == 2 ? Style.BODYCAM : Style.VANILLA; // 1 — бывший «улучшенный», теперь обычный
     }
 
     /** Наш стиль действует прямо сейчас (вид от первого лица, камера Arc от третьего лица выключена). */
@@ -64,7 +62,7 @@ public final class FirstPersonCam {
     }
 
     public static boolean anyActive() {
-        return active(Style.ENHANCED) || active(Style.BODYCAM);
+        return active(Style.BODYCAM);
     }
 
     /** Смена стиля по F5 (0 — обычный, 1 — улучшенный, 2 — бодикам). */
@@ -75,7 +73,7 @@ public final class FirstPersonCam {
         ArcConfig.save();
         init = false;
         if (mc.player != null && style != 0) {
-            String key = style == 1 ? "archud.fp.enhanced" : "archud.fp.bodycam";
+            String key = "archud.fp.bodycam";
             mc.player.displayClientMessage(Component.translatable("archud.fp.mode", Component.translatable(key)).withStyle(ChatFormatting.AQUA), true);
         }
     }
@@ -137,12 +135,6 @@ public final class FirstPersonCam {
         float land = landOffset();
         Vec3 eye = camera.getPosition();
 
-        if (s == Style.ENHANCED) {
-            roll = -strafe * 1.4F;
-            if (land > 0) inv.archud$setPosition(eye.x, eye.y - land * 0.22F, eye.z);
-            return;
-        }
-
         // ---- бодикам
         float k = 1F - (float) Math.exp(-dt * 16F);
         camYaw += Mth.wrapDegrees(targetYaw - camYaw) * k;
@@ -181,17 +173,7 @@ public final class FirstPersonCam {
      * Улучшенный режим: та же форма, но мягче. Бодикам: тряску делает сама камера.
      */
     public static boolean bobView(PoseStack pose, float partialTick) {
-        if (active(Style.BODYCAM)) return true;
-        if (!active(Style.ENHANCED)) return false;
-        Player p = Minecraft.getInstance().player;
-        float f = p.walkDist - p.walkDistO;
-        float f1 = -(p.walkDist + f * partialTick);
-        float f2 = Mth.lerp(partialTick, p.oBob, p.bob);
-        float s = Mth.sin(f1 * (float) Math.PI), c = Mth.cos(f1 * (float) Math.PI);
-        pose.translate(s * f2 * 0.3F, -Math.abs(c * f2) * 0.65F, 0F);
-        pose.mulPose(Axis.ZP.rotationDegrees(s * f2 * 1.5F));
-        pose.mulPose(Axis.XP.rotationDegrees(Math.abs(Mth.cos(f1 * (float) Math.PI - 0.2F) * f2) * 2.5F));
-        return true;
+        return active(Style.BODYCAM);
     }
 
     /** Угол обзора: у бодикама шире (с учётом подзорной трубы и т.п.). */

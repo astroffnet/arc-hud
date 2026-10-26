@@ -83,17 +83,20 @@ public final class PlayerPreview {
         ResourceLocation tex = (ResourceLocation) s[0];
         PlayerModel<AbstractClientPlayer> m = model((Boolean) s[1]);
         float t = (Util.getMillis() % 1_000_000L) / 1000F;
-        float headY = feetY - size * 1.6F;
-        float yaw = Mth.clamp((mouseX - x) / 120F, -1F, 1F);
-        float pitch = Mth.clamp((mouseY - headY) / 120F, -1F, 1F);
+        // как в ванильном инвентаре: углы к курсору через арктангенс (плавно и без перекоса)
+        float eyeY = feetY - size * 1.62F;
+        float f = (float) Math.atan((x - mouseX) / 40F);
+        float gA = (float) Math.atan((eyeY - mouseY) / 40F);
+        float bodyTurn = f * 20F;          // градусы: тело
+        float headTurn = f * 20F;          // голова дополнительно к телу
+        float headPitch = -gA * 20F;
         m.young = false;
         m.crouching = false;
         m.riding = false;
         m.attackTime = 0;
         resetPart(m);
-        m.head.yRot = yaw * 0.9F;
-        m.head.xRot = pitch * 0.6F;
-        m.body.yRot = yaw * 0.25F;
+        m.head.yRot = headTurn * Mth.DEG_TO_RAD;
+        m.head.xRot = headPitch * Mth.DEG_TO_RAD;
         float breathe = Mth.sin(t * 1.4F);
         m.rightArm.zRot = 0.08F + breathe * 0.03F;
         m.leftArm.zRot = -0.08F - breathe * 0.03F;
@@ -108,10 +111,14 @@ public final class PlayerPreview {
 
         PoseStack pose = g.pose();
         pose.pushPose();
-        pose.translate(x, feetY + breathe * 0.6F, 150);
-        pose.scale(size, size, -size);
-        pose.mulPose(Axis.YP.rotationDegrees(-yaw * 25F));
-        pose.translate(0, -1.5F, 0);
+        // та же цепочка преобразований, что у InventoryScreen.renderEntityInInventory + LivingEntityRenderer
+        pose.translate(x, feetY + breathe * 0.4F, 150);
+        pose.mulPoseMatrix(new org.joml.Matrix4f().scaling(size, size, -size));
+        pose.mulPose(Axis.ZP.rotationDegrees(180F));
+        pose.mulPose(Axis.XP.rotationDegrees(gA * 20F));
+        pose.mulPose(Axis.YP.rotationDegrees(-bodyTurn));
+        pose.scale(-1F, -1F, 1F);
+        pose.translate(0F, -1.501F, 0F);
         Lighting.setupForEntityInInventory();
         VertexConsumer vc = g.bufferSource().getBuffer(m.renderType(tex));
         m.renderToBuffer(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);

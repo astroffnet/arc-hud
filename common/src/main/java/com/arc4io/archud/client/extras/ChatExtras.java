@@ -31,6 +31,7 @@ public final class ChatExtras {
     private ChatExtras() {}
 
     public static Component process(ChatComponent chat, Component msg) {
+        com.arc4io.archud.client.net.E4mcBridge.onChat(msg.getString());
         ArcConfig cfg = ArcConfig.get();
         if (!cfg.chatTimestamps && !cfg.chatCollapse && !cfg.chatMentions) return msg;
         String text = msg.getString();

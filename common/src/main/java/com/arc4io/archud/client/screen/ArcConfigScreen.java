@@ -38,7 +38,10 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
             "minimapSize", new int[]{80, 96, 110, 128, 150, 180},
             "bodycamFov", new int[]{80, 90, 100, 110, 120},
             "crosshairStyle", new int[]{0, 1, 2, 3},
-            "breakReminder", new int[]{0, 30, 60, 90, 120, 180});
+            "breakReminder", new int[]{0, 30, 60, 90, 120, 180},
+            "maxParticles", new int[]{0, 1000, 2000, 4000, 8000},
+            "shadowDistance", new int[]{0, 16, 24, 32, 48, 64},
+            "signTextDistance", new int[]{0, 12, 16, 24, 32, 48});
 
     public ArcConfigScreen(Screen parent) {
         super(Component.translatable("archud.config.title"));
@@ -134,9 +137,10 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
         try {
             int v = f.getInt(ArcConfig.get());
             if (f.getName().equals("firstPersonStyle")) {
-                return Component.translatable(v == 1 ? "archud.fp.enhanced" : v == 2 ? "archud.fp.bodycam" : "archud.fp.vanilla").getString();
+                return Component.translatable(v == 2 ? "archud.fp.bodycam" : "archud.fp.vanilla").getString();
             }
             if (f.getName().equals("bodycamFov")) return v + "°";
+            if (f.getName().equals("maxParticles")) return v == 0 ? "∞" : Integer.toString(v);
             if (f.getName().equals("crosshairStyle")) return Component.translatable("archud.crosshair." + v).getString();
             if (f.getName().equals("breakReminder")) return v == 0 ? Component.translatable("options.off").getString() : v + " min";
             if (v == 0) return Component.translatable("options.off").getString();
