@@ -473,6 +473,12 @@ public class HostPanelScreen extends ArcScreen {
         int x = px + 10, y = py + 50;
         if (flags[F_PUBLISHED]) {
             g.drawString(font, Component.translatable("archud.admin.address", address()), x, y, Draw.TEXT, true);
+            String internet = com.arc4io.archud.client.net.E4mcBridge.domain();
+            if (internet != null) {
+                g.drawString(font, Component.translatable("archud.e4mc.address", internet), x, y + 11, 0xFF9CFF5A, true);
+            } else if (com.arc4io.archud.client.net.E4mcBridge.present()) {
+                Draw.small(g, font, Component.translatable("archud.e4mc.waiting").getString(), x, y + 12, Draw.TEXT_DIM, 0.7F);
+            }
         } else {
             g.drawString(font, Component.translatable("archud.admin.closed"), x, y, 0xFFFFB74D, true);
         }

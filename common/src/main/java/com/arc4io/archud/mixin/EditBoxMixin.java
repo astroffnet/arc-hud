@@ -20,4 +20,17 @@ public abstract class EditBoxMixin {
         if (color == 0xFF000000) return; // внутренняя заливка — уже нарисована вместе с рамкой
         ArcWidgets.drawEditBox(g, (EditBox) (Object) this, x1, y1, x2, y2);
     }
+
+    /** Подсказка в пустом поле не выходит за его рамку (обрезается с «…» под ширину поля). */
+    @Redirect(method = "renderWidget", require = 0,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)I"))
+    private int archud$hint(GuiGraphics g, net.minecraft.client.gui.Font font, net.minecraft.network.chat.Component text, int x, int y, int color) {
+        EditBox self = (EditBox) (Object) this;
+        int max = self.getX() + self.getWidth() - 4 - x;
+        if (max > 8 && font.width(text) > max) {
+            String s = font.plainSubstrByWidth(text.getString(), max - font.width("…")) + "…";
+            return g.drawString(font, s, x, y, color);
+        }
+        return g.drawString(font, text, x, y, color);
+    }
 }

@@ -160,6 +160,19 @@ public class ArcConfig {
     public boolean customEnchanting = true;
     /** Быстрая смена языка и языковых пакетов (без полной перезагрузки ресурсов). */
     public boolean fastLanguageReload = true;
+    // ---------------- производительность (дополнительно)
+    public boolean particleCulling = true;
+    /** Максимум частиц за кадр (0 — без ограничения). */
+    public int maxParticles = 4000;
+    /** Тени сущностей дальше N блоков не рисуются (0 — как в ванилле). */
+    public int shadowDistance = 32;
+    /** Текст табличек дальше N блоков не рисуется (0 — как в ванилле). */
+    public int signTextDistance = 24;
+    public boolean lazyTextureAnimations = true;
+    /** Своё меню F3. */
+    public boolean customF3 = true;
+    /** Свой экран настроек графики (ванилла, Sodium / Embeddium, OptiFine). */
+    public boolean customVideoSettings = true;
     /** Встроенный ресурспак «Родное слово» (русский перевод модов). */
     public boolean builtinRussianPack = true;
     /** Встроенный пакет уже был включён автоматически (дальше решает игрок). */
@@ -252,8 +265,6 @@ public class ArcConfig {
     public float cameraDistance = 4.0F;
     /** Текущий вид от первого лица: 0 — обычный, 1 — улучшенный, 2 — бодикам (меняется по F5). */
     public int firstPersonStyle = 0;
-    /** Улучшенный вид от первого лица в цикле F5. */
-    public boolean fpEnhancedInF5Cycle = true;
     /** Бодикам в цикле F5. */
     public boolean fpBodycamInF5Cycle = true;
     public int bodycamFov = 100;

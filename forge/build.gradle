@@ -46,6 +46,15 @@ mixin {
 }
 
 repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter { includeGroup 'maven.modrinth' }
+    }
     maven {
         name = 'Sponge'
         url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -56,7 +65,13 @@ repositories {
     }
 }
 
+configurations {
+    bundled
+}
+
 dependencies {
+    // e4mc (MIT, skye) — «Открыть для сети» доступно из интернета; кладётся в jar как вложенный мод (Jar-in-Jar)
+    bundled("maven.modrinth:e4mc:6.2.3-forge") { transitive = false }
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
@@ -92,3 +107,31 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// Jar-in-Jar: вложить e4mc в итоговый jar (META-INF/jarjar + metadata.json) после reobf
+def bundleJarJar = tasks.register('bundleJarJar') {
+    dependsOn 'reobfJar'
+    doLast {
+        def jarFile = tasks.named('jar').get().archiveFile.get().asFile
+        def deps = configurations.bundled.resolve()
+        def tmpDir = new File(buildDir, 'jarjar-tmp')
+        tmpDir.deleteDir()
+        tmpDir.mkdirs()
+        def entries = []
+        deps.each { f ->
+            entries << """{"identifier":{"group":"maven.modrinth","artifact":"e4mc"},"version":{"range":"[6.2.3-forge,)","artifactVersion":"6.2.3-forge"},"path":"META-INF/jarjar/${f.name}","isObfuscated":false}"""
+        }
+        def meta = new File(tmpDir, 'metadata.json')
+        meta.text = '{"jars":[' + entries.join(',') + ']}'
+        def out = new File(jarFile.parentFile, jarFile.name + '.tmp')
+        ant.zip(destfile: out) {
+            zipfileset(src: jarFile)
+            deps.each { f -> zipfileset(file: f, prefix: 'META-INF/jarjar') }
+            zipfileset(file: meta, fullpath: 'META-INF/jarjar/metadata.json')
+        }
+        jarFile.delete()
+        out.renameTo(jarFile)
+    }
+}
+tasks.named('reobfJar') { finalizedBy bundleJarJar }
+tasks.named('build') { dependsOn bundleJarJar }

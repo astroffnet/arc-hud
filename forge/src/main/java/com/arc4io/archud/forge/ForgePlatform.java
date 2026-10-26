@@ -16,7 +16,8 @@ import java.util.Optional;
 public class ForgePlatform implements Platform {
     @Override
     public String loaderName() {
-        return "Forge";
+        // Sinytra Connector (Fabric-моды на Forge) — показываем как ForgeFabric
+        return net.minecraftforge.fml.ModList.get().isLoaded("connector") ? "ForgeFabric" : "Forge";
     }
 
     @Override

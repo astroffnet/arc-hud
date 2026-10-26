@@ -86,17 +86,18 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             for (String[] e : layers) if (e[0].equals(l[0]) && e[1].equals(l[1])) dup = true;
             if (!dup) layers.add(l);
         }
-        int y = height - 24;
-        addRenderableWidget(new ArcButton(6, y, 70, 18, Component.translatable("archud.map.center"), b -> {
+        // нижняя панель: кнопки раскладываются по ширине экрана и переносятся на строку выше (любой масштаб GUI)
+        List<ArcButton> bar = new ArrayList<>();
+        bar.add(new ArcButton(0, 0, 70, 18, Component.translatable("archud.map.center"), b -> {
             followPlayer = true;
             viewLayer = null;
             layerIndex = 0;
         }));
-        addRenderableWidget(new ArcButton(80, y, 104, 18, Component.translatable("archud.wp.add_here"), b -> {
+        bar.add(new ArcButton(0, 0, 104, 18, Component.translatable("archud.wp.add_here"), b -> {
             Waypoint w = WaypointManager.createHere();
             if (w != null) minecraft.setScreen(new WaypointEditScreen(this, w, true));
         }));
-        addRenderableWidget(new ArcButton(188, y, 120, 18, layerLabel(), b -> {
+        bar.add(new ArcButton(0, 0, 120, 18, layerLabel(), b -> {
             if (layers.isEmpty()) return;
             layerIndex = (layerIndex + 1) % layers.size();
             String[] l = layers.get(layerIndex);
@@ -104,18 +105,31 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             followPlayer = viewingCurrent() && followPlayer;
             b.setMessage(layerLabel());
         }));
-        addRenderableWidget(new ArcButton(312, y, 22, 18, Component.literal("☰"), b -> showList = !showList));
-        addRenderableWidget(new ArcButton(338, y, 22, 18, Component.literal("⋯"), b -> showTrail = !showTrail));
-        addRenderableWidget(new ArcButton(364, y, 22, 18, Component.literal("▦"), b -> showGrid = !showGrid));
-        addRenderableWidget(new ArcButton(390, y, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime));
-        addRenderableWidget(new ArcButton(416, y, 22, 18, Component.literal("◎"), b -> showZones = !showZones));
-        addRenderableWidget(new ArcButton(442, y, 70, 18, Component.translatable("archud.map.export"), b -> export()));
-        addRenderableWidget(new ArcButton(516, y, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
-        gotoBox = addRenderableWidget(new EditBox(font, 6, height - 46, 120, 16, Component.translatable("archud.map.goto")));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("☰"), b -> showList = !showList), "archud.map.tip_list"));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("⋯"), b -> showTrail = !showTrail), "archud.map.tip_trail"));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("▦"), b -> showGrid = !showGrid), "archud.map.tip_grid"));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime), "archud.map.tip_slime"));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◎"), b -> showZones = !showZones), "archud.map.tip_zones"));
+        bar.add(new ArcButton(0, 0, 70, 18, Component.translatable("archud.map.export"), b -> export()));
+        bar.add(new ArcButton(0, 0, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
+        int maxX = width - 6 - 70 - 6; // справа — «Готово»
+        int x = 6, rowY = height - 24;
+        for (ArcButton b : bar) {
+            if (x + b.getWidth() > maxX && x > 6) {
+                x = 6;
+                rowY -= 22;
+            }
+            b.setPosition(x, rowY);
+            addRenderableWidget(b);
+            x += b.getWidth() + 4;
+        }
+        int gy = rowY - 24;
+        gotoBox = addRenderableWidget(new EditBox(font, 6, gy + 1, 120, 16, Component.translatable("archud.map.goto")));
         gotoBox.setHint(Component.translatable("archud.map.goto_hint"));
         gotoBox.setMaxLength(64);
-        addRenderableWidget(new ArcButton(130, height - 47, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
-        addRenderableWidget(new ArcButton(188, height - 47, 80, 18, Component.translatable("archud.nav.go"), b -> gotoCoords(true)));
+        addRenderableWidget(new ArcButton(130, gy, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
+        addRenderableWidget(new ArcButton(188, gy, 80, 18, Component.translatable("archud.nav.go"), b -> gotoCoords(true)));
+        toolsTop = gy;
         int lw = listW();
         searchBox = addRenderableWidget(new EditBox(font, width - lw + 4, 34, lw - 8, 14, Component.translatable("archud.controls.search")));
         searchBox.setHint(Component.translatable("archud.controls.search"));
@@ -257,6 +271,13 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         }
     }
 
+    private int toolsTop;
+
+    private static ArcButton tip(ArcButton b, String key) {
+        b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(key)));
+        return b;
+    }
+
     private int listW() {
         return showList ? Math.min(180, width / 4) : 0;
     }
@@ -333,11 +354,11 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             else if (viewDim().equals("minecraft:the_nether")) info += "   O: " + bx * 8 + ", " + bz * 8;
             Draw.small(g, font, info, 10, 19, Draw.TEXT_DIM, 0.6F);
         }
-        Draw.small(g, font, Component.translatable("archud.map.hint").getString(), 6, height - 56, Draw.TEXT_DIM, 0.6F);
+        Draw.small(g, font, Component.translatable("archud.map.hint").getString(), 6, toolsTop - 9, Draw.TEXT_DIM, 0.6F);
         String sync = com.arc4io.archud.client.ArcClientNet.mapSyncActive()
                 ? Component.translatable("archud.map.sync_on", com.arc4io.archud.client.ArcClientNet.players().size()).getString()
                 : Component.translatable("archud.map.sync_off").getString();
-        Draw.small(g, font, sync, 6, height - 63, com.arc4io.archud.client.ArcClientNet.mapSyncActive() ? 0xFF9CFF5A : Draw.TEXT_DIM, 0.6F);
+        Draw.small(g, font, sync, 6, toolsTop - 16, com.arc4io.archud.client.ArcClientNet.mapSyncActive() ? 0xFF9CFF5A : Draw.TEXT_DIM, 0.6F);
 
         if (showList) renderList(g, mapW, mouseX, mouseY, accent);
         super.render(g, mouseX, mouseY, partialTick);

@@ -83,7 +83,11 @@ public final class ShowcaseDriver {
             mc.setScreen(new TitleScreen());
             title = mc.screen;
         }, null);
+        add(5, mc -> org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), 1300, 150), null);
         add(60, mc -> {}, "01_title_screen");
+        add(5, mc -> org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), 1890, 1000), null);
+        add(20, mc -> {}, "01b_title_mouse_right_low");
+        add(5, mc -> org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), 960, 540), null);
         add(40, mc -> mc.setScreen(new JoinMultiplayerScreen(new TitleScreen())), null);
         add(10, mc -> {
             ServerList list = new ServerList(mc);
@@ -125,6 +129,9 @@ public final class ShowcaseDriver {
         add(40, mc -> {}, "05_hud_and_minimap");
         add(10, mc -> lookAt(mc, 0), null);
         add(40, mc -> {}, "06_waypoints_in_world");
+        add(5, mc -> mc.options.renderDebug = true, null);
+        add(30, mc -> {}, "06b_f3");
+        add(5, mc -> mc.options.renderDebug = false, null);
         add(10, mc -> forceTab = true, null);
         add(20, mc -> {}, "07_player_list");
         add(10, mc -> {
@@ -140,13 +147,7 @@ public final class ShowcaseDriver {
             WeaponInspect.start(mc);
         }, null);
         add(26, mc -> {}, "09_item_inspect");
-        add(10, mc -> {
-            ArcConfig.get().firstPersonStyle = 0;
-            mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: улучшенный
-            ArcHud.LOGGER.info("[Showcase] F5 -> {} style {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle);
-            if (mc.player != null) mc.player.setXRot(62F);
-        }, null);
-        add(40, mc -> {}, "09b_first_person_enhanced");
+        add(5, mc -> ArcConfig.get().firstPersonStyle = 0, null);
         add(10, mc -> {
             mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: бодикам
             ArcHud.LOGGER.info("[Showcase] F5 -> {} style {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle);
@@ -222,6 +223,20 @@ public final class ShowcaseDriver {
         add(40, mc -> {}, "16_host_panel");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.OptionsScreen(null, mc.options)), null);
         add(30, mc -> {}, "17_options");
+        add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(mc.screen, mc.options)), null);
+        add(40, mc -> ArcHud.LOGGER.info("[Showcase] video screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getName()), "17c_video");
+        add(10, mc -> {
+            mc.setScreen(null);
+            mc.options.guiScale().set(4);
+            mc.resizeDisplay();
+            mc.setScreen(new WorldMapScreen(null));
+        }, null);
+        add(40, mc -> {}, "17d_map_scale4");
+        add(10, mc -> {
+            mc.setScreen(null);
+            mc.options.guiScale().set(3);
+            mc.resizeDisplay();
+        }, null);
         add(10, mc -> {
             mc.setScreen(null);
             long t = net.minecraft.Util.getMillis();

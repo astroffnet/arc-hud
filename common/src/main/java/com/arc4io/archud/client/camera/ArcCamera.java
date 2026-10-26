@@ -63,7 +63,7 @@ public final class ArcCamera {
     }
 
     /**
-     * Порядок F5: от первого лица (обычный → улучшенный → бодикам) → камера Arc → обычная от третьего лица → (вид спереди, если включён) → от первого лица.
+     * Порядок F5: от первого лица (обычный → бодикам) → камера Arc → обычная от третьего лица → (вид спереди, если включён) → от первого лица.
      */
     public static CameraType nextPerspective(CameraType current) {
         Minecraft mc = Minecraft.getInstance();
@@ -72,7 +72,7 @@ public final class ArcCamera {
         if (current == CameraType.FIRST_PERSON) {
             // сначала виды от первого лица: обычный → улучшенный → бодикам
             int s = cfg.firstPersonStyle;
-            int next = s == 0 && cfg.fpEnhancedInF5Cycle ? 1 : s < 2 && cfg.fpBodycamInF5Cycle ? 2 : -1;
+            int next = s != 2 && cfg.fpBodycamInF5Cycle ? 2 : -1;
             if (next > 0) {
                 FirstPersonCam.setStyle(mc, next);
                 return CameraType.FIRST_PERSON;

@@ -80,6 +80,8 @@ public final class ScreenSwapper {
                 && next.getClass().getSimpleName().endsWith("TitleScreen")) {
             return new ArcTitleScreen();
         }
+        Screen video = com.arc4io.archud.client.video.ArcVideoScreen.wrap(next, current);
+        if (video != null) return video;
         if (cfg.customControlsScreen && next instanceof KeyBindsScreen) {
             return new ArcControlsScreen(current, Minecraft.getInstance().options);
         }
