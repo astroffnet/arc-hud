@@ -117,6 +117,12 @@ public final class ForgeClient implements ClientPlatform {
 
     private static void onOverlayPre(RenderGuiOverlayEvent.Pre event) {
         ResourceLocation id = event.getOverlay().id();
+        // своё меню F3 (на Forge текст отладки рисует отдельный слой)
+        if (id.equals(VanillaGuiOverlay.DEBUG_TEXT.id()) && com.arc4io.archud.client.hud.ArcDebugScreen.enabled()) {
+            event.setCanceled(true);
+            com.arc4io.archud.client.hud.ArcDebugScreen.render(event.getGuiGraphics());
+            return;
+        }
         // место под Arc HUD резервируем ДО полос других модов (они регистрируются над хотбаром)
         if (id.equals(VanillaGuiOverlay.HOTBAR.id()) || id.equals(VanillaGuiOverlay.VIGNETTE.id())) reserveSpace();
         if (ArcConfig.get().hiddenOverlays.contains(id.toString())

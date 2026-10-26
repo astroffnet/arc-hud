@@ -62,10 +62,24 @@ public final class SodiumBridge {
     /** Экран Sodium для подмены (создаётся, чтобы аддоны добавили свои страницы). */
     public static Screen createScreen(Screen parent) {
         for (String n : SCREENS) {
+            Class<?> c;
             try {
-                Class<?> c = Class.forName(n);
-                return (Screen) c.getConstructor(Screen.class).newInstance(parent);
+                c = Class.forName(n);
+            } catch (Throwable t) {
+                continue;
+            }
+            // Sodium: закрытый конструктор + статический createScreen(Screen); Embeddium: открытый конструктор
+            try {
+                Object s = c.getMethod("createScreen", Screen.class).invoke(null, parent);
+                if (s instanceof Screen sc && field(sc, "pages") != null) return sc;
             } catch (Throwable ignored) {
+            }
+            try {
+                var ctor = c.getDeclaredConstructor(Screen.class);
+                ctor.setAccessible(true);
+                return (Screen) ctor.newInstance(parent);
+            } catch (Throwable t) {
+                ArcHud.LOGGER.debug("Arc HUD: cannot create {}: {}", n, t.toString());
             }
         }
         return null;

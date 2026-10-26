@@ -71,6 +71,7 @@ final class HudBlocks {
     static void renderAnchored(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int w, int h, int accent, long now,
                                boolean debug, boolean spectator) {
         ArcConfig cfg = ArcConfig.get();
+        if (debug && ArcDebugScreen.enabled()) return; // своё F3 занимает оба края экрана
         Map<HudAnchor, List<Block>> map = new EnumMap<>(HudAnchor.class);
         if (!debug) {
             if (cfg.minimap) add(map, cfg.minimapAnchor, "minimap", minimap(mc, p, font, accent));
