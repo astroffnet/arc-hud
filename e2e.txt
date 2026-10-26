@@ -1,0 +1,14 @@
+[26Oct2026 16:10:11.277] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] connecting to 127.0.0.1:25565
+[26Oct2026 16:10:16.417] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] welcomed=true modServer=false positions=true mapSync=true waypointsOnServer=true adminAllowed=true
+[26Oct2026 16:10:26.027] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] waypoint added
+[26Oct2026 16:10:32.494] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] adminAllowed=true adminState=true
+[26Oct2026 16:10:38.039] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] admin result='✔' time=6009
+[26Oct2026 16:10:50.457] [Render thread/INFO] [com.arc4io.archud.ArcHud/]: [E2E] done
+[16:09:11] [Server thread/INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+[16:09:19] [Server thread/INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+[16:09:19] [Server thread/INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+[16:10:37] [Server thread/INFO]: [ArcHUD] [admin] 16:10:37  Dev: w_noon
+[16:10:51] [Server thread/INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
+ArcHUD/config.yml
+ArcHUD/map/minecraft~overworld.bin
+ArcHUD/waypoints/dev@1.json.gz

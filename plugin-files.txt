@@ -1,0 +1,3 @@
+ArcHUD/config.yml
+ArcHUD/map/minecraft~overworld.bin
+ArcHUD/waypoints/dev@1.json.gz
