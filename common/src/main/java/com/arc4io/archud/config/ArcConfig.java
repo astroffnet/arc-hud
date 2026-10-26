@@ -179,6 +179,32 @@ public class ArcConfig {
     public boolean lazyTextureAnimations = true;
     /** Своё меню F3. */
     public boolean customF3 = true;
+    /** Оптимизация: значения 100 переключателей (id → значение, 0 — выключено). */
+    public java.util.Map<String, Integer> perf = new java.util.HashMap<>();
+    /** Ванильные значения, которые вернуть при выключении переключателя оптимизации. */
+    public java.util.Map<String, Integer> perfRestore = new java.util.HashMap<>();
+    /** Пресет «Баланс» уже применён при первом запуске. */
+    public boolean perfOffered = false;
+    // ---- встроенный шейдер и масштаб рендера (настройки графики → «Эффекты»)
+    public boolean shaderEnabled = false;
+    public boolean shaderHdr = true;
+    public int shaderHdrStrength = 55;
+    public boolean shaderBloom = true;
+    public int shaderVibrance = 20;
+    public int shaderContrast = 8;
+    public int shaderTemperature = 0;
+    public int shaderSharpen = 25;
+    public boolean shaderFxaa = true;
+    /** Масштаб рендера мира, % (100 — выключено). */
+    public int renderScale = 100;
+    /** 0 — билинейно, 1 — в стиле FSR (бикубически + RCAS). */
+    public int upscaler = 1;
+    public int upscaleSharpness = 50;
+    // ---- шевеление растений
+    public boolean wavingPlants = true;
+    public boolean wavingLeaves = true;
+    public int wavingStrength = 50;
+    public int wavingSpeed = 50;
     /** Следить за папкой mods и предлагать быстрый перезапуск с возвратом в мир. */
     public boolean modWatcher = true;
     /** Свой экран настроек графики (ванилла, Sodium / Embeddium, OptiFine). */
@@ -369,6 +395,8 @@ public class ArcConfig {
             if (instance.pickupsAnchor == null) instance.pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
             if (instance.statusAnchor == null) instance.statusAnchor = HudAnchor.BOTTOM_LEFT;
             if (instance.minimapAnchor == null) instance.minimapAnchor = HudAnchor.TOP_RIGHT;
+            if (instance.perf == null) instance.perf = new java.util.HashMap<>();
+            if (instance.perfRestore == null) instance.perfRestore = new java.util.HashMap<>();
             if (instance.addonPanelsAnchor == null) instance.addonPanelsAnchor = HudAnchor.RIGHT;
             instance.minimapSize = Math.max(64, Math.min(200, instance.minimapSize));
             instance.minimapZoom = Math.max(0.25, Math.min(6.0, instance.minimapZoom));

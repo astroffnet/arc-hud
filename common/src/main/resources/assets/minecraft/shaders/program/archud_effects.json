@@ -1,0 +1,19 @@
+{
+  "blend": { "func": "add", "srcrgb": "one", "dstrgb": "zero" },
+  "vertex": "sobel",
+  "fragment": "archud_effects",
+  "attributes": [ "Position" ],
+  "samplers": [ { "name": "DiffuseSampler" } ],
+  "uniforms": [
+    { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+    { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+    { "name": "OutSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
+    { "name": "Hdr", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Bloom", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Vibrance", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Contrast", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Temperature", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Sharpen", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "Fxaa", "type": "float", "count": 1, "values": [ 0.0 ] }
+  ]
+}

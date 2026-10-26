@@ -30,9 +30,18 @@ public abstract class GameRendererCamMixin {
         if (v != cir.getReturnValue()) cir.setReturnValue(v);
     }
 
+    @Inject(method = "render", require = 0, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+    private void archud$scaleBegin(float partialTick, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+        com.arc4io.archud.client.fx.Waving.update();
+        com.arc4io.archud.client.fx.RenderScale.begin();
+    }
+
     @Inject(method = "render", require = 0, at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
     private void archud$lens(float partialTick, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+        com.arc4io.archud.client.fx.RenderScale.end();
+        com.arc4io.archud.client.fx.ArcEffects.process(partialTick);
         FirstPersonCam.postProcess(partialTick);
     }
 
@@ -45,5 +54,8 @@ public abstract class GameRendererCamMixin {
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
     private void archud$reload(net.minecraft.server.packs.resources.ResourceManager manager, CallbackInfo ci) {
         FirstPersonCam.reset();
+        com.arc4io.archud.client.fx.ArcEffects.reset();
+        com.arc4io.archud.client.fx.ArcEffects.resetFailed();
+        com.arc4io.archud.client.fx.RenderScale.reset();
     }
 }

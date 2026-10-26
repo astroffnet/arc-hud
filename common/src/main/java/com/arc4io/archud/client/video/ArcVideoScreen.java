@@ -56,14 +56,21 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
     private int sideW, listX, listW, listTop, listBottom, descX, descW;
     private int guiScaleBefore, mipBefore;
 
+    /** Для автоматических скриншотов: открыть страницу с конца (2 — «Оптимизация», 1 — «Эффекты»). */
+    public static int showcaseFromEnd;
+
     public ArcVideoScreen(Screen parent, Source source, List<VideoPage> pages, List<SodiumEntry> sodiumEntries, Screen original) {
         super(Component.translatable("archud.video.title"));
         this.parent = parent;
         this.source = source;
-        this.pages = pages;
+        this.pages = ArcPages.append(pages); // + «Оптимизация» и «Эффекты» Arc HUD
         this.sodiumEntries = sodiumEntries;
         this.original = original;
-        this.page = Mth.clamp(lastPage, 0, Math.max(0, pages.size() - 1));
+        if (showcaseFromEnd > 0) {
+            lastPage = this.pages.size() - showcaseFromEnd;
+            showcaseFromEnd = 0;
+        }
+        this.page = Mth.clamp(lastPage, 0, Math.max(0, this.pages.size() - 1));
         Minecraft mc = Minecraft.getInstance();
         guiScaleBefore = mc.options.guiScale().get();
         mipBefore = mc.options.mipmapLevels().get();
@@ -366,7 +373,7 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
             }
             case BUTTON -> {
                 Draw.panel(g, cx, y + 2, cw, ROW - 5, ctrlHov ? Draw.alpha(c, 0x50) : 0x24FFFFFF, c);
-                g.drawCenteredString(font, Component.translatable("archud.video.open"), cx + cw / 2, y + 5, 0xFFFFFFFF);
+                g.drawCenteredString(font, e.buttonText(), cx + cw / 2, y + 5, 0xFFFFFFFF);
             }
             default -> {
                 String v = e.valueText().getString();
@@ -486,6 +493,7 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
         if (source == Source.SODIUM) SodiumBridge.apply(sodiumEntries);
         Minecraft mc = Minecraft.getInstance();
         mc.options.save();
+        com.arc4io.archud.config.ArcConfig.save();
         if (source != Source.SODIUM) {
             if (mc.options.guiScale().get() != guiScaleBefore) mc.resizeDisplay();
             if (mc.options.mipmapLevels().get() != mipBefore) {

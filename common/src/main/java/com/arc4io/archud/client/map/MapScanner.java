@@ -57,6 +57,7 @@ public final class MapScanner {
         boolean now = mc.level != null;
         if (inWorld && !now) {
             MapCache.unloadAll();
+            if (com.arc4io.archud.client.perf.Perf.on("s_gc")) System.gc(); // освободить память мира сразу, а не во время следующей игры
             Navigator.clear();
             TrailManager.clear();
             com.arc4io.archud.compat.TempadCompat.reset();
@@ -109,6 +110,7 @@ public final class MapScanner {
             int fps = mc.getFps();
             budgetNs = fps < 25 ? 1_000_000L : fps < 45 ? 2_000_000L : 3_000_000L;
         }
+        if (com.arc4io.archud.client.perf.Perf.on("a_map_scan")) budgetNs /= 2; // оптимизация: вдвое меньше времени на карту
         long deadline = System.nanoTime() + budgetNs;
         int far = Math.max(4, Math.min(32, mc.options.getEffectiveRenderDistance()));
         if (surfaceLayer != null) {

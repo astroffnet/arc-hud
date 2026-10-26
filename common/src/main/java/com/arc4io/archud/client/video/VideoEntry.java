@@ -56,4 +56,9 @@ public interface VideoEntry {
 
     // BUTTON (открыть другой экран, например шейдеры OptiFine)
     default void press() {}
+
+    /** Надпись на кнопке. */
+    default Component buttonText() {
+        return Component.translatable("archud.video.open");
+    }
 }

@@ -37,6 +37,11 @@ public final class ArcClient {
         if (!(mc.screen instanceof com.arc4io.archud.client.screen.ScreenFit.Fits)) com.arc4io.archud.client.screen.ScreenFit.restore();
         ArcClientNet.tick(mc);
         com.arc4io.archud.client.mods.ModWatcher.tick(mc);
+        if (!ArcConfig.get().perfOffered && mc.options != null) {
+            // первый запуск: пресет оптимизации «Баланс» (всё можно поменять во вкладке «Оптимизация»)
+            ArcConfig.get().perfOffered = true;
+            com.arc4io.archud.client.perf.Perf.preset(1);
+        }
         if (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen) {
             com.arc4io.archud.client.mods.GameRestarter.resumeIfPending(mc.screen);
         }

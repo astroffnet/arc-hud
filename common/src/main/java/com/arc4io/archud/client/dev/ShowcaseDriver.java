@@ -145,6 +145,18 @@ public final class ShowcaseDriver {
         }, null);
         add(10, mc -> lookAt(mc, 0), null);
         add(40, mc -> {}, "06_waypoints_in_world");
+        add(5, mc -> {
+            var c = ArcConfig.get();
+            c.shaderEnabled = true;
+            c.renderScale = 70;
+        }, null);
+        add(40, mc -> ArcHud.LOGGER.info("[Showcase] shader on, render scale {} -> {}", ArcConfig.get().renderScale,
+                com.arc4io.archud.client.fx.RenderScale.info()), "06c_shader_fsr70");
+        add(5, mc -> {
+            var c = ArcConfig.get();
+            c.shaderEnabled = false;
+            c.renderScale = 100;
+        }, null);
         add(5, mc -> mc.options.renderDebug = true, null);
         add(30, mc -> {}, "06b_f3");
         add(5, mc -> mc.options.renderDebug = false, null);
@@ -270,6 +282,13 @@ public final class ShowcaseDriver {
         add(30, mc -> {}, "17_options");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(mc.screen, mc.options)), null);
         add(40, mc -> ArcHud.LOGGER.info("[Showcase] video screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getName()), "17c_video");
+        for (int fromEnd : new int[]{2, 1}) {
+            add(10, mc -> {
+                com.arc4io.archud.client.video.ArcVideoScreen.showcaseFromEnd = fromEnd;
+                mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(null, mc.options));
+            }, null);
+            add(40, mc -> {}, fromEnd == 2 ? "17c2_optimization" : "17c3_effects");
+        }
         add(10, mc -> {
             mc.setScreen(null);
             mc.options.guiScale().set(4);

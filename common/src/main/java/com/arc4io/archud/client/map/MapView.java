@@ -192,26 +192,47 @@ public final class MapView {
      * для каждой полосы — ~40 раз за кадр вместе с рельефом, следом, слизневыми чанками и сеткой.)
      */
     public static void circleBands(GuiGraphics g, int ix, int iy, int is, Runnable draw) {
+        masked(g, ix, iy, is, true, draw, 0);
+    }
+
+    private static long lastDrawn;
+    private static int lastRect;
+
+    /**
+     * Содержимое карты через внеэкранный буфер: круглая или квадратная маска. throttleMs &gt; 0 — перерисовывать
+     * содержимое не чаще (оптимизация «мини-карта 30 к/с»), между перерисовками выводится готовая картинка.
+     */
+    public static void masked(GuiGraphics g, int ix, int iy, int is, boolean circle, Runnable draw, long throttleMs) {
         Minecraft mc = Minecraft.getInstance();
         com.mojang.blaze3d.pipeline.RenderTarget main = mc.getMainRenderTarget();
         g.flush();
+        boolean fresh = false;
         if (circleTarget == null) {
             circleTarget = new com.mojang.blaze3d.pipeline.TextureTarget(main.width, main.height, false, Minecraft.ON_OSX);
+            fresh = true;
         } else if (circleTarget.width != main.width || circleTarget.height != main.height) {
             circleTarget.resize(main.width, main.height, Minecraft.ON_OSX);
+            fresh = true;
         }
-        circleTarget.setClearColor(0F, 0F, 0F, 0F);
-        circleTarget.clear(Minecraft.ON_OSX); // очищается только область ножниц — ровно квадрат карты
-        circleTarget.bindWrite(true);
-        draw.run();
-        g.flush();
-        main.bindWrite(true);
-
         org.joml.Matrix4f m = g.pose().last().pose();
+        org.joml.Vector4f corner = m.transform(new org.joml.Vector4f(ix, iy, 0F, 1F));
+        int rect = java.util.Objects.hash(Math.round(corner.x()), Math.round(corner.y()), is);
+        long now = net.minecraft.Util.getMillis();
+        if (fresh || throttleMs <= 0 || rect != lastRect || now - lastDrawn >= throttleMs) {
+            lastDrawn = now;
+            lastRect = rect;
+            circleTarget.setClearColor(0F, 0F, 0F, 0F);
+            circleTarget.clear(Minecraft.ON_OSX); // очищается только область ножниц — ровно квадрат карты
+            circleTarget.bindWrite(true);
+            draw.run();
+            g.flush();
+            main.bindWrite(true);
+        }
+
         double gs = mc.getWindow().getGuiScale();
         float fw = circleTarget.width, fh = circleTarget.height;
         float r = is / 2F, ccx = ix + r, ccy = iy + r;
-        float step = 0.5F;
+        float step = circle ? 0.5F : is;
         com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
         com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, circleTarget.getColorTextureId());
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
@@ -223,9 +244,12 @@ public final class MapView {
         bb.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX);
         org.joml.Vector4f v = new org.joml.Vector4f();
         for (float y = iy; y < iy + is; y += step) {
-            float mid = y + step / 2F - ccy;
-            float hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
-            if (hw <= 0.05F) continue;
+            float hw;
+            if (circle) {
+                float mid = y + step / 2F - ccy;
+                hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
+                if (hw <= 0.05F) continue;
+            } else hw = r;
             float x0 = ccx - hw, x1 = ccx + hw, y1 = Math.min(y + step, iy + is);
             vert(bb, m, v, x0, y1, gs, fw, fh);
             vert(bb, m, v, x1, y1, gs, fw, fh);

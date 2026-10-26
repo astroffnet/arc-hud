@@ -330,7 +330,8 @@ final class HudBlocks {
                     MapView.drawNavigatorLine(g, mc, cx, cy, wx, wz, zoom, rot, half);
                 };
                 HudScale.scissor(g, ix, iy, ix + is, iy + is);
-                if (circle) MapView.circleBands(g, ix, iy, is, layer);
+                if (com.arc4io.archud.client.perf.Perf.on("a_minimap_30fps")) MapView.masked(g, ix, iy, is, circle, layer, 33);
+                else if (circle) MapView.circleBands(g, ix, iy, is, layer);
                 else layer.run();
                 if (cfg.minimapWaypoints) MapView.drawWaypoints(g, font, cx, cy, wx, wz, zoom, rot, circle ? half * 0.86F : half, true, false);
                 MapView.drawPlayerArrow(g, cx, cy, cfg.minimapRotate ? 0F : yaw + 180F, 0xFFFFFFFF);
