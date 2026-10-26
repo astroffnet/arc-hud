@@ -1,5 +1,6 @@
 package com.arc4io.archud.client.map;
 
+import com.arc4io.archud.client.ArcClientNet;
 import com.arc4io.archud.client.ArcKeys;
 import com.arc4io.archud.client.hud.Draw;
 import com.arc4io.archud.client.hud.HudRenderer;
@@ -12,8 +13,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.lwjgl.glfw.GLFW;
@@ -23,32 +27,43 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Полноэкранная карта мира.
- *  - ЛКМ перетаскивание, колесо — масштаб к курсору, WASD/стрелки — сдвиг, +/- — масштаб;
- *  - ПКМ — контекстное меню (метка здесь, навигация, телепорт, координаты в чат);
- *  - выбор измерения и слоя (карта сохраняется по измерениям — можно смотреть Незер из Верхнего мира);
- *  - переход к координатам, список меток с поиском, фильтрами по типу и сортировкой по расстоянию;
- *  - след игрока, слизневые чанки, сетка, экспорт видимой карты в PNG.
+ *  - сверху: слой/измерение, поиск по координатам или нику, «Готово»;
+ *  - слева: боковая панель с вкладками «Метки» (поиск, фильтры, список) и «Игроки» (все не скрытые игроки
+ *    с лицом, расстоянием и здоровьем; клик — показать на карте);
+ *  - справа: инструменты (масштаб, к себе, сетка, след, зоны прогрузки, слизневые чанки, экспорт PNG);
+ *  - снизу: строка состояния (координаты под курсором, масштаб, расстояние, синхронизация);
+ *  - на карте: ЛКМ — перетаскивание, колесо — масштаб к курсору, ПКМ — меню, WASD — сдвиг.
  */
 public class WorldMapScreen extends Screen implements com.arc4io.archud.client.screen.ScreenFit.Fits {
+    private static final int TOP = 26, BOTTOM = 14, RAIL = 28;
+
+    // настройки вида — живут всю сессию
+    private static boolean showSide = true, showTrail = true, showSlime, showGrid = true, showZones = true;
+    private static int tab; // 0 — метки, 1 — игроки
+
     private final Screen parent;
     private double centerX, centerZ;
     private float zoom = 2F;
-    private boolean dragging, followPlayer = true, showList = true, showTrail = true, showSlime, showGrid = true, showZones = true;
-    private double listScroll;
+    private boolean dragging, followPlayer = true;
+    private double listScroll, playerScroll;
     private MapCache.Layer viewLayer;
     private final List<String[]> layers = new ArrayList<>();
     private int layerIndex;
     private EditBox gotoBox, searchBox;
+    private int listTop;
     // контекстное меню
     private boolean menuOpen;
     private int menuX, menuY, menuWX, menuWZ;
     private Waypoint menuWaypoint;
-    private java.util.UUID menuPlayer;
+    private UUID menuPlayer;
     private String menuPlayerName;
     private double[] menuPlayerPos;
     private final List<String> menuItems = new ArrayList<>();
@@ -56,6 +71,45 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     public WorldMapScreen(Screen parent) {
         super(Component.translatable("archud.map.title"));
         this.parent = parent;
+    }
+
+    private UUID pendingFocus;
+
+    /** Открыть карту сразу на игроке (из списка игроков в меню паузы). */
+    public WorldMapScreen focusOn(UUID player) {
+        this.pendingFocus = player;
+        tab = 1;
+        showSide = true;
+        return this;
+    }
+
+    // ------------------------------------------------------------------ геометрия
+    private int sideW() {
+        return showSide ? Mth.clamp(width / 4, 150, 210) : 0;
+    }
+
+    private int mapX0() {
+        return sideW();
+    }
+
+    private int mapY0() {
+        return TOP;
+    }
+
+    private int mapY1() {
+        return height - BOTTOM;
+    }
+
+    private float mapCX() {
+        return (sideW() + width) / 2F;
+    }
+
+    private float mapCY() {
+        return (TOP + height - BOTTOM) / 2F;
+    }
+
+    private boolean inMap(double mx, double my) {
+        return mx >= mapX0() && mx < width - RAIL && my >= mapY0() && my < mapY1();
     }
 
     private String currentDim() {
@@ -70,6 +124,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         return viewLayer == null ? currentDim() : viewLayer.dimension();
     }
 
+    // ------------------------------------------------------------------ виджеты
     @Override
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 600, 300);
@@ -77,7 +132,6 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             centerX = minecraft.player.getX();
             centerZ = minecraft.player.getZ();
         }
-        // слои: текущий + сохранённые
         layers.clear();
         MapCache.Layer act = MapCache.active();
         if (act != null) layers.add(new String[]{act.dimension(), act.level()});
@@ -86,61 +140,97 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             for (String[] e : layers) if (e[0].equals(l[0]) && e[1].equals(l[1])) dup = true;
             if (!dup) layers.add(l);
         }
-        // нижняя панель: кнопки раскладываются по ширине экрана и переносятся на строку выше (любой масштаб GUI)
-        List<ArcButton> bar = new ArrayList<>();
-        bar.add(new ArcButton(0, 0, 70, 18, Component.translatable("archud.map.center"), b -> {
-            followPlayer = true;
-            viewLayer = null;
-            layerIndex = 0;
-        }));
-        bar.add(new ArcButton(0, 0, 104, 18, Component.translatable("archud.wp.add_here"), b -> {
-            Waypoint w = WaypointManager.createHere();
-            if (w != null) minecraft.setScreen(new WaypointEditScreen(this, w, true));
-        }));
-        bar.add(new ArcButton(0, 0, 120, 18, layerLabel(), b -> {
+        if (pendingFocus != null) {
+            for (PRow r : players()) {
+                if (r.id().equals(pendingFocus)) {
+                    focusPlayer(r, false);
+                    highlightUntil = Util.getMillis() + 6000;
+                }
+            }
+            pendingFocus = null;
+        }
+        String go = gotoBox != null ? gotoBox.getValue() : "";
+        String search = searchBox != null ? searchBox.getValue() : "";
+
+        // ---- верхняя панель
+        addRenderableWidget(tip(new ArcButton(4, 4, 18, 18, Component.literal("☰"), b -> {
+            showSide = !showSide;
+            rebuildWidgets();
+        }).toggle(() -> showSide), "archud.map.tip_list"));
+        int titleW = font.width(title) + 8;
+        int lx = 26 + titleW;
+        addRenderableWidget(tip(new ArcButton(lx, 4, 128, 18, layerLabel(), b -> {
             if (layers.isEmpty()) return;
             layerIndex = (layerIndex + 1) % layers.size();
             String[] l = layers.get(layerIndex);
             viewLayer = MapCache.layer(WaypointManager.worldKey(), l[0], l[1]);
             followPlayer = viewingCurrent() && followPlayer;
             b.setMessage(layerLabel());
-        }));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("☰"), b -> {
-            showList = !showList;
-            String go = gotoBox != null ? gotoBox.getValue() : "";
-            rebuildWidgets(); // панель кнопок перестраивается под новую ширину карты
-            if (gotoBox != null) gotoBox.setValue(go);
-        }), "archud.map.tip_list"));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("⋯"), b -> showTrail = !showTrail), "archud.map.tip_trail"));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("▦"), b -> showGrid = !showGrid), "archud.map.tip_grid"));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime), "archud.map.tip_slime"));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◎"), b -> showZones = !showZones), "archud.map.tip_zones"));
-        bar.add(new ArcButton(0, 0, 70, 18, Component.translatable("archud.map.export"), b -> export()));
-        bar.add(new ArcButton(0, 0, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
-        // справа — «Готово», а при открытом списке меток — его панель: кнопки не заходят ни туда, ни туда
-        int maxX = Math.min(width - 6 - 70 - 6, width - listW() - 6);
-        int x = 6, rowY = height - 24;
-        for (ArcButton b : bar) {
-            if (x + b.getWidth() > maxX && x > 6) {
-                x = 6;
-                rowY -= 22;
-            }
-            b.setPosition(x, rowY);
-            addRenderableWidget(b);
-            x += b.getWidth() + 4;
-        }
-        int gy = rowY - 24;
-        gotoBox = addRenderableWidget(new EditBox(font, 6, gy + 1, 120, 16, Component.translatable("archud.map.goto")));
+        }), "archud.map.tip_layer"));
+        int doneX = width - 64;
+        addRenderableWidget(new ArcButton(doneX, 4, 60, 18, Component.translatable("gui.done"), b -> onClose()));
+        int navW = 74, goW = 52;
+        int boxR = doneX - 8 - navW - 4 - goW - 4;
+        int boxW = Mth.clamp(boxR - (lx + 128 + 10), 80, 200);
+        int boxX = boxR - boxW;
+        gotoBox = addRenderableWidget(new EditBox(font, boxX, 5, boxW, 16, Component.translatable("archud.map.goto")));
         gotoBox.setHint(Component.translatable("archud.map.goto_hint"));
         gotoBox.setMaxLength(64);
-        addRenderableWidget(new ArcButton(130, gy, 54, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
-        addRenderableWidget(new ArcButton(188, gy, 80, 18, Component.translatable("archud.nav.go"), b -> gotoCoords(true)));
-        toolsTop = gy;
-        int lw = listW();
-        searchBox = addRenderableWidget(new EditBox(font, width - lw + 4, 34, lw - 8, 14, Component.translatable("archud.controls.search")));
-        searchBox.setHint(Component.translatable("archud.controls.search"));
-        searchBox.visible = showList;
-        addRenderableWidget(new ArcButton(width - 76, height - 24, 70, 18, Component.translatable("gui.done"), b -> onClose()));
+        gotoBox.setValue(go);
+        addRenderableWidget(new ArcButton(boxR + 4, 4, goW, 18, Component.translatable("archud.map.goto"), b -> gotoCoords(false)));
+        addRenderableWidget(new ArcButton(boxR + 8 + goW, 4, navW, 18, Component.translatable("archud.nav.go"), b -> gotoCoords(true)));
+
+        // ---- инструменты справа
+        int rx = width - RAIL + 3, ry = TOP + 6;
+        addRenderableWidget(tip(new ArcButton(rx, ry, 22, 20, Component.literal("+"), b -> zoomAt(mapCX(), mapCY(), 1.25F)), "archud.map.tip_zoom_in"));
+        addRenderableWidget(tip(new ArcButton(rx, ry += 22, 22, 20, Component.literal("−"), b -> zoomAt(mapCX(), mapCY(), 0.8F)), "archud.map.tip_zoom_out"));
+        addRenderableWidget(tip(new ArcButton(rx, ry += 22, 22, 20, Component.literal("⌖"), b -> {
+            followPlayer = true;
+            viewLayer = null;
+            layerIndex = 0;
+            rebuildWidgets();
+        }).toggle(() -> followPlayer && viewingCurrent()), "archud.map.center"));
+        ry += 30;
+        addRenderableWidget(tip(new ArcButton(rx, ry, 22, 20, Component.literal("▦"), b -> showGrid = !showGrid).toggle(() -> showGrid), "archud.map.tip_grid"));
+        addRenderableWidget(tip(new ArcButton(rx, ry += 22, 22, 20, Component.literal("⋯"), b -> showTrail = !showTrail).toggle(() -> showTrail), "archud.map.tip_trail"));
+        addRenderableWidget(tip(new ArcButton(rx, ry += 22, 22, 20, Component.literal("◎"), b -> showZones = !showZones).toggle(() -> showZones), "archud.map.tip_zones"));
+        if (minecraft.getSingleplayerServer() != null) {
+            addRenderableWidget(tip(new ArcButton(rx, ry += 22, 22, 20, Component.literal("◘"), b -> showSlime = !showSlime).toggle(() -> showSlime), "archud.map.tip_slime"));
+        }
+        ry += 30;
+        addRenderableWidget(tip(new ArcButton(rx, ry, 22, 20, Component.literal("⤓"), b -> export()), "archud.map.export"));
+
+        // ---- боковая панель
+        searchBox = null;
+        if (showSide) {
+            int sw = sideW();
+            int half = (sw - 12) / 2;
+            addRenderableWidget(new ArcButton(4, TOP + 4, half, 18, Component.translatable("archud.map.tab.waypoints"), b -> {
+                tab = 0;
+                rebuildWidgets();
+            }).toggle(() -> tab == 0));
+            addRenderableWidget(new ArcButton(8 + half, TOP + 4, sw - 12 - half, 18, Component.translatable("archud.map.tab.players"), b -> {
+                tab = 1;
+                rebuildWidgets();
+            }).toggle(() -> tab == 1));
+            if (tab == 0) {
+                searchBox = addRenderableWidget(new EditBox(font, 5, TOP + 27, sw - 10, 14, Component.translatable("archud.controls.search")));
+                searchBox.setHint(Component.translatable("archud.controls.search"));
+                searchBox.setValue(search);
+                int by = height - BOTTOM - 22;
+                addRenderableWidget(new ArcButton(4, by, sw - 34, 18, Component.translatable("archud.wp.add_here"), b -> {
+                    Waypoint w = WaypointManager.createHere();
+                    if (w != null) minecraft.setScreen(new WaypointEditScreen(this, w, true));
+                }));
+                addRenderableWidget(tip(new ArcButton(sw - 26, by, 22, 18, Component.literal("≡"), b -> minecraft.setScreen(new WaypointListScreen(this))),
+                        "archud.wpl.short"));
+            }
+        }
+    }
+
+    private static ArcButton tip(ArcButton b, String key) {
+        b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(key)));
+        return b;
     }
 
     private Component layerLabel() {
@@ -160,6 +250,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         return Component.literal(dim + " · " + lv);
     }
 
+    // ------------------------------------------------------------------ переход / поиск игроков
     private void gotoCoords(boolean navigate) {
         String[] parts = gotoBox.getValue().trim().split("[\\s,;]+");
         try {
@@ -177,67 +268,84 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             centerZ = z;
             if (navigate) Navigator.navigateTo(x, y, z, viewDim());
         } catch (Exception notCoords) {
-            // не координаты — ищем игрока по нику
-            List<FoundPlayer> found = findPlayers(gotoBox.getValue());
+            List<PRow> found = findPlayers(gotoBox.getValue());
             if (!found.isEmpty()) focusPlayer(found.get(0), navigate);
         }
     }
 
-    /** Игрок для поиска на карте: виден рядом или известен серверу Arc HUD (скрытые не попадают). */
-    private record FoundPlayer(java.util.UUID id, String name, String dim, double x, double y, double z) {}
+    /** Игрок для панели и поиска. known — позиция известна (виден рядом или его сообщил сервер Arc HUD). */
+    private record PRow(UUID id, String name, String dim, double x, double y, double z, float hp, boolean known, boolean self) {}
 
-    private FoundPlayer highlighted;
+    private PRow highlighted;
     private long highlightUntil;
 
-    private List<FoundPlayer> findPlayers(String query) {
-        String q = query.trim().toLowerCase(java.util.Locale.ROOT);
-        List<FoundPlayer> out = new ArrayList<>();
-        if (q.isEmpty() || q.matches("[-\\d\\s,;]+")) return out;
-        java.util.Set<java.util.UUID> seen = new java.util.HashSet<>();
-        if (minecraft.level != null) {
-            String dim = minecraft.level.dimension().location().toString();
+    /** Все не скрытые игроки: вы, видимые рядом, известные серверу Arc HUD, затем остальные онлайн (без позиции). */
+    private List<PRow> players() {
+        List<PRow> out = new ArrayList<>();
+        Set<UUID> seen = new HashSet<>();
+        if (minecraft.player != null && minecraft.level != null) {
+            var me = minecraft.player;
+            out.add(new PRow(me.getUUID(), me.getGameProfile().getName(), currentDim(), me.getX(), me.getY(), me.getZ(), me.getHealth(), true, true));
+            seen.add(me.getUUID());
             for (net.minecraft.world.entity.player.Player p : minecraft.level.players()) {
-                if (p == minecraft.player || com.arc4io.archud.client.ArcClientNet.isHidden(p.getUUID())) continue;
-                if (!p.getGameProfile().getName().toLowerCase(java.util.Locale.ROOT).contains(q)) continue;
-                seen.add(p.getUUID());
-                out.add(new FoundPlayer(p.getUUID(), p.getGameProfile().getName(), dim, p.getX(), p.getY(), p.getZ()));
+                if (!seen.add(p.getUUID()) || ArcClientNet.isHidden(p.getUUID())) continue;
+                out.add(new PRow(p.getUUID(), p.getGameProfile().getName(), currentDim(), p.getX(), p.getY(), p.getZ(), p.getHealth(), true, false));
             }
         }
-        for (var rp : com.arc4io.archud.client.ArcClientNet.players()) {
-            if (seen.contains(rp.id()) || !rp.name().toLowerCase(java.util.Locale.ROOT).contains(q)) continue;
-            out.add(new FoundPlayer(rp.id(), rp.name(), rp.dimension(), rp.x(), rp.y(), rp.z()));
+        for (var rp : ArcClientNet.players()) {
+            if (!seen.add(rp.id())) continue;
+            out.add(new PRow(rp.id(), rp.name(), rp.dimension(), rp.x(), rp.y(), rp.z(), rp.health(), true, false));
         }
-        // сначала совпадения с начала ника
-        out.sort(java.util.Comparator.comparingInt((FoundPlayer f) -> f.name().toLowerCase(java.util.Locale.ROOT).startsWith(q) ? 0 : 1)
-                .thenComparing(FoundPlayer::name, String.CASE_INSENSITIVE_ORDER));
+        if (minecraft.getConnection() != null) {
+            for (PlayerInfo info : minecraft.getConnection().getOnlinePlayers()) {
+                UUID id = info.getProfile().getId();
+                if (id == null || !seen.add(id) || ArcClientNet.isHidden(id)) continue;
+                out.add(new PRow(id, info.getProfile().getName(), "", 0, 0, 0, -1, false, false));
+            }
+        }
+        String dim = currentDim();
+        double px = minecraft.player == null ? 0 : minecraft.player.getX(), pz = minecraft.player == null ? 0 : minecraft.player.getZ();
+        out.sort(Comparator.comparingInt((PRow r) -> r.self() ? 0 : r.known() ? (r.dim().equals(dim) ? 1 : 2) : 3)
+                .thenComparingDouble(r -> r.known() && r.dim().equals(dim) ? Math.hypot(r.x() - px, r.z() - pz) : 0)
+                .thenComparing(PRow::name, String.CASE_INSENSITIVE_ORDER));
         return out;
     }
 
-    private void focusPlayer(FoundPlayer f, boolean navigate) {
-        String cur = minecraft.level == null ? "" : minecraft.level.dimension().location().toString();
-        if (!f.dim().equals(cur)) {
-            viewLayer = MapCache.layer(WaypointManager.worldKey(), f.dim(), "surface");
-        } else {
-            viewLayer = null;
+    private List<PRow> findPlayers(String query) {
+        String q = query.trim().toLowerCase(Locale.ROOT);
+        List<PRow> out = new ArrayList<>();
+        if (q.isEmpty() || q.matches("[-\\d\\s,;]+")) return out;
+        for (PRow r : players()) {
+            if (r.self() || !r.known() || !r.name().toLowerCase(Locale.ROOT).contains(q)) continue;
+            out.add(r);
         }
-        followPlayer = false;
+        out.sort(Comparator.comparingInt((PRow f) -> f.name().toLowerCase(Locale.ROOT).startsWith(q) ? 0 : 1)
+                .thenComparing(PRow::name, String.CASE_INSENSITIVE_ORDER));
+        return out;
+    }
+
+    private void focusPlayer(PRow f, boolean navigate) {
+        if (!f.known()) return;
+        if (!f.dim().equals(currentDim())) viewLayer = MapCache.layer(WaypointManager.worldKey(), f.dim(), "surface");
+        else viewLayer = null;
+        followPlayer = f.self();
         centerX = f.x();
         centerZ = f.z();
         if (zoom < 1F) zoom = 1F;
-        highlighted = f;
-        highlightUntil = net.minecraft.Util.getMillis() + 4000;
-        gotoBox.setValue("");
-        if (navigate) Navigator.navigateTo((int) Math.floor(f.x()), (int) Math.floor(f.y()), (int) Math.floor(f.z()), f.dim());
+        highlighted = f.self() ? null : f;
+        highlightUntil = Util.getMillis() + 4000;
+        if (gotoBox != null && !f.self()) gotoBox.setValue("");
+        if (navigate && !f.self()) Navigator.navigateTo((int) Math.floor(f.x()), (int) Math.floor(f.y()), (int) Math.floor(f.z()), f.dim());
     }
 
     /** Подсказки игроков под полем поиска; возвращает true, если клик попал в подсказку. */
     private boolean clickSuggestion(double mx, double my) {
-        if (!gotoBox.isFocused()) return false;
-        List<FoundPlayer> found = findPlayers(gotoBox.getValue());
-        int x = gotoBox.getX(), y = gotoBox.getY() - 14;
-        for (int i = 0; i < Math.min(5, found.size()); i++) {
-            int ry = y - i * 13;
-            if (mx >= x && mx < x + 140 && my >= ry && my < ry + 12) {
+        if (gotoBox == null || !gotoBox.isFocused()) return false;
+        List<PRow> found = findPlayers(gotoBox.getValue());
+        int x = gotoBox.getX(), y = gotoBox.getY() + 18;
+        for (int i = 0; i < Math.min(6, found.size()); i++) {
+            int ry = y + i * 13;
+            if (mx >= x && mx < x + gotoBox.getWidth() && my >= ry && my < ry + 12) {
                 focusPlayer(found.get(i), false);
                 return true;
             }
@@ -246,66 +354,67 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     }
 
     private void renderSuggestions(GuiGraphics g, int mouseX, int mouseY, int accent) {
-        if (gotoBox.isFocused()) {
-            List<FoundPlayer> found = findPlayers(gotoBox.getValue());
-            int x = gotoBox.getX(), y = gotoBox.getY() - 14;
-            String cur = minecraft.level == null ? "" : minecraft.level.dimension().location().toString();
-            for (int i = 0; i < Math.min(5, found.size()); i++) {
-                FoundPlayer f = found.get(i);
-                int ry = y - i * 13;
-                boolean hov = mouseX >= x && mouseX < x + 140 && mouseY >= ry && mouseY < ry + 12;
-                Draw.panel(g, x, ry, 140, 12, hov ? Draw.PANEL_LIGHT : 0xE00B0F14, Draw.alpha(accent, hov ? 0xFF : 0x70));
-                Draw.small(g, font, "☺ " + f.name(), x + 3, ry + 3, 0xFF80DEEA, 0.7F);
-                String where = f.dim().equals(cur) && minecraft.player != null
-                        ? Math.round(Math.sqrt(Math.pow(f.x() - minecraft.player.getX(), 2) + Math.pow(f.z() - minecraft.player.getZ(), 2))) + " m"
-                        : HudRenderer.pretty(f.dim().substring(f.dim().indexOf(':') + 1));
-                Draw.small(g, font, where, x + 137 - font.width(where) * 0.6F, ry + 3.5F, Draw.TEXT_DIM, 0.6F);
+        if (gotoBox != null && gotoBox.isFocused()) {
+            List<PRow> found = findPlayers(gotoBox.getValue());
+            int x = gotoBox.getX(), y = gotoBox.getY() + 18, w = gotoBox.getWidth();
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 300);
+            for (int i = 0; i < Math.min(6, found.size()); i++) {
+                PRow f = found.get(i);
+                int ry = y + i * 13;
+                boolean hov = mouseX >= x && mouseX < x + w && mouseY >= ry && mouseY < ry + 12;
+                Draw.panel(g, x, ry, w, 12, hov ? Draw.PANEL_LIGHT : 0xF00B0F14, Draw.alpha(accent, hov ? 0xFF : 0x70));
+                face(g, f.id(), x + 2, ry + 2, 8);
+                Draw.small(g, font, f.name(), x + 13, ry + 3, 0xFF80DEEA, 0.7F);
+                String where = where(f);
+                Draw.small(g, font, where, x + w - 3 - font.width(where) * 0.6F, ry + 3.5F, Draw.TEXT_DIM, 0.6F);
             }
             if (found.isEmpty() && !gotoBox.getValue().isBlank() && !gotoBox.getValue().trim().matches("[-\\d\\s,;]+")) {
-                Draw.panel(g, x, y, 140, 12, 0xE00B0F14, 0x40FFFFFF);
+                Draw.panel(g, x, y, w, 12, 0xF00B0F14, 0x40FFFFFF);
                 Draw.small(g, font, Component.translatable("archud.map.no_player").getString(), x + 3, y + 3, Draw.TEXT_DIM, 0.65F);
             }
-        }
-        // подсветка найденного игрока
-        if (highlighted != null && net.minecraft.Util.getMillis() < highlightUntil && highlighted.dim().equals(viewDim())) {
-            float cx = (width - listW()) / 2F, cy = height / 2F;
-            float[] s = MapView.toScreen(highlighted.x(), highlighted.z(), centerX, centerZ, zoom, 0F);
-            int hx = Math.round(cx + s[0]), hy = Math.round(cy + s[1]);
-            int r = 6 + Math.round(Draw.pulse(700) * 6);
-            Draw.outline(g, hx - r, hy - r, r * 2, r * 2, 0xFF80DEEA);
-            Draw.smallCentered(g, font, highlighted.name(), hx, hy - r - 8, 0xFF80DEEA, 0.75F);
+            g.pose().popPose();
         }
     }
 
-    private int toolsTop;
-
-    private static ArcButton tip(ArcButton b, String key) {
-        b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(key)));
-        return b;
+    private String where(PRow f) {
+        if (!f.known()) return Component.translatable("archud.map.players.unknown").getString();
+        if (f.self()) return Component.translatable("archud.map.players.you").getString();
+        if (f.dim().equals(currentDim()) && minecraft.player != null) {
+            return Math.round(Math.hypot(f.x() - minecraft.player.getX(), f.z() - minecraft.player.getZ())) + " m";
+        }
+        return HudRenderer.pretty(f.dim().substring(f.dim().indexOf(':') + 1));
     }
 
-    private int listW() {
-        return showList ? Math.min(180, width / 4) : 0;
+    /** Лицо игрока (скин с сервера, иначе стандартный). */
+    private void face(GuiGraphics g, UUID id, int x, int y, int size) {
+        ResourceLocation skin = null;
+        if (minecraft.getConnection() != null) {
+            PlayerInfo info = minecraft.getConnection().getPlayerInfo(id);
+            if (info != null) skin = info.getSkinLocation();
+        }
+        if (skin == null) skin = net.minecraft.client.resources.DefaultPlayerSkin.getDefaultSkin(id);
+        PlayerFaceRenderer.draw(g, skin, x, y, size);
     }
 
     private double[] screenToWorld(double mx, double my) {
-        float cx = (width - listW()) / 2F, cy = height / 2F;
-        return new double[]{centerX + (mx - cx) / zoom, centerZ + (my - cy) / zoom};
+        return new double[]{centerX + (mx - mapCX()) / zoom, centerZ + (my - mapCY()) / zoom};
     }
 
     @Override
     public void tick() {
-        // плавный сдвиг клавишами
         long win = minecraft.getWindow().getWindow();
         double step = 12 / zoom;
-        boolean typing = gotoBox.isFocused() || searchBox.isFocused();
-        if (!typing) {
+        if (!typing()) {
             if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_W) || com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_UP)) pan(0, -step);
             if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_S) || com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_DOWN)) pan(0, step);
             if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_A) || com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_LEFT)) pan(-step, 0);
             if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_D) || com.mojang.blaze3d.platform.InputConstants.isKeyDown(win, GLFW.GLFW_KEY_RIGHT)) pan(step, 0);
         }
-        searchBox.visible = showList;
+    }
+
+    private boolean typing() {
+        return (gotoBox != null && gotoBox.isFocused()) || (searchBox != null && searchBox.isFocused());
     }
 
     private void pan(double dx, double dz) {
@@ -314,23 +423,24 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         centerZ += dz;
     }
 
+    // ------------------------------------------------------------------ отрисовка
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         int accent = Theme.accent();
-        int mapW = width - listW();
         g.fill(0, 0, width, height, 0xFF06080C);
         if (followPlayer && viewingCurrent() && minecraft.player != null) {
             centerX = minecraft.player.getX();
             centerZ = minecraft.player.getZ();
         }
-        float cx = mapW / 2F, cy = height / 2F;
-        float radius = Math.max(mapW, height) / 1.4F;
+        int x0 = mapX0(), y0 = mapY0(), y1 = mapY1();
+        float cx = mapCX(), cy = mapCY();
+        float radius = Math.max(width - x0, y1 - y0) / 1.4F;
         RenderSystem.enableBlend();
-        g.enableScissor(0, 0, mapW, height);
+        g.enableScissor(x0, y0, width, y1);
         MapCache.Layer layer = viewLayer != null ? viewLayer : MapCache.active();
         if (viewLayer == null) MapView.drawTerrain(g, cx, cy, centerX, centerZ, zoom, 0F, radius);
         else if (layer != null) MapView.drawTerrain(g, layer, cx, cy, centerX, centerZ, zoom, 0F, radius);
-        if (showGrid) drawGrid(g, mapW, cx, cy);
+        if (showGrid) drawGrid(g, x0, y0, y1, cx, cy);
         if (showSlime) MapView.drawSlimeChunks(g, minecraft, cx, cy, centerX, centerZ, zoom, 0F, radius);
         if (showTrail) MapView.drawTrail(g, TrailManager.trail(viewDim()), cx, cy, centerX, centerZ, zoom, 0F, radius, accent);
         MapView.drawRemotePlayers(g, minecraft, viewDim(), cx, cy, centerX, centerZ, zoom, 0F, radius, true, showZones);
@@ -343,46 +453,94 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             float[] ps = MapView.toScreen(minecraft.player.getX(), minecraft.player.getZ(), centerX, centerZ, zoom, 0F);
             MapView.drawPlayerArrow(g, cx + ps[0], cy + ps[1], minecraft.player.getYRot() + 180F, Draw.alpha(accent, 0xFF));
         }
+        if (highlighted != null && Util.getMillis() < highlightUntil && highlighted.dim().equals(viewDim())) {
+            float[] s = MapView.toScreen(highlighted.x(), highlighted.z(), centerX, centerZ, zoom, 0F);
+            int hx = Math.round(cx + s[0]), hy = Math.round(cy + s[1]);
+            int r = 6 + Math.round(Draw.pulse(700) * 6);
+            Draw.outline(g, hx - r, hy - r, r * 2, r * 2, 0xFF80DEEA);
+            Draw.smallCentered(g, font, highlighted.name(), hx, hy - r - 8, 0xFF80DEEA, 0.75F);
+        }
+        // роза ветров и масштабная линейка
+        Draw.smallCentered(g, font, "N", (x0 + width - RAIL) / 2F, y0 + 4, 0xFFFF5252, 0.9F);
+        scaleBar(g, x0 + 8, y1 - 10, accent);
         g.disableScissor();
 
-        // шапка
-        Draw.panel(g, 4, 4, Math.min(mapW - 8, 300), 24, Draw.PANEL, Draw.alpha(accent, 0x90));
-        g.drawString(font, title.getString() + " · " + layerLabel().getString(), 10, 8, Draw.alpha(accent, 0xFF), true);
-        if (mouseX < mapW) {
+        // ---- верхняя панель
+        g.fill(0, 0, width, TOP, 0xF00B0F14);
+        g.fill(0, TOP - 1, width, TOP, Draw.alpha(accent, 0x90));
+        g.drawString(font, title, 26, 9, Draw.alpha(accent, 0xFF), true);
+
+        // ---- инструменты справа
+        g.fill(width - RAIL, TOP, width, y1, 0xC00B0F14);
+        g.fill(width - RAIL, TOP, width - RAIL + 1, y1, Draw.alpha(accent, 0x50));
+
+        // ---- строка состояния
+        g.fill(0, y1, width, height, 0xF00B0F14);
+        g.fill(0, y1, width, y1 + 1, Draw.alpha(accent, 0x50));
+        String info;
+        if (inMap(mouseX, mouseY)) {
             double[] w = screenToWorld(mouseX, mouseY);
             int bx = (int) Math.floor(w[0]), bz = (int) Math.floor(w[1]);
-            String info = bx + ", " + bz + "   ×" + String.format("%.2f", zoom);
-            if (minecraft.player != null && viewingCurrent()) {
-                double d = Math.sqrt(Math.pow(bx - minecraft.player.getX(), 2) + Math.pow(bz - minecraft.player.getZ(), 2));
-                info += "   " + Math.round(d) + " m";
-            }
-            if (viewDim().equals("minecraft:overworld")) info += "   N: " + Math.floorDiv(bx, 8) + ", " + Math.floorDiv(bz, 8);
-            else if (viewDim().equals("minecraft:the_nether")) info += "   O: " + bx * 8 + ", " + bz * 8;
-            Draw.small(g, font, info, 10, 19, Draw.TEXT_DIM, 0.6F);
+            info = "X " + bx + "  Z " + bz;
+            if (minecraft.player != null && viewingCurrent()) info += "   ·   " + Math.round(Math.hypot(bx - minecraft.player.getX(), bz - minecraft.player.getZ())) + " m";
+            if (viewDim().equals("minecraft:overworld")) info += "   ·   " + Component.translatable("archud.map.nether_short").getString() + " " + Math.floorDiv(bx, 8) + ", " + Math.floorDiv(bz, 8);
+            else if (viewDim().equals("minecraft:the_nether")) info += "   ·   " + Component.translatable("archud.map.overworld_short").getString() + " " + bx * 8 + ", " + bz * 8;
+        } else {
+            info = Component.translatable("archud.map.hint").getString();
         }
-        Draw.small(g, font, Component.translatable("archud.map.hint").getString(), 6, toolsTop - 9, Draw.TEXT_DIM, 0.6F);
-        String sync = com.arc4io.archud.client.ArcClientNet.mapSyncActive()
-                ? Component.translatable("archud.map.sync_on", com.arc4io.archud.client.ArcClientNet.players().size()).getString()
+        info += "   ·   ×" + String.format(Locale.ROOT, zoom >= 1 ? "%.1f" : "%.2f", zoom);
+        Draw.small(g, font, info, 5, y1 + 4, Draw.TEXT_DIM, 0.7F);
+        boolean sync = ArcClientNet.mapSyncActive();
+        String st = sync ? Component.translatable("archud.map.sync_on", ArcClientNet.players().size()).getString()
                 : Component.translatable("archud.map.sync_off").getString();
-        Draw.small(g, font, sync, 6, toolsTop - 16, com.arc4io.archud.client.ArcClientNet.mapSyncActive() ? 0xFF9CFF5A : Draw.TEXT_DIM, 0.6F);
+        if (ArcClientNet.waypointsOnServer()) st += "   ·   " + Component.translatable("archud.map.wp_on_server").getString();
+        Draw.small(g, font, st, width - 5 - font.width(st) * 0.7F, y1 + 4, sync ? 0xFF9CFF5A : Draw.TEXT_DIM, 0.7F);
 
-        if (showList) renderList(g, mapW, mouseX, mouseY, accent);
+        // ---- боковая панель
+        if (showSide) {
+            int sw = sideW();
+            g.fill(0, TOP, sw, y1, 0xF20B0F14);
+            g.fill(sw - 1, TOP, sw, y1, Draw.alpha(accent, 0x70));
+            if (tab == 0) renderWaypointsTab(g, sw, mouseX, mouseY, accent);
+            else renderPlayersTab(g, sw, mouseX, mouseY, accent);
+        }
+
         super.render(g, mouseX, mouseY, partialTick);
         renderSuggestions(g, mouseX, mouseY, accent);
         if (menuOpen) renderMenu(g, mouseX, mouseY, accent);
     }
 
-    private void drawGrid(GuiGraphics g, int mapW, float cx, float cy) {
-        int step = zoom >= 4 ? 16 : 128;
-        double left = centerX - cx / zoom, top = centerZ - cy / zoom;
-        int color = step == 16 ? 0x16FFFFFF : 0x12FFFFFF;
-        for (double wx = Math.floor(left / step) * step; wx < left + mapW / zoom; wx += step) {
-            int sx = (int) (cx + (wx - centerX) * zoom);
-            g.fill(sx, 0, sx + 1, height, color);
+    /** Линейка масштаба: круглое число блоков ≈ 60 пикселей. */
+    private void scaleBar(GuiGraphics g, int x, int y, int accent) {
+        double blocks = 60 / zoom;
+        double[] nice = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+        double b = nice[nice.length - 1];
+        for (double n : nice) {
+            if (n >= blocks * 0.6) {
+                b = n;
+                break;
+            }
         }
-        for (double wz = Math.floor(top / step) * step; wz < top + height / zoom; wz += step) {
+        int px = (int) Math.round(b * zoom);
+        g.fill(x - 1, y - 1, x + px + 1, y + 3, 0x90000000);
+        g.fill(x, y, x + px, y + 2, Draw.alpha(accent, 0xFF));
+        g.fill(x, y - 3, x + 1, y + 2, 0xFFFFFFFF);
+        g.fill(x + px - 1, y - 3, x + px, y + 2, 0xFFFFFFFF);
+        String label = b >= 1000 ? (int) (b / 1000) + " km" : (int) b + " m";
+        Draw.small(g, font, label, x + px + 4, y - 2, 0xFFFFFFFF, 0.65F);
+    }
+
+    private void drawGrid(GuiGraphics g, int x0, int y0, int y1, float cx, float cy) {
+        int step = zoom >= 4 ? 16 : zoom >= 0.5F ? 128 : 512;
+        double left = centerX - (cx - x0) / zoom, top = centerZ - (cy - y0) / zoom;
+        int color = step == 16 ? 0x16FFFFFF : 0x12FFFFFF;
+        for (double wx = Math.floor(left / step) * step; wx < left + (width - x0) / zoom; wx += step) {
+            int sx = (int) (cx + (wx - centerX) * zoom);
+            g.fill(sx, y0, sx + 1, y1, color);
+        }
+        for (double wz = Math.floor(top / step) * step; wz < top + (y1 - y0) / zoom; wz += step) {
             int sy = (int) (cy + (wz - centerZ) * zoom);
-            g.fill(0, sy, mapW, sy + 1, color);
+            g.fill(x0, sy, width, sy + 1, color);
         }
     }
 
@@ -405,11 +563,13 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         }
     }
 
+    // ------------------------------------------------------------------ вкладка «Метки»
     private List<Waypoint> listed() {
         String q = searchBox == null ? "" : searchBox.getValue().toLowerCase(Locale.ROOT);
+        List<Waypoint.Source> allowed = WaypointManager.filterSources();
         List<Waypoint> out = new ArrayList<>();
         for (Waypoint w : WaypointManager.all()) {
-            if (!WaypointManager.sourceVisible(w.source)) continue;
+            if (!WaypointManager.sourceVisible(w.source) || (!allowed.contains(w.source) && w.source != Waypoint.Source.TEMP)) continue;
             if (!q.isEmpty() && !w.name.toLowerCase(Locale.ROOT).contains(q)) continue;
             out.add(w);
         }
@@ -421,46 +581,130 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         return out;
     }
 
-    private void renderList(GuiGraphics g, int x, int mouseX, int mouseY, int accent) {
-        int lw = listW();
-        Draw.panel(g, x, 0, lw, height, 0xF00B0F14, Draw.alpha(accent, 0x70));
-        g.drawString(font, Component.translatable("archud.wp.title"), x + 6, 6, Draw.TEXT, true);
-        // фильтры по типу
-        Waypoint.Source[] srcs = Waypoint.Source.values();
-        int fx = x + 4;
-        for (Waypoint.Source s : srcs) {
-            if (s == Waypoint.Source.TEMP) continue;
-            boolean on = WaypointManager.sourceVisible(s);
+    /** Фильтры-«чипы» с переносом строк: {x, y, w} для каждого типа из filterSources(). */
+    private List<int[]> chips(int sw) {
+        List<int[]> out = new ArrayList<>();
+        int x = 5, y = TOP + 46;
+        for (Waypoint.Source s : WaypointManager.filterSources()) {
             String label = Component.translatable("archud.wp.src." + s.name().toLowerCase(Locale.ROOT)).getString();
-            int tw = Math.round(font.width(label) * 0.55F) + 6;
-            Draw.panel(g, fx, 18, tw, 12, on ? Draw.alpha(accent, 0x50) : Draw.PANEL, on ? Draw.alpha(accent, 0xFF) : 0x30FFFFFF);
-            Draw.small(g, font, label, fx + 3, 21.5F, on ? 0xFFFFFFFF : Draw.TEXT_DIM, 0.55F);
-            fx += tw + 2;
+            int tw = Math.round(font.width(label) * 0.6F) + 8;
+            if (x + tw > sw - 5 && x > 5) {
+                x = 5;
+                y += 14;
+            }
+            out.add(new int[]{x, y, tw});
+            x += tw + 3;
         }
+        return out;
+    }
+
+    private void renderWaypointsTab(GuiGraphics g, int sw, int mouseX, int mouseY, int accent) {
+        List<Waypoint.Source> srcs = WaypointManager.filterSources();
+        List<int[]> rects = chips(sw);
+        for (int i = 0; i < srcs.size(); i++) {
+            int[] r = rects.get(i);
+            boolean on = WaypointManager.sourceVisible(srcs.get(i));
+            String label = Component.translatable("archud.wp.src." + srcs.get(i).name().toLowerCase(Locale.ROOT)).getString();
+            Draw.panel(g, r[0], r[1], r[2], 12, on ? Draw.alpha(accent, 0x50) : Draw.PANEL, on ? Draw.alpha(accent, 0xFF) : 0x30FFFFFF);
+            Draw.small(g, font, label, r[0] + 4, r[1] + 3, on ? 0xFFFFFFFF : Draw.TEXT_DIM, 0.6F);
+        }
+        listTop = (rects.isEmpty() ? TOP + 46 : rects.get(rects.size() - 1)[1] + 12) + 6;
+        int bottom = height - BOTTOM - 26;
         List<Waypoint> list = listed();
-        int top = 52, bottom = height - 30;
-        listScroll = Mth.clamp(listScroll, 0, Math.max(0, list.size() * 22 - (bottom - top)));
-        g.enableScissor(x, top, x + lw, bottom);
-        int y = top - (int) listScroll;
+        listScroll = Mth.clamp(listScroll, 0, Math.max(0, list.size() * 24 - (bottom - listTop)));
+        if (list.isEmpty()) {
+            Draw.wrapped(g, font, Component.translatable("archud.map.wp_empty").getString(), 8, listTop + 6, sw - 16, Draw.TEXT_DIM, 0.65F);
+        }
+        g.enableScissor(0, listTop, sw, bottom);
+        int y = listTop - (int) listScroll;
         String dim = currentDim();
         for (Waypoint wp : list) {
-            boolean hov = mouseX >= x && mouseX < x + lw && mouseY >= y && mouseY < y + 21 && mouseY >= top && mouseY < bottom;
-            if (hov) g.fill(x + 2, y, x + lw - 2, y + 21, 0x20FFFFFF);
-            if (Navigator.isTarget(wp)) g.fill(x + 2, y, x + 4, y + 21, 0xFF000000 | wp.color);
-            MapView.diamond(g, x + 11, y + 10, 5, wp.color);
-            Draw.smallCentered(g, font, wp.initials(), x + 11.5F, y + 8, 0xFF000000, 0.5F);
-            String n = wp.name;
-            if (font.width(n) > lw - 26) n = font.plainSubstrByWidth(n, lw - 30) + "…";
-            g.drawString(font, n, x + 20, y + 2, wp.visible ? Draw.TEXT : Draw.TEXT_DIM, true);
-            String info = dim.equals(wp.dimension) && minecraft.player != null
-                    ? Math.round(wp.distanceTo(minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ())) + " m"
-                    : HudRenderer.pretty(wp.dimension.substring(wp.dimension.indexOf(':') + 1));
-            Draw.small(g, font, info + "  ·  " + Component.translatable("archud.wp.src." + wp.source.name().toLowerCase(Locale.ROOT)).getString(),
-                    x + 20, y + 12, Draw.TEXT_DIM, 0.6F);
-            y += 22;
+            if (y + 23 >= listTop && y < bottom) {
+                boolean hov = mouseX >= 0 && mouseX < sw && mouseY >= y && mouseY < y + 23 && mouseY >= listTop && mouseY < bottom;
+                g.fill(3, y, sw - 4, y + 23, hov ? 0x26FFFFFF : 0x0CFFFFFF);
+                if (Navigator.isTarget(wp)) g.fill(3, y, 5, y + 23, 0xFF000000 | wp.color);
+                MapView.diamond(g, 14, y + 11, 6, wp.color);
+                Draw.smallCentered(g, font, wp.initials(), 14.5F, y + 9, 0xFF000000, 0.5F);
+                String n = wp.name;
+                int room = sw - 32;
+                if (font.width(n) > room) n = font.plainSubstrByWidth(n, room - font.width("…")) + "…";
+                g.drawString(font, n, 25, y + 3, wp.visible ? Draw.TEXT : Draw.TEXT_DIM, true);
+                String info = dim.equals(wp.dimension) && minecraft.player != null
+                        ? Math.round(wp.distanceTo(minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ())) + " m"
+                        : HudRenderer.pretty(wp.dimension.substring(wp.dimension.indexOf(':') + 1));
+                Draw.small(g, font, info + "  ·  " + wp.x + " " + wp.y + " " + wp.z, 25, y + 13, Draw.TEXT_DIM, 0.6F);
+            }
+            y += 24;
         }
         g.disableScissor();
-        Draw.small(g, font, Component.translatable("archud.map.list_hint").getString(), x + 4, height - 28, Draw.TEXT_DIM, 0.5F);
+    }
+
+    private Waypoint waypointRowAt(double mx, double my) {
+        if (!showSide || tab != 0 || mx >= sideW() || my < listTop || my >= height - BOTTOM - 26) return null;
+        int idx = (int) ((my - listTop + listScroll) / 24);
+        List<Waypoint> list = listed();
+        return idx >= 0 && idx < list.size() ? list.get(idx) : null;
+    }
+
+    // ------------------------------------------------------------------ вкладка «Игроки»
+    private static final int PROW_H = 28;
+
+    private void renderPlayersTab(GuiGraphics g, int sw, int mouseX, int mouseY, int accent) {
+        List<PRow> list = players();
+        int top = TOP + 28, bottom = height - BOTTOM - 4;
+        boolean remoteHint = minecraft.getConnection() != null && !minecraft.isSingleplayer() && !ArcClientNet.positionsActive();
+        if (remoteHint) bottom -= 24;
+        playerScroll = Mth.clamp(playerScroll, 0, Math.max(0, list.size() * (PROW_H + 2) - (bottom - top)));
+        g.enableScissor(0, top, sw, bottom);
+        int y = top - (int) playerScroll;
+        for (PRow r : list) {
+            if (y + PROW_H >= top && y < bottom) {
+                boolean hov = mouseX < sw && mouseY >= y && mouseY < y + PROW_H && mouseY >= top && mouseY < bottom;
+                g.fill(3, y, sw - 4, y + PROW_H, r.self() ? Draw.alpha(accent, 0x30) : hov ? 0x26FFFFFF : 0x0CFFFFFF);
+                if (r.self()) g.fill(3, y, 5, y + PROW_H, Draw.alpha(accent, 0xFF));
+                face(g, r.id(), 9, y + 6, 16);
+                if (!r.known()) g.fill(9, y + 6, 25, y + 22, 0x80000000);
+                boolean talking = com.arc4io.archud.compat.VoiceCompat.isTalking(r.id());
+                if (talking) MapView.talkRing(g, 17, y + 14);
+                String n = r.name();
+                int room = sw - 34 - (hov && r.known() && !r.self() ? 40 : 0);
+                if (font.width(n) > room) n = font.plainSubstrByWidth(n, room - font.width("…")) + "…";
+                g.drawString(font, n, 30, y + 5, r.known() ? (r.self() ? Draw.alpha(accent, 0xFF) : Draw.TEXT) : Draw.TEXT_DIM, true);
+                String line = where(r);
+                if (r.hp() >= 0) line += "   ❤ " + Math.round(r.hp());
+                Draw.small(g, font, line, 30, y + 16, Draw.TEXT_DIM, 0.62F);
+                if (hov && r.known() && !r.self()) {
+                    // ◎ показать · ➤ навигация
+                    rowIcon(g, sw - 42, y + 7, "◎", mouseX, mouseY, accent);
+                    rowIcon(g, sw - 22, y + 7, "➤", mouseX, mouseY, accent);
+                }
+            }
+            y += PROW_H + 2;
+        }
+        g.disableScissor();
+        if (remoteHint) Draw.wrapped(g, font, Component.translatable("archud.map.players.need_server").getString(), 6, bottom + 4, sw - 12, Draw.TEXT_DIM, 0.6F);
+    }
+
+    private void rowIcon(GuiGraphics g, int x, int y, String icon, int mouseX, int mouseY, int accent) {
+        boolean hov = mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 14;
+        Draw.panel(g, x, y, 16, 14, hov ? Draw.alpha(accent, 0x70) : Draw.PANEL, Draw.alpha(accent, hov ? 0xFF : 0x70));
+        g.drawCenteredString(font, icon, x + 8, y + 3, 0xFFFFFFFF);
+    }
+
+    private boolean clickPlayers(double mx, double my) {
+        List<PRow> list = players();
+        int top = TOP + 28, sw = sideW();
+        if (my < top) return false;
+        int idx = (int) ((my - top + playerScroll) / (PROW_H + 2));
+        if (idx < 0 || idx >= list.size()) return true;
+        PRow r = list.get(idx);
+        int y = top - (int) playerScroll + idx * (PROW_H + 2);
+        if (r.known() && !r.self() && my >= y + 7 && my < y + 21 && mx >= sw - 22 && mx < sw - 6) {
+            focusPlayer(r, true);
+            return true;
+        }
+        focusPlayer(r, false);
+        return true;
     }
 
     // ---------- контекстное меню ----------
@@ -539,7 +783,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
 
     /** Игрок под курсором (виден рядом или известен серверу Arc HUD). */
     private void findPlayerAt(int mx, int my) {
-        float cx = (width - listW()) / 2F, cy = height / 2F;
+        float cx = mapCX(), cy = mapCY();
         String dim = viewDim();
         double best = 7 * 7;
         if (viewingCurrent() && minecraft.level != null) {
@@ -652,7 +896,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     }
 
     private Waypoint waypointAt(double mx, double my) {
-        float cx = (width - listW()) / 2F, cy = height / 2F;
+        float cx = mapCX(), cy = mapCY();
         String dim = viewDim();
         for (Waypoint w : WaypointManager.all()) {
             if (!w.visible || !dim.equals(w.dimension) || !WaypointManager.sourceVisible(w.source)) continue;
@@ -666,9 +910,9 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     private void export() {
         MapCache.Layer layer = viewLayer != null ? viewLayer : MapCache.active();
         if (layer == null) return;
-        int mapW = width - listW();
-        double minX = centerX - mapW / 2.0 / zoom, minZ = centerZ - height / 2.0 / zoom;
-        int w = (int) Math.min(4096, Math.ceil(mapW / zoom)), h = (int) Math.min(4096, Math.ceil(height / zoom));
+        int mapW = width - RAIL - mapX0(), mapH = mapY1() - mapY0();
+        double minX = centerX - (mapCX() - mapX0()) / zoom, minZ = centerZ - (mapCY() - mapY0()) / zoom;
+        int w = (int) Math.min(4096, Math.ceil(mapW / zoom)), h = (int) Math.min(4096, Math.ceil(mapH / zoom));
         if (w <= 0 || h <= 0) return;
         try (NativeImage img = new NativeImage(w, h, true)) {
             int bx0 = (int) Math.floor(minX), bz0 = (int) Math.floor(minZ);
@@ -700,32 +944,28 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         if (menuOpen) return clickMenu(mx, my);
         if (clickSuggestion(mx, my)) return true;
         if (super.mouseClicked(mx, my, button)) return true;
-        int mapW = width - listW();
-        if (mx >= mapW && showList) {
+        if (my < TOP || my >= mapY1() || mx >= width - RAIL) return true; // панели
+        if (showSide && mx < sideW()) {
+            if (tab == 1) return clickPlayers(mx, my);
             // фильтры
-            if (my >= 18 && my < 30) {
-                int fx = mapW + 4;
-                for (Waypoint.Source s : Waypoint.Source.values()) {
-                    if (s == Waypoint.Source.TEMP) continue;
-                    String label = Component.translatable("archud.wp.src." + s.name().toLowerCase(Locale.ROOT)).getString();
-                    int tw = Math.round(font.width(label) * 0.55F) + 6;
-                    if (mx >= fx && mx < fx + tw) {
-                        WaypointManager.toggleSource(s);
-                        return true;
-                    }
-                    fx += tw + 2;
+            List<Waypoint.Source> srcs = WaypointManager.filterSources();
+            List<int[]> rects = chips(sideW());
+            for (int i = 0; i < srcs.size(); i++) {
+                int[] r = rects.get(i);
+                if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + 12) {
+                    WaypointManager.toggleSource(srcs.get(i));
+                    return true;
                 }
-                return true;
             }
-            int idx = (int) ((my - 52 + listScroll) / 22);
-            List<Waypoint> list = listed();
-            if (my >= 52 && idx >= 0 && idx < list.size()) {
-                Waypoint w = list.get(idx);
+            Waypoint w = waypointRowAt(mx, my);
+            if (w != null) {
                 if (button == 1) openMenu((int) mx, (int) my, w);
-                else if (w.dimension.equals(viewDim())) {
+                else {
+                    if (!w.dimension.equals(currentDim())) viewLayer = MapCache.layer(WaypointManager.worldKey(), w.dimension, "surface");
+                    else viewLayer = null;
                     followPlayer = false;
-                    centerX = w.x;
-                    centerZ = w.z;
+                    centerX = w.x + 0.5;
+                    centerZ = w.z + 0.5;
                 }
             }
             return true;
@@ -764,10 +1004,12 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        if (showList && mx >= width - listW()) {
-            listScroll -= delta * 22;
+        if (showSide && mx < sideW()) {
+            if (tab == 0) listScroll -= delta * 24;
+            else playerScroll -= delta * (PROW_H + 2);
             return true;
         }
+        if (!inMap(mx, my)) return true;
         zoomAt(mx, my, delta > 0 ? 1.25F : 0.8F);
         return true;
     }
@@ -775,7 +1017,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     private void zoomAt(double mx, double my, float factor) {
         float old = zoom;
         zoom = Mth.clamp(zoom * factor, 0.0625F, 16F);
-        float cx = (width - listW()) / 2F, cy = height / 2F;
+        float cx = mapCX(), cy = mapCY();
         centerX += (mx - cx) / old - (mx - cx) / zoom;
         centerZ += (my - cy) / old - (my - cy) / zoom;
         if (old != zoom && (mx != cx || my != cy)) followPlayer = false;
@@ -783,32 +1025,37 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean typing = gotoBox.isFocused() || searchBox.isFocused();
+        boolean typing = typing();
+        if (menuOpen && keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            menuOpen = false;
+            return true;
+        }
         if (!typing && ArcKeys.WORLD_MAP.matches(keyCode, scanCode)) {
             onClose();
             return true;
         }
         if (!typing && (keyCode == GLFW.GLFW_KEY_EQUAL || keyCode == GLFW.GLFW_KEY_KP_ADD)) {
-            zoomAt((width - listW()) / 2.0, height / 2.0, 1.25F);
+            zoomAt(mapCX(), mapCY(), 1.25F);
             return true;
         }
         if (!typing && (keyCode == GLFW.GLFW_KEY_MINUS || keyCode == GLFW.GLFW_KEY_KP_SUBTRACT)) {
-            zoomAt((width - listW()) / 2.0, height / 2.0, 0.8F);
+            zoomAt(mapCX(), mapCY(), 0.8F);
             return true;
         }
         if (gotoBox.isFocused() && keyCode == GLFW.GLFW_KEY_ENTER) {
             gotoCoords(false);
             return true;
         }
+        if (!typing && keyCode == GLFW.GLFW_KEY_TAB) {
+            tab = 1 - tab;
+            showSide = true;
+            rebuildWidgets();
+            return true;
+        }
         if (!typing && keyCode == GLFW.GLFW_KEY_DELETE) {
             double mx = minecraft.mouseHandler.xpos() * width / minecraft.getWindow().getScreenWidth();
             double my = minecraft.mouseHandler.ypos() * height / minecraft.getWindow().getScreenHeight();
-            Waypoint hit = null;
-            if (showList && mx >= width - listW()) {
-                int idx = (int) ((my - 52 + listScroll) / 22);
-                List<Waypoint> list = listed();
-                if (my >= 52 && idx >= 0 && idx < list.size()) hit = list.get(idx);
-            } else hit = waypointAt(mx, my);
+            Waypoint hit = showSide && mx < sideW() ? waypointRowAt(mx, my) : waypointAt(mx, my);
             if (hit != null && WaypointListScreen.deletable(hit)) {
                 if (Navigator.isTarget(hit)) Navigator.clear();
                 WaypointManager.remove(hit);
@@ -820,10 +1067,6 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         }
         if (!typing && keyCode == GLFW.GLFW_KEY_L) {
             minecraft.setScreen(new WaypointListScreen(this));
-            return true;
-        }
-        if (menuOpen && keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            menuOpen = false;
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

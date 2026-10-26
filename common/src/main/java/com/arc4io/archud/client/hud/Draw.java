@@ -2,6 +2,7 @@ package com.arc4io.archud.client.hud;
 
 import com.arc4io.archud.ArcHud;
 import net.minecraft.client.gui.Font;
+import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -142,6 +143,20 @@ public final class Draw {
         g.pose().scale(scale, scale, 1);
         g.drawString(font, s, 0, 0, color, true);
         g.pose().popPose();
+    }
+
+    /** Мелкий текст с переносом по ширине; возвращает высоту. */
+    public static int wrapped(GuiGraphics g, Font font, String s, float x, float y, int maxW, int color, float scale) {
+        List<net.minecraft.util.FormattedCharSequence> lines = font.split(net.minecraft.network.chat.FormattedText.of(s), Math.max(10, (int) (maxW / scale)));
+        float lh = 10 * scale;
+        for (int i = 0; i < lines.size(); i++) {
+            g.pose().pushPose();
+            g.pose().translate(x, y + i * lh, 0);
+            g.pose().scale(scale, scale, 1);
+            g.drawString(font, lines.get(i), 0, 0, color, true);
+            g.pose().popPose();
+        }
+        return Math.round(lines.size() * lh);
     }
 
     public static float pulse(long periodMs) {

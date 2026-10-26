@@ -43,6 +43,14 @@ public class ArcButton extends AbstractButton {
         return this;
     }
 
+    private java.util.function.BooleanSupplier toggled;
+
+    /** Кнопка-переключатель: во включённом состоянии подсвечена акцентом. */
+    public ArcButton toggle(java.util.function.BooleanSupplier on) {
+        this.toggled = on;
+        return this;
+    }
+
     public ArcButton danger() {
         this.danger = true;
         return this;
@@ -82,8 +90,9 @@ public class ArcButton extends AbstractButton {
             return;
         }
 
-        int bg = Draw.mix(Draw.PANEL, Draw.PANEL_LIGHT, hover);
-        int border = !active ? 0x40FFFFFF : Draw.mix(Draw.alpha(accent, 0x60), Draw.alpha(accent, 0xFF), hover);
+        boolean on = toggled != null && toggled.getAsBoolean();
+        int bg = on ? Draw.alpha(accent, 0x70) : Draw.mix(Draw.PANEL, Draw.PANEL_LIGHT, hover);
+        int border = !active ? 0x40FFFFFF : on ? Draw.alpha(accent, 0xFF) : Draw.mix(Draw.alpha(accent, 0x60), Draw.alpha(accent, 0xFF), hover);
         Draw.panel(g, x, y, w, h, bg, border);
         if (hover > 0.01F) g.fill(x + 2, y + h - 2, x + 2 + Math.round((w - 4) * hover), y + h - 1, Draw.alpha(accent, 0xFF));
         int color = !active ? 0xFF6A7380 : Draw.mix(0xFFDCE6F0, 0xFFFFFFFF, hover);
