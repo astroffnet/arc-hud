@@ -33,7 +33,7 @@ public final class EnchantClient {
     }
 
     public static boolean serverSupports() {
-        return ArcNet.canSendToServer();
+        return ArcNet.canSendToServer() && com.arc4io.archud.client.ArcClientNet.modServer();
     }
 
     private static void onData(FriendlyByteBuf buf) {

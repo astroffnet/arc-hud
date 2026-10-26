@@ -29,6 +29,13 @@ public final class ArcClientNet {
     /** Игрок, о котором сообщил сервер (может быть далеко или в другом измерении). */
     public record RemotePlayer(UUID id, String name, String dimension, double x, double y, double z, float yaw, float health) {}
 
+    /** Сервер — мод Arc HUD (Forge/Fabric), а не плагин Bukkit: доступны все серверные функции. */
+    private static boolean modServer;
+
+    public static boolean modServer() {
+        return welcomed && modServer;
+    }
+
     private static boolean helloSent, welcomed, mapSync, positions, sharing, tempadDoors;
     private static int viewDistance = 10;
     private static long lastPlayers;
@@ -49,6 +56,7 @@ public final class ArcClientNet {
             positions = buf.readBoolean();
             sharing = buf.readBoolean();
             tempadDoors = buf.isReadable() && buf.readBoolean();
+            modServer = buf.isReadable() && buf.readBoolean();
             if (ArcConfig.get().hideFromMap) sendPrivacy(true);
         });
         ArcNet.onClient("map_chunks", buf -> {
@@ -205,7 +213,7 @@ public final class ArcClientNet {
     }
 
     private static void reset() {
-        helloSent = welcomed = mapSync = positions = sharing = tempadDoors = false;
+        helloSent = welcomed = mapSync = positions = sharing = tempadDoors = modServer = false;
         waypointSyncReady = false;
         waypointSyncAt = 0;
         adminAllowed = false;
