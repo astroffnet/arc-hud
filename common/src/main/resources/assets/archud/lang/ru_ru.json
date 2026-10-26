@@ -831,5 +831,10 @@
   "archud.e4mc.title": "Мир открыт для интернета",
   "archud.e4mc.copied": "%s — скопировано, отправьте друзьям",
   "archud.e4mc.address": "Интернет (e4mc): %s",
-  "archud.e4mc.waiting": "e4mc: получаем адрес в интернете…"
+  "archud.e4mc.waiting": "e4mc: получаем адрес в интернете…",
+  "archud.config.modWatcher": "Следить за папкой mods (быстрый перезапуск)",
+  "archud.mods.changed": "Папка mods изменилась",
+  "archud.mods.restart": "⟳ Перезапустить: %s мод.",
+  "archud.mods.restart_tip": "Forge и Fabric загружают код модов только при запуске. Перезапуск сохранит мир, и игра откроется сразу в нём (или снова подключится к серверу).",
+  "archud.mods.restart_manual": "Этот лаунчер нельзя перезапустить автоматически — перезапустите игру через лаунчер."
 }

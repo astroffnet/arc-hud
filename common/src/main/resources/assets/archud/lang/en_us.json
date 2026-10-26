@@ -772,5 +772,10 @@
   "archud.e4mc.title": "World is open to the internet",
   "archud.e4mc.copied": "%s — copied, send it to friends",
   "archud.e4mc.address": "Internet (e4mc): %s",
-  "archud.e4mc.waiting": "e4mc: getting an internet address…"
+  "archud.e4mc.waiting": "e4mc: getting an internet address…",
+  "archud.config.modWatcher": "Watch the mods folder (quick restart)",
+  "archud.mods.changed": "Mods folder changed",
+  "archud.mods.restart": "⟳ Restart: %s mods",
+  "archud.mods.restart_tip": "Forge and Fabric only load mod code at startup. Restart now: the world is saved and the game reopens straight into it (or reconnects to the server).",
+  "archud.mods.restart_manual": "Your launcher can't be restarted automatically — restart the game from the launcher."
 }

@@ -71,9 +71,10 @@ final class HudBlocks {
     static void renderAnchored(GuiGraphics g, Minecraft mc, LocalPlayer p, Font font, int w, int h, int accent, long now,
                                boolean debug, boolean spectator) {
         ArcConfig cfg = ArcConfig.get();
-        if (debug && ArcDebugScreen.enabled()) return; // своё F3 занимает оба края экрана
+        // своё F3 не прячет HUD: его карточки встают в стопки слева и справа, под блоки HUD
+        boolean arcF3 = debug && ArcDebugScreen.enabled();
         Map<HudAnchor, List<Block>> map = new EnumMap<>(HudAnchor.class);
-        if (!debug) {
+        if (!debug || arcF3) {
             if (cfg.minimap) add(map, cfg.minimapAnchor, "minimap", minimap(mc, p, font, accent));
             if (cfg.infoPanel) add(map, cfg.infoPanelAnchor, "info", info(mc, p, font, accent));
             if (cfg.compass) add(map, cfg.compassAnchor, "compass", compass(p, font, accent));
@@ -89,23 +90,60 @@ final class HudBlocks {
             if (cfg.pickupNotifications) add(map, cfg.pickupsAnchor, "pickups", pickups(font, accent, now));
             if (cfg.movementStatus) add(map, cfg.statusAnchor, "status", status(p, font, accent));
         }
+        if (arcF3) {
+            List<Block> l = new ArrayList<>(), r = new ArrayList<>();
+            ArcDebugScreen.build(mc, font, accent, w, l, r);
+            for (Block b : l) map.computeIfAbsent(HudAnchor.TOP_LEFT, k -> new ArrayList<>()).add(b);
+            for (Block b : r) map.computeIfAbsent(HudAnchor.TOP_RIGHT, k -> new ArrayList<>()).add(b);
+            ArcDebugScreen.markLaidOut();
+        }
         int boss = bossCount(mc) * 19;
+        Map<HudAnchor, Integer> start = new EnumMap<>(HudAnchor.class);
         for (Map.Entry<HudAnchor, List<Block>> e : map.entrySet()) {
             HudAnchor a = e.getKey();
-            List<Block> list = e.getValue();
-            int total = -3;
-            for (Block b : list) total += b.h() + 3;
-            int y = switch (a.row) {
+            int total = total(e.getValue());
+            start.put(a, switch (a.row) {
                 case 0 -> 2 + (a.col == 1 ? boss : 0);
                 case 1 -> (h - total) / 2;
                 default -> h - 2 - total;
-            };
+            });
+        }
+        // стопки одного края не налезают друг на друга: середина сдвигается под верх, а если места
+        // не хватает — у верхней стопки отбрасываются нижние карточки F3
+        for (int col = 0; col <= 2; col += 2) {
+            HudAnchor top = HudAnchor.at(col, 0), mid = HudAnchor.at(col, 1), bot = HudAnchor.at(col, 2);
+            List<Block> tl = map.get(top);
+            if (tl == null) continue;
+            while (true) {
+                int topEnd = start.get(top) + total(tl) + 3;
+                int floor = map.containsKey(bot) ? start.get(bot) - 3 : h;
+                List<Block> ml = map.get(mid);
+                if (ml != null) {
+                    int my = Math.max(start.get(mid), topEnd);
+                    start.put(mid, my);
+                    topEnd = my + total(ml) + 3;
+                }
+                if (topEnd <= floor + 3 || tl.isEmpty() || !(tl.get(tl.size() - 1) instanceof ArcDebugScreen.CardBlock)) break;
+                tl.remove(tl.size() - 1);
+                if (ml != null) start.put(mid, (h - total(ml)) / 2);
+            }
+        }
+        for (Map.Entry<HudAnchor, List<Block>> e : map.entrySet()) {
+            HudAnchor a = e.getKey();
+            List<Block> list = e.getValue();
+            int y = start.get(a);
             for (Block b : list) {
                 int x = a.col == 0 ? 2 : a.col == 2 ? w - 2 - b.w() : (w - b.w()) / 2;
                 b.draw(g, x, y, a.col == 2);
                 y += b.h() + 3;
             }
         }
+    }
+
+    private static int total(List<Block> list) {
+        int total = -3;
+        for (Block b : list) total += b.h() + 3;
+        return total;
     }
 
     private static void add(Map<HudAnchor, List<Block>> map, HudAnchor anchor, String id, Block b) {

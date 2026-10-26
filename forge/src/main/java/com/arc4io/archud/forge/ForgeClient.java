@@ -117,8 +117,9 @@ public final class ForgeClient implements ClientPlatform {
 
     private static void onOverlayPre(RenderGuiOverlayEvent.Pre event) {
         ResourceLocation id = event.getOverlay().id();
-        // своё меню F3 (на Forge текст отладки рисует отдельный слой)
-        if (id.equals(VanillaGuiOverlay.DEBUG_TEXT.id()) && com.arc4io.archud.client.hud.ArcDebugScreen.enabled()) {
+        // своё меню F3 (на Forge текст отладки рисует отдельный слой; он вызывается каждый кадр,
+        // даже когда F3 закрыто, — поэтому проверяем, что F3 действительно открыто)
+        if (id.equals(VanillaGuiOverlay.DEBUG_TEXT.id()) && com.arc4io.archud.client.hud.ArcDebugScreen.active()) {
             event.setCanceled(true);
             com.arc4io.archud.client.hud.ArcDebugScreen.render(event.getGuiGraphics());
             return;

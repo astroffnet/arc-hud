@@ -171,6 +171,8 @@ public class ArcConfig {
     public boolean lazyTextureAnimations = true;
     /** Своё меню F3. */
     public boolean customF3 = true;
+    /** Следить за папкой mods и предлагать быстрый перезапуск с возвратом в мир. */
+    public boolean modWatcher = true;
     /** Свой экран настроек графики (ванилла, Sodium / Embeddium, OptiFine). */
     public boolean customVideoSettings = true;
     /** Встроенный ресурспак «Родное слово» (русский перевод модов). */

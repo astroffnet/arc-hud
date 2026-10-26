@@ -13,7 +13,39 @@ public final class NetUtil {
     private NetUtil() {}
 
     /** Адрес в локальной сети (192.168.x.x / 10.x / 172.16-31.x) — первым, затем VPN (Hamachi, Radmin, ZeroTier…). */
+    private static volatile List<String> cached;
+    private static volatile long cachedAt;
+    private static volatile boolean scanning;
+
+    /**
+     * Кэшированный список адресов. Перебор сетевых интерфейсов в Windows занимает десятки миллисекунд,
+     * поэтому его нельзя делать каждый кадр: результат живёт 15 секунд и обновляется в фоновом потоке.
+     */
     public static List<String> localAddresses() {
+        List<String> c = cached;
+        if (c == null) {
+            c = scan();
+            cached = c;
+            cachedAt = System.currentTimeMillis();
+            return c;
+        }
+        if (System.currentTimeMillis() - cachedAt > 15_000 && !scanning) {
+            scanning = true;
+            Thread t = new Thread(() -> {
+                try {
+                    cached = scan();
+                    cachedAt = System.currentTimeMillis();
+                } finally {
+                    scanning = false;
+                }
+            }, "ArcHud-NetScan");
+            t.setDaemon(true);
+            t.start();
+        }
+        return c;
+    }
+
+    private static List<String> scan() {
         List<String> lan = new ArrayList<>(), other = new ArrayList<>();
         try {
             for (Iterator<NetworkInterface> it = NetworkInterface.getNetworkInterfaces().asIterator(); it.hasNext(); ) {
@@ -35,7 +67,7 @@ public final class NetUtil {
         }
         lan.addAll(other);
         if (lan.isEmpty()) lan.add("127.0.0.1");
-        return lan;
+        return java.util.Collections.unmodifiableList(lan);
     }
 
     public static String primaryAddress() {

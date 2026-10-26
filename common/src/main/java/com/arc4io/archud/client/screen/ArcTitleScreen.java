@@ -45,9 +45,13 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         super(Component.translatable("narrator.screen.title"));
     }
 
+    private int modsStamp;
+
     @Override
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 400, 240);
+        modsStamp = com.arc4io.archud.client.mods.ModWatcher.stamp();
+        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, width);
         if (openTime == 0) openTime = Util.getMillis();
         panelW = Math.min(240, Math.max(190, width / 3));
         int bx = 26;
@@ -108,6 +112,7 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
 
     @Override
     public void tick() {
+        if (com.arc4io.archud.client.mods.ModWatcher.stamp() != modsStamp) rebuildWidgets();
         super.tick();
         if (particles.size() < 60 && random.nextFloat() < 0.6F) {
             particles.add(new float[]{
