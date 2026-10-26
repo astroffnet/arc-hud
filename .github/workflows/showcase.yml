@@ -55,3 +55,8 @@ jobs:
           git add -A
           git commit -q -m "Showcase ${{ github.sha }}"
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:ci-showcase-${{ matrix.loader }}
+      - name: Verify the run (no mixin failures, showcase finished)
+        run: |
+          LOG=${{ matrix.loader }}/run/logs/latest.log
+          if grep -q "Mixin apply failed archud" "$LOG"; then grep "Mixin apply failed archud" "$LOG" | head -5; exit 1; fi
+          if ! grep -q "\[Showcase\] done" "$LOG"; then echo "Showcase did not finish"; tail -40 "$LOG"; exit 1; fi
