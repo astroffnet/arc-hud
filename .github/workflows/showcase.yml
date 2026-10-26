@@ -28,6 +28,9 @@ jobs:
           gradle-version: "8.8"
       - name: Install virtual display
         run: sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri mesa-utils
+      - name: Request legacy OpenGL 2.0 context (Fabric) to test the version switch
+        if: matrix.loader == 'fabric'
+        run: mkdir -p fabric/run/config/archud && echo "version=20" > fabric/run/config/archud/opengl.properties
       - name: Run client with showcase driver
         working-directory: ${{ matrix.loader }}
         env:
