@@ -89,8 +89,8 @@ void main() {
 
     // вес текущего образца: насколько центр пикселя уменьшенного кадра близок к этому пикселю экрана
     vec2 dOut = (pIn - (vec2(base) + 0.5)) / Scale;
-    float w = exp(-1.2 * dot(dOut, dOut));
-    vec3 cur = mix(smoothCur, nearest, w);
+    float w = exp(-2.5 * dot(dOut, dOut));
+    vec3 cur = mix(smoothCur, nearest, clamp(w * 1.5, 0.0, 1.0));
 
     if (HistoryValid < 0.5 || offscreen) {
         fragColor = vec4(clamp(fromYCoCg(smoothCur), 0.0, 1.0), 1.0);
@@ -105,7 +105,9 @@ void main() {
     float ma = max(a.x, max(a.y, a.z));
     if (ma > 1.0) hist = center + v / ma;
 
-    float alpha = 0.04 + 0.16 * w + clamp(motionPx * 0.015, 0.0, 0.25);
-    vec3 outc = mix(hist, cur, clamp(alpha, 0.04, 0.6));
+    // в покое новый кадр вносит вклад почти только там, где его образец попал близко к пикселю экрана —
+    // так из сдвинутых кадров собираются детали полного разрешения; в движении история обновляется быстрее
+    float alpha = 0.012 + 0.22 * w + clamp(motionPx * 0.02, 0.0, 0.35);
+    vec3 outc = mix(hist, cur, clamp(alpha, 0.012, 0.6));
     fragColor = vec4(clamp(fromYCoCg(outc), 0.0, 1.0), 1.0);
 }

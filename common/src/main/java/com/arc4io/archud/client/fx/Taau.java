@@ -58,8 +58,12 @@ public final class Taau {
     }
 
     /** Из миксина GameRenderer.getProjectionMatrix: сдвинуть проекцию на долю пикселя. */
+    /** Для проверки в тестовом прогоне: сдвиг проекции действительно применялся. */
+    public static int jitterCalls;
+
     public static void jitter(Matrix4f proj) {
         if (!jitterActive) return;
+        jitterCalls++;
         proj.translateLocal(2F * jx / jitterW, 2F * jy / jitterH, 0F);
     }
 
@@ -119,7 +123,7 @@ public final class Taau {
 
         var sfx = sharp.getEffect();
         sfx.safeGetUniform("Mode").set(1F);
-        sfx.safeGetUniform("Sharpness").set(sharpness);
+        sfx.safeGetUniform("Sharpness").set(Math.min(0.875F, sharpness * 1.25F)); // накопление чуть смягчает; 0.875 — предел RCAS (вес 3/16)
         sharp.process(pt);
 
         useA = !useA;
