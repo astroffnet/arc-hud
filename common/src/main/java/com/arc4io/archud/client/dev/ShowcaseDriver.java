@@ -280,6 +280,20 @@ public final class ShowcaseDriver {
                 java.nio.file.Files.deleteIfExists(mc.gameDirectory.toPath().resolve("mods").resolve("showcase-test-mod.jar"));
             } catch (Exception ignored) {
             }
+            try {
+                try (var worlds = java.nio.file.Files.list(mc.gameDirectory.toPath().resolve("saves"))) {
+                    for (java.nio.file.Path root : worlds.toList()) {
+                        for (String d : new String[]{"playerdata", "advancements", "stats"}) {
+                            if (!java.nio.file.Files.isDirectory(root.resolve(d))) continue;
+                            try (var files = java.nio.file.Files.list(root.resolve(d))) {
+                                ArcHud.LOGGER.info("[Showcase] {}/{}: {}", root.getFileName(), d, files.map(f -> f.getFileName().toString()).toList());
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                ArcHud.LOGGER.info("[Showcase] storage listing: " + e);
+            }
             ArcHud.LOGGER.info("[Showcase] done");
             mc.stop();
         }, null);
