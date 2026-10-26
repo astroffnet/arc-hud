@@ -38,7 +38,6 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
             java.util.Map.entry("waypointMaxDistance", new int[]{0, 250, 500, 1000, 2000, 5000}),
             java.util.Map.entry("minimapSize", new int[]{80, 96, 110, 128, 150, 180}),
             java.util.Map.entry("bodycamFov", new int[]{80, 90, 100, 110, 120}),
-            java.util.Map.entry("crosshairStyle", new int[]{0, 1, 2, 3}),
             java.util.Map.entry("breakReminder", new int[]{0, 30, 60, 90, 120, 180}),
             java.util.Map.entry("maxParticles", new int[]{0, 1000, 2000, 4000, 8000}),
             java.util.Map.entry("shadowDistance", new int[]{0, 16, 24, 32, 48, 64}),

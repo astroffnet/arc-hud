@@ -78,14 +78,14 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    // Тест совместимости (CI: -PcompatMods): моды игрока из Modrinth, только в среде запуска
+    // Тест совместимости (CI: -PcompatMods): моды игрока из Modrinth (по id версии — номера версий у Forge и Fabric совпадают)
     if (project.hasProperty('compatMods')) {
-        runtimeOnly fg.deobf("maven.modrinth:aether:1.20.1-1.5.2-neoforge")
-        runtimeOnly fg.deobf("maven.modrinth:azurelib:3.1.24")
-        runtimeOnly fg.deobf("maven.modrinth:azurelib-armor:2.0.14")
-        runtimeOnly fg.deobf("maven.modrinth:playeranimator:1.0.2-rc1+1.20-forge")
-        runtimeOnly fg.deobf("maven.modrinth:regeneration:42.1.1+forge")
-        runtimeOnly fg.deobf("maven.modrinth:legends-mod-core:1.20.1-ss1.0.22")
+        runtimeOnly fg.deobf("maven.modrinth:aether:2411kUqF")
+        runtimeOnly fg.deobf("maven.modrinth:azurelib:BF48e0nr")
+        runtimeOnly fg.deobf("maven.modrinth:azurelib-armor:ZzJnDHAP")
+        runtimeOnly fg.deobf("maven.modrinth:playeranimator:xe2EVE6q")
+        runtimeOnly fg.deobf("maven.modrinth:regeneration:OIui6HZO")
+        runtimeOnly fg.deobf("maven.modrinth:legends-mod-core:nCsrAjfS")
     }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)

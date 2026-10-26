@@ -57,6 +57,11 @@ public interface VideoEntry {
     // BUTTON (открыть другой экран, например шейдеры OptiFine)
     default void press() {}
 
+    /** Превью под описанием (например, прицел); false — нет превью. */
+    default boolean preview(net.minecraft.client.gui.GuiGraphics g, int x, int y, int w, int h) {
+        return false;
+    }
+
     /** Надпись на кнопке. */
     default Component buttonText() {
         return Component.translatable("archud.video.open");

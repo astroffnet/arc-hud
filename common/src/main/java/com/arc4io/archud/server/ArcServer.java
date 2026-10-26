@@ -86,6 +86,7 @@ public final class ArcServer {
         AuthGate.tick(server);
         AntiEsp.tick();
         AdminServer.tick(server, tick);
+        LegendServer.tick(server, ARC_PLAYERS);
         // AntiESP: перепроверка видимости, даже если игрок стоит на месте (ванилла пересчитывает только при движении)
         if (AntiEsp.enabled() && tick % 5 == 0) {
             for (ServerPlayer p : server.getPlayerList().getPlayers()) p.serverLevel().getChunkSource().move(p);
@@ -232,6 +233,7 @@ public final class ArcServer {
     }
 
     public static void onStop(MinecraftServer server) {
+        LegendServer.save(server);
         if (current == server) save(server);
         reset();
     }
@@ -272,6 +274,7 @@ public final class ArcServer {
         w.writeBoolean(true); // сервер — мод (не плагин): есть стол зачарования Arc и т.п.
         ArcNet.sendToPlayer(player, w);
         WaypointStore.sendSaved(player);
+        LegendServer.onWelcome(player);
         if (protocol != PROTOCOL || !cfg.serverMapSync) return;
         Deque<long[]> q = new ArrayDeque<>();
         // сначала измерение игрока

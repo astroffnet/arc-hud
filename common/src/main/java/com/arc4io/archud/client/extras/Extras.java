@@ -286,29 +286,9 @@ public final class Extras {
         if (cfg.crosshairStyle == 0 || mc.player == null || mc.options.renderDebug) return false;
         if (!mc.options.getCameraType().isFirstPerson()) return true;
         int cx = g.guiWidth() / 2, cy = g.guiHeight() / 2;
-        int c = Draw.brighten(Theme.accent(), 0.4F);
-        int sh = 0x90000000;
-        switch (cfg.crosshairStyle) {
-            case 1 -> {
-                g.fill(cx - 2, cy - 2, cx + 2, cy + 2, sh);
-                g.fill(cx - 1, cy - 1, cx + 1, cy + 1, c);
-            }
-            case 2 -> {
-                for (int[] r : new int[][]{{-6, -1, -2, 0}, {2, -1, 6, 0}, {-1, -6, 0, -2}, {-1, 2, 0, 6}}) {
-                    g.fill(cx + r[0] - 1, cy + r[1] - 1, cx + r[2] + 1, cy + r[3] + 1, sh);
-                    g.fill(cx + r[0], cy + r[1], cx + r[2], cy + r[3], c);
-                }
-                g.fill(cx - 1, cy - 1, cx, cy, c);
-            }
-            default -> {
-                for (int a = 0; a < 24; a++) {
-                    double ang = a * Math.PI * 2 / 24;
-                    int x = cx + (int) Math.round(Math.cos(ang) * 4.5), y = cy + (int) Math.round(Math.sin(ang) * 4.5);
-                    g.fill(x - 1, y - 1, x, y, c);
-                }
-                g.fill(cx - 1, cy - 1, cx, cy, c);
-            }
-        }
+        boolean onTarget = mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity;
+        int c = Crosshair.color(cfg, false);
+        Crosshair.draw(g, cx, cy, mc.getWindow().getGuiScale(), cfg, onTarget);
         // индикатор атаки
         if (mc.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
             float s = mc.player.getAttackStrengthScale(0F);

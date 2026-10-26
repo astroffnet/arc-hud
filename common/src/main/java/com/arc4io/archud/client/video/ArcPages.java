@@ -18,6 +18,7 @@ public final class ArcPages {
         List<VideoPage> out = new ArrayList<>(pages);
         out.add(optimization());
         out.add(EffectsPage.page());
+        out.add(CrosshairPage.page());
         out.add(GraphicsApiPage.page());
         return out;
     }

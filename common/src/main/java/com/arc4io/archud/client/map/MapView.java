@@ -163,6 +163,10 @@ public final class MapView {
 
     public static void drawWaypoints(GuiGraphics g, Font font, float cx, float cy, double centerX, double centerZ, float zoom, float rotation,
                                      float half, boolean clampToEdge, boolean labels) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null) {
+            Legends.draw(g, font, mc.level.dimension().location().toString(), cx, cy, centerX, centerZ, zoom, rotation, half, labels ? 5 : 4, false);
+        }
         for (Waypoint w : WaypointManager.inDimension()) {
             float[] s = toScreen(w.x + 0.5, w.z + 0.5, centerX, centerZ, zoom, rotation);
             float m = Math.max(Math.abs(s[0]), Math.abs(s[1]));
