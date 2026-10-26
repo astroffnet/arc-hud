@@ -556,7 +556,7 @@ public final class ShowcaseDriver {
         Step step = STEPS.get(index);
         if (step.delay() == -2) {
             // ждать окончания загрузки ресурсов (оверлей загрузки) и главного меню
-            if (mc.getOverlay() == null && (mc.screen instanceof TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen)) next(mc);
+            if (mc.getOverlay() == null && mc.screen != null) next(mc);
             return;
         }
         if (step.delay() < 0) {
