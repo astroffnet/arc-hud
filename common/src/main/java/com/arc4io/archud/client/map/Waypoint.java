@@ -12,6 +12,8 @@ public class Waypoint {
     public String name;
     public int x, y, z;
     public int color;
+    /** Иконка значка (см. MapIcons.IDS) или null — ромб с буквами. */
+    public String icon;
     public String dimension;
     public Source source = Source.USER;
     public boolean visible = true;

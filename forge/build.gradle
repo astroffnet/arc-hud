@@ -49,13 +49,13 @@ mixin {
 }
 
 repositories {
+    // Modrinth — только для группы maven.modrinth; хранилище ForgeGradle (fg.repository) тоже допускается,
+    // туда кладутся пересобранные под среду разработки моды (fg.deobf)
     exclusiveContent {
-        forRepository {
-            maven {
-                name = 'Modrinth'
-                url = 'https://api.modrinth.com/maven'
-            }
-        }
+        forRepositories(maven {
+            name = 'Modrinth'
+            url = 'https://api.modrinth.com/maven'
+        }, fg.repository)
         filter { includeGroup 'maven.modrinth' }
     }
     maven {

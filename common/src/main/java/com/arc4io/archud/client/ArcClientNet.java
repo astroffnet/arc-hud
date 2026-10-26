@@ -355,6 +355,7 @@ public final class ArcClientNet {
         buf.writeInt(w.z);
         buf.writeUtf(w.dimension, 128);
         buf.writeInt(w.color);
+        buf.writeUtf(w.icon == null ? "" : w.icon, 32);
         ArcNet.sendToServer(buf);
     }
 
@@ -364,8 +365,10 @@ public final class ArcClientNet {
         int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
         String dim = buf.readUtf(128);
         int color = buf.readInt();
+        String icon = buf.isReadable() ? buf.readUtf(32) : "";
         if (!ArcConfig.get().acceptSharedWaypoints) return;
         Waypoint w = new Waypoint(name, x, y, z, color | 0xFF000000, dim, Waypoint.Source.SHARED);
+        if (!icon.isEmpty()) w.icon = icon;
         w.sharedBy = from;
         WaypointManager.addShared(w);
         Minecraft mc = Minecraft.getInstance();

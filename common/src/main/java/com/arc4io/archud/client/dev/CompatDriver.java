@@ -67,7 +67,7 @@ public final class CompatDriver {
             return;
         }
         k.setDown(down);
-        if (down) KeyMapping.click(k.getKey());
+        if (down) KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(k.saveString()));
         held = down ? k : null;
     }
 

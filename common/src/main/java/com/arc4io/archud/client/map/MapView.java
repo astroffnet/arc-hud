@@ -176,11 +176,8 @@ public final class MapView {
             int x = Math.round(cx + s[0]), y = Math.round(cy + s[1]);
             boolean target = Navigator.isTarget(w);
             if (target) diamond(g, x, y, outside ? 5 : 7, 0xFFFFFFFF);
-            diamond(g, x, y, outside ? 3 : (labels ? 6 : 4), w.color);
-            if (labels && !outside) {
-                Draw.smallCentered(g, font, w.initials(), x + 0.5F, y - 2, 0xFF000000, 0.5F);
-                Draw.smallCentered(g, font, w.name, x, y - 13, 0xFFFFFFFF, 0.6F);
-            }
+            MapIcons.marker(g, font, w, x, y, outside ? 3 : (labels ? 6 : 4), labels && !outside);
+            if (labels && !outside) Draw.smallCentered(g, font, w.name, x, y - 13, 0xFFFFFFFF, 0.6F);
         }
     }
 

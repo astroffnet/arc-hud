@@ -552,9 +552,8 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             if (Math.abs(s[0]) > radius || Math.abs(s[1]) > radius) continue;
             int x = Math.round(cx + s[0]), y = Math.round(cy + s[1]);
             if (Navigator.isTarget(w)) MapView.diamond(g, x, y, 8, 0xFFFFFFFF);
-            MapView.diamond(g, x, y, 6, w.color);
-            Draw.smallCentered(g, font, w.initials(), x + 0.5F, y - 2, 0xFF000000, 0.5F);
-            Draw.smallCentered(g, font, w.name, x, y - 13, 0xFFFFFFFF, 0.6F);
+            MapIcons.marker(g, font, w, x, y, 6, true);
+            Draw.smallCentered(g, font, w.name, x, y - 14, 0xFFFFFFFF, 0.6F);
         }
         Waypoint nav = Navigator.target();
         if (nav != null && nav.source == Waypoint.Source.TEMP && dim.equals(nav.dimension)) {
@@ -623,8 +622,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
                 boolean hov = mouseX >= 0 && mouseX < sw && mouseY >= y && mouseY < y + 23 && mouseY >= listTop && mouseY < bottom;
                 g.fill(3, y, sw - 4, y + 23, hov ? 0x26FFFFFF : 0x0CFFFFFF);
                 if (Navigator.isTarget(wp)) g.fill(3, y, 5, y + 23, 0xFF000000 | wp.color);
-                MapView.diamond(g, 14, y + 11, 6, wp.color);
-                Draw.smallCentered(g, font, wp.initials(), 14.5F, y + 9, 0xFF000000, 0.5F);
+                MapIcons.marker(g, font, wp, 14, y + 11, 6, true);
                 String n = wp.name;
                 int room = sw - 32;
                 if (font.width(n) > room) n = font.plainSubstrByWidth(n, room - font.width("…")) + "…";
