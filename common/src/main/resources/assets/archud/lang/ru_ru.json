@@ -1400,5 +1400,13 @@
   "archud.ch.color.7": "Фиолетовый",
   "archud.ch.color.8": "Розовый",
   "archud.ch.color.9": "Бирюзовый",
-  "archud.ch.color.10": "Чёрный"
+  "archud.ch.color.10": "Чёрный",
+  "archud.adv.tree": "Дерево",
+  "archud.adv.list": "Список",
+  "archud.adv.tree_hint": "Тяните мышью, чтобы двигать дерево · колесо — вверх/вниз, Shift+колесо — вбок",
+  "archud.adv.needs": "Сначала: %s",
+  "archud.layout.hide": "Скрыть",
+  "archud.layout.show": "Показать",
+  "archud.layout.shared": "В общую зону",
+  "archud.layout.hidden": "скрыта"
 }

@@ -83,7 +83,12 @@ final class HudBlocks {
             if (cfg.effectsPanel) add(map, cfg.effectsAnchor, "effects", effects(mc, p, font, accent));
         }
         if (!spectator && cfg.addonBars) {
-            for (ArcHudApi.Panel panel : ArcHudApi.panels()) add(map, cfg.addonPanelsAnchor, "addons", panel(panel, font, accent));
+            for (ArcHudApi.Panel panel : ArcHudApi.panels()) {
+                String pid = panel.id().toString();
+                if (cfg.hiddenPanels.contains(pid)) continue;
+                HudAnchor pa = cfg.panelAnchors.getOrDefault(pid, cfg.addonPanelsAnchor);
+                add(map, pa, "addon:" + pid, panel(panel, font, accent));
+            }
         }
         if (!spectator) {
             add(map, cfg.gearAnchor, "gear", gear(p, font, accent));
@@ -166,7 +171,7 @@ final class HudBlocks {
 
     private static void add(Map<HudAnchor, List<Block>> map, HudAnchor anchor, String id, Block b) {
         if (b == null || b.h() <= 0 || anchor == null) return;
-        float sc = HudScale.get(id);
+        float sc = id.startsWith("addon:") ? HudScale.get("addons") * HudScale.get(id) : HudScale.get(id);
         if (Math.abs(sc - 1F) > 0.001F) b = new Scaled(b, sc);
         map.computeIfAbsent(anchor, k -> new ArrayList<>()).add(b);
     }

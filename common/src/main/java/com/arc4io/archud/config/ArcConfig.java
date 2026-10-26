@@ -97,6 +97,10 @@ public class ArcConfig {
     public HudAnchor pickupsAnchor = HudAnchor.BOTTOM_RIGHT;
     public HudAnchor statusAnchor = HudAnchor.BOTTOM_LEFT;
     public HudAnchor addonPanelsAnchor = HudAnchor.RIGHT;
+    /** Своё место для панели отдельного мода (id панели -> зона); нет записи — общая зона панелей модов. */
+    public java.util.Map<String, HudAnchor> panelAnchors = new java.util.HashMap<>();
+    /** Скрытые панели модов (id панели). */
+    public List<String> hiddenPanels = new ArrayList<>();
     public HudAnchor minimapAnchor = HudAnchor.TOP_RIGHT;
 
     // ---- Мини-карта ----
@@ -416,6 +420,9 @@ public class ArcConfig {
             if (instance.hiddenOverlays == null) instance.hiddenOverlays = new ArrayList<>();
             if (instance.hiddenWaypointSources == null) instance.hiddenWaypointSources = new ArrayList<>();
             if (instance.hudScales == null) instance.hudScales = new java.util.HashMap<>();
+            if (instance.panelAnchors == null) instance.panelAnchors = new java.util.HashMap<>();
+            instance.panelAnchors.values().removeIf(java.util.Objects::isNull);
+            if (instance.hiddenPanels == null) instance.hiddenPanels = new ArrayList<>();
             if (instance.respawnPoints == null) instance.respawnPoints = new java.util.HashMap<>();
             if (instance.infoPanelAnchor == null) instance.infoPanelAnchor = HudAnchor.TOP_LEFT;
             if (instance.compassAnchor == null) instance.compassAnchor = HudAnchor.TOP_CENTER;
