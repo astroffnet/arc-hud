@@ -78,6 +78,13 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
 
     // ================================================================== подмена экранов
 
+    /** Для автоматических скриншотов: открыть страницу с конца списка (2 — «Оптимизация», 1 — «Эффекты»). */
+    public void selectFromEnd(int fromEnd) {
+        page = Mth.clamp(pages.size() - fromEnd, 0, pages.size() - 1);
+        lastPage = page;
+        rebuildWidgets();
+    }
+
     /** Подмена для открывающегося экрана; null — оставить как есть. */
     public static Screen wrap(Screen next, Screen current) {
         if (bypass) {
