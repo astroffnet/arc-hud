@@ -105,14 +105,20 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             followPlayer = viewingCurrent() && followPlayer;
             b.setMessage(layerLabel());
         }));
-        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("☰"), b -> showList = !showList), "archud.map.tip_list"));
+        bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("☰"), b -> {
+            showList = !showList;
+            String go = gotoBox != null ? gotoBox.getValue() : "";
+            rebuildWidgets(); // панель кнопок перестраивается под новую ширину карты
+            if (gotoBox != null) gotoBox.setValue(go);
+        }), "archud.map.tip_list"));
         bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("⋯"), b -> showTrail = !showTrail), "archud.map.tip_trail"));
         bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("▦"), b -> showGrid = !showGrid), "archud.map.tip_grid"));
         bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◘"), b -> showSlime = !showSlime), "archud.map.tip_slime"));
         bar.add(tip(new ArcButton(0, 0, 22, 18, Component.literal("◎"), b -> showZones = !showZones), "archud.map.tip_zones"));
         bar.add(new ArcButton(0, 0, 70, 18, Component.translatable("archud.map.export"), b -> export()));
         bar.add(new ArcButton(0, 0, 80, 18, Component.translatable("archud.wpl.short"), b -> minecraft.setScreen(new WaypointListScreen(this))));
-        int maxX = width - 6 - 70 - 6; // справа — «Готово»
+        // справа — «Готово», а при открытом списке меток — его панель: кнопки не заходят ни туда, ни туда
+        int maxX = Math.min(width - 6 - 70 - 6, width - listW() - 6);
         int x = 6, rowY = height - 24;
         for (ArcButton b : bar) {
             if (x + b.getWidth() > maxX && x > 6) {
