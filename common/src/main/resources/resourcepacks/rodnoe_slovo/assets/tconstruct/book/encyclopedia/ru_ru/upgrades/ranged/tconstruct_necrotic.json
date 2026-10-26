@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:necrotic",
+  "text": [
+    {
+      "text": "Полностью заряженные стрелы лечат часть нанесённого урона: 25% на уровне 1, 45% на 2, 60% на 3, 70% на 4 и 75% на 5. Инструмент теряет 1 доп. прочность за уровень."
+    }
+  ],
+  "more_text_space": true,
+  "tool_filter": "tconstruct:modifiable/ranged",
+  "effects": [
+    "Maximum of 5 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

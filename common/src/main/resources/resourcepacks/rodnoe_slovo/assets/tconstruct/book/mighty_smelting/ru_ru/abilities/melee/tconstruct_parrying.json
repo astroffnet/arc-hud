@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:parrying",
+  "text": [
+    {
+      "text": "Используйте свои безумные навыки ниндзя, чтобы отбивать атаки прямо в воздухе."
+    }
+  ],
+  "effects": [
+    "Allows daggers to briefly block after attacking",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

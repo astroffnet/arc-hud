@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:shield_strap",
+  "text": [
+    {
+      "text": "Он защищает, он атакует, но главное — возвращает факелы."
+    }
+  ],
+  "effects": [
+    "Grants an extra offhand slot",
+    "Leggings interact allows swapping offhand",
+    "Multiple levels, each level gives +1 slot",
+    "Requires 1 upgrade slot per level"
+  ]
+}

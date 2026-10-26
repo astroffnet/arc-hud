@@ -1,0 +1,14 @@
+{
+  "tool": "tconstruct:fishing_rod",
+  "text": [
+    {
+      "text": "Удочка полезна для боя с близкими целями без траты боеприпасов. Если использовать её на воде, она заодно ловит рыбу."
+    }
+  ],
+  "properties": [
+    "Short distance ranged weapon",
+    "Damages monsters when reeled back",
+    "Requires no ammo",
+    "Can catch fish"
+  ]
+}

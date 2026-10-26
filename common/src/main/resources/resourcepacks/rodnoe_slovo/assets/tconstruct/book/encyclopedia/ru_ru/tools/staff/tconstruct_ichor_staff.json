@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:ichor_staff",
+  "text": [
+    {
+      "text": "Посох ихора — вариант посоха с большим числом слотов способностей и скоростью снаряда."
+    }
+  ],
+  "properties": [
+    "1225 Durability",
+    "1.2 Velocity",
+    "0.75 Draw Speed",
+    "2 Upgrade Slots",
+    "3 Ability Slots"
+  ]
+}

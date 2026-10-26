@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:embossed",
+  "text": [
+    {
+      "text": "Чувствуете могущество после победы над боссом? Так вложите эту силу в свои инструменты!"
+    }
+  ],
+  "effects": [
+    "Adds an upgrade slot",
+    "Single level",
+    "Slotless"
+  ]
+}

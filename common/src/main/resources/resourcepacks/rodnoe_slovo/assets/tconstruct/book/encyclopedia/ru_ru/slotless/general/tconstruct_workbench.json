@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:workbench",
+  "text": [
+    {
+      "text": "Добавляет в инвентарь инструмента верстак 2×2."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 1 level",
+    "Slotless"
+  ]
+}

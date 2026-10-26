@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:redirected",
+  "text": [
+    {
+      "text": "Направьте стрелу туда, куда она и так летела."
+    }
+  ],
+  "effects": [
+    "Copies the head trait",
+    "Single level",
+    "Slotless"
+  ]
+}

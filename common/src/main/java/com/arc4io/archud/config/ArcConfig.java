@@ -158,6 +158,14 @@ public class ArcConfig {
     public boolean customModList = true;
     public boolean customInventory = true;
     public boolean customEnchanting = true;
+    /** Быстрая смена языка и языковых пакетов (без полной перезагрузки ресурсов). */
+    public boolean fastLanguageReload = true;
+    /** Встроенный ресурспак «Родное слово» (русский перевод модов). */
+    public boolean builtinRussianPack = true;
+    /** Встроенный пакет уже был включён автоматически (дальше решает игрок). */
+    public boolean builtinRussianPackOffered = false;
+    /** Поддержка CIT-ресурспаков OptiFine на Forge (на Fabric работает встроенный CIT Resewn). */
+    public boolean citSupport = true;
 
     // ---------------- сетевая игра
     /** Избранные серверы (адреса). */

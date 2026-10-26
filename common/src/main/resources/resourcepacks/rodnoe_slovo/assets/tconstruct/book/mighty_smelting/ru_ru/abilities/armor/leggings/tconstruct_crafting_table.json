@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:crafting_table",
+  "text": [
+    {
+      "text": "Как будто все нитки в кармане запутались, но с пользой."
+    }
+  ],
+  "effects": [
+    "Adds a full crafting table to the tool's inventory",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

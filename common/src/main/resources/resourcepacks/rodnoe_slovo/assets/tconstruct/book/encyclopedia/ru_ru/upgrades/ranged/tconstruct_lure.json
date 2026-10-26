@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:lure",
+  "text": [
+    {
+      "text": "Сокращает время ловли рыбы на 5 секунд за уровень."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 3 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

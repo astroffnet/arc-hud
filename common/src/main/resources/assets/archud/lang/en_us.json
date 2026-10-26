@@ -733,5 +733,12 @@
   "archud.config.mobDamageNumbers": "Damage numbers above mobs",
   "archud.config.breakSound": "Sound before a tool breaks",
   "archud.config.infoCanSleep": "Info: you can sleep now",
-  "archud.info.can_sleep": "You can sleep"
+  "archud.info.can_sleep": "You can sleep",
+  "archud.cit.pack": "Arc HUD: OptiFine CIT",
+  "archud.cit.pack_desc": "Custom item textures from OptiFine packs",
+  "archud.fast.title": "Language packs",
+  "archud.fast.packs": "Applied instantly (texts only)",
+  "archud.config.fastLanguageReload": "Fast language & language pack switching",
+  "archud.config.builtinRussianPack": "Built-in pack «Rodnoe slovo» (restart)",
+  "archud.config.citSupport": "OptiFine CIT packs (Forge, reload)"
 }

@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:fiery",
+  "text": [
+    {
+      "text": "Огни Нижнего мира карают ваших врагов."
+    }
+  ],
+  "tool_filter": "tconstruct:modifiable/armor",
+  "effects": [
+    "Has a chance to burn attackers on hit",
+    "Multiple levels, higher levels increase chance of burn",
+    "Requires 1 upgrade slot per level"
+  ]
+}

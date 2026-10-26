@@ -1,0 +1,16 @@
+{
+  "modifier_id": "tconstruct:parrying",
+  "text": [
+    {
+      "text": "Позволяет ненадолго использовать инструмент как щит после атаки."
+    },
+    {
+      "text": "Большинство кинжалов блокируют до 10 урона и не замедляют игрока при использовании."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

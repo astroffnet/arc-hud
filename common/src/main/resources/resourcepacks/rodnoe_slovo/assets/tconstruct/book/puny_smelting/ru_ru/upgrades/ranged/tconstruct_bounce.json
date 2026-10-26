@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:bounce",
+  "text": [
+    {
+      "text": "Коронный трюк. Стреляйте из-за угла или поверх препятствий. Только следите, чтобы стрела не отскочила в вас!"
+    }
+  ],
+  "effects": [
+    "Causes arrows to bounce off blocks",
+    "Multiple levels, each level adds more bounces",
+    "Requires 1 upgrade slot per level"
+  ]
+}

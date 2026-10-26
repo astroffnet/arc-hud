@@ -1,0 +1,8 @@
+{
+  "enchantment.bagofholding.preservation": "Сохранение",
+  "enchantment.bagofholding.preservation.desc": "Не даёт потерять бездонную сумку при смерти. Каждый раз уровень зачарования снижается на единицу.",
+  "item.bagofholding.golden_bag_of_holding": "Золотая бездонная сумка",
+  "item.bagofholding.iron_bag_of_holding": "Железная бездонная сумка",
+  "item.bagofholding.leather_bag_of_holding": "Кожаная бездонная сумка",
+  "itemGroup.bagofholding.main": "Бездонная сумка"
+}

@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:shuriken",
+  "text": [
+    {
+      "text": "Сюрикены — быстрые одноразовые боеприпасы, которые можно метать без другого инструмента."
+    },
+    {
+      "text": "Это упрощает использование, но ограничивает потенциал.",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "1.5 Velocity",
+    "1.5 Projectile Damage",
+    "200% Damage Multiplier",
+    "0.75 Accuracy",
+    "2 Head Trait"
+  ]
+}

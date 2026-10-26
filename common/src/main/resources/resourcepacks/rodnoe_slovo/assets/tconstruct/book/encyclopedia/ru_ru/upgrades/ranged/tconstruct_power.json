@@ -1,0 +1,18 @@
+{
+  "modifier_id": "tconstruct:power",
+  "text": [
+    {
+      "text": "Увеличивает мощность снаряда на 0,5 за уровень, плюс бонус 0,5 на первом уровне."
+    },
+    {
+      "text": "Делает рывок, прыжок, удар и телепортацию на 25% эффективнее за уровень.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Can apply levels incrementally",
+    "Maximum of 5 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

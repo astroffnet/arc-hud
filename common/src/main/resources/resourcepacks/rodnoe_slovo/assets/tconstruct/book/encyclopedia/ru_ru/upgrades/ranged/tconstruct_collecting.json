@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:collecting",
+  "text": [
+    {
+      "text": "Позволяет вытягивать удочкой больше объектов. Можно подцепить предметы, шары опыта, стрелы и метаемые инструменты."
+    },
+    {
+      "text": "Успешно вытянутые объекты перемещаются прямо к игроку.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Single level",
+    "Requires 1 upgrade slot"
+  ]
+}

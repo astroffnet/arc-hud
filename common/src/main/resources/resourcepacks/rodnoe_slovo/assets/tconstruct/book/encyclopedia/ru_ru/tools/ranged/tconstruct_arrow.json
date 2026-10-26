@@ -1,0 +1,13 @@
+{
+  "tool": "tconstruct:arrow",
+  "text": [
+    {
+      "text": "Стрелы — одноразовые снаряды для длинных луков и арбалетов. Напрямую атаковать ими нельзя."
+    }
+  ],
+  "properties": [
+    "2.0 Projectile Damage",
+    "0.75 Accuracy",
+    "1 Head Trait, 1 Shaft Trait"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:depth_strider",
+  "text": [
+    {
+      "text": "Это либо безумие, либо гениальность. Удивительно, как часто эти качества совпадают."
+    }
+  ],
+  "effects": [
+    "Increases movement speed underwater",
+    "Multiple levels, each level further increases speed",
+    "Requires 1 upgrade slot per level"
+  ]
+}

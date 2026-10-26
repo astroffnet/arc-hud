@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:tilling",
+  "text": [
+    {
+      "text": "Нужно создать большую ферму? Очень, очень большую? Теперь это возможно."
+    }
+  ],
+  "tool_filter": "tconstruct:modifiable/armor/boots",
+  "effects": [
+    "Creates farmland as you walk",
+    "Area boosted by expanded",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

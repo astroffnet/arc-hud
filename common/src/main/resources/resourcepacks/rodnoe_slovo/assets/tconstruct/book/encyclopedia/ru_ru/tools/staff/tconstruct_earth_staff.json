@@ -1,0 +1,18 @@
+{
+  "tool": "tconstruct:earth_staff",
+  "text": [
+    {
+      "text": "Посох земляной слизи — вариант посоха с высокой защитой и точностью."
+    }
+  ],
+  "properties": [
+    "800 Durability",
+    "1 Projectile Power",
+    "0.9 Accuracy",
+    "35 Max Blocking",
+    "140 Block Angle",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Ability Slots"
+  ]
+}

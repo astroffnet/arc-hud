@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:warping",
+  "text": [
+    {
+      "text": "Над ним не перелезть. Под ним не подлезть. О нет! Придётся идти напролом!"
+    }
+  ],
+  "effects": [
+    "Charge to teleport in the direction looked",
+    "Can boost teleport range with power",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

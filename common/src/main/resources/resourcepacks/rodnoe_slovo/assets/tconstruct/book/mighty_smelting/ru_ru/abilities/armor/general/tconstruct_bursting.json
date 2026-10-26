@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:bursting",
+  "text": [
+    {
+      "text": "Немного противно, что ваша броня протекает. Но очень эффективно!"
+    },
+    {
+      "text": "ПКМ по баку с инструментом наполняет его",
+      "paragraph": true
+    }
+  ],
+  "effects": [
+    "Chance per level to apply fluid effects to attacker",
+    "Various effects based on fluid, including fire and poison",
+    "Requires 1 ability slot per level"
+  ]
+}

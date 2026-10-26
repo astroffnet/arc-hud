@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:throwing_axe",
+  "text": [
+    {
+      "text": "Метательные топоры бьют сильнее, но летят на меньшее расстояние."
+    },
+    {
+      "text": "\n"
+    },
+    {
+      "text": "Метательные топоры тоже не принимают модификаторы, но кому они нужны?",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Quick, disposable ranged option",
+    "Does not require another tool to fire"
+  ]
+}

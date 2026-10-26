@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:drill_attack",
+  "text": [
+    {
+      "text": "Удар по мобу в первую секунду способности движения — прыжка, броска или крюка — заставляет атаковать его оружием в основной руке."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 1 level",
+    "Requires 1 ability slot",
+    "Requires springing, flinging, or grapple"
+  ]
+}

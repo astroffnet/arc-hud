@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:plate_chestplate",
+  "text": [
+    {
+      "text": "Если приложить голову к нагруднику, можно услышать собственное сердцебиение и взрыв крипера за спиной. Зачем вы его сняли?"
+    },
+    {
+      "text": "Тяжёлая броня с кольчугой для гибкости — круче не придумаешь!",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Higher Durability",
+    "Higher Armor",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Material Traits"
+  ]
+}

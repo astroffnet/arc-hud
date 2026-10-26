@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:zoom",
+  "text": [
+    {
+      "text": "Я вижу своими глазками что-то далеко-далеко."
+    }
+  ],
+  "effects": [
+    "Quickly zooms in when using the tool",
+    "Single Level",
+    "Requires 1 upgrade slot"
+  ]
+}

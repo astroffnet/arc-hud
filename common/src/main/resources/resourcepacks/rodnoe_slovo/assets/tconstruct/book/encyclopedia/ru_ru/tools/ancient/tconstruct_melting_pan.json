@@ -1,0 +1,21 @@
+{
+  "tool": "tconstruct:melting_pan",
+  "text": [
+    {
+      "text": "Плавильная сковорода — посох, добывающий плавящиеся блоки и дающий на 6 самородков больше с руды (против 3 у плавильной печи). Расширители работают как жильный молот."
+    },
+    {
+      "text": "Выпадает с зомби, встречается в подземельях, иглу и дарится бронниками после рейда.",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "6 Mining Speed",
+    "Stone Harvest Tier",
+    "10% Knockback Resistance",
+    "Melting+",
+    "1 Defense Slot",
+    "1 Upgrade Slot",
+    "2 Ability Slots"
+  ]
+}

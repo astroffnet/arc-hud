@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:minotaur_axe",
+  "text": [
+    {
+      "text": "Топор минотавра — особое оружие, увеличивающее урон при атаке на бегу. Его можно найти в руках у минотавров из лабиринтов."
+    }
+  ],
+  "properties": [
+    "High Damage",
+    "Low Attack Speed",
+    "Bonus charging damage",
+    "3 Upgrade Slots",
+    "1 Ability Slot"
+  ]
+}

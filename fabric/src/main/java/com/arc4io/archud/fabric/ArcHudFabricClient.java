@@ -30,6 +30,14 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
     @Override
     public void onInitializeClient() {
         ArcClient.init(this);
+        // встроенный пакет «Родное слово» (русский перевод модов), включён по умолчанию, можно выключить
+        if (com.arc4io.archud.config.ArcConfig.get().builtinRussianPack) {
+            net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer("archud").ifPresent(c ->
+                    net.fabricmc.fabric.api.resource.ResourceManagerHelper.registerBuiltinResourcePack(
+                            new net.minecraft.resources.ResourceLocation("archud", "rodnoe_slovo"), c,
+                            net.minecraft.network.chat.Component.literal("Родное слово"),
+                            net.fabricmc.fabric.api.resource.ResourcePackActivationType.DEFAULT_ENABLED));
+        }
         for (var key : ArcKeys.ALL) KeyBindingHelper.registerKeyBinding(key);
 
         HudRenderCallback.EVENT.register((graphics, tickDelta) -> {

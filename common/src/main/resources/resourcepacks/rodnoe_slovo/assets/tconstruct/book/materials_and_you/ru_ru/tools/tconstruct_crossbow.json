@@ -1,0 +1,20 @@
+{
+  "tool": "tconstruct:crossbow",
+  "text": [
+    {
+      "text": "Арбалет подойдёт тем, кто хочет оставаться быстрым и всегда готовым к бою"
+    },
+    {
+      "text": "\n"
+    },
+    {
+      "text": "Никогда не стоит скрещивать лук",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Quick and nimble type of bow",
+    "Able to keep an arrow prepared to fire",
+    "Likes to party with fireworks"
+  ]
+}

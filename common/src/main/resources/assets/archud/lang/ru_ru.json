@@ -792,5 +792,12 @@
   "archud.config.mobDamageNumbers": "Урон над мобами",
   "archud.config.breakSound": "Звук перед поломкой инструмента",
   "archud.config.infoCanSleep": "Инфо: можно спать",
-  "archud.info.can_sleep": "Можно спать"
+  "archud.info.can_sleep": "Можно спать",
+  "archud.cit.pack": "Arc HUD: CIT OptiFine",
+  "archud.cit.pack_desc": "Свои текстуры предметов из пакетов OptiFine",
+  "archud.fast.title": "Языковые пакеты",
+  "archud.fast.packs": "Применены мгновенно (только тексты)",
+  "archud.config.fastLanguageReload": "Быстрая смена языка и языковых пакетов",
+  "archud.config.builtinRussianPack": "Встроенный пакет «Родное слово» (перезапуск)",
+  "archud.config.citSupport": "CIT-пакеты OptiFine (Forge, перезагрузка)"
 }

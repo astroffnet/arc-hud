@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:ambidextrous",
+  "text": [
+    {
+      "text": "Все дерутся кунг-фу."
+    }
+  ],
+  "effects": [
+    "Allows punching with both hands",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

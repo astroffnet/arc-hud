@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:step_up",
+  "text": [
+    {
+      "text": "Увеличивает высоту шага игрока на 0,5 блока за уровень."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 2 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

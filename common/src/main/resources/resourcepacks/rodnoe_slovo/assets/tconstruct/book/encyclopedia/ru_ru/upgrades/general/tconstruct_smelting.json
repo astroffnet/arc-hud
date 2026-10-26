@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:smelting",
+  "text": [
+    {
+      "text": "Готовит предметы внутри инструмента, когда им наносят урон в ближнем бою, добывают блоки, стреляют стрелами или блокируют урон. Готовит по 1 предмету за уровень."
+    },
+    {
+      "text": "Инвентарь открывается приседанием при взаимодействии.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 4 levels",
+    "Requires 1 upgrade slot per level"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:plate_leggings",
+  "text": [
+    {
+      "text": "Моя нога, моя нога."
+    },
+    {
+      "text": "Эти штаны обеспечивают высокую защиту для любых сражений!",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Higher Durability",
+    "Higher Armor",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Material Traits"
+  ]
+}

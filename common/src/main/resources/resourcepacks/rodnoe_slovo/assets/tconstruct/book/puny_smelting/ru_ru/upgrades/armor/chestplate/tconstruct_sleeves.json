@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:sleeves",
+  "text": [
+    {
+      "text": "Спрятанные сюрикены — классический трюк ниндзя."
+    }
+  ],
+  "effects": [
+    "Throw items from empty hand by interacting",
+    "Sneak to toggle selected item",
+    "Right click chestplate in inventory to access",
+    "Multiple levels, each level adds more slots",
+    "Requires 1 upgrade slot per level"
+  ]
+}

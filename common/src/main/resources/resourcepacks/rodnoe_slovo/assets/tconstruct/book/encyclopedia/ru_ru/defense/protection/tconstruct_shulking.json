@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:shulking",
+  "text": [
+    {
+      "text": "Даёт +10% сопротивления при приседании. Максимум 80% на весь комплект, то есть 8 уровней."
+    },
+    {
+      "text": "Снижает урон атаки при приседании на 10% за уровень самой высокоуровневой части.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Can apply levels incrementally",
+    "Requires 1 defense slot per level"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Гербицид",
+  "text": "Было бы здорово для сбора урожая, если бы не уничтожало и посевы.",
+  "block": [
+    "Removes most plants, including leaves",
+    "Replaces grass with dirt"
+  ]
+}

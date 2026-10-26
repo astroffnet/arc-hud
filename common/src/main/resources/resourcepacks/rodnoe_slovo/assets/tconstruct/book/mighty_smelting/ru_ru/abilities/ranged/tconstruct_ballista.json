@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tconstruct:ballista",
+  "text": [
+    {
+      "text": "Обычные стрелы вас не устраивают? Попробуйте баллистические боеприпасы! Стреляйте только оружием ближнего боя высочайшего качества."
+    }
+  ],
+  "effects": [
+    "Allows your bow to fire melee weapons",
+    "Melee weapon must be in other hand or quiver",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

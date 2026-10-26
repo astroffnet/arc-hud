@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:trueshot",
+  "text": [
+    {
+      "text": "Возьмите цель на прицел."
+    }
+  ],
+  "effects": [
+    "Increases accuracy of fired projectiles",
+    "Multiple levels, each level increases accuracy further",
+    "Requires 1 upgrade slot per level"
+  ]
+}

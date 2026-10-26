@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:workbench",
+  "text": [
+    {
+      "text": "Иногда не хочется отрываться от возни в карманах ради крафта."
+    }
+  ],
+  "effects": [
+    "Adds an 2x2 crafting table to the tool's inventory",
+    "Single level",
+    "Slotless"
+  ]
+}

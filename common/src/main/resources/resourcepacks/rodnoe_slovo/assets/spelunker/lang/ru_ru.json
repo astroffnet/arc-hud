@@ -1,0 +1,12 @@
+{
+  "effect.spelunker.spelunker": "Спелеолог",
+  "item.spelunker.amethyst_dust": "Аметистовая пыль",
+  "item.minecraft.potion.effect.spelunker": "Зелье спелеолога",
+  "item.minecraft.potion.effect.long_spelunker": "Зелье спелеолога",
+  "item.minecraft.splash_potion.effect.spelunker": "Взрывное зелье спелеолога",
+  "item.minecraft.splash_potion.effect.long_spelunker": "Взрывное зелье спелеолога",
+  "item.minecraft.lingering_potion.effect.spelunker": "Туманное зелье спелеолога",
+  "item.minecraft.lingering_potion.effect.long_spelunker": "Туманное зелье спелеолога",
+  "item.minecraft.tipped_arrow.effect.spelunker": "Стрела спелеолога",
+  "item.minecraft.tipped_arrow.effect.long_spelunker": "Стрела спелеолога"
+}

@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tconstruct:bulk_quiver",
+  "text": [
+    {
+      "text": "Даёт луку внутренние слоты для стрел. Стрелы из слотов используются, если в основном инвентаре стрел нет."
+    },
+    {
+      "text": "Инвентарь колчана открывается атакой с приседанием. Вмещает две стопки по 64 стрелы на уровень.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "No max level",
+    "Requires 1 ability slot per level"
+  ]
+}

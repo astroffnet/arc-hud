@@ -1,0 +1,14 @@
+{
+  "tool": "tconstruct:earth_staff",
+  "text": [
+    {
+      "text": "Используя силу зелёной слизи, можно создать самый защитный из магических посохов. У него выше шанс блока и точность, но слабее сила снаряда."
+    }
+  ],
+  "properties": [
+    "Mid Durability",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Ability Slots"
+  ]
+}

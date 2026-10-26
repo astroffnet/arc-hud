@@ -1,0 +1,11 @@
+{
+  "text": "Пепельная слизь течёт не туда, и взрыв у неё не туда.",
+  "entity": [
+    "Power 2 explosion",
+    "Up to 3 Explosion Damage",
+    "Inverted explosion knockback"
+  ],
+  "block": [
+    "Explosion breaks blocks"
+  ]
+}

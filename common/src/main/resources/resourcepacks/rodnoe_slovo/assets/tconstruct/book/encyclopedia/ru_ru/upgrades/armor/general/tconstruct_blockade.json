@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:blockade",
+  "text": [
+    {
+      "text": "Повышает базовое значение блока инструмента на +100% за уровень, максимум +300% на уровне 3."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Can apply levels incrementally",
+    "Maximum of 3 levels",
+    "Requires 1 upgrade slot per level",
+    "Requires blocking or parrying"
+  ]
+}

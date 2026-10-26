@@ -1,0 +1,19 @@
+{
+  "tool": "tconstruct:plate_helmet",
+  "text": [
+    {
+      "text": "Каски для крепких голов."
+    },
+    {
+      "text": "Хороший прочный шлем, чтобы защитить мозг. Ничто не повредит вашей голове!",
+      "paragraph": true
+    }
+  ],
+  "properties": [
+    "Higher Durability",
+    "Higher Armor",
+    "2 Upgrade Slots",
+    "3 Defense Slots",
+    "2 Material Traits"
+  ]
+}

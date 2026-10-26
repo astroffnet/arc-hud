@@ -1,0 +1,15 @@
+{
+  "modifier_id": "tconstruct:crystalshot",
+  "text": [
+    {
+      "text": "При обращении на вас могут вырасти кристаллы."
+    }
+  ],
+  "effects": [
+    "Can shoots as arrows",
+    "Doesn't require ammo, consumes extra durability",
+    "Changes colors based on crystals used to craft",
+    "Single level",
+    "Requires 1 ability slot"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:melting_pan",
+  "text": [
+    {
+      "text": "Сковородка плавит ваши блоки и хранит жидкость для ваших посохоподобных целей. Её можно найти в подземельях, иглу, у зомби, а также получить в подарок от жителей деревни."
+    }
+  ],
+  "properties": [
+    "Mines meltable blocks",
+    "Melting+",
+    "1 Defense Slot",
+    "1 Upgrade Slot",
+    "2 Ability Slots"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "modifier_id": "tconstruct:brushing",
+  "text": [
+    {
+      "text": "Удерживайте использование на подозрительном блоке, чтобы медленно расчистить его кисточкой. По завершении тратит прочность и поддерживает расчистку по области."
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Maximum of 1 level",
+    "Requires 1 ability slot"
+  ]
+}

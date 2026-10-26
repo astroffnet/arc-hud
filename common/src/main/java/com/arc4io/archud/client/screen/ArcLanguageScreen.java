@@ -65,8 +65,8 @@ public class ArcLanguageScreen extends ArcScreen {
         if (selected != null && !selected.equals(lm.getSelected())) {
             lm.setSelected(selected);
             options.languageCode = selected;
-            minecraft.reloadResourcePacks();
             options.save();
+            com.arc4io.archud.client.resources.FastReload.applyLanguage(minecraft);
         }
         onClose();
     }

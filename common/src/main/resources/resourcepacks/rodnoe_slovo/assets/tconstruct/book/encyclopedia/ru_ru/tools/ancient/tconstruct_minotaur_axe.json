@@ -1,0 +1,16 @@
+{
+  "tool": "tconstruct:minotaur_axe",
+  "text": [
+    {
+      "text": "Топор минотавра — особый топор, получаемый с минотавров в Сумеречном лесу. Он наносит бонусный урон при ударе на бегу, часто больше критического, и ломает дерево столбцом."
+    }
+  ],
+  "properties": [
+    "+3 Attack Damage",
+    "+7 Charging Damage",
+    "0.9 Attack Speed",
+    "Full stats from both heads",
+    "3 Upgrade Slots",
+    "1 Ability Slot"
+  ]
+}

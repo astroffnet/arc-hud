@@ -1,0 +1,15 @@
+{
+  "tool": "tconstruct:war_pick",
+  "text": [
+    {
+      "text": "Боевая кирка — сочетание кирки и арбалета. Её можно найти в шахтах и получить у жителей или разбойников."
+    }
+  ],
+  "properties": [
+    "Mines stone blocks and similar",
+    "Able to keep an arrow prepared to fire",
+    "Mining blocks boosts velocity of loaded arrow",
+    "3 Upgrade Slots",
+    "1 Ability Slot"
+  ]
+}

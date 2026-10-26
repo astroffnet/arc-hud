@@ -1,0 +1,16 @@
+{
+  "title": "Ихор",
+  "item": [
+    "tconstruct:ichor_slime_ball",
+    "tconstruct:ichor_congealed_slime",
+    "tconstruct:ichor_slime",
+    "tconstruct:ichor_slime_crystal",
+    "tconstruct:ichor_slime_crystal_block"
+  ],
+  "text": [
+    {
+      "text": "Огненную кровь можно получить, расплавив ихор, хотя это не лучший вариант: для его плавления нужно более горячее топливо. Но в итоге вы всё равно остаётесь в плюсе, так что это может пригодиться, чтобы пополнить запас после получения огненной крови другим способом.",
+      "paragraph": true
+    }
+  ]
+}
