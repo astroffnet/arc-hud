@@ -41,7 +41,7 @@ public final class ArcDebugScreen {
     private static int frameIdx;
     private static long lastNs;
 
-    private record Card(String title, List<String[]> rows, int extraH, int kind) {}
+    record Card(String title, List<String[]> rows, int extraH, int kind) {}
 
     private ArcDebugScreen() {}
 
@@ -50,19 +50,66 @@ public final class ArcDebugScreen {
         return ArcConfig.get().customF3 && !mc.options.renderDebugCharts && !mc.options.renderFpsChart;
     }
 
+    /** Когда Arc HUD последний раз разложил карточки F3 вместе со своими блоками (тогда отдельно их не рисуем). */
+    private static long hudLaidOutNs;
+
+    /** F3 открыто и показывается наше меню. */
+    public static boolean active() {
+        return Minecraft.getInstance().options.renderDebug && enabled();
+    }
+
+    /**
+     * Вызывается вместо ванильного текста F3. Обычно карточки уже нарисовал HUD (они стоят в его стопках
+     * у левого и правого края, ниже мини-карты и инфо-панели), здесь только замер кадра. Если HUD
+     * не рисуется (выключен, наблюдатель без HUD и т.п.) — рисуем карточки сами в углах.
+     */
     public static void render(GuiGraphics g) {
-        Minecraft mc = Minecraft.getInstance();
         long now = Util.getNanos();
         if (lastNs != 0) {
             FRAMES[frameIdx] = now - lastNs;
             frameIdx = (frameIdx + 1) % FRAMES.length;
         }
         lastNs = now;
+        if (now - hudLaidOutNs < 250_000_000L) return;
+        Minecraft mc = Minecraft.getInstance();
+        List<HudBlocks.Block> left = new ArrayList<>(), right = new ArrayList<>();
+        build(mc, mc.font, Theme.accent(), g.guiWidth(), left, right);
+        int y = 4;
+        for (HudBlocks.Block b : left) {
+            if (y + b.h() > g.guiHeight() - 2) break;
+            b.draw(g, 4, y, false);
+            y += b.h() + 4;
+        }
+        y = 4;
+        for (HudBlocks.Block b : right) {
+            if (y + b.h() > g.guiHeight() - 2) break;
+            b.draw(g, g.guiWidth() - 4 - b.w(), y, true);
+            y += b.h() + 4;
+        }
+    }
+
+    static void markLaidOut() {
+        hudLaidOutNs = Util.getNanos();
+    }
+
+    /** Карточка F3 как блок HUD — раскладывается вместе с остальными, ничего не перекрывая. */
+    record CardBlock(Card card, int w, float s, int accent) implements HudBlocks.Block {
+        @Override
+        public int h() {
+            return cardH(card, s);
+        }
+
+        @Override
+        public void draw(GuiGraphics g, int x, int y, boolean right) {
+            drawCard(g, Minecraft.getInstance().font, card, x, y, w, s, accent);
+        }
+    }
+
+    /** Собирает карточки: левый столбец («Позиция», «Мир») и правый («Производительность», «Система», «Цель»). */
+    static void build(Minecraft mc, Font font, int accent, int screenW, List<HudBlocks.Block> outLeft, List<HudBlocks.Block> outRight) {
         Entity cam = mc.getCameraEntity();
         ClientLevel level = mc.level;
         if (cam == null || level == null) return;
-        Font font = mc.font;
-        int accent = Theme.accent();
         boolean reduced = mc.showOnlyReducedInfo();
 
         List<Card> left = new ArrayList<>(), right = new ArrayList<>();
@@ -177,9 +224,9 @@ public final class ArcDebugScreen {
         }
 
         float s = 0.75F;
-        int lw = Math.min(g.guiWidth() / 2 - 12, 250);
-        drawColumn(g, font, left, 4, 4, lw, s, accent, false);
-        drawColumn(g, font, right, g.guiWidth() - 4 - lw, 4, lw, s, accent, true);
+        int lw = Math.max(120, Math.min(screenW / 2 - 100, 230));
+        for (Card c : left) outLeft.add(new CardBlock(c, lw, s, accent));
+        for (Card c : right) outRight.add(new CardBlock(c, lw, s, accent));
     }
 
     private static ItemStack targetIcon = ItemStack.EMPTY;
@@ -188,11 +235,15 @@ public final class ArcDebugScreen {
         return new String[]{k, v};
     }
 
-    private static void drawColumn(GuiGraphics g, Font font, List<Card> cards, int x, int y, int w, float s, int accent, boolean rightSide) {
-        for (Card c : cards) {
+    private static int cardH(Card c, float s) {
+        int lineH = Math.round(10 * s) + 1;
+        return 14 + c.rows().size() * lineH + c.extraH() + 4;
+    }
+
+    private static void drawCard(GuiGraphics g, Font font, Card c, int x, int y, int w, float s, int accent) {
+        {
             int lineH = Math.round(10 * s) + 1;
-            int h = 14 + c.rows().size() * lineH + c.extraH() + 4;
-            if (y + h > g.guiHeight() - 2) break;
+            int h = cardH(c, s);
             Draw.panel(g, x, y, w, h, 0xC00A0E13, Draw.alpha(accent, 0x70));
             g.fill(x + 2, y, x + w - 2, y + 1, accent);
             Draw.small(g, font, c.title().toUpperCase(Locale.ROOT), x + 5, y + 4, Draw.alpha(accent, 0xFF), 0.7F);
@@ -234,7 +285,6 @@ public final class ArcDebugScreen {
                 int l60 = gy + gh - Math.round(16.7F / 50F * gh);
                 g.fill(gx, l60, gx + gw, l60 + 1, 0x40FFFFFF);
             }
-            y += h + 4;
         }
     }
 }

@@ -164,6 +164,7 @@ public final class ShowcaseDriver {
         add(60, mc -> {}, "10_world_map");
         add(10, mc -> mc.setScreen(new WaypointListScreen(null)), null);
         add(30, mc -> {}, "11_waypoint_menu");
+        add(100, ShowcaseDriver::dropTestMod, null); // «закинули мод в папку» — наблюдатель замечает за ~4 с
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.PauseScreen(true)), null);
         add(40, mc -> {}, "12_pause_menu");
         add(10, mc -> mc.setScreen(new ArcConfigScreen(null)), null);
@@ -257,6 +258,10 @@ public final class ShowcaseDriver {
         }, null);
         add(100, mc -> {}, "18_singleplayer");
         add(40, mc -> {
+            try {
+                java.nio.file.Files.deleteIfExists(mc.gameDirectory.toPath().resolve("mods").resolve("showcase-test-mod.jar"));
+            } catch (Exception ignored) {
+            }
             ArcHud.LOGGER.info("[Showcase] done");
             mc.stop();
         }, null);
@@ -511,5 +516,19 @@ public final class ShowcaseDriver {
             ArcHud.LOGGER.error("[Showcase] step {} failed", index, t);
         }
         timer = Math.max(1, s.delay());
+    }
+
+    private static void dropTestMod(Minecraft mc) {
+        try {
+            java.nio.file.Path dir = mc.gameDirectory.toPath().resolve("mods");
+            java.nio.file.Files.createDirectories(dir);
+            try (java.util.zip.ZipOutputStream z = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(dir.resolve("showcase-test-mod.jar")))) {
+                z.putNextEntry(new java.util.zip.ZipEntry("fabric.mod.json"));
+                z.write("{\"schemaVersion\":1,\"id\":\"showcase_test\",\"version\":\"1\",\"name\":\"Showcase Test Mod\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                z.closeEntry();
+            }
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("[Showcase] test mod: " + e);
+        }
     }
 }

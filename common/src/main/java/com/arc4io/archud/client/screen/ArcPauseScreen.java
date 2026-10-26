@@ -27,9 +27,19 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
         super(Component.translatable("menu.game"));
     }
 
+    private int modsStamp;
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (com.arc4io.archud.client.mods.ModWatcher.stamp() != modsStamp) rebuildWidgets();
+    }
+
     @Override
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 240, 270);
+        modsStamp = com.arc4io.archud.client.mods.ModWatcher.stamp();
+        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, width);
         pw = 220;
         int bw = pw - 20;
         int half = (bw - 6) / 2;
