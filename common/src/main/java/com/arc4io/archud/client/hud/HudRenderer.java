@@ -691,8 +691,17 @@ public final class HudRenderer {
     // ------------------------------------------------- предупреждение о падении
     private static void fallWarning(GuiGraphics g, LocalPlayer p, Font font, int w, int h) {
         if (p.onGround() || p.getAbilities().flying || p.isFallFlying() || p.isInWater() || p.hasEffect(MobEffects.SLOW_FALLING)) return;
-        if (p.getDeltaMovement().y >= 0 || p.fallDistance < 4F) return;
-        float dmg = Math.max(0, p.fallDistance - 3F);
+        if (p.getDeltaMovement().y >= -0.3 || p.fallDistance < 1.5F) return;
+        // прогноз: уже пройденное + расстояние до земли под ногами (в воду — без урона)
+        float dmg;
+        net.minecraft.world.phys.Vec3 from = p.position();
+        net.minecraft.world.phys.BlockHitResult hit = p.level().clip(new net.minecraft.world.level.ClipContext(from, from.add(0, -64, 0),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.ANY, p));
+        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+            if (!p.level().getFluidState(hit.getBlockPos()).isEmpty()) return;
+            dmg = (float) Math.max(0, Math.ceil(p.fallDistance + (from.y - hit.getLocation().y) - 3.0));
+        } else dmg = Math.max(0, p.fallDistance - 3F);
+        if (dmg < 1F) return;
         boolean deadly = dmg >= p.getHealth() + p.getAbsorptionAmount();
         int color = deadly ? Draw.mix(0xFFFF2020, 0xFFFFFFFF, Draw.pulse(300)) : 0xFFFFB74D;
         String s = "-" + fmt(dmg) + " ❤";

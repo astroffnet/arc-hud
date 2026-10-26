@@ -45,7 +45,7 @@ import java.util.Optional;
  * Набор мелких фишек Arc HUD (каждая отключается в настройках):
  * зум, свободный обзор, полная яркость, автобег, копирование координат, «чистый» скриншот,
  * свой прицел, хитмаркер, всплывающий урон, счётчик стрел, прочность у прицела и предупреждение о поломке,
- * прогноз урона от падения, панель полёта на элитрах, название биома при входе, режим AFK,
+ * панель полёта на элитрах, название биома при входе, режим AFK,
  * напоминание о перерыве, координаты смерти в чате, предупреждение о полном инвентаре,
  * учёт времени игры на серверах.
  */
@@ -168,7 +168,7 @@ public final class Extras {
     }
 
     private static void trackDamage(Minecraft mc, LocalPlayer p, long now) {
-        if (!ArcConfig.get().damageNumbers) return;
+        if (!ArcConfig.get().mobDamageNumbers) return;
         Map<Integer, Float> seen = new HashMap<>();
         for (Entity e : mc.level.entitiesForRendering()) {
             if (!(e instanceof LivingEntity le) || e == p || e.distanceToSqr(p) > 32 * 32) continue;
@@ -193,7 +193,7 @@ public final class Extras {
     }
 
     private static void durabilityWarning(Minecraft mc, LocalPlayer p, ArcConfig cfg) {
-        if (!cfg.lowDurabilityWarning) return;
+        if (!cfg.breakSound) return;
         ItemStack s = p.getMainHandItem();
         if (!s.isDamageableItem()) return;
         int left = s.getMaxDamage() - s.getDamageValue();
@@ -333,7 +333,7 @@ public final class Extras {
         boolean firstPerson = mc.options.getCameraType().isFirstPerson();
 
         // всплывающий урон
-        if (cfg.damageNumbers && WaypointWorldRenderer.ready()) {
+        if (cfg.mobDamageNumbers && WaypointWorldRenderer.ready()) {
             for (Popup pp : POPUPS) {
                 float age = (now - pp.time()) / 1200F;
                 float[] s = WaypointWorldRenderer.project(pp.x(), pp.y() + age * 0.8, pp.z(), w, h);
@@ -382,8 +382,6 @@ public final class Extras {
                 Draw.smallCentered(g, font, t, cx, cy + 17, col, 0.5F);
             }
         }
-        // прогноз урона от падения
-        if (cfg.fallWarning) renderFallWarning(g, mc, p, cx, cy);
         // элитры
         if (cfg.elytraHud && p.isFallFlying()) renderElytra(g, mc, p, cx, cy, accent);
         // полный инвентарь
@@ -420,22 +418,6 @@ public final class Extras {
             Draw.smallCentered(g, font, "AFK", cx, cy - 14, Draw.alpha(accent, 0xFF), 2F);
             Draw.smallCentered(g, font, String.format(Locale.ROOT, "%d:%02d", sec / 60, sec % 60), cx, cy + 6, 0xFFE0E6EE, 0.9F);
         }
-    }
-
-    private static void renderFallWarning(GuiGraphics g, Minecraft mc, LocalPlayer p, int cx, int cy) {
-        if (p.onGround() || p.isFallFlying() || p.getAbilities().flying || p.isInWater() || p.isPassenger()
-                || p.hasEffect(MobEffects.SLOW_FALLING) || p.getAbilities().invulnerable || p.getDeltaMovement().y > -0.3) return;
-        Vec3 from = p.position();
-        BlockHitResult hit = mc.level.clip(new ClipContext(from, from.add(0, -64, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, p));
-        if (hit.getType() != HitResult.Type.BLOCK) return;
-        if (!mc.level.getFluidState(hit.getBlockPos()).isEmpty()) return; // в воду — без урона
-        double total = p.fallDistance + (from.y - hit.getLocation().y);
-        int dmg = (int) Math.ceil(total - 3.0);
-        if (dmg < 1) return;
-        boolean lethal = dmg >= p.getHealth() + p.getAbsorptionAmount();
-        String t = lethal ? Component.translatable("archud.extra.fall_lethal").getString()
-                : Component.translatable("archud.extra.fall", String.format(Locale.ROOT, "%.1f", dmg / 2F)).getString();
-        Draw.smallCentered(g, mc.font, t, cx, cy + 24, lethal ? 0xFFFF4040 : 0xFFFFB74D, 0.8F);
     }
 
     private static void renderElytra(GuiGraphics g, Minecraft mc, LocalPlayer p, int cx, int cy, int accent) {
