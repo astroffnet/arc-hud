@@ -37,6 +37,11 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
     private EditBox search;
     private double scroll, tabScroll;
     private int px, py, pw, ph, tabsW;
+    /** Вид «дерево» (как в ванилле — видно, какое достижение открывает следующее) или «список». */
+    private static boolean treeView = true;
+    private double panX, panY;
+    private boolean panning, panInit;
+    private static final int NODE = 26, STEP_X = 34, STEP_Y = 30;
 
     public ArcAdvancementsScreen(ClientAdvancements advancements) {
         super(Component.translatable("gui.advancements"));
@@ -57,6 +62,12 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
         if (tab == null && !roots.isEmpty()) select(roots.get(0));
         int lx = px + tabsW + 14;
         int lw = pw - tabsW - 22;
+        addRenderableWidget(new ArcButton(lx, py + 25, 60, 18, Component.translatable(treeView ? "archud.adv.tree" : "archud.adv.list"), b -> {
+            treeView = !treeView;
+            b.setMessage(Component.translatable(treeView ? "archud.adv.tree" : "archud.adv.list"));
+        }));
+        lx += 64;
+        lw -= 64;
         search = addRenderableWidget(new EditBox(font, lx, py + 26, lw - 3 * 64, 16, Component.translatable("archud.controls.search")));
         search.setHint(Component.translatable("archud.controls.search"));
         search.setResponder(s -> refresh());
@@ -80,6 +91,7 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
     private void select(Advancement root) {
         tab = root;
         scroll = 0;
+        panInit = false;
         advancements.setSelectedTab(root, true);
         refresh();
     }
@@ -168,6 +180,12 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
         }
         g.disableScissor();
 
+        if (treeView) {
+            renderTree(g, mouseX, mouseY, accent);
+            super.render(g, mouseX, mouseY, partialTick);
+            if (treeHover != null) treeTooltip(g, treeHover, mouseX, mouseY);
+            return;
+        }
         // карточки
         int lx = px + tabsW + 14, lw = pw - tabsW - 22, ly = py + 48, lh = ph - 48 - 30;
         scroll = Mth.clamp(scroll, 0, Math.max(0, shown.size() * (CARD_H + 3) - lh));
@@ -229,9 +247,164 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
         }
     }
 
+    // ------------------------------------------------------------------ дерево
+    private Advancement treeHover;
+
+    private boolean visibleInTree(Advancement a) {
+        if (a.getDisplay() == null) return false;
+        if (isDone(a) || !a.getDisplay().isHidden()) return true;
+        Advancement p = a.getParent();
+        return p != null && isDone(p);
+    }
+
+    private boolean matches(Advancement a) {
+        boolean done = isDone(a);
+        if (filter == 1 && !done) return false;
+        if (filter == 2 && done) return false;
+        String q = search == null ? "" : search.getValue().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) return true;
+        DisplayInfo d = a.getDisplay();
+        return d.getTitle().getString().toLowerCase(Locale.ROOT).contains(q) || d.getDescription().getString().toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    private int[] treeArea() {
+        int lx = px + tabsW + 14, lw = pw - tabsW - 22, ly = py + 48, lh = ph - 48 - 30;
+        return new int[]{lx, ly, lw, lh};
+    }
+
+    private int nodeX(Advancement a, int[] area) {
+        return area[0] + (int) panX + Math.round(a.getDisplay().getX() * STEP_X);
+    }
+
+    private int nodeY(Advancement a, int[] area) {
+        return area[1] + (int) panY + Math.round(a.getDisplay().getY() * STEP_Y);
+    }
+
+    private void renderTree(GuiGraphics g, int mouseX, int mouseY, int accent) {
+        treeHover = null;
+        int[] area = treeArea();
+        Draw.panel(g, area[0], area[1], area[2], area[3], 0xA0060A10, 0x30FFFFFF);
+        if (tab == null) return;
+        List<Advancement> all = new ArrayList<>();
+        collect(tab, all);
+        if (!panInit) {
+            panInit = true;
+            float minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+            for (Advancement a : all) {
+                minY = Math.min(minY, a.getDisplay().getY());
+                maxY = Math.max(maxY, a.getDisplay().getY());
+            }
+            panX = 16;
+            double treeH = (maxY - minY) * STEP_Y + NODE;
+            panY = treeH < area[3] - 16 ? (area[3] - treeH) / 2 - minY * STEP_Y : 12 - minY * STEP_Y;
+        }
+        // фоновая сетка
+        g.enableScissor(area[0] + 1, area[1] + 1, area[0] + area[2] - 1, area[1] + area[3] - 1);
+        int gs = 16;
+        int ox = Math.floorMod((int) panX, gs), oy = Math.floorMod((int) panY, gs);
+        for (int x = area[0] + ox; x < area[0] + area[2]; x += gs) g.fill(x, area[1], x + 1, area[1] + area[3], 0x08FFFFFF);
+        for (int y = area[1] + oy; y < area[1] + area[3]; y += gs) g.fill(area[0], y, area[0] + area[2], y + 1, 0x08FFFFFF);
+        // связи: от родителя вправо, вниз/вверх, вправо к ребёнку
+        for (int pass = 0; pass < 2; pass++) {
+            for (Advancement a : all) {
+                Advancement p = a.getParent();
+                if (p == null || p.getDisplay() == null || !visibleInTree(a) || !visibleInTree(p)) continue;
+                boolean lit = isDone(a);
+                if (pass == 0 && lit || pass == 1 && !lit) continue;
+                int col = lit ? Draw.alpha(accent, 0xFF) : 0xFF39424D;
+                int x1 = nodeX(p, area) + NODE, y1 = nodeY(p, area) + NODE / 2;
+                int x2 = nodeX(a, area), y2 = nodeY(a, area) + NODE / 2;
+                int mid = (x1 + x2) / 2;
+                g.fill(x1, y1 - 1, mid + 1, y1 + 1, col);
+                g.fill(mid - 1, Math.min(y1, y2) - 1, mid + 1, Math.max(y1, y2) + 1, col);
+                g.fill(mid, y2 - 1, x2, y2 + 1, col);
+            }
+        }
+        // узлы
+        for (Advancement a : all) {
+            if (!visibleInTree(a)) continue;
+            int x = nodeX(a, area), y = nodeY(a, area);
+            if (x + NODE < area[0] || x > area[0] + area[2] || y + NODE < area[1] || y > area[1] + area[3]) continue;
+            DisplayInfo d = a.getDisplay();
+            boolean done = isDone(a);
+            boolean hidden = d.isHidden() && !done;
+            boolean match = matches(a);
+            int fc = frameColor(d.getFrame());
+            int border = done ? fc : 0xFF56606C;
+            int bg = done ? Draw.alpha(fc, 0x60) : 0xE0141A22;
+            if (d.getFrame() == FrameType.CHALLENGE) {
+                Draw.panel(g, x - 2, y - 2, NODE + 4, NODE + 4, 0x00000000, Draw.alpha(border, 0x80));
+            }
+            Draw.panel(g, x, y, NODE, NODE, bg, border);
+            if (d.getFrame() == FrameType.GOAL) Draw.outline(g, x + 2, y + 2, NODE - 4, NODE - 4, Draw.alpha(border, 0x60));
+            if (!hidden) g.renderItem(d.getIcon(), x + 5, y + 5);
+            else g.drawCenteredString(font, "?", x + NODE / 2, y + 9, Draw.TEXT_DIM);
+            AdvancementProgress pr = progress.get(a);
+            if (!done && pr != null && pr.getPercent() > 0) {
+                g.fill(x + 3, y + NODE - 4, x + NODE - 3, y + NODE - 2, 0x80000000);
+                g.fill(x + 3, y + NODE - 4, x + 3 + Math.round((NODE - 6) * pr.getPercent()), y + NODE - 2, Draw.alpha(accent, 0xFF));
+            }
+            if (!match) g.fill(x, y, x + NODE, y + NODE, 0xB0060A10);
+            if (mouseX >= x && mouseX < x + NODE && mouseY >= y && mouseY < y + NODE && mouseX >= area[0] && mouseX < area[0] + area[2]
+                    && mouseY >= area[1] && mouseY < area[1] + area[3]) {
+                treeHover = a;
+                Draw.outline(g, x - 1, y - 1, NODE + 2, NODE + 2, 0xFFFFFFFF);
+            }
+        }
+        g.disableScissor();
+        Draw.small(g, font, Component.translatable("archud.adv.tree_hint").getString(), area[0] + 4, area[1] + area[3] - 8, 0x80FFFFFF, 0.6F);
+    }
+
+    private void treeTooltip(GuiGraphics g, Advancement a, int mx, int my) {
+        DisplayInfo d = a.getDisplay();
+        boolean done = isDone(a);
+        List<Component> tip = new ArrayList<>();
+        if (d.isHidden() && !done) {
+            tip.add(Component.literal("???"));
+        } else {
+            tip.add(d.getTitle().copy().withStyle(d.getFrame().getChatColor()));
+            tip.add(d.getDescription());
+        }
+        AdvancementProgress p = progress.get(a);
+        if (done && p != null && p.getFirstProgressDate() != null) {
+            tip.add(Component.literal("✔ " + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(p.getFirstProgressDate())).withStyle(s -> s.withColor(0x9CFF5A)));
+        } else if (p != null) {
+            String pt = p.getProgressText();
+            tip.add(Component.literal(pt != null ? pt : Math.round(p.getPercent() * 100) + "%").withStyle(s -> s.withColor(0x8C9AAB)));
+        }
+        Advancement parent = a.getParent();
+        if (!done && parent != null && parent.getDisplay() != null && !isDone(parent)) {
+            tip.add(Component.translatable("archud.adv.needs", parent.getDisplay().getTitle()).withStyle(s -> s.withColor(0xFFD54F)));
+        }
+        g.renderComponentTooltip(font, tip, mx, my);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (treeView && panning) {
+            panX += dx;
+            panY += dy;
+            return true;
+        }
+        return super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        panning = false;
+        return super.mouseReleased(mx, my, button);
+    }
+
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (super.mouseClicked(mx, my, button)) return true;
+        if (treeView) {
+            int[] area = treeArea();
+            if (mx >= area[0] && mx < area[0] + area[2] && my >= area[1] && my < area[1] + area[3]) {
+                panning = true;
+                return true;
+            }
+        }
         int tx = px + 8, ty = py + 26, th = ph - 26 - 30;
         if (mx >= tx && mx < tx + tabsW && my >= ty && my < ty + th) {
             int idx = (int) ((my - ty - 2 + tabScroll) / 28);
@@ -246,6 +419,10 @@ public class ArcAdvancementsScreen extends Screen implements ClientAdvancements.
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
         if (mx < px + tabsW + 10) tabScroll = Math.max(0, tabScroll - delta * 28);
+        else if (treeView) {
+            if (hasShiftDown()) panX += delta * 30;
+            else panY += delta * 30;
+        }
         else scroll -= delta * (CARD_H + 3) * 2;
         return true;
     }

@@ -1341,5 +1341,13 @@
   "archud.ch.color.7": "Purple",
   "archud.ch.color.8": "Pink",
   "archud.ch.color.9": "Cyan",
-  "archud.ch.color.10": "Black"
+  "archud.ch.color.10": "Black",
+  "archud.adv.tree": "Tree",
+  "archud.adv.list": "List",
+  "archud.adv.tree_hint": "Drag to move the tree · wheel — up/down, Shift+wheel — sideways",
+  "archud.adv.needs": "First: %s",
+  "archud.layout.hide": "Hide",
+  "archud.layout.show": "Show",
+  "archud.layout.shared": "Shared zone",
+  "archud.layout.hidden": "hidden"
 }

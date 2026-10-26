@@ -58,6 +58,13 @@ repositories {
         }, fg.repository)
         filter { includeGroup 'maven.modrinth' }
     }
+    exclusiveContent {
+        forRepositories(maven {
+            name = 'CurseMaven'
+            url = 'https://cursemaven.com'
+        }, fg.repository)
+        filter { includeGroup 'curse.maven' }
+    }
     maven {
         name = 'Sponge'
         url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -86,6 +93,9 @@ dependencies {
         runtimeOnly fg.deobf("maven.modrinth:playeranimator:xe2EVE6q")
         runtimeOnly fg.deobf("maven.modrinth:regeneration:OIui6HZO")
         runtimeOnly fg.deobf("maven.modrinth:legends-mod-core:nCsrAjfS")
+        // библиотеки, которые Legends несёт внутри себя (jar-in-jar не деобфусцируется в dev-запуске)
+        runtimeOnly fg.deobf("curse.maven:photon-871522:7501597")
+        runtimeOnly fg.deobf("maven.modrinth:ldlib:ONxYJpRz")
     }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
