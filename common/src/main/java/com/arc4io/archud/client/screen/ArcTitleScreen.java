@@ -51,7 +51,6 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 400, 240);
         modsStamp = com.arc4io.archud.client.mods.ModWatcher.stamp();
-        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, width);
         if (openTime == 0) openTime = Util.getMillis();
         panelW = Math.min(240, Math.max(190, width / 3));
         int bx = 26;
@@ -108,6 +107,8 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
             addRenderableWidget(apply);
             addRenderableWidget(reset);
         }
+        // моды в папке поменялись — «Перезапустить» сверху по центру (правый верх занимают уведомления)
+        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, width / 2, 8, 0);
     }
 
     @Override

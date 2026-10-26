@@ -39,7 +39,6 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
     protected void init() {
         com.arc4io.archud.client.screen.ScreenFit.ensure(this, 240, 270);
         modsStamp = com.arc4io.archud.client.mods.ModWatcher.stamp();
-        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, width);
         pw = 220;
         int bw = pw - 20;
         int half = (bw - 6) / 2;
@@ -99,6 +98,9 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
             b.active = false;
             disconnect();
         }).icon(Icons.WARNING).danger());
+        // моды в папке поменялись — «Перезапустить» под панелью (или над ней, если снизу нет места)
+        int ry = py + ph + 4 + 18 <= height - 2 ? py + ph + 4 : Math.max(2, py - 22);
+        com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, px, ry, pw);
     }
 
     private static Component hideLabel() {

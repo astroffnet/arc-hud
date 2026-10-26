@@ -160,14 +160,17 @@ public final class ModWatcher {
         return Component.literal(sb.toString());
     }
 
-    /** Кнопка «Перезапустить» в правом верхнем углу главного меню и меню паузы (если моды менялись). */
-    public static void addButton(java.util.function.Consumer<com.arc4io.archud.client.screen.ArcButton> add, int screenW) {
+    /** Кнопка «Перезапустить» (если моды в папке менялись); x/y — левый верх, w — ширина или 0 (по тексту, по центру x). */
+    public static void addButton(java.util.function.Consumer<com.arc4io.archud.client.screen.ArcButton> add, int x, int y, int w) {
         if (!pending()) return;
         Minecraft mc = Minecraft.getInstance();
         Component label = buttonLabel();
-        int w = mc.font.width(label) + 24;
-        com.arc4io.archud.client.screen.ArcButton b = new com.arc4io.archud.client.screen.ArcButton(screenW - w - 8, 8, w, 18, label,
-                x -> GameRestarter.restart(mc));
+        if (w <= 0) {
+            w = mc.font.width(label) + 24;
+            x -= w / 2;
+        }
+        com.arc4io.archud.client.screen.ArcButton b = new com.arc4io.archud.client.screen.ArcButton(x, y, w, 18, label,
+                btn -> GameRestarter.restart(mc));
         b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(tooltip()));
         add.accept(b);
     }

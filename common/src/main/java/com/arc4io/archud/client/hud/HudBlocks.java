@@ -117,6 +117,15 @@ final class HudBlocks {
             while (true) {
                 int topEnd = start.get(top) + total(tl) + 3;
                 int floor = map.containsKey(bot) ? start.get(bot) - 3 : h;
+                // карточки F3 не заходят на хотбар и полосы здоровья, если столбец доходит до центра экрана
+                int maxW = 0;
+                boolean hasCards = false;
+                for (Block b : tl) {
+                    maxW = Math.max(maxW, b.w());
+                    hasCards |= b instanceof ArcDebugScreen.CardBlock;
+                }
+                boolean reachesCenter = col == 0 ? 2 + maxW > w / 2 - 100 : w - 2 - maxW < w / 2 + 140;
+                if (hasCards && reachesCenter) floor = Math.min(floor, h - 52);
                 List<Block> ml = map.get(mid);
                 if (ml != null) {
                     int my = Math.max(start.get(mid), topEnd);

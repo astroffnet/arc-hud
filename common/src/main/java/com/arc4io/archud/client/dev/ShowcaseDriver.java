@@ -257,6 +257,8 @@ public final class ShowcaseDriver {
             mc.setScreen(new SelectWorldScreen(new TitleScreen()));
         }, null);
         add(100, mc -> {}, "18_singleplayer");
+        add(10, mc -> mc.setScreen(new TitleScreen()), null);
+        add(60, mc -> {}, "19_title_mods_changed");
         add(40, mc -> {
             try {
                 java.nio.file.Files.deleteIfExists(mc.gameDirectory.toPath().resolve("mods").resolve("showcase-test-mod.jar"));
