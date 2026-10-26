@@ -108,7 +108,7 @@ public class ArcPauseScreen extends Screen implements com.arc4io.archud.client.s
             disconnect();
         }).icon(Icons.WARNING).danger());
         // моды в папке поменялись — «Перезапустить» под панелью (или над ней, если снизу нет места)
-        int ry = py + ph + 4 + 18 <= height - 2 ? py + ph + 4 : Math.max(2, py - 22);
+        int ry = py + ph + 12 + 18 <= height - 2 ? py + ph + 12 : Math.max(2, py - 22);
         com.arc4io.archud.client.mods.ModWatcher.addButton(this::addRenderableWidget, px, ry, pw);
     }
 
