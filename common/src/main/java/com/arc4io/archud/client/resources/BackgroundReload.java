@@ -22,6 +22,7 @@ public final class BackgroundReload {
     private static Consumer<Optional<Throwable>> onFinish;
     private static float shown;
     private static long started;
+    private static boolean drawnLogged;
 
     private BackgroundReload() {}
 
@@ -81,7 +82,15 @@ public final class BackgroundReload {
             g.pose().popPose();
             g.flush();
             com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
-        } catch (Throwable ignored) {
+            if (!drawnLogged) {
+                drawnLogged = true;
+                ArcHud.LOGGER.info("Arc HUD: background reload bar drawn ({}%)", Math.round(shown * 100));
+            }
+        } catch (Throwable t) {
+            if (!drawnLogged) {
+                drawnLogged = true;
+                ArcHud.LOGGER.warn("Arc HUD: background reload bar failed", t);
+            }
         }
     }
 }
