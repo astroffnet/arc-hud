@@ -350,6 +350,33 @@ public final class ShowcaseDriver {
         add(100, mc -> {}, "18_singleplayer");
         add(10, mc -> mc.setScreen(new TitleScreen()), null);
         add(60, mc -> {}, "19_title_mods_changed");
+        // фоновая перезагрузка ресурсов (без экрана загрузки)
+        add(10, mc -> {
+            mc.setScreen(null);
+            mc.reloadResourcePacks();
+            ArcHud.LOGGER.info("[Showcase] background reload started, active={} overlay={}",
+                    com.arc4io.archud.client.resources.BackgroundReload.active(), mc.getOverlay());
+        }, null);
+        add(6, mc -> {}, "22_bg_reload");
+        add(200, mc -> ArcHud.LOGGER.info("[Showcase] background reload active={} overlay={}",
+                com.arc4io.archud.client.resources.BackgroundReload.active(), mc.getOverlay()), null);
+        // мод без кода — подгружается без перезапуска
+        add(5, ShowcaseDriver::dropResourceMod, null);
+        add(300, mc -> ArcHud.LOGGER.info("[Showcase] hot-load packs={} restartPending={}",
+                mc.options.resourcePacks, com.arc4io.archud.client.mods.ModWatcher.changes()), null);
+        // свой список модов
+        add(10, mc -> mc.setScreen(new com.arc4io.archud.client.mods.ArcModListScreen(null)), null);
+        add(40, mc -> ArcHud.LOGGER.info("[Showcase] mod list: {} mods, configurable: {}",
+                com.arc4io.archud.client.ArcClient.platform().mods().size(),
+                com.arc4io.archud.client.ArcClient.platform().mods().stream().filter(m -> m.config() != null).map(m -> m.id()).toList()), "21_mod_list");
+        // антикрашер: искусственная ошибка в тике клиента → экран восстановления вместо закрытия игры
+        add(10, mc -> {
+            mc.setScreen(null);
+            ArcHud.LOGGER.info("[Showcase] throwing a test crash");
+            crashNext = true;
+        }, null);
+        add(80, mc -> ArcHud.LOGGER.info("[Showcase] after crash: screen={} level={}",
+                mc.screen == null ? "none" : mc.screen.getClass().getSimpleName(), mc.level != null), "20_crash_recovered");
         add(40, mc -> {
             try {
                 java.nio.file.Files.deleteIfExists(mc.gameDirectory.toPath().resolve("mods").resolve("showcase-test-mod.jar"));
@@ -585,8 +612,15 @@ public final class ShowcaseDriver {
         }
     }
 
+    private static boolean crashNext;
+
     public static void tick(Minecraft mc) {
         if (!enabled) return;
+        if (crashNext) {
+            // вне try/catch шага — исключение уходит в игровой цикл, его должен поймать антикрашер
+            crashNext = false;
+            throw new IllegalStateException("Arc HUD showcase: test crash");
+        }
         if (index < 0) {
             next(mc); // шаг 0
             return;
@@ -628,6 +662,20 @@ public final class ShowcaseDriver {
             ArcHud.LOGGER.error("[Showcase] step {} failed", index, t);
         }
         timer = Math.max(1, s.delay());
+    }
+
+    private static void dropResourceMod(Minecraft mc) {
+        try {
+            java.nio.file.Path dir = com.arc4io.archud.client.ArcClient.platform().modsDir();
+            java.nio.file.Files.createDirectories(dir);
+            try (java.util.zip.ZipOutputStream z = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(dir.resolve("showcase-res-mod.jar")))) {
+                z.putNextEntry(new java.util.zip.ZipEntry("assets/showcase_res/lang/en_us.json"));
+                z.write("{\"showcase_res.hello\":\"Hot-loaded!\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                z.closeEntry();
+            }
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("[Showcase] resource mod: " + e);
+        }
     }
 
     private static void dropTestMod(Minecraft mc) {

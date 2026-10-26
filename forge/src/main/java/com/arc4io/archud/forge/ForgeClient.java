@@ -197,13 +197,43 @@ public final class ForgeClient implements ClientPlatform {
 
     @Override
     public Screen createModListScreen(Screen parent) {
-        return ArcConfig.get().customModList ? new ArcModListScreen(parent) : new ModListScreen(parent);
+        return ArcConfig.get().customModList ? new com.arc4io.archud.client.mods.ArcModListScreen(parent) : new ModListScreen(parent);
     }
 
     @Override
     public Screen swapPlatformScreen(Screen next, Screen current) {
-        if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new ArcModListScreen(current);
+        if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new com.arc4io.archud.client.mods.ArcModListScreen(current);
         return next;
+    }
+
+    @Override
+    public java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
+        java.util.List<com.arc4io.archud.client.mods.ModEntry> out = new java.util.ArrayList<>();
+        for (net.minecraftforge.forgespi.language.IModInfo m : net.minecraftforge.fml.ModList.get().getMods()) {
+            com.arc4io.archud.client.mods.ModEntry.Logo logo = null;
+            java.util.Optional<String> file = m.getLogoFile();
+            if (file.isPresent() && !file.get().isBlank()) {
+                String f = file.get();
+                logo = () -> {
+                    java.nio.file.Path p = m.getOwningFile().getFile().findResource(f);
+                    return p != null && java.nio.file.Files.exists(p) ? java.nio.file.Files.newInputStream(p) : null;
+                };
+            }
+            var factory = net.minecraftforge.client.ConfigScreenHandler.getScreenFactoryFor(m);
+            java.util.function.Function<Screen, Screen> config = factory.isPresent()
+                    ? parent -> factory.get().apply(net.minecraft.client.Minecraft.getInstance(), parent) : null;
+            Object authors = m.getConfig().getConfigElement("authors").orElse(null);
+            boolean lib = m.getModId().equals("forge") || m.getModId().equals("minecraft");
+            out.add(new com.arc4io.archud.client.mods.ModEntry(m.getModId(), m.getDisplayName(), m.getVersion().toString(),
+                    m.getDescription(), authors == null ? null : authors.toString(), m.getModURL().map(Object::toString).orElse(null),
+                    lib, logo, config, null));
+        }
+        return out;
+    }
+
+    @Override
+    public java.nio.file.Path modsDir() {
+        return net.minecraftforge.fml.loading.FMLPaths.MODSDIR.get();
     }
 
     private static void onRenderLevel(net.minecraftforge.client.event.RenderLevelStageEvent event) {

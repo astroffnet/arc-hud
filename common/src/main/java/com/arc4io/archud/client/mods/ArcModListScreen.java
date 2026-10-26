@@ -1,4 +1,4 @@
-package com.arc4io.archud.forge;
+package com.arc4io.archud.client.mods;
 
 import com.arc4io.archud.ArcHud;
 import com.arc4io.archud.client.hud.Draw;
@@ -15,14 +15,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,19 +24,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 /**
- * Новый список модов для Forge: поиск, логотипы, авторы, описание, кнопки «Настроить», «Сайт», «Папка модов».
+ * Список модов Arc HUD — один и тот же на Forge и Fabric (на Fabric заменяет Mod Menu, ставить его не нужно):
+ * поиск, логотипы, авторы, описание, «Настроить», «Сайт», «Папка модов», библиотеки и вложенные моды свёрнуты.
  */
 public class ArcModListScreen extends ArcScreen {
     private static final int ROW = 24;
     private static final Map<String, Optional<int[]>> LOGO_SIZE = new HashMap<>();
-    private final List<IModInfo> all = new ArrayList<>();
-    private final List<IModInfo> shown = new ArrayList<>();
-    private IModInfo selected;
+    private final List<ModEntry> all = new ArrayList<>();
+    private final List<ModEntry> shown = new ArrayList<>();
+    private ModEntry selected;
     private EditBox search;
-    private ArcButton configBtn, siteBtn;
+    private ArcButton configBtn, siteBtn, libsBtn;
+    private final Map<String, Integer> children = new HashMap<>();
+    private static boolean showLibs;
     private double scroll, descScroll;
     private int listW;
 
@@ -54,8 +50,12 @@ public class ArcModListScreen extends ArcScreen {
     protected void init() {
         layout(620, height - 16);
         all.clear();
-        all.addAll(ModList.get().getMods());
-        all.sort(Comparator.comparing(m -> m.getDisplayName().toLowerCase(Locale.ROOT)));
+        children.clear();
+        for (ModEntry m : com.arc4io.archud.client.ArcClient.platform().mods()) {
+            if (m.parent() != null && !m.parent().isEmpty()) children.merge(m.parent(), 1, Integer::sum);
+            all.add(m);
+        }
+        all.sort(Comparator.comparing(m -> m.name().toLowerCase(Locale.ROOT)));
         listW = Math.min(200, pw / 3);
         search = addRenderableWidget(new EditBox(font, px + 10, py + 26, listW, 16, Component.translatable("archud.controls.search")));
         search.setHint(Component.translatable("archud.controls.search"));
@@ -63,50 +63,70 @@ public class ArcModListScreen extends ArcScreen {
         int dx = px + listW + 20;
         configBtn = addRenderableWidget(new ArcButton(dx, py + ph - 24, 110, 18, Component.translatable("archud.mods.config"), b -> openConfig()));
         siteBtn = addRenderableWidget(new ArcButton(dx + 114, py + ph - 24, 90, 18, Component.translatable("archud.mods.site"), b -> openSite()));
-        addRenderableWidget(new ArcButton(px + 8, py + ph - 24, listW + 4, 18, Component.translatable("archud.mods.folder"),
-                b -> Util.getPlatform().openFile(FMLPaths.MODSDIR.get().toFile())));
+        int half = (listW + 4 - 4) / 2;
+        addRenderableWidget(new ArcButton(px + 8, py + ph - 24, half, 18, Component.translatable("archud.mods.folder"),
+                b -> Util.getPlatform().openFile(com.arc4io.archud.client.ArcClient.platform().modsDir().toFile())));
+        libsBtn = addRenderableWidget(new ArcButton(px + 12 + half, py + ph - 24, half, 18, libsLabel(), b -> {
+            showLibs = !showLibs;
+            b.setMessage(libsLabel());
+            refresh();
+        }));
         addDone();
         if (selected == null && !all.isEmpty()) selected = all.get(0);
         refresh();
     }
 
+    private Component libsLabel() {
+        return Component.translatable(showLibs ? "archud.mods.libs_on" : "archud.mods.libs_off");
+    }
+
     private void refresh() {
         shown.clear();
         String q = search == null ? "" : search.getValue().toLowerCase(Locale.ROOT);
-        for (IModInfo m : all) {
-            if (q.isEmpty() || m.getDisplayName().toLowerCase(Locale.ROOT).contains(q) || m.getModId().contains(q)) shown.add(m);
+        for (ModEntry m : all) {
+            boolean match = q.isEmpty() || m.name().toLowerCase(Locale.ROOT).contains(q) || m.id().contains(q);
+            if (!match) continue;
+            // библиотеки и вложенные моды (модули Fabric API и т. п.) — только по кнопке или в поиске
+            boolean hidden = m.library() || (m.parent() != null && !m.parent().isEmpty());
+            if (hidden && !showLibs && q.isEmpty()) continue;
+            shown.add(m);
         }
         updateButtons();
     }
 
     private void updateButtons() {
-        configBtn.active = selected != null && ConfigScreenHandler.getScreenFactoryFor(selected).isPresent();
-        siteBtn.active = selected != null && selected.getModURL().isPresent();
+        configBtn.active = selected != null && selected.config() != null;
+        siteBtn.active = selected != null && selected.url() != null && !selected.url().isBlank();
     }
 
     private void openConfig() {
-        if (selected == null) return;
-        Optional<BiFunction<net.minecraft.client.Minecraft, Screen, Screen>> f = ConfigScreenHandler.getScreenFactoryFor(selected);
-        f.ifPresent(fn -> minecraft.setScreen(fn.apply(minecraft, this)));
+        if (selected == null || selected.config() == null) return;
+        try {
+            Screen s = selected.config().apply(this);
+            if (s != null) minecraft.setScreen(s);
+            else net.minecraft.client.gui.components.toasts.SystemToast.addOrUpdate(minecraft.getToasts(),
+                    net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                    Component.literal(selected.name()), Component.translatable("archud.mods.no_config"));
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: config screen of {} failed", selected.id(), t);
+        }
     }
 
     private void openSite() {
-        if (selected != null) selected.getModURL().ifPresent(u -> Util.getPlatform().openUri(u.toString()));
+        if (selected != null && selected.url() != null) Util.getPlatform().openUri(selected.url());
     }
 
-    private static ResourceLocation logoId(IModInfo m) {
-        return ArcHud.id("mod_logo/" + m.getModId().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
+    private static ResourceLocation logoId(ModEntry m) {
+        return ArcHud.id("mod_logo/" + m.id().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
     }
 
     /** Загружает логотип мода (один раз), возвращает {ширина, высота} или null. */
-    private int[] logo(IModInfo m) {
-        return LOGO_SIZE.computeIfAbsent(m.getModId(), id -> {
+    private int[] logo(ModEntry m) {
+        return LOGO_SIZE.computeIfAbsent(m.id(), id -> {
             try {
-                Optional<String> file = m.getLogoFile();
-                if (file.isEmpty() || file.get().isBlank()) return Optional.empty();
-                Path path = m.getOwningFile().getFile().findResource(file.get());
-                if (path == null || !Files.exists(path)) return Optional.empty();
-                try (InputStream in = Files.newInputStream(path)) {
+                if (m.logo() == null) return Optional.empty();
+                try (InputStream in = m.logo().open()) {
+                    if (in == null) return Optional.empty();
                     NativeImage img = NativeImage.read(in);
                     int[] size = {img.getWidth(), img.getHeight()};
                     minecraft.getTextureManager().register(logoId(m), new DynamicTexture(img));
@@ -118,11 +138,11 @@ public class ArcModListScreen extends ArcScreen {
         }).orElse(null);
     }
 
-    private void drawLogo(GuiGraphics g, IModInfo m, int x, int y, int boxW, int boxH) {
+    private void drawLogo(GuiGraphics g, ModEntry m, int x, int y, int boxW, int boxH) {
         int[] s = logo(m);
         if (s == null) {
             Draw.panel(g, x, y, Math.min(boxW, boxH), boxH, 0x60000000, 0x40FFFFFF);
-            String letter = m.getDisplayName().isEmpty() ? "?" : m.getDisplayName().substring(0, 1).toUpperCase(Locale.ROOT);
+            String letter = m.name().isEmpty() ? "?" : m.name().substring(0, 1).toUpperCase(Locale.ROOT);
             g.drawCenteredString(font, letter, x + Math.min(boxW, boxH) / 2, y + boxH / 2 - 4, Draw.alpha(Theme.accent(), 0xFF));
             return;
         }
@@ -144,7 +164,7 @@ public class ArcModListScreen extends ArcScreen {
         scroll = Mth.clamp(scroll, 0, Math.max(0, shown.size() * ROW - lh));
         g.enableScissor(lx, ly, lx + listW, ly + lh);
         int y = ly - (int) scroll;
-        for (IModInfo m : shown) {
+        for (ModEntry m : shown) {
             if (y + ROW >= ly && y <= ly + lh) {
                 boolean sel = m == selected;
                 boolean hov = mouseX >= lx && mouseX < lx + listW && mouseY >= y && mouseY < y + ROW && mouseY >= ly && mouseY < ly + lh;
@@ -152,10 +172,10 @@ public class ArcModListScreen extends ArcScreen {
                 else if (hov) g.fill(lx, y, lx + listW, y + ROW - 1, 0x18FFFFFF);
                 if (sel) g.fill(lx, y, lx + 2, y + ROW - 1, Draw.alpha(accent, 0xFF));
                 drawLogo(g, m, lx + 4, y + 2, 20, 20);
-                String n = m.getDisplayName();
+                String n = m.name();
                 if (font.width(n) > listW - 34) n = font.plainSubstrByWidth(n, listW - 38) + "…";
                 g.drawString(font, n, lx + 28, y + 3, sel ? 0xFFFFFFFF : Draw.TEXT, true);
-                Draw.small(g, font, m.getVersion().toString(), lx + 28, y + 13, Draw.TEXT_DIM, 0.6F);
+                Draw.small(g, font, m.version(), lx + 28, y + 13, Draw.TEXT_DIM, 0.6F);
             }
             y += ROW;
         }
@@ -167,19 +187,24 @@ public class ArcModListScreen extends ArcScreen {
             Draw.panel(g, dx, dy, dw, dh, 0x40000000, 0x30FFFFFF);
             drawLogo(g, selected, dx + 8, dy + 8, Math.min(dw - 16, 240), 56);
             int ty = dy + 70;
-            g.drawString(font, selected.getDisplayName(), dx + 8, ty, 0xFFFFFFFF, true);
+            g.drawString(font, selected.name(), dx + 8, ty, 0xFFFFFFFF, true);
             ty += 12;
-            Draw.small(g, font, "ID: " + selected.getModId() + "   " + Component.translatable("archud.mods.version").getString() + ": " + selected.getVersion(),
+            Draw.small(g, font, "ID: " + selected.id() + "   " + Component.translatable("archud.mods.version").getString() + ": " + selected.version(),
                     dx + 8, ty, Draw.TEXT_DIM, 0.75F);
             ty += 10;
-            Object authors = selected.getConfig().getConfigElement("authors").orElse(null);
-            if (authors != null) {
+            String authors = selected.authors();
+            Integer kids = children.get(selected.id());
+            if (kids != null) {
+                Draw.small(g, font, Component.translatable("archud.mods.children", kids).getString(), dx + 8, ty, Draw.TEXT_DIM, 0.75F);
+                ty += 10;
+            }
+            if (authors != null && !authors.isBlank()) {
                 Draw.small(g, font, Component.translatable("archud.mods.authors").getString() + ": " + authors, dx + 8, ty, Draw.alpha(accent, 0xFF), 0.75F);
                 ty += 10;
             }
             g.fill(dx + 8, ty + 2, dx + dw - 8, ty + 3, Draw.alpha(accent, 0x40));
             ty += 8;
-            List<FormattedCharSequence> lines = font.split(Component.literal(selected.getDescription().trim()), dw - 16);
+            List<FormattedCharSequence> lines = font.split(Component.literal(selected.description() == null ? "" : selected.description().trim()), dw - 16);
             int maxLines = (dy + dh - 6 - ty) / 10;
             descScroll = Mth.clamp(descScroll, 0, Math.max(0, lines.size() - maxLines));
             for (int i = (int) descScroll; i < lines.size() && i < descScroll + maxLines; i++) {

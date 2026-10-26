@@ -22,6 +22,16 @@ public interface ClientPlatform {
         return next;
     }
 
+    /** Все загруженные моды для списка модов Arc HUD. */
+    default java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
+        return java.util.List.of();
+    }
+
+    /** Папка mods. */
+    default java.nio.file.Path modsDir() {
+        return net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("mods");
+    }
+
     /** id HUD-элементов других модов (на Forge — зарегистрированные оверлеи). */
     default java.util.List<String> hudOverlayIds() {
         return java.util.List.of();

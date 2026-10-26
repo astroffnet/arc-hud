@@ -326,6 +326,14 @@ public class ArcConfig {
     public int backgroundFps = 15;
     /** Автосохранение мира (одиночная игра / «Открыть для сети») по реальному времени. */
     public boolean autosave = true;
+    /** Антикрашер: после краша — экран с возвратом в главное меню вместо закрытия игры. */
+    public boolean antiCrash = true;
+    /** Перенос длинных подсказок, чтобы они не уходили за экран. */
+    public boolean tooltipWrap = true;
+    /** Перезагрузка ресурсов в фоне, без экрана загрузки (смена ресурспака, F3+T). */
+    public boolean backgroundReload = true;
+    /** Моды без кода (только ресурсы) подгружаются сразу, без перезапуска. */
+    public boolean hotLoad = true;
     /** Версия набора оптимизаций: новым переключателям при обновлении один раз ставятся значения «Баланса». */
     public int perfVersion = 0;
     public int autosaveMinutes = 3;

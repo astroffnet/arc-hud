@@ -15,7 +15,15 @@
     "CraftingMenuMixin",
     "ServerTickMixin",
     "ServerLevelTpsMixin",
-    "NaturalSpawnerTpsMixin"
+    "NaturalSpawnerTpsMixin",
+    "PacketNbtLimitMixin",
+    "PacketCompressionLimitMixin",
+    "PacketEncoderLimitMixin",
+    "PacketFrameDecoderMixin",
+    "PacketFramePrependerMixin",
+    "ClientboundPayloadLimitMixin",
+    "ServerboundPayloadLimitMixin",
+    "LazyDfuMixin"
   ],
   "client": [
     "PerfEntityRenderMixin",
@@ -95,7 +103,18 @@
     "ChunkRenderDispatcherAccessor",
     "LevelRendererAccessor",
     "RenderChunkInfoAccessor",
-    "WindowGlMixin"
+    "WindowGlMixin",
+    "AntiCrashMixin",
+    "MinecraftInvoker",
+    "TooltipWrapMixin",
+    "GuiGraphicsInvoker",
+    "ClientTextTooltipAccessor",
+    "LoadingOverlayAccessor",
+    "BackgroundReloadMixin",
+    "FastPaintingMixin",
+    "ParticleEngineInvoker",
+    "AsyncParticleMixin",
+    "ParticleLightCacheMixin"
   ],
   "injectors": {
     "defaultRequire": 1
