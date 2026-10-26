@@ -18,7 +18,7 @@ import java.util.UUID;
 /**
  * Метки игроков на сервере (выделенном или «Открыть для сети»).
  * Клиент присылает свой список меток (сжатый JSON, частями по ~28 КБ) при каждом изменении,
- * сервер хранит его в папке мира: data/archud_waypoints/&lt;uuid&gt;.json.gz
+ * сервер хранит его в папке мира: data/archud_waypoints/&lt;ник&gt;.json.gz
  * и при входе отдаёт обратно — метки игрока доступны с любого компьютера и после переустановки.
  */
 public final class WaypointStore {
@@ -32,8 +32,27 @@ public final class WaypointStore {
         ArcNet.onServer("wp_sync", WaypointStore::onSync);
     }
 
-    private static Path file(MinecraftServer server, UUID id) {
-        return server.getWorldPath(LevelResource.ROOT).resolve("data").resolve("archud_waypoints").resolve(id + ".json.gz");
+    private static Path dir(MinecraftServer server) {
+        return server.getWorldPath(LevelResource.ROOT).resolve("data").resolve("archud_waypoints");
+    }
+
+    /**
+     * Файл меток игрока — по НИКУ (без учёта регистра): на пиратских серверах и при смене аккаунта
+     * UUID может меняться, а ник остаётся. Старый файл по UUID переименовывается при первом входе.
+     */
+    private static Path file(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        String nick = player.getGameProfile().getName().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9_.\\-]", "_");
+        Path f = dir(server).resolve(nick + ".json.gz");
+        Path legacy = dir(server).resolve(player.getUUID() + ".json.gz");
+        if (!Files.exists(f) && Files.exists(legacy)) {
+            try {
+                Files.move(legacy, f);
+            } catch (Exception e) {
+                ArcHud.LOGGER.warn("Arc HUD: cannot rename {} -> {}", legacy.getFileName(), f.getFileName(), e);
+            }
+        }
+        return f;
     }
 
     /** Пакет: часть (varint), всего частей (varint), байты. */
@@ -55,12 +74,12 @@ public final class WaypointStore {
         }
         PARTS.remove(player.getUUID());
         try {
-            Path f = file(player.getServer(), player.getUUID());
+            Path f = file(player);
             Files.createDirectories(f.getParent());
             Path tmp = f.resolveSibling(f.getFileName() + ".tmp");
             Files.write(tmp, acc.toByteArray());
             Files.move(tmp, f, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            ArcHud.LOGGER.info("Arc HUD: stored waypoints of {} ({} bytes)", player.getGameProfile().getName(), acc.size());
+            ArcHud.LOGGER.info("Arc HUD: stored waypoints of {} -> {} ({} bytes)", player.getGameProfile().getName(), f.getFileName(), acc.size());
         } catch (Exception e) {
             ArcHud.LOGGER.warn("Arc HUD: cannot save waypoints of {}", player.getGameProfile().getName(), e);
         }
@@ -71,7 +90,7 @@ public final class WaypointStore {
         if (!ArcConfig.get().serverWaypointSync || player.getServer() == null) return;
         byte[] data = null;
         try {
-            Path f = file(player.getServer(), player.getUUID());
+            Path f = file(player);
             if (Files.exists(f) && Files.size(f) <= MAX_BYTES) data = Files.readAllBytes(f);
         } catch (Exception e) {
             ArcHud.LOGGER.warn("Arc HUD: cannot read waypoints of {}", player.getGameProfile().getName(), e);
