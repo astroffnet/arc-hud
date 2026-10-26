@@ -55,9 +55,12 @@ public final class ChatStyler {
         // вкладка
         Minecraft mc = Minecraft.getInstance();
         Component tab = Component.translatable("archud.chat.label");
-        int tw = mc.font.width(tab) + 12;
+        boolean head = ChatHeads.enabled() && mc.player != null;
+        int hx = head ? 11 : 0;
+        int tw = mc.font.width(tab) + 12 + hx;
         Draw.panel(g, 2, h - 27, tw, 12, Draw.alpha(0x101419, (int) (0xD0 * p)), Draw.alpha(accent, a));
-        g.drawString(mc.font, tab, 8, h - 25, Draw.alpha(0xEAF2FA, Math.max(8, a)), true);
+        if (head) ChatHeads.draw(g, new ChatHeads.Sender(mc.player.getUUID(), mc.player.getGameProfile().getName()), 7, h - 25, Math.max(8, a));
+        g.drawString(mc.font, tab, 8 + hx, h - 25, Draw.alpha(0xEAF2FA, Math.max(8, a)), true);
     }
 
     public static void postRender(Screen screen, GuiGraphics g) {

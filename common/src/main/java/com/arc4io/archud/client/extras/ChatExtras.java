@@ -33,6 +33,7 @@ public final class ChatExtras {
     public static Component process(ChatComponent chat, Component msg) {
         com.arc4io.archud.client.net.E4mcBridge.onChat(msg.getString());
         ArcConfig cfg = ArcConfig.get();
+        msg = com.arc4io.archud.client.screen.ChatHeads.restyle(msg);
         if (!cfg.chatTimestamps && !cfg.chatCollapse && !cfg.chatMentions) return msg;
         String text = msg.getString();
         long now = Util.getMillis();

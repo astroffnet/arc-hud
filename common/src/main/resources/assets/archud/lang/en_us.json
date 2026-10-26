@@ -1349,5 +1349,6 @@
   "archud.layout.hide": "Hide",
   "archud.layout.show": "Show",
   "archud.layout.shared": "Shared zone",
-  "archud.layout.hidden": "hidden"
+  "archud.layout.hidden": "hidden",
+  "archud.config.chatHeads": "Player heads in chat"
 }
