@@ -1274,5 +1274,13 @@
   "archud.perf.p_light_cache": "Particle light cache",
   "archud.perf.p_light_cache.desc": "A particle's light is recomputed only when it moves to another block or every 10 ticks, not every frame.",
   "archud.perf.p_async": "Multithreaded particles",
-  "archud.perf.p_async.desc": "With more than 400 particles, plain vanilla particles update on several threads. Modded and complex particles (fireworks, drips, lava) stay on the main thread. If a particle type turns out incompatible, it's moved back automatically. Not with OptiFine."
+  "archud.perf.p_async.desc": "With more than 400 particles, plain vanilla particles update on several threads. Modded and complex particles (fireworks, drips, lava) stay on the main thread. If a particle type turns out incompatible, it's moved back automatically. Not with OptiFine.",
+  "archud.inv.title": "Inventory",
+  "archud.inv.level": "Level %s",
+  "archud.inv.crafting": "Crafting",
+  "archud.inv.inventory": "Inventory",
+  "archud.inv.accessories": "Accessories",
+  "archud.inv.mods": "Mods",
+  "archud.inv.btn.regen": "Regeneration",
+  "archud.inv.btn.mod": "Mod button"
 }

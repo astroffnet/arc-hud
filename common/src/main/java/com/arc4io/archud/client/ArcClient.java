@@ -25,6 +25,7 @@ public final class ArcClient {
         ArcClientNet.init();
         com.arc4io.archud.client.enchant.EnchantClient.init();
         com.arc4io.archud.client.dev.ShowcaseDriver.init();
+        com.arc4io.archud.client.dev.CompatDriver.init();
     }
 
     public static ClientPlatform platform() {
@@ -34,6 +35,7 @@ public final class ArcClient {
     /** Вызывается в конце каждого клиентского тика. */
     public static void tick(Minecraft mc) {
         com.arc4io.archud.client.dev.ShowcaseDriver.tick(mc);
+        com.arc4io.archud.client.dev.CompatDriver.tick(mc);
         com.arc4io.archud.client.dev.ScreenshotTour.tick(mc);
         com.arc4io.archud.client.map.MapScanner.worldCheck(mc);
         if (!(mc.screen instanceof com.arc4io.archud.client.screen.ScreenFit.Fits)) com.arc4io.archud.client.screen.ScreenFit.restore();

@@ -23,7 +23,8 @@
     "PacketFramePrependerMixin",
     "ClientboundPayloadLimitMixin",
     "ServerboundPayloadLimitMixin",
-    "LazyDfuMixin"
+    "LazyDfuMixin",
+    "IntegratedCommandsMixin"
   ],
   "client": [
     "PerfEntityRenderMixin",
@@ -114,7 +115,11 @@
     "FastPaintingMixin",
     "ParticleEngineInvoker",
     "AsyncParticleMixin",
-    "ParticleLightCacheMixin"
+    "ParticleLightCacheMixin",
+    "LanPortMixin",
+    "ShareToLanScreenAccessor",
+    "SlotPosAccessor",
+    "ImageButtonAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

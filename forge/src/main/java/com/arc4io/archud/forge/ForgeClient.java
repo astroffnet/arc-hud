@@ -92,6 +92,8 @@ public final class ForgeClient implements ClientPlatform {
     }
 
     private static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(
+                com.arc4io.archud.forge.inventory.ForgeInventory.TYPE.get(), com.arc4io.archud.client.screen.ArcSurvivalScreen::new));
         event.enqueueWork(() -> {
             if (ModList.get().isLoaded("legendsmod")) LegendsCompat.init();
         });
@@ -204,6 +206,14 @@ public final class ForgeClient implements ClientPlatform {
     public Screen swapPlatformScreen(Screen next, Screen current) {
         if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new com.arc4io.archud.client.mods.ArcModListScreen(current);
         return next;
+    }
+
+    @Override
+    public boolean openServerInventory(net.minecraft.client.Minecraft mc) {
+        // слоты Curios (и скрытые слоты Aether) — только через меню на сервере с Arc HUD
+        if (!com.arc4io.archud.forge.inventory.ForgeInventory.curios() || !com.arc4io.archud.client.ArcClientNet.modServer()) return false;
+        com.arc4io.archud.network.ArcNet.sendToServer(com.arc4io.archud.network.ArcNet.create("open_inv"));
+        return true;
     }
 
     @Override

@@ -51,7 +51,7 @@ public class ArcLanScreen extends ArcScreen {
                 .create(x + half + 6, y, half, 20, Component.translatable("options.difficulty"), (b, v) -> difficulty = v));
         y += 34;
         port = addRenderableWidget(new EditBox(font, x + 90, y, half - 90 + half + 6, 16, Component.translatable("lanServer.port")));
-        port.setValue(Integer.toString(HttpUtil.getAvailablePort()));
+        port.setValue(Integer.toString(HttpUtil.isPortAvailable(25565) ? 25565 : HttpUtil.getAvailablePort()));
         port.setFilter(s -> s.isEmpty() || s.matches("\\d{1,5}"));
         y += 22;
         motd = addRenderableWidget(new EditBox(font, x + 90, y, half - 90 + half + 6, 16, Component.translatable("archud.lan.motd")));

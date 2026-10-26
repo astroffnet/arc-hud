@@ -94,6 +94,11 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
     }
 
     @Override
+    public boolean classicInventory() {
+        return FabricLoader.getInstance().isModLoaded("trinkets");
+    }
+
+    @Override
     public java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
         return FabricMods.mods();
     }

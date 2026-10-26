@@ -114,7 +114,7 @@ public final class InventoryExtras {
      * Атрибуты урона/скорости атаки сервер не синхронизирует с клиентом, поэтому значение
      * пересчитывается здесь: база игрока + модификаторы предмета в главной руке (+ эффекты).
      */
-    static float withHeld(LocalPlayer p, Attribute a) {
+    public static float withHeld(LocalPlayer p, Attribute a) {
         net.minecraft.world.entity.ai.attributes.AttributeInstance inst = p.getAttribute(a);
         if (inst == null) return 0F;
         double base = inst.getBaseValue();
