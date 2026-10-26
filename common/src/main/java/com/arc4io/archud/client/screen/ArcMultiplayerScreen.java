@@ -157,15 +157,15 @@ public class ArcMultiplayerScreen extends Screen implements ScreenFit.Fits {
         addRenderableWidget(new ArcButton(listX + listW - 164, 34, 80, 18, Component.translatable("archud.mp.play"), b -> quickConnect()).icon(Icons.JUMP));
         addRenderableWidget(new ArcButton(listX + listW - 80, 34, 80, 18, Component.translatable("archud.mp.save"), b -> quickSave()));
 
-        // поиск и сортировка
+        // поиск — в шапке между заголовком и кнопками, сортировка — справа от вкладок
         String s = search != null ? search.getValue() : "";
-        int sx = listX + 4 * 74;
-        search = new EditBox(font, sx, 58, Math.max(60, listX + listW - 90 - sx), 14, Component.translatable("archud.mp.search"));
+        int sx = listX + 110;
+        search = new EditBox(font, sx, 9, Math.max(60, bx - 8 - sx), 16, Component.translatable("archud.mp.search"));
         search.setHint(Component.translatable("archud.mp.search").withStyle(st -> st.withColor(0x6A7380)));
         search.setValue(s);
         search.setResponder(v -> scroll = 0);
         addRenderableWidget(search);
-        addRenderableWidget(new ArcButton(listX + listW - 84, 57, 84, 16, Component.translatable("archud.mp.sort." + sort), b -> {
+        addRenderableWidget(new ArcButton(listX + listW - 78, 57, 78, 16, Component.translatable("archud.mp.sort." + sort), b -> {
             sort = (sort + 1) % 4;
             b.setMessage(Component.translatable("archud.mp.sort." + sort));
         }));
@@ -505,16 +505,16 @@ public class ArcMultiplayerScreen extends Screen implements ScreenFit.Fits {
         g.drawString(font, title, listX, 9, Draw.TEXT, true);
         g.fill(listX, 20, listX + 34, 21, accent);
         Draw.small(g, font, Component.translatable("archud.mp.count", servers.size(), lan.size()).getString(), listX, 24, Draw.TEXT_DIM, 0.6F);
-        Draw.small(g, font, Component.translatable("archud.mp.quick_label").getString(), listX + 1, 30, 0xFF6A7682, 0.5F);
 
         // вкладки
         TabKind[] kinds = TabKind.values();
         for (int i = 0; i < kinds.length; i++) {
             TabKind k = kinds[i];
-            int tx = listX + i * 74, ty = 57;
+            int tabW = Math.min(70, (listW - 82) / 4 - 3);
+            int tx = listX + i * (tabW + 3), ty = 57;
             boolean sel = k == tab;
-            boolean hov = mx >= tx && mx < tx + 70 && my >= ty && my < ty + 16;
-            Draw.panel(g, tx, ty, 70, 16, sel ? Draw.alpha(accent, 0x55) : hov ? 0x30FFFFFF : 0x18FFFFFF, sel ? accent : 0x30FFFFFF);
+            boolean hov = mx >= tx && mx < tx + tabW && my >= ty && my < ty + 16;
+            Draw.panel(g, tx, ty, tabW, 16, sel ? Draw.alpha(accent, 0x55) : hov ? 0x30FFFFFF : 0x18FFFFFF, sel ? accent : 0x30FFFFFF);
             int count = switch (k) {
                 case ALL -> servers.size() + lan.size();
                 case FAVORITES -> ArcConfig.get().favoriteServers.size();
@@ -522,8 +522,8 @@ public class ArcMultiplayerScreen extends Screen implements ScreenFit.Fits {
                 case HISTORY -> ArcConfig.get().serverStats.size();
             };
             String label = Component.translatable("archud.mp.tab." + k.name().toLowerCase(Locale.ROOT)).getString() + " " + count;
-            Draw.smallCentered(g, font, label, tx + 35, ty + 5, sel ? 0xFFFFFFFF : Draw.TEXT, 0.65F);
-            hits.add(new Hit(tx, ty, 70, 16, () -> {
+            Draw.smallCentered(g, font, label, tx + tabW / 2F, ty + 5, sel ? 0xFFFFFFFF : Draw.TEXT, 0.6F);
+            hits.add(new Hit(tx, ty, tabW, 16, () -> {
                 if (tab != k) {
                     tab = k;
                     scroll = 0;
