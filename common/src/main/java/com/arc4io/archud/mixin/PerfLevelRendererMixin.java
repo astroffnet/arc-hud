@@ -29,4 +29,20 @@ public abstract class PerfLevelRendererMixin {
                                     LightTexture light, org.joml.Matrix4f projection, CallbackInfo ci) {
         com.arc4io.archud.client.fx.Taau.capture(pose.last().pose(), projection, camera.getPosition());
     }
+
+    /** Адаптивная дальность: чанки за радиусом не рисуются и не перестраиваются. */
+    @Inject(method = "applyFrustum", at = @At("TAIL"), require = 0)
+    private void archud$adaptive(net.minecraft.client.renderer.culling.Frustum frustum, CallbackInfo ci) {
+        com.arc4io.archud.client.perf.AdaptiveDistance.filter(this);
+    }
+
+    @Inject(method = "compileChunks", at = @At("HEAD"), require = 0)
+    private void archud$compileStart(net.minecraft.client.Camera camera, CallbackInfo ci) {
+        com.arc4io.archud.client.perf.AdaptiveDistance.compileStart();
+    }
+
+    @Inject(method = "compileChunks", at = @At("RETURN"), require = 0)
+    private void archud$compileEnd(net.minecraft.client.Camera camera, CallbackInfo ci) {
+        com.arc4io.archud.client.perf.AdaptiveDistance.compileEnd();
+    }
 }

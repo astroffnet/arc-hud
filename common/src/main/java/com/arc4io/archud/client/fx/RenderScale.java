@@ -30,7 +30,7 @@ public final class RenderScale {
     private static boolean allowed() {
         if (failed) return false;
         Minecraft mc = Minecraft.getInstance();
-        return mc.options.graphicsMode().get() != GraphicsStatus.FABULOUS && !ShaderPacks.inUse();
+        return mc.options.graphicsMode().get() != GraphicsStatus.FABULOUS && !ShaderPacks.inUse() && !com.arc4io.archud.client.gfx.GlContext.vulkan();
     }
 
     public static float scale() {

@@ -12,7 +12,10 @@
     "PlayerDataStorageAccessor",
     "PlayerListStorageMixin",
     "EnchantmentMenuAccessor",
-    "CraftingMenuMixin"
+    "CraftingMenuMixin",
+    "ServerTickMixin",
+    "ServerLevelTpsMixin",
+    "NaturalSpawnerTpsMixin"
   ],
   "client": [
     "PerfEntityRenderMixin",
@@ -83,7 +86,14 @@
     "EntityTurnMixin",
     "KeyboardInputMixin",
     "MouseScrollMixin",
-    "PerspectiveCycleMixin"
+    "PerspectiveCycleMixin",
+    "IntegratedServerMixin",
+    "LivingEntityLerpMixin",
+    "ChunkUploadBudgetMixin",
+    "ChunkRenderDispatcherAccessor",
+    "LevelRendererAccessor",
+    "RenderChunkInfoAccessor",
+    "WindowGlMixin"
   ],
   "injectors": {
     "defaultRequire": 1

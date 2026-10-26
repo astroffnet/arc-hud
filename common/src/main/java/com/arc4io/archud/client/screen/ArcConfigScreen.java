@@ -31,17 +31,18 @@ public class ArcConfigScreen extends Screen implements com.arc4io.archud.client.
     private int px, py, pw, ph, listY, listH;
 
     /** Числовые настройки: значения, между которыми переключает клик (ЛКМ — дальше, ПКМ — назад). */
-    private static final java.util.Map<String, int[]> PRESETS = java.util.Map.of(
-            "decorCullDistance", new int[]{0, 24, 32, 48, 64, 96},
-            "backgroundFps", new int[]{1, 5, 10, 15, 30, 60},
-            "waypointMaxDistance", new int[]{0, 250, 500, 1000, 2000, 5000},
-            "minimapSize", new int[]{80, 96, 110, 128, 150, 180},
-            "bodycamFov", new int[]{80, 90, 100, 110, 120},
-            "crosshairStyle", new int[]{0, 1, 2, 3},
-            "breakReminder", new int[]{0, 30, 60, 90, 120, 180},
-            "maxParticles", new int[]{0, 1000, 2000, 4000, 8000},
-            "shadowDistance", new int[]{0, 16, 24, 32, 48, 64},
-            "signTextDistance", new int[]{0, 12, 16, 24, 32, 48});
+    private static final java.util.Map<String, int[]> PRESETS = java.util.Map.ofEntries(
+            java.util.Map.entry("decorCullDistance", new int[]{0, 24, 32, 48, 64, 96}),
+            java.util.Map.entry("backgroundFps", new int[]{1, 5, 10, 15, 30, 60}),
+            java.util.Map.entry("autosaveMinutes", new int[]{1, 2, 3, 5, 10, 15}),
+            java.util.Map.entry("waypointMaxDistance", new int[]{0, 250, 500, 1000, 2000, 5000}),
+            java.util.Map.entry("minimapSize", new int[]{80, 96, 110, 128, 150, 180}),
+            java.util.Map.entry("bodycamFov", new int[]{80, 90, 100, 110, 120}),
+            java.util.Map.entry("crosshairStyle", new int[]{0, 1, 2, 3}),
+            java.util.Map.entry("breakReminder", new int[]{0, 30, 60, 90, 120, 180}),
+            java.util.Map.entry("maxParticles", new int[]{0, 1000, 2000, 4000, 8000}),
+            java.util.Map.entry("shadowDistance", new int[]{0, 16, 24, 32, 48, 64}),
+            java.util.Map.entry("signTextDistance", new int[]{0, 12, 16, 24, 32, 48}));
 
     public ArcConfigScreen(Screen parent) {
         super(Component.translatable("archud.config.title"));

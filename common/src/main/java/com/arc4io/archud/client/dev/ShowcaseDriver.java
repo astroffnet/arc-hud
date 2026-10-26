@@ -226,6 +226,17 @@ public final class ShowcaseDriver {
         add(100, ShowcaseDriver::dropTestMod, null); // «закинули мод в папку» — наблюдатель замечает за ~4 с
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.PauseScreen(true)), null);
         add(40, mc -> {}, "12_pause_menu");
+        // сохранение мира: кнопка «Сохранить мир» (как нажатие) и проверка, что сервер сохранил
+        add(5, mc -> {
+            int before = com.arc4io.archud.server.WorldSaver.saveCount();
+            com.arc4io.archud.client.WorldSaveClient.saveNow(mc);
+            ArcHud.LOGGER.info("[Showcase] save requested, count before={}", before);
+        }, null);
+        add(60, mc -> ArcHud.LOGGER.info("[Showcase] save state={} count={} ms={} glCurrent={} glMax={}", com.arc4io.archud.server.WorldSaver.state(),
+                com.arc4io.archud.server.WorldSaver.saveCount(), com.arc4io.archud.server.WorldSaver.lastDurationMs(),
+                com.arc4io.archud.client.gfx.GlContext.current(), com.arc4io.archud.client.gfx.GlContext.maxSupported()), null);
+        add(10, mc -> mc.setScreen(new com.arc4io.archud.client.screen.ArcPauseScreen()), null);
+        add(30, mc -> {}, "12b_pause_saved");
         add(10, mc -> mc.setScreen(new ArcConfigScreen(null)), null);
         add(30, mc -> {}, "13_settings");
         add(10, mc -> mc.setScreen(new HudLayoutScreen(null)), null);
@@ -293,7 +304,7 @@ public final class ShowcaseDriver {
         add(30, mc -> {}, "17_options");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(mc.screen, mc.options)), null);
         add(40, mc -> ArcHud.LOGGER.info("[Showcase] video screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getName()), "17c_video");
-        for (int fromEnd : new int[]{2, 1}) {
+        for (int fromEnd : new int[]{3, 2, 1}) {
             add(10, mc -> {
                 com.arc4io.archud.client.video.ArcVideoScreen.showcaseFromEnd = fromEnd;
                 mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(null, mc.options));
@@ -301,7 +312,7 @@ public final class ShowcaseDriver {
             add(10, mc -> {
                 if (mc.screen instanceof com.arc4io.archud.client.video.ArcVideoScreen v) v.selectFromEnd(fromEnd);
             }, null);
-            add(40, mc -> {}, fromEnd == 2 ? "17c2_optimization" : "17c3_effects");
+            add(40, mc -> {}, fromEnd == 3 ? "17c2_optimization" : fromEnd == 2 ? "17c3_effects" : "17c4_api");
         }
         add(10, mc -> {
             mc.setScreen(null);

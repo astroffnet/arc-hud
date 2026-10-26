@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
  * Клиентская логика, общая для Forge и Fabric.
  */
 public final class ArcClient {
+    private static boolean glChecked;
     private static ClientPlatform platform;
 
     private ArcClient() {}
@@ -44,6 +45,18 @@ public final class ArcClient {
         }
         if (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen) {
             com.arc4io.archud.client.mods.GameRestarter.resumeIfPending(mc.screen);
+        }
+        WorldSaveClient.tick(mc);
+        if (!glChecked && mc.getOverlay() == null && mc.screen != null) {
+            // игра дошла до меню — выбранная версия OpenGL работает
+            glChecked = true;
+            com.arc4io.archud.client.gfx.GlContext.detect();
+            com.arc4io.archud.client.gfx.GlContext.startupOk();
+            if (com.arc4io.archud.client.gfx.GlContext.revertedAfterCrash()) {
+                net.minecraft.client.gui.components.toasts.SystemToast.addOrUpdate(mc.getToasts(),
+                        net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                        Component.translatable("archud.fx.gl_version"), Component.translatable("archud.fx.gl_version.reverted"));
+            }
         }
         if (mc.player == null) return;
         ArcConfig cfg = ArcConfig.get();
