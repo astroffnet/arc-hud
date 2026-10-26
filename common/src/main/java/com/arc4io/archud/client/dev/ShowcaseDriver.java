@@ -168,6 +168,24 @@ public final class ShowcaseDriver {
             lookAt(mc, 0);
         }, null);
         add(60, mc -> {}, "09c_bodycam");
+        // вплотную к стене: раньше было видно сквозь блоки
+        add(5, mc -> {
+            var sp = mc.getSingleplayerServer();
+            if (sp == null || mc.player == null) return;
+            net.minecraft.core.BlockPos base = mc.player.blockPosition();
+            java.util.UUID id = mc.player.getUUID();
+            sp.execute(() -> {
+                var sl = sp.getPlayerList().getPlayer(id);
+                if (sl == null) return;
+                var lvl = sl.serverLevel();
+                // стена из камня перед игроком (на юг), 3x3
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = 0; dy <= 2; dy++)
+                        lvl.setBlockAndUpdate(base.offset(dx, dy, 1), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+                sl.teleportTo(lvl, base.getX() + 0.5, base.getY(), base.getZ() + 0.69, 0F, 10F); // лицом к стене, вплотную
+            });
+        }, null);
+        add(40, mc -> {}, "09d_bodycam_wall");
         add(10, mc -> {
             mc.options.setCameraType(ArcCamera.nextPerspective(mc.options.getCameraType())); // F5: камера Arc
             ArcHud.LOGGER.info("[Showcase] F5 -> {} style {} arc {}", mc.options.getCameraType(), ArcConfig.get().firstPersonStyle, ArcCamera.active());
@@ -266,6 +284,9 @@ public final class ShowcaseDriver {
             mc.setScreen(new InventoryScreen(mc.player));
         }, null);
         add(30, mc -> {}, "17b_russian_fast");
+        // «импорт» встроенного пака: тот же пак zip-файлом в папке resourcepacks, включение через экран паков
+        add(10, ShowcaseDriver::importRuPack, null);
+        add(120, mc -> ArcHud.LOGGER.info("[Showcase] imported pack applied, selected: {}", mc.options.resourcePacks), "17c2_ru_pack_imported");
         add(10, mc -> {
             mc.setScreen(null);
             if (mc.level != null) mc.level.disconnect();
@@ -561,6 +582,49 @@ public final class ShowcaseDriver {
             }
         } catch (Exception e) {
             ArcHud.LOGGER.warn("[Showcase] test mod: " + e);
+        }
+    }
+
+    private static void importRuPack(Minecraft mc) {
+        try {
+            var repo = mc.getResourcePackRepository();
+            net.minecraft.server.packs.repository.Pack builtin = null;
+            for (var p : repo.getAvailablePacks()) if (p.getId().contains("rodnoe")) builtin = p;
+            if (builtin == null) {
+                ArcHud.LOGGER.info("[Showcase] builtin pack not found");
+                return;
+            }
+            java.nio.file.Path zip = mc.getResourcePackDirectory().resolve("Rodnoe_slovo_ru_RU_by_arc4io.zip");
+            try (var res = builtin.open(); var out = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(zip))) {
+                var meta = res.getRootResource("pack.mcmeta");
+                if (meta != null) {
+                    out.putNextEntry(new java.util.zip.ZipEntry("pack.mcmeta"));
+                    try (var in = meta.get()) {
+                        in.transferTo(out);
+                    }
+                    out.closeEntry();
+                }
+                for (String ns : res.getNamespaces(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)) {
+                    res.listResources(net.minecraft.server.packs.PackType.CLIENT_RESOURCES, ns, "lang", (loc, sup) -> {
+                        try (var in = sup.get()) {
+                            out.putNextEntry(new java.util.zip.ZipEntry("assets/" + loc.getNamespace() + "/" + loc.getPath()));
+                            in.transferTo(out);
+                            out.closeEntry();
+                        } catch (Exception e) {
+                            ArcHud.LOGGER.warn("[Showcase] zip entry " + loc + ": " + e);
+                        }
+                    });
+                }
+            }
+            repo.reload();
+            java.util.List<String> ids = new java.util.ArrayList<>(repo.getSelectedIds());
+            ids.add("file/Rodnoe_slovo_ru_RU_by_arc4io.zip");
+            ArcHud.LOGGER.info("[Showcase] importing pack, available: {}", repo.getAvailableIds());
+            repo.setSelected(ids);
+            mc.options.updateResourcePacks(repo);
+            mc.setScreen(new com.arc4io.archud.client.screen.ArcPackScreen(null, mc.options));
+        } catch (Throwable e) {
+            ArcHud.LOGGER.error("[Showcase] import pack failed", e);
         }
     }
 }
