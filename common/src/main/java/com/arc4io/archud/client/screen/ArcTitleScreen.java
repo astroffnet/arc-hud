@@ -39,7 +39,7 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
     private int panelW;
     // карточка профиля справа
     private net.minecraft.client.gui.components.EditBox nickBox;
-    private int cardX, cardY, cardW = 150, cardH = 196;
+    private int cardX, cardY, cardW = 150, cardH = 214;
 
     public ArcTitleScreen() {
         super(Component.translatable("narrator.screen.title"));
@@ -195,13 +195,13 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         Draw.hGradient(g, x + 1, y + 1, x + cardW - 1, y + 110, Draw.alpha(accent, 0x30), 0x00000000);
         Draw.small(g, font, Component.translatable("archud.profile.title").getString(), x + 8, y + 6, Draw.TEXT_DIM, 0.7F);
         // подставка
-        int fx = x + cardW / 2, fy = y + 112;
+        int fx = x + cardW / 2, fy = y + 116;
         g.fill(fx - 26, fy, fx + 26, fy + 2, Draw.alpha(accent, 0x70));
         g.fillGradient(fx - 30, fy + 2, fx + 30, fy + 6, Draw.alpha(accent, 0x30), 0x00000000);
         String name = minecraft.getUser().getName();
-        com.arc4io.archud.client.profile.PlayerPreview.render(g, name, fx, fy, 56F * Draw.easeOut(intro), mouseX, mouseY);
+        com.arc4io.archud.client.profile.PlayerPreview.render(g, name, fx, fy, 46F * Draw.easeOut(intro), mouseX, mouseY);
         // имя и статус
-        int ny = y + 118;
+        int ny = y + 122;
         g.drawCenteredString(font, name, fx, ny, 0xFFFFFFFF);
         boolean custom = com.arc4io.archud.client.profile.NicknameManager.isCustom();
         String sub = custom ? Component.translatable("archud.profile.offline", com.arc4io.archud.client.profile.NicknameManager.accountName()).getString()
@@ -209,7 +209,7 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         Draw.smallCentered(g, font, sub, fx, ny + 11, custom ? 0xFFFFD54F : 0xFF9CFF5A, 0.55F);
         // подсказка под кнопками
         String hint = Component.translatable("archud.profile.hint").getString();
-        int hy = y + cardH - 20;
+        int hy = y + cardH - 21;
         for (var line : font.split(Component.literal(hint), (int) ((cardW - 12) / 0.5F))) {
             g.pose().pushPose();
             g.pose().translate(x + 6, hy, 0);

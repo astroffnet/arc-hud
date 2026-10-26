@@ -182,11 +182,11 @@ public class ArcConfig {
 
     // ---------------- 40 фишек
     public boolean infoNetherCoords = true;
-    public boolean infoMoonPhase = true;
+    public boolean infoMoonPhase = false;
     public boolean infoDayNightTimer = true;
     public boolean infoSlimeChunk = true;
-    public boolean infoWeatherForecast = true;
-    public boolean infoSessionTime = true;
+    public boolean infoWeatherForecast = false;
+    public boolean infoSessionTime = false;
     public boolean targetBlockDetails = true;
     public boolean targetMobStats = true;
     /** Прицел: 0 — ванильный, 1 — точка, 2 — крест, 3 — круг. */
