@@ -62,7 +62,7 @@ dependencies {
     include "maven.modrinth:e4mc:6.2.3-fabric"
 
     // только для тестового запуска: проверка своего экрана графики с Sodium
-    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.13-fabric"
+    modLocalRuntime "maven.modrinth:sodium:mc1.20.1-0.5.11"
 
     // Необязательные: Trinkets (слоты спины/пояса), Mod Menu (кнопка настроек)
     modCompileOnly "dev.emi:trinkets:${project.trinkets_version}"
