@@ -61,6 +61,7 @@ public final class WaypointStore {
     /** Пакет: часть (varint), всего частей (varint), байты. */
     private static void onSync(ServerPlayer player, FriendlyByteBuf buf) {
         if (!ArcConfig.get().serverWaypointSync || player.getServer() == null) return;
+        if (!ArcServer.isArcPlayer(player.getUUID())) return; // не вошёл (/login) — чужие метки не перезаписать
         int part = buf.readVarInt(), total = buf.readVarInt();
         byte[] data = buf.readByteArray(ArcNet.C2S_LIMIT);
         if (total <= 0 || total > MAX_BYTES / 1000 || part < 0 || part >= total) return;

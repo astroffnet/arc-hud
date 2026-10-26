@@ -138,6 +138,10 @@ public class ArcConfig {
     public boolean serverWaypointSync = true;
     /** Сервер: хранить инвентарь (playerdata), достижения и статистику игроков по нику, а не по UUID. */
     public boolean nicknameStorage = true;
+    /** Сервер: AntiESP — не отправлять игрокам сущности, скрытые за непрозрачными блоками. */
+    public boolean antiEsp = true;
+    /** Сервер: минимальный уровень оператора для админ-панели (1–4). */
+    public int adminPermissionLevel = 2;
     public boolean serverTempadToPlayers = true;
     /** Скрыть себя с карт других игроков. */
     public boolean hideFromMap = false;

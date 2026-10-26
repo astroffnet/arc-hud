@@ -254,6 +254,14 @@ public final class ShowcaseDriver {
         add(10, mc -> {
             if (mc.player != null) mc.player.closeContainer();
         }, null);
+        for (String t : new String[]{"PLAYERS", "WORLD", "SERVER", "LISTS"}) {
+            add(10, mc -> {
+                com.arc4io.archud.client.screen.AdminPanelScreen.showcase(t, mc.player.getGameProfile().getName());
+                mc.setScreen(new com.arc4io.archud.client.screen.AdminPanelScreen(null));
+            }, null);
+            add(40, mc -> ArcHud.LOGGER.info("[Showcase] admin allowed={} state={}", com.arc4io.archud.client.ArcClientNet.adminAllowed(),
+                    com.arc4io.archud.client.ArcClientNet.adminState() != null), "16a_admin_" + t.toLowerCase());
+        }
         add(10, mc -> mc.setScreen(new HostPanelScreen(null)), null);
         add(40, mc -> {}, "16_host_panel");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.OptionsScreen(null, mc.options)), null);
@@ -605,7 +613,7 @@ public final class ShowcaseDriver {
                     out.closeEntry();
                 }
                 for (String ns : res.getNamespaces(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)) {
-                    res.listResources(net.minecraft.server.packs.PackType.CLIENT_RESOURCES, ns, "lang", (loc, sup) -> {
+                    for (String dir : new String[]{"lang", "patchouli_books", "books"}) res.listResources(net.minecraft.server.packs.PackType.CLIENT_RESOURCES, ns, dir, (loc, sup) -> {
                         try (var in = sup.get()) {
                             out.putNextEntry(new java.util.zip.ZipEntry("assets/" + loc.getNamespace() + "/" + loc.getPath()));
                             in.transferTo(out);

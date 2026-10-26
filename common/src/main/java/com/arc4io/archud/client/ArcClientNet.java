@@ -73,6 +73,19 @@ public final class ArcClientNet {
             }
         });
         ArcNet.onClient("wp_shared", ArcClientNet::onShared);
+        ArcNet.onClient("admin_allowed", buf -> adminAllowed = buf.readBoolean());
+        ArcNet.onClient("admin_state", buf -> {
+            try {
+                adminState = com.google.gson.JsonParser.parseString(new String(buf.readByteArray(1 << 21), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                adminStateAt = System.currentTimeMillis();
+            } catch (Exception e) {
+                com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: bad admin state", e);
+            }
+        });
+        ArcNet.onClient("admin_result", buf -> {
+            adminResult = buf.readUtf(256);
+            adminResultAt = System.currentTimeMillis();
+        });
         ArcNet.onClient("wp_saved", buf -> {
             String json = null;
             if (buf.readBoolean()) {
@@ -91,6 +104,41 @@ public final class ArcClientNet {
                         Component.translatable("archud.wp.synced_title"), Component.translatable("archud.wp.synced", added));
             }
         });
+    }
+
+    // ------------------------------------------------------------------ админ-панель
+    private static boolean adminAllowed;
+    private static com.google.gson.JsonObject adminState;
+    private static long adminStateAt, adminResultAt;
+    private static String adminResult = "";
+
+    /** Сервер разрешил этому игроку админ-панель (оператор, вошёл в аккаунт). */
+    public static boolean adminAllowed() {
+        return welcomed && adminAllowed;
+    }
+
+    public static com.google.gson.JsonObject adminState() {
+        return adminState;
+    }
+
+    public static long adminStateAt() {
+        return adminStateAt;
+    }
+
+    public static String adminResult() {
+        return System.currentTimeMillis() - adminResultAt < 4000 ? adminResult : "";
+    }
+
+    public static void adminRequest() {
+        ArcNet.sendToServer(ArcNet.create(adminState == null ? "admin_open" : "admin_refresh"));
+    }
+
+    public static void adminAction(String action, String target, String arg) {
+        FriendlyByteBuf buf = ArcNet.create("admin_action");
+        buf.writeUtf(action, 64);
+        buf.writeUtf(target == null ? "" : target, 64);
+        buf.writeUtf(arg == null ? "" : (arg.length() > 256 ? arg.substring(0, 256) : arg), 256);
+        ArcNet.sendToServer(buf);
     }
 
     /** Сервер прислал сохранённые метки — с этого момента наши изменения отправляются ему. */
@@ -160,6 +208,8 @@ public final class ArcClientNet {
         helloSent = welcomed = mapSync = positions = sharing = tempadDoors = false;
         waypointSyncReady = false;
         waypointSyncAt = 0;
+        adminAllowed = false;
+        adminState = null;
         PLAYERS.clear();
         HIDDEN.clear();
         SENT_HASH.clear();
