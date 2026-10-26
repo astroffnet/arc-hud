@@ -1350,5 +1350,22 @@
   "archud.layout.show": "Show",
   "archud.layout.shared": "Shared zone",
   "archud.layout.hidden": "hidden",
-  "archud.config.chatHeads": "Player heads in chat"
+  "archud.config.chatHeads": "Player heads in chat",
+  "archud.anvil.rename": "New name…",
+  "archud.anvil.result": "Result",
+  "archud.anvil.place": "Put an item into the left slot",
+  "archud.anvil.place2": "and material or a book into the second",
+  "archud.anvil.renamed": "will be renamed",
+  "archud.anvil.incompatible": "cannot be combined",
+  "archud.anvil.enchants": "ENCHANTMENTS",
+  "archud.anvil.durability": "DURABILITY",
+  "archud.anvil.penalty": "Prior work penalty: %s lvl",
+  "archud.anvil.have": "You have: %s lvl",
+  "archud.backpack.sort": "Sort backpack",
+  "archud.backpack.deposit": "Deposit matching items",
+  "archud.backpack.tier.leather": "leather",
+  "archud.backpack.tier.iron": "iron",
+  "archud.backpack.tier.diamond": "diamond",
+  "archud.config.customBackpackScreen": "New backpack screen",
+  "archud.config.customAnvil": "New anvil"
 }

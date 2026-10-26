@@ -15,7 +15,8 @@ public enum ArcPacket {
     OPEN_BACKPACK("open_backpack"),
     SORT_INVENTORY("sort_inventory"),
     SELECT_RECIPE("select_recipe"),
-    TEMPAD_OPEN("tempad_open");
+    TEMPAD_OPEN("tempad_open"),
+    BACKPACK_DEPOSIT("backpack_deposit");
 
     private final ResourceLocation id;
 
@@ -41,11 +42,17 @@ public enum ArcPacket {
         if (player == null) return;
         switch (this) {
             case OPEN_BACKPACK -> BackpackManager.openEquippedOrFirst(player);
-            case SORT_INVENTORY -> InventorySorter.sort(player);
+            case SORT_INVENTORY -> {
+                if (player.containerMenu instanceof com.arc4io.archud.menu.BackpackMenu bm) InventorySorter.sortBackpack(player, bm);
+                else InventorySorter.sort(player);
+            }
             case SELECT_RECIPE -> {
                 if (arg != null) RecipeSelector.select(player, arg);
             }
             case TEMPAD_OPEN -> com.arc4io.archud.server.TempadServer.openDoor(player, arg);
+            case BACKPACK_DEPOSIT -> {
+                if (player.containerMenu instanceof com.arc4io.archud.menu.BackpackMenu bm) InventorySorter.depositMatching(player, bm);
+            }
         }
     }
 }

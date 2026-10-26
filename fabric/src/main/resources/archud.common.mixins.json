@@ -68,6 +68,7 @@
     "ChatComponentAccessor",
     "ChatComponentMixin",
     "ChatHeadsMixin",
+    "AnvilScreenAccessor",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",
