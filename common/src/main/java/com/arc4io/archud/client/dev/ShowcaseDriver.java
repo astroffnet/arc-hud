@@ -554,6 +554,11 @@ public final class ShowcaseDriver {
             return;
         }
         Step step = STEPS.get(index);
+        if (step.delay() == -2) {
+            // ждать окончания загрузки ресурсов (оверлей загрузки) и главного меню
+            if (mc.getOverlay() == null && (mc.screen instanceof TitleScreen || mc.screen instanceof com.arc4io.archud.client.screen.ArcTitleScreen)) next(mc);
+            return;
+        }
         if (step.delay() < 0) {
             // ждать загрузки мира
             if (mc.level != null && mc.player != null && mc.screen == null) next(mc);
@@ -643,7 +648,9 @@ public final class ShowcaseDriver {
      * синхронизация меток, админ-панель и действие из неё, карта и меню паузы. Результаты — строки [E2E] в логе.
      */
     private static void buildE2e(String address) {
-        add(200, mc -> {
+        STEPS.add(new Step(-2, mc -> {}, null)); // ресурсы загружены
+        add(100, mc -> {}, null);
+        add(20, mc -> {
             mc.options.guiScale().set(3);
             mc.options.onboardAccessibility = false;
             mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
