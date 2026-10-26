@@ -1,0 +1,62 @@
+name: Compat (Forge with Aether, Curios, Legends, Regeneration)
+
+on:
+  push:
+    paths: [ ".github/compat.txt" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compat:
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [ forge ]
+    name: Compat (${{ matrix.loader }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.8"
+      - name: Install virtual display
+        run: sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri mesa-utils
+      - name: Run client with showcase driver
+        working-directory: ${{ matrix.loader }}
+        env:
+          ARCHUD_SHOWCASE: "compat"
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          MESA_GL_VERSION_OVERRIDE: "4.5"
+        run: |
+          set +e
+          timeout 35m xvfb-run -a -s "-screen 0 1920x1080x24" gradle runClient -PcompatMods --no-daemon --stacktrace > runclient.log 2>&1
+          echo "exit code: $?" >> runclient.log
+          exit 0
+      - name: Publish screenshots and logs
+        if: always()
+        run: |
+          mkdir -p /tmp/out
+          cp ${{ matrix.loader }}/runclient.log /tmp/out/ 2>/dev/null || true
+          cp ${{ matrix.loader }}/run/screenshots/*.png /tmp/out/ 2>/dev/null || true
+          cp ${{ matrix.loader }}/run/logs/latest.log /tmp/out/ 2>/dev/null || true
+          cp -r ${{ matrix.loader }}/run/crash-reports /tmp/out/ 2>/dev/null || true
+          echo "${{ github.sha }} ${{ job.status }}" > /tmp/out/STATUS.txt
+          cd /tmp/out
+          git init -q -b ci-compat-${{ matrix.loader }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Compat ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:ci-compat-${{ matrix.loader }}
+      - name: Verify the run (no mixin failures, showcase finished)
+        run: |
+          LOG=${{ matrix.loader }}/run/logs/latest.log
+          if grep -q "Mixin apply failed archud" "$LOG"; then grep "Mixin apply failed archud" "$LOG" | head -5; exit 1; fi
+          if ! grep -q "\[Compat\] done" "$LOG"; then echo "Showcase did not finish"; tail -40 "$LOG"; exit 1; fi

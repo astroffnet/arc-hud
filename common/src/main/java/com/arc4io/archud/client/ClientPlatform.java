@@ -22,6 +22,16 @@ public interface ClientPlatform {
         return next;
     }
 
+    /** Новый инвентарь с аксессуарами: запросить меню у сервера (true — запрос отправлен, экран откроет сервер). */
+    default boolean openServerInventory(net.minecraft.client.Minecraft mc) {
+        return false;
+    }
+
+    /** Оставить прежний инвентарь (например, Trinkets на Fabric сам встраивает слоты в ванильный). */
+    default boolean classicInventory() {
+        return false;
+    }
+
     /** Все загруженные моды для списка модов Arc HUD. */
     default java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
         return java.util.List.of();

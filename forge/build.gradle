@@ -22,6 +22,9 @@ minecraft {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'info'
+            // миксины других модов (в тесте совместимости) — их refmap переводится на имена среды разработки
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             args '--width', '1920', '--height', '1080'
             mods { archud { source sourceSets.main } }
         }
@@ -74,6 +77,16 @@ dependencies {
     bundled("maven.modrinth:e4mc:6.2.3-forge") { transitive = false }
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // Тест совместимости (CI: -PcompatMods): моды игрока из Modrinth, только в среде запуска
+    if (project.hasProperty('compatMods')) {
+        runtimeOnly fg.deobf("maven.modrinth:aether:1.20.1-1.5.2-neoforge")
+        runtimeOnly fg.deobf("maven.modrinth:azurelib:3.1.24")
+        runtimeOnly fg.deobf("maven.modrinth:azurelib-armor:2.0.14")
+        runtimeOnly fg.deobf("maven.modrinth:playeranimator:1.0.2-rc1+1.20-forge")
+        runtimeOnly fg.deobf("maven.modrinth:regeneration:42.1.1+forge")
+        runtimeOnly fg.deobf("maven.modrinth:legends-mod-core:1.20.1-ss1.0.22")
+    }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")

@@ -36,6 +36,7 @@ public class ArcHudForge {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         ArcHud.init(new ForgePlatform());
         ITEMS.register(modBus);
+        com.arc4io.archud.forge.inventory.ForgeInventory.register(modBus);
         modBus.addListener(ArcHudForge::onCreativeTabs);
         ForgeNetwork.register();
         if (net.minecraftforge.fml.ModList.get().isLoaded("curios")) {
