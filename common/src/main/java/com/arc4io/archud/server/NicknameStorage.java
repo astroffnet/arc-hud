@@ -16,7 +16,7 @@ import java.util.Locale;
  * На серверах без лицензии, в «Открыть для сети» и при смене лаунчера UUID игрока может меняться —
  * тогда ванилла создаёт «нового» игрока с пустым инвентарём и без достижений. По нику этого не происходит.
  *
- * Имя файла — ник в нижнем регистре (ники в Minecraft не различают регистр). Если файла по нику ещё нет,
+ * Имя файла — ник с учётом регистра (см. {@link #key(String)}). Если файла по нику ещё нет,
  * а по UUID есть — он копируется (оригинал остаётся как резервная копия).
  */
 public final class NicknameStorage {
@@ -26,9 +26,27 @@ public final class NicknameStorage {
         return ArcConfig.get().nicknameStorage;
     }
 
-    /** Ключ файла: ник в нижнем регистре, только безопасные для имени файла символы. */
+    /**
+     * Ключ файла с учётом регистра ника: «Arc4io» и «arc4io» — разные игроки. Файловые системы Windows и macOS
+     * не различают регистр в именах файлов, поэтому регистр кодируется явно: ник в нижнем регистре
+     * + «@» + маска заглавных букв (hex). «arc4io» → arc4io, «Arc4io» → arc4io@1, «ARC» → arc@7.
+     */
     public static String key(Player player) {
-        return player.getGameProfile().getName().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.\\-]", "_");
+        return key(player.getGameProfile().getName());
+    }
+
+    public static String key(String name) {
+        String lower = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.\\-]", "_");
+        java.math.BigInteger mask = java.math.BigInteger.ZERO;
+        for (int i = 0; i < name.length(); i++) {
+            if (Character.isUpperCase(name.charAt(i))) mask = mask.setBit(i);
+        }
+        return mask.signum() == 0 ? lower : lower + "@" + mask.toString(16);
+    }
+
+    /** Ключ прошлой версии (ник в нижнем регистре, без учёта регистра) — для переноса. */
+    public static String legacyKey(String name) {
+        return name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.\\-]", "_");
     }
 
     /** Путь к файлу по нику; при необходимости переносит данные из файла по UUID. */
@@ -37,8 +55,10 @@ public final class NicknameStorage {
         String name = uuidFile.getFileName().toString();
         String uuid = player.getStringUUID();
         if (!name.startsWith(uuid)) return uuidFile;
-        Path nick = uuidFile.resolveSibling(key(player) + name.substring(uuid.length()));
+        String suffix = name.substring(uuid.length());
+        Path nick = uuidFile.resolveSibling(key(player) + suffix);
         migrate(uuidFile, nick);
+        migrate(uuidFile.resolveSibling(legacyKey(player.getGameProfile().getName()) + suffix), nick);
         return nick;
     }
 
@@ -49,7 +69,9 @@ public final class NicknameStorage {
     /** playerdata: перенести &lt;uuid&gt;.dat → &lt;ник&gt;.dat перед загрузкой. */
     public static void migratePlayerData(File dir, Player player) {
         if (!enabled() || dir == null) return;
-        migrate(new File(dir, player.getStringUUID() + ".dat").toPath(), new File(dir, key(player) + ".dat").toPath());
+        Path to = new File(dir, key(player) + ".dat").toPath();
+        migrate(new File(dir, player.getStringUUID() + ".dat").toPath(), to);
+        migrate(new File(dir, legacyKey(player.getGameProfile().getName()) + ".dat").toPath(), to);
     }
 
     private static void migrate(Path from, Path to) {

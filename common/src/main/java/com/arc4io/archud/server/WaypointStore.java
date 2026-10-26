@@ -37,19 +37,22 @@ public final class WaypointStore {
     }
 
     /**
-     * Файл меток игрока — по НИКУ (без учёта регистра): на пиратских серверах и при смене аккаунта
-     * UUID может меняться, а ник остаётся. Старый файл по UUID переименовывается при первом входе.
+     * Файл меток игрока — по нику с учётом регистра (см. {@link NicknameStorage#key(String)}).
+     * Старые файлы (по UUID и по нику без учёта регистра) копируются при первом входе.
      */
     private static Path file(ServerPlayer player) {
-        MinecraftServer server = player.getServer();
-        String nick = player.getGameProfile().getName().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9_.\\-]", "_");
-        Path f = dir(server).resolve(nick + ".json.gz");
-        Path legacy = dir(server).resolve(player.getUUID() + ".json.gz");
-        if (!Files.exists(f) && Files.exists(legacy)) {
-            try {
-                Files.move(legacy, f);
-            } catch (Exception e) {
-                ArcHud.LOGGER.warn("Arc HUD: cannot rename {} -> {}", legacy.getFileName(), f.getFileName(), e);
+        Path d = dir(player.getServer());
+        String name = player.getGameProfile().getName();
+        Path f = d.resolve(NicknameStorage.key(name) + ".json.gz");
+        if (!Files.exists(f)) {
+            for (Path legacy : new Path[]{d.resolve(player.getUUID() + ".json.gz"), d.resolve(NicknameStorage.legacyKey(name) + ".json.gz")}) {
+                if (legacy.equals(f) || !Files.exists(legacy)) continue;
+                try {
+                    Files.copy(legacy, f);
+                    break;
+                } catch (Exception e) {
+                    ArcHud.LOGGER.warn("Arc HUD: cannot copy {} -> {}", legacy.getFileName(), f.getFileName(), e);
+                }
             }
         }
         return f;

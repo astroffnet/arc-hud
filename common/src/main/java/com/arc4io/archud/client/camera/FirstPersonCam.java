@@ -72,10 +72,7 @@ public final class FirstPersonCam {
         cfg.firstPersonStyle = style;
         ArcConfig.save();
         init = false;
-        if (mc.player != null && style != 0) {
-            String key = "archud.fp.bodycam";
-            mc.player.displayClientMessage(Component.translatable("archud.fp.mode", Component.translatable(key)).withStyle(ChatFormatting.AQUA), true);
-        }
+        // без надписи о режиме: камера просто переключается
     }
 
     // ------------------------------------------------------------------ тик
@@ -154,12 +151,29 @@ public final class FirstPersonCam {
         double side = Mth.sin(phase) * bob * 0.6;
         Vec3 target = eye.add(fx * 0.24 + fz * side, up, fz * 0.24 - fx * side);
         if (p.isCrouching()) target = target.add(0, 0.06, 0);
-        HitResult hit = p.level().clip(new ClipContext(eye, target, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, p));
-        if (hit.getType() != HitResult.Type.MISS) {
-            Vec3 h = hit.getLocation();
-            target = eye.add(h.subtract(eye).scale(0.6));
-        }
+        target = safePosition(p, eye, target);
         inv.archud$setPosition(target.x, target.y, target.z);
+    }
+
+    /**
+     * Камера не должна заходить в блоки. Проверяется не одна линия от глаз, а коробка вокруг камеры
+     * (ближняя плоскость отсечения при широком угле обзора ~0.13 блока в стороны): иначе, стоя вплотную
+     * к стене, край кадра оказывался внутри блока и было видно сквозь него («рентген»).
+     * Камера сдвигается от точки крепления обратно к глазам, пока коробка не станет свободной.
+     */
+    private static Vec3 safePosition(Player p, Vec3 eye, Vec3 target) {
+        var level = p.level();
+        double hx = 0.22, hy = 0.12;
+        for (int i = 10; i >= 1; i--) {
+            Vec3 c = eye.lerp(target, i / 10.0);
+            net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(c.x - hx, c.y - hy, c.z - hx, c.x + hx, c.y + hy, c.z + hx);
+            if (level.noCollision(box)) {
+                // и прямая видимость от глаз (через тонкие блоки вроде стёкол коробка не проверяет)
+                HitResult hit = level.clip(new ClipContext(eye, c, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, p));
+                if (hit.getType() == HitResult.Type.MISS) return c;
+            }
+        }
+        return eye; // вплотную со всех сторон — как обычная камера
     }
 
     /** Крен камеры (вызывается из bobHurt — действует и на мир, и на руку). */
