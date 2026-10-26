@@ -57,6 +57,12 @@ public final class InfoExtras {
             long ticks = day ? (tod < 12542L ? 12542L - tod : 24000L - tod + 12542L) : 23460L - tod;
             out.add(new Line(day ? Icons.MOON : Icons.SUN, Component.translatable(day ? "archud.info.to_night" : "archud.info.to_day", mmss(ticks / 20)), 0xFFE0E6EE));
         }
+        // можно ли лечь спать
+        if (cfg.infoCanSleep && overworld) {
+            long tod = level.getDayTime() % 24000L;
+            boolean night = (tod >= 12542L && tod < 23460L) || level.isThundering();
+            if (night) out.add(new Line(Icons.MOON, Component.translatable("archud.info.can_sleep"), 0xFFB39DDB));
+        }
         var server = mc.getSingleplayerServer();
         // слизневый чанк (только одиночная игра — нужен сид)
         if (cfg.infoSlimeChunk && overworld && server != null) {

@@ -192,11 +192,11 @@ public class ArcConfig {
     /** Прицел: 0 — ванильный, 1 — точка, 2 — крест, 3 — круг. */
     public int crosshairStyle = 0;
     public boolean hitMarker = true;
-    public boolean damageNumbers = true;
+    public boolean mobDamageNumbers = true;
     public boolean arrowCounter = true;
     public boolean lowDurabilityCrosshair = true;
-    public boolean lowDurabilityWarning = true;
-    public boolean fallWarning = true;
+    public boolean breakSound = true;
+    public boolean infoCanSleep = true;
     public boolean elytraHud = true;
     public boolean zoomEnabled = true;
     public boolean freelookEnabled = true;

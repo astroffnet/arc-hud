@@ -119,12 +119,12 @@
   "archud.config.modNames": "Названия модов",
   "archud.config.armorDurability": "Прочность брони",
   "archud.config.heldDurability": "Прочность в руках",
-  "archud.config.lowDurabilityWarning": "Предупреждать о поломке",
+  "archud.config.lowDurabilityWarning": "Мигание низкой прочности",
   "archud.config.ammoCounter": "Счётчик стрел",
   "archud.config.totemCounter": "Счётчик тотемов",
   "archud.config.itemEnergy": "Энергия предметов",
-  "archud.config.fallWarning": "Прогноз урона от падения",
-  "archud.config.damageNumbers": "Всплывающий урон",
+  "archud.config.fallWarning": "Предупреждение о падении",
+  "archud.config.damageNumbers": "Цифры урона",
   "archud.config.pickupNotifications": "Подбор предметов",
   "archud.config.movementStatus": "Статус движения",
   "archud.config.addonBars": "Полосы аддонов",
@@ -788,5 +788,9 @@
   "archud.config.hideRain": "Скрыть дождь и снег",
   "archud.config.afkOverlay": "Экран AFK через 3 мин",
   "archud.config.breakReminder": "Напоминание о перерыве",
-  "archud.config.fullInventoryWarning": "Предупреждение о полном инвентаре"
+  "archud.config.fullInventoryWarning": "Предупреждение о полном инвентаре",
+  "archud.config.mobDamageNumbers": "Урон над мобами",
+  "archud.config.breakSound": "Звук перед поломкой инструмента",
+  "archud.config.infoCanSleep": "Инфо: можно спать",
+  "archud.info.can_sleep": "Можно спать"
 }

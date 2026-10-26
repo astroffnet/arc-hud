@@ -705,10 +705,10 @@
   "archud.config.targetMobStats": "Target: horse speed and jump",
   "archud.config.crosshairStyle": "Crosshair",
   "archud.config.hitMarker": "Hit marker",
-  "archud.config.damageNumbers": "Floating damage numbers",
+  "archud.config.damageNumbers": "Health change numbers",
   "archud.config.arrowCounter": "Arrow counter by crosshair",
   "archud.config.lowDurabilityCrosshair": "Low durability by crosshair",
-  "archud.config.lowDurabilityWarning": "Warn before a tool breaks",
+  "archud.config.lowDurabilityWarning": "Low durability blink",
   "archud.config.fallWarning": "Fall damage forecast",
   "archud.config.elytraHud": "Elytra flight panel",
   "archud.config.zoomEnabled": "Zoom (C)",
@@ -729,5 +729,9 @@
   "archud.config.hideRain": "Hide rain and snow",
   "archud.config.afkOverlay": "AFK screen after 3 min",
   "archud.config.breakReminder": "Break reminder",
-  "archud.config.fullInventoryWarning": "Full inventory warning"
+  "archud.config.fullInventoryWarning": "Full inventory warning",
+  "archud.config.mobDamageNumbers": "Damage numbers above mobs",
+  "archud.config.breakSound": "Sound before a tool breaks",
+  "archud.config.infoCanSleep": "Info: you can sleep now",
+  "archud.info.can_sleep": "You can sleep"
 }
