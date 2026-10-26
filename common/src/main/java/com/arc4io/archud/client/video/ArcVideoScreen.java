@@ -315,6 +315,9 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
                 g.pose().popPose();
                 ty += 7;
             }
+            // превью (прицел) — внизу панели описания
+            int ph = Math.min(90, dh / 2);
+            info.preview(g, dx + 6, dy + dh - ph - 6, dw - 12, ph);
         } else {
             Draw.smallCentered(g, font, Component.translatable("archud.video.hover").getString(), dx + dw / 2F, dy + 14, Draw.TEXT_DIM, 0.65F);
         }

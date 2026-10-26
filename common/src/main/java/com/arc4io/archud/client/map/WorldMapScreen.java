@@ -546,6 +546,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
 
     private void drawWaypointsFor(GuiGraphics g, float cx, float cy, float radius) {
         String dim = viewDim();
+        Legends.draw(g, font, dim, cx, cy, centerX, centerZ, zoom, 0F, radius + 2, 7, zoom >= 1F);
         for (Waypoint w : WaypointManager.all()) {
             if (!w.visible || !dim.equals(w.dimension) || !WaypointManager.sourceVisible(w.source)) continue;
             float[] s = MapView.toScreen(w.x + 0.5, w.z + 0.5, centerX, centerZ, zoom, 0F);
@@ -706,6 +707,8 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     }
 
     // ---------- контекстное меню ----------
+    private Legends.Legend menuLegend;
+
     private void openMenu(int mx, int my, Waypoint wp) {
         double[] w = screenToWorld(mx, my);
         menuWX = (int) Math.floor(w[0]);
@@ -715,6 +718,13 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         menuWaypoint = wp;
         menuItems.clear();
         menuPlayer = null;
+        menuLegend = wp == null ? Legends.at(viewDim(), mapCX(), mapCY(), centerX, centerZ, zoom, mx, my) : null;
+        if (menuLegend != null) {
+            menuItems.add("nav_legend");
+            menuItems.add("hide_legend");
+            menuOpen = true;
+            return;
+        }
         if (wp == null) findPlayerAt(mx, my);
         if (menuPlayer != null) {
             menuItems.add("tp_smart");
@@ -816,7 +826,8 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         g.pose().pushPose();
         g.pose().translate(0, 0, 400);
         Draw.panel(g, x, y, w, h, 0xF0101419, Draw.alpha(accent, 0xFF));
-        String head = menuPlayer != null ? "☺ " + menuPlayerName : menuWaypoint != null ? menuWaypoint.name : menuWX + ", " + menuWZ;
+        String head = menuPlayer != null ? "☺ " + menuPlayerName : menuWaypoint != null ? menuWaypoint.name
+                : menuLegend != null ? "★ " + Legends.name(menuLegend).getString() : menuWX + ", " + menuWZ;
         Draw.small(g, font, head, x + 5, y + 4, Draw.alpha(accent, 0xFF), 0.7F);
         for (int i = 0; i < menuItems.size(); i++) {
             int iy = y + 13 + i * 14;
@@ -871,6 +882,8 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
                 minecraft.setScreen(null);
             }
             case "nav_here" -> Navigator.navigateTo(menuWX, ty, menuWZ, viewDim());
+            case "nav_legend" -> Navigator.navigateTo(menuLegend.x(), menuLegend.y(), menuLegend.z(), viewDim());
+            case "hide_legend" -> Legends.hide(menuLegend);
             case "share_coords" -> {
                 if (minecraft.getConnection() != null) minecraft.getConnection().sendChat("x:" + menuWX + " y:" + ty + " z:" + menuWZ);
             }

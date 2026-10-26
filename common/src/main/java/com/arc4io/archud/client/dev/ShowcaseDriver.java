@@ -304,7 +304,7 @@ public final class ShowcaseDriver {
         add(30, mc -> {}, "17_options");
         add(10, mc -> mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(mc.screen, mc.options)), null);
         add(40, mc -> ArcHud.LOGGER.info("[Showcase] video screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getName()), "17c_video");
-        for (int fromEnd : new int[]{3, 2, 1}) {
+        for (int fromEnd : new int[]{4, 3, 2, 1}) {
             add(10, mc -> {
                 com.arc4io.archud.client.video.ArcVideoScreen.showcaseFromEnd = fromEnd;
                 net.minecraft.client.gui.screens.Screen parent = mc.screen;
@@ -317,7 +317,7 @@ public final class ShowcaseDriver {
             add(10, mc -> {
                 if (mc.screen instanceof com.arc4io.archud.client.video.ArcVideoScreen v) v.selectFromEnd(fromEnd);
             }, null);
-            add(40, mc -> {}, fromEnd == 3 ? "17c2_optimization" : fromEnd == 2 ? "17c3_effects" : "17c4_api");
+            add(40, mc -> {}, fromEnd == 4 ? "17c2_optimization" : fromEnd == 3 ? "17c3_effects" : fromEnd == 2 ? "17c5_crosshair" : "17c4_api");
         }
         add(10, mc -> {
             mc.setScreen(null);

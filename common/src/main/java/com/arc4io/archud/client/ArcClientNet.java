@@ -49,6 +49,7 @@ public final class ArcClientNet {
     private ArcClientNet() {}
 
     public static void init() {
+        com.arc4io.archud.client.map.Legends.init();
         ArcNet.onClient("welcome", buf -> {
             int protocol = buf.readVarInt();
             welcomed = protocol == ArcServer.PROTOCOL;
@@ -223,6 +224,7 @@ public final class ArcClientNet {
         SENT_HASH.clear();
         OUTGOING.clear();
         WaypointManager.clearShared();
+        com.arc4io.archud.client.map.Legends.reset();
     }
 
     /** Новый отсканированный чанк поверхности — отправить на сервер, если он изменился. */

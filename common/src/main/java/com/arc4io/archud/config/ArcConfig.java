@@ -248,6 +248,16 @@ public class ArcConfig {
     public boolean targetMobStats = true;
     /** Прицел: 0 — ванильный, 1 — точка, 2 — крест, 3 — круг. */
     public int crosshairStyle = 0;
+    /** Цвет прицела (ARGB), 0 — цвет темы. */
+    public int crosshairColor = 0;
+    public int crosshairSize = 6;
+    public int crosshairThickness = 2;
+    public int crosshairGap = 3;
+    public boolean crosshairOutline = true;
+    public boolean crosshairDot = false;
+    public int crosshairOpacity = 100;
+    /** Прицел краснеет, когда наведён на моба/игрока. */
+    public boolean crosshairHitColor = true;
     public boolean hitMarker = true;
     public boolean mobDamageNumbers = true;
     public boolean arrowCounter = true;
@@ -334,6 +344,10 @@ public class ArcConfig {
     public boolean backgroundReload = true;
     /** Моды без кода (только ресурсы) подгружаются сразу, без перезапуска. */
     public boolean hotLoad = true;
+    /** Сервер: метки-легенды построек (деревни, аванпосты…), открытых игроками. */
+    public boolean serverLegends = true;
+    /** Показывать легенды на картах. */
+    public boolean showLegends = true;
     /** Версия набора оптимизаций: новым переключателям при обновлении один раз ставятся значения «Баланса». */
     public int perfVersion = 0;
     public int autosaveMinutes = 3;
