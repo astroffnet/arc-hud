@@ -30,6 +30,9 @@ public final class ArcCamera {
     private static float curDist = 4F, curSide, curHeight;
     private static long lastFrame;
     private static boolean wasAiming;
+    /** Свободный обзор (удержание клавиши): камера вращается вокруг персонажа, сам он не поворачивается. */
+    private static boolean freelook;
+    private static CameraType beforeFreelook;
 
     private ArcCamera() {}
 
@@ -114,11 +117,35 @@ public final class ArcCamera {
             return;
         }
         // игрок сам переключил вид (F5) — выходим из режима
-        if (mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK) active = false;
+        if (mc.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
+            active = false;
+            freelook = false;
+        }
+    }
+
+    public static void freelookStart(Minecraft mc) {
+        if (active || mc.player == null) return;
+        beforeFreelook = mc.options.getCameraType();
+        start(mc);
+        curDist = 0.5F;
+        freelook = true;
+        mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+    }
+
+    public static void freelookEnd(Minecraft mc) {
+        if (!freelook) return;
+        freelook = false;
+        active = false;
+        mc.options.setCameraType(beforeFreelook == null ? CameraType.FIRST_PERSON : beforeFreelook);
+    }
+
+    public static boolean freelook() {
+        return freelook;
     }
 
     /** Персонаж смотрит туда же, куда камера (прицел, атака, использование предмета, элитры, транспорт). */
     public static boolean aiming() {
+        if (freelook) return false;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
         if (p == null) return true;
@@ -147,6 +174,7 @@ public final class ArcCamera {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
         if (!active || p == null) return;
+        if (freelook) return; // при свободном обзоре управление обычное
         boolean aim = aiming();
         if (aim) {
             if (!wasAiming) faceCamera(p);

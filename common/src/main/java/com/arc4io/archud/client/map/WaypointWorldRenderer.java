@@ -47,7 +47,12 @@ public final class WaypointWorldRenderer {
     }
 
     /** {x, y, w} в GUI-координатах; w ≤ 0 — точка позади камеры. */
-    private static float[] project(double wx, double wy, double wz, int sw, int sh) {
+    /** Матрицы камеры свежие (можно проецировать). */
+    public static boolean ready() {
+        return capturedFrame >= 0 && frame - capturedFrame <= 3;
+    }
+
+    public static float[] project(double wx, double wy, double wz, int sw, int sh) {
         Vector4f v = new Vector4f((float) (wx - camPos.x), (float) (wy - camPos.y), (float) (wz - camPos.z), 1F);
         VIEW.transform(v);
         PROJ.transform(v);

@@ -33,6 +33,8 @@ public final class InventoryExtras {
     private InventoryExtras() {}
 
     public static void onInit(Screen screen, Consumer<AbstractWidget> add) {
+        com.arc4io.archud.client.extras.ContainerExtras.onInit(screen, add);
+        com.arc4io.archud.client.extras.ReconnectHooks.onInit(screen, add);
         sortBtn = null;
         packBtn = null;
         if (!(screen instanceof InventoryScreen) || !ArcConfig.get().inventoryButtons) return;
@@ -61,6 +63,8 @@ public final class InventoryExtras {
     }
 
     public static void onRender(Screen screen, GuiGraphics g) {
+        com.arc4io.archud.client.extras.ContainerExtras.onRender(screen, g);
+        com.arc4io.archud.client.extras.ReconnectHooks.onRender(screen, g);
         if (!(screen instanceof InventoryScreen inv)) return;
         position(inv);
         if (!ArcConfig.get().inventoryStats || inv.getRecipeBookComponent().isVisible()) return;

@@ -212,6 +212,9 @@ final class HudBlocks {
             int color = block <= 0 ? 0xFFFF7A7A : block < 8 ? 0xFFFFD54F : Draw.TEXT;
             lines.add(new InfoLine(Icons.LIGHT, Component.translatable("archud.info.light", block, sky), color));
         }
+        for (com.arc4io.archud.client.extras.InfoExtras.Line l : com.arc4io.archud.client.extras.InfoExtras.infoLines(mc, p)) {
+            lines.add(new InfoLine(l.icon(), l.text(), l.color()));
+        }
         if (lines.isEmpty()) return null;
         int width = 0;
         for (InfoLine l : lines) width = Math.max(width, font.width(l.text()));
@@ -423,14 +426,17 @@ final class HudBlocks {
             String mod = BuiltInRegistries.ENTITY_TYPE.getKey(living.getType()).getNamespace();
             String mn = cfg.modNames && !mod.equals("minecraft") ? ArcHud.platform().modName(mod) : "";
             float hp = living.getHealth(), max = Math.max(1, living.getMaxHealth());
-            int pw = Math.max(120, font.width(name) + 24 + Math.round(font.width(mn) * 0.5F));
+            String extra = com.arc4io.archud.client.extras.InfoExtras.mobDetail(living);
+            int pw = Math.max(Math.max(120, font.width(name) + 24 + Math.round(font.width(mn) * 0.5F)), Math.round(font.width(extra) * 0.6F) + 10);
+            int ph = extra.isEmpty() ? 26 : 34;
             return new Block() {
                 public int w() { return pw; }
 
-                public int h() { return 26; }
+                public int h() { return ph; }
 
                 public void draw(GuiGraphics g, int x, int y, boolean right) {
-                    Draw.accentPanel(g, x, y, pw, 26, accent);
+                    Draw.accentPanel(g, x, y, pw, ph, accent);
+                    if (!extra.isEmpty()) Draw.small(g, font, extra, x + 5, y + 26, 0xFFFFE082, 0.6F);
                     Draw.icon(g, Icons.SKULL, x + 3, y + 3);
                     g.drawString(font, name, x + 14, y + 3, Draw.TEXT, true);
                     Draw.bar(g, x + 4, y + 14, pw - 8, 5, hp / max, 0xFFFF6B6B, 0xFFB71C1C);
@@ -446,15 +452,18 @@ final class HudBlocks {
             Component name = state.getBlock().getName();
             String mod = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace();
             String mn = cfg.modNames ? ArcHud.platform().modName(mod) : "";
-            int pw = Math.max(font.width(name), Math.round(font.width(mn) * 0.6F)) + 28;
+            String detail = com.arc4io.archud.client.extras.InfoExtras.blockDetail(state);
+            int pw = Math.max(Math.max(font.width(name), Math.round(font.width(mn) * 0.6F)), Math.round(font.width(detail) * 0.6F)) + 28;
+            int bh = detail.isEmpty() ? 20 : 27;
             ItemStack icon = new ItemStack(state.getBlock().asItem());
             return new Block() {
                 public int w() { return pw; }
 
-                public int h() { return 20; }
+                public int h() { return bh; }
 
                 public void draw(GuiGraphics g, int x, int y, boolean right) {
-                    Draw.accentPanel(g, x, y, pw, 20, accent);
+                    Draw.accentPanel(g, x, y, pw, bh, accent);
+                    if (!detail.isEmpty()) Draw.small(g, font, detail, x + 21, y + 19.5F, 0xFFFFE082, 0.6F);
                     if (!icon.isEmpty()) g.renderItem(icon, x + 2, y + 2);
                     g.drawString(font, name, x + 21, y + 3, Draw.TEXT, true);
                     if (!mn.isEmpty()) Draw.small(g, font, mn, x + 21, y + 12.5F, 0xFF7FA7C9, 0.6F);

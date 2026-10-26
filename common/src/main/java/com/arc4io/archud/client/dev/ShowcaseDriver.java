@@ -72,6 +72,7 @@ public final class ShowcaseDriver {
     private static void build() {
         add(200, mc -> {
             mc.options.guiScale().set(3);
+            ArcConfig.get().crosshairStyle = 2;
             mc.options.onboardAccessibility = false;
             mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
@@ -97,6 +98,10 @@ public final class ShowcaseDriver {
             mc.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
         }, null);
         add(160, mc -> {}, "02_multiplayer");
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.screen.ArcMultiplayerScreen m) m.showcaseSelectFirst();
+        }, null);
+        add(120, mc -> {}, "02b_multiplayer_details");
         add(10, mc -> CreateWorldScreen.openFresh(mc, new TitleScreen()), null);
         add(60, mc -> {}, "03_create_world");
         add(10, mc -> mc.setScreen(new ArcGameRulesScreen(new GameRules(), o -> mc.setScreen(new TitleScreen()))), null);

@@ -32,7 +32,14 @@ public final class ArcKeys {
     public static final KeyMapping CAMERA = new KeyMapping("key.archud.camera", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F6, CATEGORY);
     public static final KeyMapping CAMERA_SHOULDER = new KeyMapping("key.archud.camera_shoulder", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
 
-    public static final List<KeyMapping> ALL = List.of(CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
+    public static final KeyMapping ZOOM = new KeyMapping("key.archud.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
+    public static final KeyMapping FREELOOK = new KeyMapping("key.archud.freelook", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, CATEGORY);
+    public static final KeyMapping FULLBRIGHT = new KeyMapping("key.archud.fullbright", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
+    public static final KeyMapping COPY_COORDS = new KeyMapping("key.archud.copy_coords", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
+    public static final KeyMapping CLEAN_SCREENSHOT = new KeyMapping("key.archud.clean_screenshot", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
+    public static final KeyMapping AUTO_SPRINT = new KeyMapping("key.archud.auto_sprint", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
+
+    public static final List<KeyMapping> ALL = List.of(ZOOM, FREELOOK, FULLBRIGHT, COPY_COORDS, CLEAN_SCREENSHOT, AUTO_SPRINT, CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
             WORLD_MAP, ADD_WAYPOINT, WAYPOINTS, ZOOM_IN, ZOOM_OUT, HOST_PANEL);
 
     private ArcKeys() {}

@@ -9,6 +9,14 @@
     "CraftingMenuMixin"
   ],
   "client": [
+    "ChatAddMixin",
+    "ItemTooltipMixin",
+    "AttackHookMixin",
+    "FullbrightMixin",
+    "HideRainMixin",
+    "ContainerScreenAccessor",
+    "ContainerSearchKeyMixin",
+    "MinecraftUserAccessor",
     "GameRendererCamMixin",
     "GuiCrosshairMixin",
     "EnchantmentScreenInvoker",
