@@ -1,0 +1,11 @@
+name: ArcHUD
+version: '${version}'
+main: com.arc4io.archud.bukkit.ArcHudPlugin
+api-version: '1.20'
+author: arc4io
+description: "Arc HUD server part: shared map, player positions, waypoint storage, admin panel, AntiESP"
+softdepend: [AuthMe, nLogin]
+permissions:
+  archud.admin:
+    description: Arc HUD admin panel
+    default: op

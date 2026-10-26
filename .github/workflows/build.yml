@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        loader: [ forge, fabric ]
+        loader: [ forge, fabric, bukkit ]
     name: Build (${{ matrix.loader }})
     runs-on: ubuntu-latest
     steps:

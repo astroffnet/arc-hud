@@ -269,6 +269,7 @@ public final class ArcServer {
         w.writeBoolean(cfg.serverPlayerPositions);
         w.writeBoolean(cfg.serverWaypointSharing);
         w.writeBoolean(TempadServer.isAvailable());
+        w.writeBoolean(true); // сервер — мод (не плагин): есть стол зачарования Arc и т.п.
         ArcNet.sendToPlayer(player, w);
         WaypointStore.sendSaved(player);
         if (protocol != PROTOCOL || !cfg.serverMapSync) return;

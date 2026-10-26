@@ -135,3 +135,15 @@ def bundleJarJar = tasks.register('bundleJarJar') {
 }
 tasks.matching { it.name == 'reobfJar' }.configureEach { finalizedBy bundleJarJar }
 tasks.named('build') { dependsOn bundleJarJar }
+
+// Серверный jar: тот же мод без клиентских ресурсов (встроенный ресурспак «Родное слово», текстуры, шейдеры,
+// звуки) и без e4mc — для выделенного сервера Forge / NeoForge 1.20.1.
+def serverJar = tasks.register('serverJar', Zip) {
+    dependsOn bundleJarJar
+    archiveFileName = "archud-server-forge-${minecraft_version}-${mod_version}.jar"
+    destinationDirectory = layout.buildDirectory.dir('libs')
+    from({ zipTree(tasks.named('jar').get().archiveFile.get().asFile) }) {
+        exclude 'resourcepacks/**', 'assets/**', 'META-INF/jarjar/**'
+    }
+}
+tasks.named('build') { dependsOn serverJar }

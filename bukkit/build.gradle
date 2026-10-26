@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+version = mod_version
+group = 'com.arc4io.archud'
+
+base {
+    archivesName = "archud-server-bukkit"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    // API Paper 1.20.1: плагин работает на Spigot/Paper/Purpur 1.20.1 и новее (API обратно совместим)
+    compileOnly 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filesMatching('plugin.yml') { expand props }
+}

@@ -1,0 +1,118 @@
+name: Server test (dedicated servers)
+
+# Запускает настоящие серверы с серверной частью Arc HUD и проверяет, что они стартуют без ошибок:
+#  Forge 1.20.1 + archud-server-forge, Fabric 1.20.1 + archud-server-fabric, Paper 1.20.1 / 1.21.1 + плагин.
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  server:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: forge
+            project: forge
+            java: 17
+          - name: fabric
+            project: fabric
+            java: 17
+          - name: paper-1.20.1
+            project: bukkit
+            java: 17
+            mc: 1.20.1
+          - name: paper-1.21.1
+            project: bukkit
+            java: 21
+            mc: 1.21.1
+    name: Server (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17 for the build
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.8"
+
+      - name: Build ${{ matrix.project }}
+        working-directory: ${{ matrix.project }}
+        run: gradle build --no-daemon -q
+
+      - name: JDK ${{ matrix.java }} for the server
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Prepare server
+        run: |
+          set -e
+          mkdir -p /tmp/srv && cd /tmp/srv
+          echo "eula=true" > eula.txt
+          printf 'online-mode=false\nspawn-protection=0\nview-distance=4\n' > server.properties
+          case "${{ matrix.name }}" in
+            forge)
+              FV=$(grep '^forge_version' $GITHUB_WORKSPACE/forge/gradle.properties | cut -d= -f2)
+              curl -sSLo installer.jar "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-$FV/forge-1.20.1-$FV-installer.jar"
+              java -jar installer.jar --installServer > install.log 2>&1
+              mkdir -p mods && cp $GITHUB_WORKSPACE/forge/build/libs/archud-server-forge-*.jar mods/
+              echo 'bash run.sh nogui' > start.sh ;;
+            fabric)
+              LV=$(grep '^loader_version' $GITHUB_WORKSPACE/fabric/gradle.properties | cut -d= -f2)
+              FA=$(grep '^fabric_version' $GITHUB_WORKSPACE/fabric/gradle.properties | cut -d= -f2)
+              curl -sSLo server.jar "https://meta.fabricmc.net/v2/versions/loader/1.20.1/$LV/1.0.1/server/jar"
+              mkdir -p mods
+              curl -sSLo mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FA/fabric-api-$FA.jar"
+              cp $GITHUB_WORKSPACE/fabric/build/libs/archud-server-fabric-*.jar mods/
+              echo 'java -Xmx2G -jar server.jar nogui' > start.sh ;;
+            paper-*)
+              B=$(curl -s "https://api.papermc.io/v2/projects/paper/versions/${{ matrix.mc }}/builds" | jq '.builds[-1].build')
+              curl -sSLo paper.jar "https://api.papermc.io/v2/projects/paper/versions/${{ matrix.mc }}/builds/$B/downloads/paper-${{ matrix.mc }}-$B.jar"
+              mkdir -p plugins && cp $GITHUB_WORKSPACE/bukkit/build/libs/archud-server-bukkit-*.jar plugins/
+              echo 'java -Xmx2G -jar paper.jar nogui' > start.sh ;;
+          esac
+          ls -la mods plugins 2>/dev/null || true
+
+      - name: Run server until "Done", then stop
+        run: |
+          cd /tmp/srv
+          ( for i in $(seq 1 300); do grep -q 'Done (' logs/latest.log 2>/dev/null && break; sleep 2; done; sleep 20; echo stop ) \
+            | timeout 900 bash start.sh > console.log 2>&1 || true
+          cp logs/latest.log server.log 2>/dev/null || cp console.log server.log
+          if grep -q 'Done (' server.log; then STATUS=success; else STATUS=failure; fi
+          # ошибки Arc HUD: миксины, исключения, отключение плагина
+          grep -n -i -E "archud|arc hud" server.log | grep -i -E "error|exception|fail|could not|disabl" > archud-errors.txt || true
+          if [ -s archud-errors.txt ]; then STATUS=failure; fi
+          grep -n -i -E "archud|arc hud" server.log | head -40 > archud-lines.txt || true
+          echo "$GITHUB_SHA $STATUS" > STATUS.txt
+          echo "STATUS=$STATUS" >> $GITHUB_ENV
+          cat STATUS.txt archud-lines.txt archud-errors.txt
+
+      - name: Publish logs
+        if: always()
+        run: |
+          mkdir -p /tmp/out && cd /tmp/srv
+          cp STATUS.txt server.log console.log archud-lines.txt archud-errors.txt /tmp/out/ 2>/dev/null || true
+          cd /tmp/out
+          git init -q -b ci-server-${{ matrix.name }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Server test ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:ci-server-${{ matrix.name }}
+
+      - name: Fail if the server did not start cleanly
+        if: env.STATUS != 'success'
+        run: exit 1

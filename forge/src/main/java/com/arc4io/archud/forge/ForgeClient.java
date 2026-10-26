@@ -71,7 +71,14 @@ public final class ForgeClient implements ClientPlatform {
 
         com.arc4io.archud.network.ArcNet.setClientSide(
                 buf -> ForgeNetwork.CHANNEL.sendToServer(new ForgeNetwork.RawC2S(com.arc4io.archud.network.ArcNet.bytes(buf))),
-                () -> Minecraft.getInstance().getConnection() != null && ForgeNetwork.present(Minecraft.getInstance().getConnection().getConnection()));
+                () -> {
+                    var conn = Minecraft.getInstance().getConnection();
+                    if (conn == null) return false;
+                    // Forge-сервер с Arc HUD — по каналу; Bukkit/Paper (для Forge это «ванильный» сервер) — плагин Arc HUD
+                    // слушает тот же канал, а без плагина пакет просто игнорируется
+                    return ForgeNetwork.present(conn.getConnection())
+                            || net.minecraftforge.network.NetworkHooks.isVanillaConnection(conn.getConnection());
+                });
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(ForgeClient::onOverlayPre);
         bus.addListener(ForgeClient::onClientTick);

@@ -88,3 +88,33 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release = 17
     it.options.encoding = 'UTF-8'
 }
+
+// Серверный jar: тот же мод без клиентских ресурсов (встроенный ресурспак «Родное слово», текстуры, шейдеры,
+// звуки) и без вложенных клиентских модов (CIT Resewn, e4mc) — для выделенного сервера Fabric 1.20.1.
+def serverMeta = tasks.register('serverMeta') {
+    dependsOn 'remapJar'
+    def out = layout.buildDirectory.file('server-meta/fabric.mod.json')
+    outputs.file out
+    doLast {
+        def jar = tasks.named('remapJar').get().archiveFile.get().asFile
+        def text = null
+        new java.util.zip.ZipFile(jar).withCloseable { z -> text = z.getInputStream(z.getEntry('fabric.mod.json')).getText('UTF-8') }
+        def json = new groovy.json.JsonSlurper().parseText(text)
+        json.remove('jars')
+        json.description = (json.description ?: '') + ' (server build)'
+        def f = out.get().asFile
+        f.parentFile.mkdirs()
+        f.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json)), 'UTF-8')
+    }
+}
+def serverJar = tasks.register('serverJar', Zip) {
+    dependsOn serverMeta
+    archiveFileName = "archud-server-fabric-${project.minecraft_version}-${project.mod_version}.jar"
+    destinationDirectory = layout.buildDirectory.dir('libs')
+    from({ zipTree(tasks.named('remapJar').get().archiveFile.get().asFile) }) {
+        exclude 'resourcepacks/**', 'META-INF/jars/**', 'fabric.mod.json'
+        exclude { e -> e.path.startsWith('assets/') && e.path != 'assets/archud/icon.png' && !e.directory }
+    }
+    from(layout.buildDirectory.dir('server-meta'))
+}
+tasks.named('build') { dependsOn serverJar }
