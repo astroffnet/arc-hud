@@ -66,7 +66,9 @@ public final class ShowcaseDriver {
         enabled = "1".equals(System.getenv("ARCHUD_SHOWCASE"));
         if (!enabled) return;
         ArcHud.LOGGER.info("[Showcase] enabled");
-        build();
+        String e2e = System.getenv("ARCHUD_E2E");
+        if (e2e != null && !e2e.isBlank()) buildE2e(e2e.trim());
+        else build();
     }
 
     private static void build() {
@@ -634,5 +636,59 @@ public final class ShowcaseDriver {
         } catch (Throwable e) {
             ArcHud.LOGGER.error("[Showcase] import pack failed", e);
         }
+    }
+
+    /**
+     * Сквозная проверка с сервером Bukkit/Paper + плагин Arc HUD (ARCHUD_E2E=адрес): подключение, приветствие,
+     * синхронизация меток, админ-панель и действие из неё, карта и меню паузы. Результаты — строки [E2E] в логе.
+     */
+    private static void buildE2e(String address) {
+        add(200, mc -> {
+            mc.options.guiScale().set(3);
+            mc.options.onboardAccessibility = false;
+            mc.options.tutorialStep = net.minecraft.client.tutorial.TutorialSteps.NONE;
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
+            mc.options.save();
+            mc.resizeDisplay();
+            ArcHud.LOGGER.info("[E2E] connecting to {}", address);
+            net.minecraft.client.gui.screens.ConnectScreen.startConnecting(new TitleScreen(), mc,
+                    net.minecraft.client.multiplayer.resolver.ServerAddress.parseString(address), new ServerData("E2E", address, false), false);
+        }, null);
+        addWaitWorld();
+        add(200, mc -> ArcHud.LOGGER.info("[E2E] welcomed={} modServer={} positions={} mapSync={} waypointsOnServer={} adminAllowed={}",
+                com.arc4io.archud.client.ArcClientNet.connected(), com.arc4io.archud.client.ArcClientNet.modServer(),
+                com.arc4io.archud.client.ArcClientNet.positionsActive(), com.arc4io.archud.client.ArcClientNet.mapSyncActive(),
+                com.arc4io.archud.client.ArcClientNet.waypointsOnServer(), com.arc4io.archud.client.ArcClientNet.adminAllowed()), "e2e_01_joined");
+        add(10, mc -> {
+            if (mc.player == null) return;
+            Waypoint w = new Waypoint("E2E point", mc.player.getBlockX() + 20, mc.player.getBlockY(), mc.player.getBlockZ(), 0xFF4FC3F7,
+                    mc.level.dimension().location().toString(), Waypoint.Source.USER);
+            WaypointManager.add(w);
+            ArcHud.LOGGER.info("[E2E] waypoint added");
+        }, null);
+        add(120, mc -> {
+            com.arc4io.archud.client.screen.AdminPanelScreen.showcase("PLAYERS", mc.player.getGameProfile().getName());
+            mc.setScreen(new com.arc4io.archud.client.screen.AdminPanelScreen(null));
+        }, null);
+        add(100, mc -> ArcHud.LOGGER.info("[E2E] adminAllowed={} adminState={}", com.arc4io.archud.client.ArcClientNet.adminAllowed(),
+                com.arc4io.archud.client.ArcClientNet.adminState() != null), "e2e_02_admin_players");
+        add(10, mc -> com.arc4io.archud.client.ArcClientNet.adminAction("w_noon", "", ""), null);
+        add(60, mc -> ArcHud.LOGGER.info("[E2E] admin result='{}' time={}", com.arc4io.archud.client.ArcClientNet.adminResult(),
+                mc.level == null ? -1 : mc.level.getDayTime() % 24000), null);
+        add(10, mc -> {
+            com.arc4io.archud.client.screen.AdminPanelScreen.showcase("SERVER", mc.player.getGameProfile().getName());
+            mc.setScreen(new com.arc4io.archud.client.screen.AdminPanelScreen(null));
+        }, null);
+        add(60, mc -> {}, "e2e_03_admin_server");
+        add(10, mc -> mc.setScreen(new WorldMapScreen(null)), null);
+        add(60, mc -> {}, "e2e_04_map");
+        add(10, mc -> mc.setScreen(new com.arc4io.archud.client.screen.ArcPauseScreen()), null);
+        add(40, mc -> {}, "e2e_05_pause");
+        add(20, mc -> {
+            ArcHud.LOGGER.info("[E2E] done");
+            if (mc.level != null) mc.level.disconnect();
+            mc.clearLevel();
+            mc.stop();
+        }, null);
     }
 }

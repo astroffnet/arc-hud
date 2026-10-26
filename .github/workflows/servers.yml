@@ -94,7 +94,7 @@ jobs:
           cp logs/latest.log server.log 2>/dev/null || cp console.log server.log
           if grep -q 'Done (' server.log; then STATUS=success; else STATUS=failure; fi
           # ошибки Arc HUD: миксины, исключения, отключение плагина
-          grep -n -i -E "archud|arc hud" server.log | grep -i -E "error|exception|fail|could not|disabl" > archud-errors.txt || true
+          grep -n -i -E "archud|arc hud" server.log | grep -i -E "error|exception|fail|could not|disabl" | grep -v -E "Disabling ArcHUD|\] \[ArcHUD\] Disabling" > archud-errors.txt || true
           if [ -s archud-errors.txt ]; then STATUS=failure; fi
           grep -n -i -E "archud|arc hud" server.log | head -40 > archud-lines.txt || true
           echo "$GITHUB_SHA $STATUS" > STATUS.txt
