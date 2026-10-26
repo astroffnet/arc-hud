@@ -16,6 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class BlockEntityCullingMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
     private <E extends BlockEntity> void archud$cull(E blockEntity, float partialTick, PoseStack pose, MultiBufferSource buffers, CallbackInfo ci) {
+        if (com.arc4io.archud.client.perf.PerfHooks.skipBlockEntity(blockEntity)) {
+            ci.cancel();
+            return;
+        }
         BlockEntityRenderer<E> renderer = ((BlockEntityRenderDispatcher) (Object) this).getRenderer(blockEntity);
         if (renderer == null || renderer.shouldRenderOffScreen(blockEntity)) return;
         if (!Culler.shouldRenderBlockEntity(blockEntity)) ci.cancel();
