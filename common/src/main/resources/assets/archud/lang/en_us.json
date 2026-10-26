@@ -797,5 +797,6 @@
   "archud.pause.lan_open": "Open to LAN",
   "archud.pause.solo": "Singleplayer",
   "archud.pause.host": "host",
-  "archud.pause.invite_hint": "Open to LAN to invite friends — they'll appear here."
+  "archud.pause.invite_hint": "Open to LAN to invite friends — they'll appear here.",
+  "archud.config.nicknameStorage": "Server: store player data by nickname (inventory, advancements, stats)"
 }
