@@ -68,6 +68,18 @@ public final class BackgroundReload {
         }
         shown += (r.getActualProgress() - shown) * 0.2F;
         try {
+            // к концу кадра матрицы интерфейса уже сняты — ставим такие же, как у GUI
+            var win = mc.getWindow();
+            org.joml.Matrix4f oldProj = new org.joml.Matrix4f(com.mojang.blaze3d.systems.RenderSystem.getProjectionMatrix());
+            var oldSort = com.mojang.blaze3d.systems.RenderSystem.getVertexSorting();
+            com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(new org.joml.Matrix4f().setOrtho(0F,
+                    (float) (win.getWidth() / win.getGuiScale()), (float) (win.getHeight() / win.getGuiScale()), 0F, 1000F, 21000F),
+                    com.mojang.blaze3d.vertex.VertexSorting.ORTHOGRAPHIC_Z);
+            var mv = com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
+            mv.pushPose();
+            mv.setIdentity();
+            mv.translate(0F, 0F, -11000F);
+            com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
             GuiGraphics g = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
             com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
             g.pose().pushPose();
@@ -82,6 +94,9 @@ public final class BackgroundReload {
             g.pose().popPose();
             g.flush();
             com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+            mv.popPose();
+            com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
+            com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(oldProj, oldSort);
             if (!drawnLogged) {
                 drawnLogged = true;
                 ArcHud.LOGGER.info("Arc HUD: background reload bar drawn ({}%)", Math.round(shown * 100));
