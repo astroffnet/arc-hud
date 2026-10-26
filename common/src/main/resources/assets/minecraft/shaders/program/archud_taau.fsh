@@ -50,8 +50,8 @@ vec3 catmull(sampler2D tex, vec2 uv, vec2 size) {
 }
 
 void main() {
-    // где эта точка экрана лежит в сдвинутом уменьшенном кадре
-    vec2 uvIn = texCoord - Jitter / InSize;
+    // где эта точка экрана лежит в сдвинутом уменьшенном кадре (проекция сдвинута на +Jitter пикселей)
+    vec2 uvIn = texCoord + Jitter / InSize;
     vec2 pIn = uvIn * InSize;
     ivec2 base = ivec2(floor(pIn));
     ivec2 maxI = ivec2(InSize) - 1;
