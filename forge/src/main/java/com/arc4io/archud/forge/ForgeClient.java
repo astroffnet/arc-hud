@@ -215,14 +215,22 @@ public final class ForgeClient implements ClientPlatform {
     private static void onAddPacks(net.minecraftforge.event.AddPackFindersEvent event) {
         if (event.getPackType() != net.minecraft.server.packs.PackType.CLIENT_RESOURCES) return;
         com.arc4io.archud.config.ArcConfig cfg = com.arc4io.archud.config.ArcConfig.get();
+        boolean optifine = com.arc4io.archud.compat.OptiFineCompat.present();
         event.addRepositorySource(consumer -> {
-            var cit = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(com.arc4io.archud.forge.cit.CitPack.ID,
-                    net.minecraft.network.chat.Component.translatable("archud.cit.pack"), true, id -> new com.arc4io.archud.forge.cit.CitPack(),
-                    net.minecraft.server.packs.PackType.CLIENT_RESOURCES, net.minecraft.server.packs.repository.Pack.Position.TOP,
-                    net.minecraft.server.packs.repository.PackSource.BUILT_IN);
-            if (cit != null) consumer.accept(cit);
+            // с OptiFine CIT-пакеты он обрабатывает сам — свой CIT не нужен
+            if (!optifine) {
+                var cit = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(com.arc4io.archud.forge.cit.CitPack.ID,
+                        net.minecraft.network.chat.Component.translatable("archud.cit.pack"), true, id -> new com.arc4io.archud.forge.cit.CitPack(),
+                        net.minecraft.server.packs.PackType.CLIENT_RESOURCES, net.minecraft.server.packs.repository.Pack.Position.TOP,
+                        net.minecraft.server.packs.repository.PackSource.BUILT_IN);
+                if (cit != null) consumer.accept(cit);
+            }
             if (cfg.builtinRussianPack) {
-                java.nio.file.Path path = net.minecraftforge.fml.ModList.get().getModFileById("archud").getFile().findResource("resourcepacks/rodnoe_slovo");
+                // Пак распаковывается в обычную папку (config/archud/builtin/...): OptiFine при загрузке ресурсов
+                // обращается к файлам пака как к файлам на диске и падал на пути внутри jar мода
+                java.nio.file.Path inJar = net.minecraftforge.fml.ModList.get().getModFileById("archud").getFile().findResource("resourcepacks/rodnoe_slovo");
+                java.nio.file.Path path = com.arc4io.archud.client.resources.BuiltinPacks.extract(inJar, "rodnoe_slovo");
+                if (path == null) return;
                 var ru = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(RU_PACK, net.minecraft.network.chat.Component.literal("Родное слово"), false,
                         id -> new net.minecraft.server.packs.PathPackResources(id, path, true), net.minecraft.server.packs.PackType.CLIENT_RESOURCES,
                         net.minecraft.server.packs.repository.Pack.Position.TOP, net.minecraft.server.packs.repository.PackSource.BUILT_IN);
