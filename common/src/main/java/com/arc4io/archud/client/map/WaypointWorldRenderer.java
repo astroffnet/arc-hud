@@ -210,6 +210,10 @@ public final class WaypointWorldRenderer {
             float pulse = Draw.pulse(1200);
             MapView.diamond(g, x, y, r + 2 + Math.round(pulse * 2), Draw.alpha(Theme.accent(), (int) (0x90 * (1 - pulse))));
         }
+        if (MapIcons.index(m.w().icon) >= 0) {
+            MapIcons.badge(g, m.w().icon, x, y, r + 2, color, a);
+            return;
+        }
         MapView.diamond(g, x, y, r + 1, Draw.alpha(0xFF000000, a * 3 / 4));
         MapView.diamond(g, x, y, r, Draw.alpha(color, a));
         Draw.smallCentered(g, font, m.w().initials(), x + 0.5F, y - 2.5F, Draw.alpha(0xFF0B0F14, a), 0.55F);

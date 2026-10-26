@@ -457,7 +457,9 @@ final class HudBlocks {
                         float diff = Mth.wrapDegrees(deg - heading);
                         if (Math.abs(diff) > 90) continue;
                         int px = cx + Math.round(diff * (cw / 2F) / 90F);
-                        MapView.diamond(g, px, y + 7, 3, wp.color);
+                        if (com.arc4io.archud.client.map.MapIcons.index(wp.icon) >= 0)
+                            com.arc4io.archud.client.map.MapIcons.badge(g, wp.icon, px, y + 7, 5, 0xFF000000 | wp.color, 0xFF);
+                        else MapView.diamond(g, px, y + 7, 3, wp.color);
                         if (Math.abs(diff) < focusDiff) {
                             focusDiff = Math.abs(diff);
                             focus = wp;

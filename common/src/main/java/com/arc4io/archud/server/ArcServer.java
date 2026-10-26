@@ -312,6 +312,7 @@ public final class ArcServer {
         int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
         String dim = buf.readUtf(128);
         int color = buf.readInt();
+        String icon = buf.isReadable() ? buf.readUtf(32) : "";
         MinecraftServer server = player.getServer();
         if (server == null) return;
         int sent = 0;
@@ -327,6 +328,7 @@ public final class ArcServer {
                 w.writeInt(z);
                 w.writeUtf(dim, 128);
                 w.writeInt(color);
+                w.writeUtf(icon, 32);
                 ArcNet.sendToPlayer(p, w);
             } else {
                 p.sendSystemMessage(Component.literal("[" + player.getGameProfile().getName() + "] ◆ " + name + " — x:" + x + " y:" + y + " z:" + z

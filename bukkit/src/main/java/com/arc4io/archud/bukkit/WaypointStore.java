@@ -90,11 +90,12 @@ final class WaypointStore {
         int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
         String dim = buf.readUtf(128);
         int color = buf.readInt();
+        String icon = buf.readable() ? buf.readUtf(32) : "";
         int sent = 0;
         for (Player o : Bukkit.getOnlinePlayers()) {
             if (o == p || (!target.isEmpty() && !o.getName().equalsIgnoreCase(target))) continue;
             if (plugin.arcPlayers.contains(o.getUniqueId())) {
-                plugin.send(o, ArcHudPlugin.packet("wp_shared").utf(p.getName()).utf(name).i32(x).i32(y).i32(z).utf(dim).i32(color));
+                plugin.send(o, ArcHudPlugin.packet("wp_shared").utf(p.getName()).utf(name).i32(x).i32(y).i32(z).utf(dim).i32(color).utf(icon));
             } else {
                 o.sendMessage("§b[" + p.getName() + "] ◆ " + name + " — x:" + x + " y:" + y + " z:" + z + " (" + dim + ")");
             }
