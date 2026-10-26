@@ -1409,5 +1409,22 @@
   "archud.layout.show": "Показать",
   "archud.layout.shared": "В общую зону",
   "archud.layout.hidden": "скрыта",
-  "archud.config.chatHeads": "Головы игроков в чате"
+  "archud.config.chatHeads": "Головы игроков в чате",
+  "archud.anvil.rename": "Новое имя…",
+  "archud.anvil.result": "Результат",
+  "archud.anvil.place": "Положите предмет в левую ячейку,",
+  "archud.anvil.place2": "а материал или книгу — во вторую",
+  "archud.anvil.renamed": "будет переименован",
+  "archud.anvil.incompatible": "нельзя совместить",
+  "archud.anvil.enchants": "ЗАЧАРОВАНИЯ",
+  "archud.anvil.durability": "ПРОЧНОСТЬ",
+  "archud.anvil.penalty": "Штраф за прошлые работы: %s ур.",
+  "archud.anvil.have": "У вас: %s ур.",
+  "archud.backpack.sort": "Сортировать рюкзак",
+  "archud.backpack.deposit": "Сложить похожее из инвентаря",
+  "archud.backpack.tier.leather": "кожаный",
+  "archud.backpack.tier.iron": "железный",
+  "archud.backpack.tier.diamond": "алмазный",
+  "archud.config.customBackpackScreen": "Новый экран рюкзака",
+  "archud.config.customAnvil": "Новая наковальня"
 }

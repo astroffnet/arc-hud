@@ -386,6 +386,8 @@ public class ArcConfig {
     public boolean customTitleScreen = true;
     public boolean customControlsScreen = true;
     public boolean chatStyle = true;
+    public boolean customBackpackScreen = true;
+    public boolean customAnvil = true;
     public boolean chatAnimation = true;
     public boolean inventoryStats = true;
     public boolean inventoryButtons = true;

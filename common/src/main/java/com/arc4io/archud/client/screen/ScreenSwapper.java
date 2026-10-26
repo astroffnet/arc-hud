@@ -136,6 +136,15 @@ public final class ScreenSwapper {
             var e = (net.minecraft.client.gui.screens.inventory.EnchantmentScreen) next;
             return new ArcEnchantmentScreen(e.getMenu(), mc.player.getInventory(), e.getTitle());
         }
+        if (cfg.customBackpackScreen && c == net.minecraft.client.gui.screens.inventory.ContainerScreen.class && mc.player != null) {
+            var cs = (net.minecraft.client.gui.screens.inventory.ContainerScreen) next;
+            var pack = ArcBackpackScreen.backpackFor(cs, mc.player);
+            if (pack != null) return new ArcBackpackScreen(cs.getMenu(), mc.player.getInventory(), cs.getTitle(), pack);
+        }
+        if (cfg.customAnvil && c == net.minecraft.client.gui.screens.inventory.AnvilScreen.class && mc.player != null) {
+            var a = (net.minecraft.client.gui.screens.inventory.AnvilScreen) next;
+            return new ArcAnvilScreen(a.getMenu(), mc.player.getInventory(), a.getTitle());
+        }
         return com.arc4io.archud.client.ArcClient.platform().swapPlatformScreen(next, current);
     }
 }
