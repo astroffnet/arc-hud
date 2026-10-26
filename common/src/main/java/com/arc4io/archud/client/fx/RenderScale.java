@@ -22,6 +22,8 @@ public final class RenderScale {
     private static PostPass upscale;
     private static boolean failed, swapped;
     private static int lastW, lastH;
+    /** Под какой размер сейчас подогнаны буферы LevelRenderer (обводка свечения); 0 — под окно. */
+    private static int lrW, lrH, lrWinW, lrWinH;
 
     private RenderScale() {}
 
@@ -36,13 +38,30 @@ public final class RenderScale {
     /** Перед отрисовкой мира: подменить основной буфер уменьшенным. */
     public static void begin() {
         float s = scale();
-        if (s >= 1F) return;
         Minecraft mc = Minecraft.getInstance();
+        if (s >= 1F) {
+            // масштаб выключили — вернуть буферы мира к размеру окна
+            if (lrW != 0) {
+                lrW = lrH = 0;
+                mc.levelRenderer.resize(mc.getWindow().getWidth(), mc.getWindow().getHeight());
+            }
+            return;
+        }
         try {
             real = mc.getMainRenderTarget();
             int w = Math.max(1, Math.round(real.width * s)), h = Math.max(1, Math.round(real.height * s));
             if (scaled == null) scaled = new TextureTarget(w, h, true, Minecraft.ON_OSX);
             else if (scaled.width != w || scaled.height != h) scaled.resize(w, h, Minecraft.ON_OSX);
+            // буферы мира (обводка светящихся сущностей) — того же размера, иначе они переключают область вывода
+            // на размер окна и всё, что рисуется после них (сущности, вода, рука), попадает не в тот масштаб
+            int winW = mc.getWindow().getWidth(), winH = mc.getWindow().getHeight();
+            if (lrW != w || lrH != h || lrWinW != winW || lrWinH != winH) {
+                lrW = w;
+                lrH = h;
+                lrWinW = winW;
+                lrWinH = winH;
+                mc.levelRenderer.resize(w, h);
+            }
             ((MinecraftTargetAccessor) mc).archud$setMainRenderTarget(scaled);
             swapped = true;
             scaled.bindWrite(true);

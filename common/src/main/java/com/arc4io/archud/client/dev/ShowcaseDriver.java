@@ -287,6 +287,9 @@ public final class ShowcaseDriver {
                 com.arc4io.archud.client.video.ArcVideoScreen.showcaseFromEnd = fromEnd;
                 mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(null, mc.options));
             }, null);
+            add(10, mc -> {
+                if (mc.screen instanceof com.arc4io.archud.client.video.ArcVideoScreen v) v.selectFromEnd(fromEnd);
+            }, null);
             add(40, mc -> {}, fromEnd == 2 ? "17c2_optimization" : "17c3_effects");
         }
         add(10, mc -> {
