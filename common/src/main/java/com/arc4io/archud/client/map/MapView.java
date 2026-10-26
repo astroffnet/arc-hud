@@ -184,18 +184,64 @@ public final class MapView {
         }
     }
 
-    /** Круглая маска: рисует содержимое полосами, обрезанными по кругу. */
+    private static com.mojang.blaze3d.pipeline.RenderTarget circleTarget;
+
+    /**
+     * Круглая маска. Содержимое рисуется ОДИН раз во внеэкранный буфер размером с окно, затем переносится
+     * на экран тонкими полосками по кругу одним вызовом отрисовки. (Раньше содержимое перерисовывалось
+     * для каждой полосы — ~40 раз за кадр вместе с рельефом, следом, слизневыми чанками и сеткой.)
+     */
     public static void circleBands(GuiGraphics g, int ix, int iy, int is, Runnable draw) {
-        float r = is / 2F, cy = iy + r, cx = ix + r;
-        int step = 3;
-        for (int y = iy; y < iy + is; y += step) {
-            float mid = y + step / 2F - cy;
-            float hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
-            if (hw < 1) continue;
-            com.arc4io.archud.client.hud.HudScale.scissor(g, (int) (cx - hw), y, (int) Math.ceil(cx + hw), Math.min(y + step, iy + is));
-            draw.run();
-            g.disableScissor();
+        Minecraft mc = Minecraft.getInstance();
+        com.mojang.blaze3d.pipeline.RenderTarget main = mc.getMainRenderTarget();
+        g.flush();
+        if (circleTarget == null) {
+            circleTarget = new com.mojang.blaze3d.pipeline.TextureTarget(main.width, main.height, false, Minecraft.ON_OSX);
+        } else if (circleTarget.width != main.width || circleTarget.height != main.height) {
+            circleTarget.resize(main.width, main.height, Minecraft.ON_OSX);
         }
+        circleTarget.setClearColor(0F, 0F, 0F, 0F);
+        circleTarget.clear(Minecraft.ON_OSX); // очищается только область ножниц — ровно квадрат карты
+        circleTarget.bindWrite(true);
+        draw.run();
+        g.flush();
+        main.bindWrite(true);
+
+        org.joml.Matrix4f m = g.pose().last().pose();
+        double gs = mc.getWindow().getGuiScale();
+        float fw = circleTarget.width, fh = circleTarget.height;
+        float r = is / 2F, ccx = ix + r, ccy = iy + r;
+        float step = 0.5F;
+        com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, circleTarget.getColorTextureId());
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        // в буфере цвет уже умножен на альфу (смешивание GUI пишет альфу отдельно)
+        com.mojang.blaze3d.systems.RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+        com.mojang.blaze3d.vertex.BufferBuilder bb = com.mojang.blaze3d.vertex.Tesselator.getInstance().getBuilder();
+        bb.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX);
+        org.joml.Vector4f v = new org.joml.Vector4f();
+        for (float y = iy; y < iy + is; y += step) {
+            float mid = y + step / 2F - ccy;
+            float hw = (float) Math.sqrt(Math.max(0, r * r - mid * mid));
+            if (hw <= 0.05F) continue;
+            float x0 = ccx - hw, x1 = ccx + hw, y1 = Math.min(y + step, iy + is);
+            vert(bb, m, v, x0, y1, gs, fw, fh);
+            vert(bb, m, v, x1, y1, gs, fw, fh);
+            vert(bb, m, v, x1, y, gs, fw, fh);
+            vert(bb, m, v, x0, y, gs, fw, fh);
+        }
+        com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(bb.end());
+        com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+    }
+
+    private static void vert(com.mojang.blaze3d.vertex.BufferBuilder bb, org.joml.Matrix4f m, org.joml.Vector4f v, float x, float y,
+                             double gs, float fw, float fh) {
+        m.transform(v.set(x, y, 0F, 1F));
+        float u = (float) (v.x() * gs / fw), t = 1F - (float) (v.y() * gs / fh);
+        bb.vertex(m, x, y, 0F).uv(u, t).endVertex();
     }
 
     public static void circleRing(GuiGraphics g, float cx, float cy, float r, int color) {
@@ -225,6 +271,19 @@ public final class MapView {
         g.pose().popPose();
     }
 
+    private static final java.util.Map<Long, Boolean> SLIME = new java.util.HashMap<>();
+    private static long slimeSeed;
+
+    /** Слизневый ли чанк — с кэшем (проверка создаёт генератор случайных чисел на каждый чанк). */
+    private static boolean isSlime(long seed, int x, int z) {
+        if (seed != slimeSeed || SLIME.size() > 50000) {
+            SLIME.clear();
+            slimeSeed = seed;
+        }
+        return SLIME.computeIfAbsent(((long) x << 32) ^ (z & 0xFFFFFFFFL),
+                k -> net.minecraft.world.level.levelgen.WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L).nextInt(10) == 0);
+    }
+
     /** Слизневые чанки (только одиночная игра — нужен сид мира). */
     public static void drawSlimeChunks(GuiGraphics g, Minecraft mc, float cx, float cy, double centerX, double centerZ, float zoom, float rotation, float half) {
         if (mc.getSingleplayerServer() == null || mc.level == null || !mc.level.dimension().location().toString().equals("minecraft:overworld")) return;
@@ -239,7 +298,7 @@ public final class MapView {
         g.pose().scale(zoom, zoom, 1F);
         for (int x = c0x; x <= c1x; x++) {
             for (int z = c0z; z <= c1z; z++) {
-                if (net.minecraft.world.level.levelgen.WorldgenRandom.seedSlimeChunk(x, z, seed, 987234911L).nextInt(10) != 0) continue;
+                if (!isSlime(seed, x, z)) continue;
                 float sx = (float) (x * 16 - centerX), sz = (float) (z * 16 - centerZ);
                 g.pose().pushPose();
                 g.pose().translate(sx, sz, 0);
