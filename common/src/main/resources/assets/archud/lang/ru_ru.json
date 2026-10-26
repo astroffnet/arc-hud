@@ -1408,5 +1408,6 @@
   "archud.layout.hide": "Скрыть",
   "archud.layout.show": "Показать",
   "archud.layout.shared": "В общую зону",
-  "archud.layout.hidden": "скрыта"
+  "archud.layout.hidden": "скрыта",
+  "archud.config.chatHeads": "Головы игроков в чате"
 }

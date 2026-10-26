@@ -379,6 +379,8 @@ public class ArcConfig {
 
     // ---- Чат ----
     public boolean chatMessagesStyle = true;
+    /** Головы игроков у сообщений чата. */
+    public boolean chatHeads = true;
 
     // ---- Экраны ----
     public boolean customTitleScreen = true;

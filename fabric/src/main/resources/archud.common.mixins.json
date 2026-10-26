@@ -67,6 +67,7 @@
     "EnchantmentScreenInvoker",
     "ChatComponentAccessor",
     "ChatComponentMixin",
+    "ChatHeadsMixin",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",

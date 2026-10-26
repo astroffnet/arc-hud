@@ -79,6 +79,7 @@ public final class ArcChatRenderer {
         int base = Mth.floor((g.guiHeight() - 40) / scale);
         long now = Util.getMillis();
         int accent = Theme.accent();
+        int gut = ChatHeads.gutter();
 
         List<Row> rows = new ArrayList<>();
         for (int j = 0; j < perPage && j + scrollPos < lines.size(); j++) {
@@ -124,12 +125,14 @@ public final class ArcChatRenderer {
             int y2 = base - bottom.index() * lh;
             int y1 = base - topRow.index() * lh - lh;
             int x1 = -4 + off;
-            int x2 = (focused ? width + 4 : textW + 6) + off;
+            int x2 = (focused ? width + 4 : textW + gut + 6) + off;
 
             String firstText = plain(topRow.line().content());
             GuiMessageTag tag = bottom.line().tag();
+            ChatHeads.Sender sender = gut > 0 ? ChatHeads.sender(topRow.line().content()) : null;
             int typeColor = tag != null ? 0xFF000000 | tag.indicatorColor()
-                    : firstText.startsWith("<") ? accent
+                    : sender != null && sender.name() != null ? 0xFF000000 | ChatHeads.nameColor(sender.name())
+                    : sender != null || firstText.startsWith("<") ? accent
                     : 0xFF90A4AE;
 
             if (!focused) {
@@ -144,9 +147,23 @@ public final class ArcChatRenderer {
             float glow = 1F - Mth.clamp((now - seen) / 900F, 0F, 1F);
             if (glow > 0F) Draw.outline(g, x1, y1, x2 - x1 + 1, y2 - y1, Draw.alpha(typeColor, (int) (0xB0 * glow * (a / 255F))));
 
+            if (gut > 0) {
+                int hy = base - topRow.index() * lh + textOff;
+                if (sender != null) {
+                    // голова игрока с тонкой рамкой
+                    g.fill(2 + off, hy - 1, 12 + off, hy + 9, Draw.alpha(0x000000, (int) (0x90 * (a / 255F))));
+                    ChatHeads.draw(g, sender, 3 + off, hy, a);
+                } else {
+                    // системное сообщение — маленький ромб цвета сообщения
+                    int cx = 7 + off, cy = hy + 4;
+                    int c = Draw.alpha(typeColor, (int) (0xC0 * (a / 255F)));
+                    g.fill(cx - 1, cy - 2, cx + 1, cy + 2, c);
+                    g.fill(cx - 2, cy - 1, cx + 2, cy + 1, c);
+                }
+            }
             for (Row r : group) {
                 int ly = base - r.index() * lh;
-                g.drawString(font, r.line().content(), 2 + off, ly + textOff, Draw.alpha(0xFFFFFF, Math.max(4, a)));
+                g.drawString(font, r.line().content(), 2 + gut + off, ly + textOff, Draw.alpha(0xFFFFFF, Math.max(4, a)));
             }
         }
         g.pose().popPose();
