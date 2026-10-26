@@ -307,7 +307,12 @@ public final class ShowcaseDriver {
         for (int fromEnd : new int[]{3, 2, 1}) {
             add(10, mc -> {
                 com.arc4io.archud.client.video.ArcVideoScreen.showcaseFromEnd = fromEnd;
-                mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(null, mc.options));
+                net.minecraft.client.gui.screens.Screen parent = mc.screen;
+                if (parent == null) {
+                    parent = new net.minecraft.client.gui.screens.TitleScreen();
+                    parent.init(mc, mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
+                }
+                mc.setScreen(new net.minecraft.client.gui.screens.VideoSettingsScreen(parent, mc.options));
             }, null);
             add(10, mc -> {
                 if (mc.screen instanceof com.arc4io.archud.client.video.ArcVideoScreen v) v.selectFromEnd(fromEnd);
