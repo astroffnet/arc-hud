@@ -68,6 +68,9 @@ public final class BackgroundReload {
         shown += (r.getActualProgress() - shown) * 0.2F;
         try {
             GuiGraphics g = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
+            com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 500); // поверх всего интерфейса
             int w = mc.getWindow().getGuiScaledWidth();
             g.fill(0, 0, w, 2, 0x66000000);
             g.fill(0, 0, Math.round(w * Math.max(0.02F, shown)), 2, 0xFF4FC3F7);
@@ -75,7 +78,9 @@ public final class BackgroundReload {
             int lw = mc.font.width(label);
             g.fill(w - lw - 10, 4, w - 2, 16, 0x99000000);
             g.drawString(mc.font, label, w - lw - 6, 6, 0xFFE0E6EE, false);
+            g.pose().popPose();
             g.flush();
+            com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
         } catch (Throwable ignored) {
         }
     }

@@ -59,6 +59,9 @@ public final class FabricMods {
             boolean lib = id.equals("minecraft") || id.equals("fabricloader") || badges(md).contains("library");
             String parent = modmenuParent(md);
             if (parent == null) parent = c.getContainingMod().map(m -> m.getMetadata().getId()).orElse(null);
+            // модули Fabric API (в среде разработки они не вложены в fabric-api)
+            if (parent == null && !id.equals("fabric-api") && (md.containsCustomValue("fabric-api:module-lifecycle") || id.startsWith("fabric-")))
+                parent = "fabric-api";
             out.add(new ModEntry(id, md.getName(), md.getVersion().getFriendlyString(), md.getDescription(), authors, url,
                     lib, logo, cfg.get(id), parent));
         }
