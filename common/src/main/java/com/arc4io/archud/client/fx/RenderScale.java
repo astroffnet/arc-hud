@@ -20,26 +20,36 @@ import org.joml.Matrix4f;
 public final class RenderScale {
     private static RenderTarget scaled, real;
     private static PostPass upscale;
-    private static boolean failed, swapped;
+    private static boolean failed, swapped, temporalFrame;
     private static int lastW, lastH;
     /** Под какой размер сейчас подогнаны буферы LevelRenderer (обводка свечения); 0 — под окно. */
     private static int lrW, lrH, lrWinW, lrWinH;
 
     private RenderScale() {}
 
+    private static boolean allowed() {
+        if (failed) return false;
+        Minecraft mc = Minecraft.getInstance();
+        return mc.options.graphicsMode().get() != GraphicsStatus.FABULOUS && !ShaderPacks.inUse();
+    }
+
     public static float scale() {
         ArcConfig c = ArcConfig.get();
-        if (failed || c.renderScale >= 100 || c.renderScale < 25) return 1F;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.options.graphicsMode().get() == GraphicsStatus.FABULOUS || ShaderPacks.inUse()) return 1F;
+        if (c.renderScale >= 100 || c.renderScale < 25 || !allowed()) return 1F;
         return c.renderScale / 100F;
+    }
+
+    /** Arc TSR (временной апскейл, аналог DLSS); при 100% работает как сглаживание (аналог DLAA). */
+    public static boolean temporal() {
+        return ArcConfig.get().upscaler == 2 && allowed();
     }
 
     /** Перед отрисовкой мира: подменить основной буфер уменьшенным. */
     public static void begin() {
         float s = scale();
         Minecraft mc = Minecraft.getInstance();
-        if (s >= 1F) {
+        boolean tsr = temporal();
+        if (s >= 1F && !tsr) {
             // масштаб выключили — вернуть буферы мира к размеру окна
             if (lrW != 0) {
                 lrW = lrH = 0;
@@ -50,12 +60,23 @@ public final class RenderScale {
         try {
             real = mc.getMainRenderTarget();
             int w = Math.max(1, Math.round(real.width * s)), h = Math.max(1, Math.round(real.height * s));
-            if (scaled == null) scaled = new TextureTarget(w, h, true, Minecraft.ON_OSX);
-            else if (scaled.width != w || scaled.height != h) scaled.resize(w, h, Minecraft.ON_OSX);
+            if (scaled == null) {
+                scaled = new TextureTarget(w, h, true, Minecraft.ON_OSX);
+                Taau.invalidate();
+            } else if (scaled.width != w || scaled.height != h) {
+                scaled.resize(w, h, Minecraft.ON_OSX);
+                Taau.invalidate();
+            }
             // буферы мира (обводка светящихся сущностей) — того же размера, иначе они переключают область вывода
             // на размер окна и всё, что рисуется после них (сущности, вода, рука), попадает не в тот масштаб
             int winW = mc.getWindow().getWidth(), winH = mc.getWindow().getHeight();
-            if (lrW != w || lrH != h || lrWinW != winW || lrWinH != winH) {
+            if (s >= 1F) {
+                // TSR на 100%: буферы мира уже под окно
+                if (lrW != 0) {
+                    lrW = lrH = 0;
+                    mc.levelRenderer.resize(winW, winH);
+                }
+            } else if (lrW != w || lrH != h || lrWinW != winW || lrWinH != winH) {
                 lrW = w;
                 lrH = h;
                 lrWinW = winW;
@@ -64,6 +85,8 @@ public final class RenderScale {
             }
             ((MinecraftTargetAccessor) mc).archud$setMainRenderTarget(scaled);
             swapped = true;
+            temporalFrame = tsr;
+            if (tsr) Taau.beginFrame(w, h);
             scaled.bindWrite(true);
         } catch (Exception e) {
             fail(e);
@@ -74,8 +97,24 @@ public final class RenderScale {
     public static void end() {
         if (!swapped) return;
         swapped = false;
+        Taau.endFrame();
         Minecraft mc = Minecraft.getInstance();
         ((MinecraftTargetAccessor) mc).archud$setMainRenderTarget(real);
+        scaled.setFilterMode(9729); // линейная выборка для бикубического фильтра
+        if (temporalFrame) {
+            try {
+                RenderSystem.disableBlend();
+                RenderSystem.disableDepthTest();
+                RenderSystem.resetTextureMatrix();
+                Taau.resolve(mc, scaled, real, ArcConfig.get().upscaleSharpness / 100F, mc.getFrameTime());
+                real.bindWrite(true);
+            } catch (Exception e) {
+                fail(e);
+                real.bindWrite(true);
+                RenderSystem.enableDepthTest();
+            }
+            return;
+        }
         try {
             if (upscale == null) {
                 upscale = new PostPass(mc.getResourceManager(), "archud_upscale", scaled, real);
@@ -107,9 +146,11 @@ public final class RenderScale {
         Minecraft mc = Minecraft.getInstance();
         if (swapped && real != null) ((MinecraftTargetAccessor) mc).archud$setMainRenderTarget(real);
         swapped = false;
+        Taau.endFrame();
     }
 
     public static void reset() {
+        Taau.reset();
         if (upscale != null) upscale.close();
         upscale = null;
         failed = false;

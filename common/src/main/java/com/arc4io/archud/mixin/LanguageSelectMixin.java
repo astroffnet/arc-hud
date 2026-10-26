@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.concurrent.CompletableFuture;
 
 /** Ванильный экран языка (если новые экраны выключены): тоже быстрая смена. */
-@Mixin(LanguageSelectScreen.class)
+@Mixin(value = LanguageSelectScreen.class, priority = 500)
 public abstract class LanguageSelectMixin {
     @Redirect(method = "onDone", require = 0,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;"))

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /** Частицы вне поля зрения и сверх лимита не рисуются. */
-@Mixin(ParticleEngine.class)
+@Mixin(value = ParticleEngine.class, priority = 500)
 public abstract class ParticleCullMixin {
     @Redirect(method = "render", require = 0,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))

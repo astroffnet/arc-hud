@@ -21,4 +21,12 @@ public abstract class PerfLevelRendererMixin {
     private void archud$outlines(CallbackInfoReturnable<Boolean> cir) {
         if (Perf.on("s_entity_outline")) cir.setReturnValue(false);
     }
+
+    /** Arc TSR: матрицы камеры этого кадра для совмещения с прошлым. */
+    @Inject(method = "renderLevel", at = @At("HEAD"), require = 0)
+    private void archud$taauCapture(com.mojang.blaze3d.vertex.PoseStack pose, float pt, long nanos, boolean outline,
+                                    net.minecraft.client.Camera camera, net.minecraft.client.renderer.GameRenderer gr,
+                                    LightTexture light, org.joml.Matrix4f projection, CallbackInfo ci) {
+        com.arc4io.archud.client.fx.Taau.capture(pose.last().pose(), projection, camera.getPosition());
+    }
 }
