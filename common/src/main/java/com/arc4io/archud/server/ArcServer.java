@@ -61,6 +61,7 @@ public final class ArcServer {
         ArcNet.onServer("map_chunks", ArcServer::onChunks);
         ArcNet.onServer("wp_share", ArcServer::onShare);
         TempadServer.init();
+        WaypointStore.init();
         EnchantServer.init();
         ArcNet.onServer("privacy", (player, buf) -> {
             if (buf.readBoolean()) HIDDEN.add(player.getUUID());
@@ -194,6 +195,7 @@ public final class ArcServer {
         ARC_PLAYERS.remove(player.getUUID());
         UPLOAD_QUEUE.remove(player.getUUID());
         LAST_SHARE.remove(player.getUUID());
+        WaypointStore.onLogout(player);
     }
 
     public static void onStop(MinecraftServer server) {
@@ -225,6 +227,7 @@ public final class ArcServer {
         w.writeBoolean(cfg.serverWaypointSharing);
         w.writeBoolean(TempadServer.isAvailable());
         ArcNet.sendToPlayer(player, w);
+        WaypointStore.sendSaved(player);
         if (protocol != PROTOCOL || !cfg.serverMapSync) return;
         Deque<long[]> q = new ArrayDeque<>();
         // сначала измерение игрока

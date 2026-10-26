@@ -134,6 +134,8 @@ public class ArcConfig {
     public boolean serverMapSync = true;
     public boolean serverPlayerPositions = true;
     public boolean serverWaypointSharing = true;
+    /** Сервер хранит метки каждого игрока в папке мира и отдаёт их при входе. */
+    public boolean serverWaypointSync = true;
     public boolean serverTempadToPlayers = true;
     /** Скрыть себя с карт других игроков. */
     public boolean hideFromMap = false;

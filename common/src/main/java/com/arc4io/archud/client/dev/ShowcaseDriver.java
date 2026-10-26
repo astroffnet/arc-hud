@@ -176,6 +176,8 @@ public final class ShowcaseDriver {
         }, null);
         add(60, mc -> mc.setScreen(new WorldMapScreen(null)), null);
         add(60, mc -> {}, "10_world_map");
+        add(10, mc -> mc.setScreen(new com.arc4io.archud.client.map.WorldMapScreen(null).focusOn(mc.player.getUUID())), null);
+        add(40, mc -> {}, "10b_map_players");
         add(10, mc -> mc.setScreen(new WaypointListScreen(null)), null);
         add(30, mc -> {}, "11_waypoint_menu");
         add(100, ShowcaseDriver::dropTestMod, null); // «закинули мод в папку» — наблюдатель замечает за ~4 с

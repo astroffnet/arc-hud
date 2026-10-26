@@ -73,6 +73,56 @@ public final class ArcClientNet {
             }
         });
         ArcNet.onClient("wp_shared", ArcClientNet::onShared);
+        ArcNet.onClient("wp_saved", buf -> {
+            String json = null;
+            if (buf.readBoolean()) {
+                try (java.util.zip.GZIPInputStream in = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(buf.readByteArray(1 << 20)))) {
+                    json = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: bad waypoints from server", e);
+                }
+            }
+            int added = WaypointManager.mergeFromServer(json);
+            waypointSyncReady = true;
+            waypointSyncAt = System.currentTimeMillis(); // отправить объединённый список обратно
+            if (added > 0) {
+                Minecraft mc = Minecraft.getInstance();
+                SystemToast.addOrUpdate(mc.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                        Component.translatable("archud.wp.synced_title"), Component.translatable("archud.wp.synced", added));
+            }
+        });
+    }
+
+    /** Сервер прислал сохранённые метки — с этого момента наши изменения отправляются ему. */
+    private static boolean waypointSyncReady;
+    /** Когда отправить список меток на сервер (0 — нечего). */
+    private static long waypointSyncAt;
+
+    /** Метки изменились (вызывается из сохранения) — отправить на сервер через секунду (изменения подряд склеиваются). */
+    public static void waypointsChanged() {
+        if (waypointSyncReady) waypointSyncAt = System.currentTimeMillis() + 1000;
+    }
+
+    private static void pushWaypoints() {
+        byte[] data;
+        try {
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            try (java.util.zip.GZIPOutputStream gz = new java.util.zip.GZIPOutputStream(bos)) {
+                gz.write(WaypointManager.exportJson().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+            data = bos.toByteArray();
+        } catch (Exception e) {
+            return;
+        }
+        int partSize = 28000;
+        int total = Math.max(1, (data.length + partSize - 1) / partSize);
+        for (int i = 0; i < total; i++) {
+            FriendlyByteBuf buf = ArcNet.create("wp_sync");
+            buf.writeVarInt(i);
+            buf.writeVarInt(total);
+            buf.writeByteArray(Arrays.copyOfRange(data, i * partSize, Math.min(data.length, (i + 1) * partSize)));
+            ArcNet.sendToServer(buf);
+        }
     }
 
     public static void tick(Minecraft mc) {
@@ -100,10 +150,16 @@ public final class ArcClientNet {
             ArcNet.sendToServer(buf);
         }
         if (System.currentTimeMillis() - lastPlayers > 5000) PLAYERS.clear();
+        if (waypointSyncReady && waypointSyncAt != 0 && System.currentTimeMillis() >= waypointSyncAt) {
+            waypointSyncAt = 0;
+            pushWaypoints();
+        }
     }
 
     private static void reset() {
         helloSent = welcomed = mapSync = positions = sharing = tempadDoors = false;
+        waypointSyncReady = false;
+        waypointSyncAt = 0;
         PLAYERS.clear();
         HIDDEN.clear();
         SENT_HASH.clear();
@@ -151,6 +207,11 @@ public final class ArcClientNet {
 
     public static int viewDistance() {
         return viewDistance;
+    }
+
+    /** Метки этого игрока хранятся на сервере. */
+    public static boolean waypointsOnServer() {
+        return waypointSyncReady;
     }
 
     public static boolean connected() {

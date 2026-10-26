@@ -217,6 +217,55 @@ public final class WaypointManager {
         } catch (Exception e) {
             ArcHud.LOGGER.warn("Arc HUD: не удалось сохранить метки", e);
         }
+        com.arc4io.archud.client.ArcClientNet.waypointsChanged();
+    }
+
+    private static final Gson COMPACT = new Gson();
+
+    /** Свои метки этого мира в JSON (для сервера). */
+    public static String exportJson() {
+        return COMPACT.toJson(new ArrayList<>(USER));
+    }
+
+    /**
+     * Метки с сервера: добавляются те, которых ещё нет локально (совпадение — измерение, координаты и имя).
+     * Так при входе с другого компьютера метки появляются сразу, а локальные не теряются. Возвращает число добавленных.
+     */
+    public static int mergeFromServer(String json) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            String k = computeWorldKey(mc);
+            if (!k.equals(worldKey)) {
+                worldKey = k;
+                load();
+                loadRespawn();
+            }
+        }
+        if (json == null || json.isEmpty()) return 0;
+        List<Waypoint> list;
+        try {
+            list = COMPACT.fromJson(json, new TypeToken<List<Waypoint>>() {}.getType());
+        } catch (Exception e) {
+            return 0;
+        }
+        if (list == null) return 0;
+        int added = 0;
+        for (Waypoint w : list) {
+            if (w == null || w.dimension == null || w.name == null) continue;
+            if (w.source != Waypoint.Source.USER && w.source != Waypoint.Source.DEATH) continue;
+            boolean exists = false;
+            for (Waypoint o : USER) {
+                if (o.x == w.x && o.y == w.y && o.z == w.z && w.dimension.equals(o.dimension) && w.name.equals(o.name)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) continue;
+            USER.add(w);
+            added++;
+        }
+        if (added > 0) save();
+        return added;
     }
 
     /** Новая метка на месте игрока — ещё НЕ сохранена (сохраняется кнопкой «Готово» в редакторе, Esc — отмена). */
@@ -286,6 +335,21 @@ public final class WaypointManager {
         Waypoint nav = Navigator.target();
         if (nav != null && nav.source == Waypoint.Source.TEMP && dim.equals(nav.dimension)) out.add(nav);
         return Collections.unmodifiableList(out);
+    }
+
+    /** Типы меток для фильтров: вэйстоуны и Tempad — только если стоят эти моды, «поделились» — в сетевой игре. */
+    public static List<Waypoint.Source> filterSources() {
+        List<Waypoint.Source> out = new ArrayList<>();
+        out.add(Waypoint.Source.USER);
+        out.add(Waypoint.Source.DEATH);
+        out.add(Waypoint.Source.SPAWN);
+        Minecraft mc = Minecraft.getInstance();
+        boolean multi = !SHARED.isEmpty() || (mc.getConnection() != null && !mc.isSingleplayer())
+                || (mc.getSingleplayerServer() != null && mc.getSingleplayerServer().isPublished());
+        if (multi) out.add(Waypoint.Source.SHARED);
+        if (ArcHud.platform().isModLoaded("waystones")) out.add(Waypoint.Source.WAYSTONE);
+        if (ArcHud.platform().isModLoaded("tempad")) out.add(Waypoint.Source.TEMPAD);
+        return out;
     }
 
     public static boolean sourceVisible(Waypoint.Source s) {
