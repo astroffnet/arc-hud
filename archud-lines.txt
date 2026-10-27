@@ -1,0 +1,3 @@
+4:	- archud 1.2.0
+51:	- jei 15.74.0.230
+58:[05:20:41] [main/INFO]: Arc HUD by arc4io loaded on Fabric
