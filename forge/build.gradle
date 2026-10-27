@@ -65,6 +65,14 @@ repositories {
         }, fg.repository)
         filter { includeGroup 'curse.maven' }
     }
+    // API JEI (MIT) — только публичные интерфейсы, для плагинов модов, написанных для JEI
+    exclusiveContent {
+        forRepositories(maven {
+            name = 'BlameJared'
+            url = 'https://maven.blamejared.com'
+        }, fg.repository)
+        filter { includeGroup 'mezz.jei' }
+    }
     maven {
         name = 'Sponge'
         url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -77,6 +85,7 @@ repositories {
 
 configurations {
     bundled
+    jeiApi
 }
 
 dependencies {
@@ -97,6 +106,17 @@ dependencies {
         // библиотеки, которые Legends несёт внутри себя (jar-in-jar не деобфусцируется в dev-запуске)
         runtimeOnly fg.deobf("curse.maven:photon-871522:7501597")
         runtimeOnly fg.deobf("maven.modrinth:ldlib:ONxYJpRz")
+    }
+
+    // API JEI: компилируемся против него; в jar вкладывается отдельным модом «jei» (только API) — если поставлен
+    // настоящий JEI, Forge берёт его, а не нашу копию
+    compileOnly "mezz.jei:jei-1.20.1-common-api:${jei_version}"
+    jeiApi("mezz.jei:jei-1.20.1-common-api:${jei_version}") { transitive = false }
+    jeiApi("mezz.jei:jei-1.20.1-forge-api:${jei_version}") { transitive = false }
+    if (project.hasProperty('compatMods')) {
+        // мод с плагином для JEI (без самого JEI) — проверка моста
+        runtimeOnly fg.deobf("maven.modrinth:farmers-delight:SiIpcZzM")
+        runtimeOnly files(layout.buildDirectory.file('jei-api/jei-api-archud-forge.jar')) { builtBy 'jeiApiJar' }
     }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
@@ -132,9 +152,25 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// API JEI отдельным модом «jei» (lowcodefml): классы API из maven + mods.toml и лицензия MIT; переводится в SRG (reobf)
+def jeiApiJar = tasks.register('jeiApiJar', Jar) {
+    archiveFileName = 'jei-api-archud-forge.jar'
+    destinationDirectory = layout.buildDirectory.dir('jei-api')
+    from({ configurations.jeiApi.resolve().collect { zipTree(it) } }) {
+        exclude 'META-INF/**', 'pack.mcmeta', '*.png'
+    }
+    from(file('jei-api'))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest { attributes(['Implementation-Title': 'jei-api', 'Implementation-Version': jei_version, 'Automatic-Module-Name': 'jei.api.archud']) }
+}
+reobf {
+    jeiApiJar {}
+}
+tasks.matching { it.name == 'jeiApiJar' }.configureEach { finalizedBy 'reobfJeiApiJar' }
+
 // Jar-in-Jar: вложить e4mc в итоговый jar (META-INF/jarjar + metadata.json) после reobf
 def bundleJarJar = tasks.register('bundleJarJar') {
-    dependsOn 'reobfJar'
+    dependsOn 'reobfJar', 'reobfJeiApiJar'
     doLast {
         def jarFile = tasks.named('jar').get().archiveFile.get().asFile
         def deps = configurations.bundled.resolve()
@@ -145,12 +181,15 @@ def bundleJarJar = tasks.register('bundleJarJar') {
         deps.each { f ->
             entries << """{"identifier":{"group":"maven.modrinth","artifact":"e4mc"},"version":{"range":"[6.2.3-forge,)","artifactVersion":"6.2.3-forge"},"path":"META-INF/jarjar/${f.name}","isObfuscated":false}"""
         }
+        def jeiJar = tasks.named('jeiApiJar').get().archiveFile.get().asFile
+        entries << """{"identifier":{"group":"mezz.jei","artifact":"jei-1.20.1-api-archud"},"version":{"range":"[${jei_version},)","artifactVersion":"${jei_version}"},"path":"META-INF/jarjar/${jeiJar.name}","isObfuscated":false}"""
         def meta = new File(tmpDir, 'metadata.json')
         meta.text = '{"jars":[' + entries.join(',') + ']}'
         def out = new File(jarFile.parentFile, jarFile.name + '.tmp')
         ant.zip(destfile: out) {
             zipfileset(src: jarFile)
             deps.each { f -> zipfileset(file: f, prefix: 'META-INF/jarjar') }
+            zipfileset(file: jeiJar, prefix: 'META-INF/jarjar')
             zipfileset(file: meta, fullpath: 'META-INF/jarjar/metadata.json')
         }
         jarFile.delete()

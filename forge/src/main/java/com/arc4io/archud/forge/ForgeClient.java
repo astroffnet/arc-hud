@@ -223,6 +223,43 @@ public final class ForgeClient implements ClientPlatform {
     }
 
     @Override
+    public java.util.List<Object> jeiPlugins() {
+        java.util.List<Object> out = new java.util.ArrayList<>();
+        org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("Lmezz/jei/api/JeiPlugin;");
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (net.minecraftforge.forgespi.language.ModFileScanData data : net.minecraftforge.fml.ModList.get().getAllScanData()) {
+            for (net.minecraftforge.forgespi.language.ModFileScanData.AnnotationData a : data.getAnnotations()) {
+                if (!type.equals(a.annotationType()) || !seen.add(a.memberName())) continue;
+                try {
+                    Class<?> c = Class.forName(a.memberName(), true, ForgeClient.class.getClassLoader());
+                    out.add(c.getDeclaredConstructor().newInstance());
+                } catch (Throwable t) {
+                    com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: JEI plugin {} not loaded: {}", a.memberName(), t.toString());
+                }
+            }
+        }
+        return out;
+    }
+
+    @Override
+    public net.minecraft.resources.ResourceLocation fluidSprite(net.minecraft.world.level.material.Fluid fluid) {
+        try {
+            return net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid).getStillTexture();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    @Override
+    public int fluidTint(net.minecraft.world.level.material.Fluid fluid) {
+        try {
+            return net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid).getTintColor();
+        } catch (Throwable t) {
+            return 0xFFFFFFFF;
+        }
+    }
+
+    @Override
     public int burnTime(net.minecraft.world.item.ItemStack stack) {
         try {
             return net.minecraftforge.common.ForgeHooks.getBurnTime(stack, null);

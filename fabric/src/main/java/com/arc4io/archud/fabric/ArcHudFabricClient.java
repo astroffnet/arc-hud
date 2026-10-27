@@ -97,6 +97,41 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
     }
 
     @Override
+    public java.util.List<Object> jeiPlugins() {
+        java.util.List<Object> out = new java.util.ArrayList<>();
+        for (var c : net.fabricmc.loader.api.FabricLoader.getInstance().getEntrypointContainers("jei_mod_plugin", Object.class)) {
+            try {
+                out.add(c.getEntrypoint());
+            } catch (Throwable t) {
+                com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: JEI plugin from {} not loaded: {}", c.getProvider().getMetadata().getId(), t.toString());
+            }
+        }
+        return out;
+    }
+
+    @Override
+    public net.minecraft.resources.ResourceLocation fluidSprite(net.minecraft.world.level.material.Fluid fluid) {
+        try {
+            var h = net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry.INSTANCE.get(fluid);
+            if (h == null) return null;
+            var sp = h.getFluidSprites(null, null, fluid.defaultFluidState());
+            return sp != null && sp.length > 0 && sp[0] != null ? sp[0].contents().name() : null;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    @Override
+    public int fluidTint(net.minecraft.world.level.material.Fluid fluid) {
+        try {
+            var h = net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry.INSTANCE.get(fluid);
+            return h == null ? 0xFFFFFFFF : h.getFluidColor(null, null, fluid.defaultFluidState()) | 0xFF000000;
+        } catch (Throwable t) {
+            return 0xFFFFFFFF;
+        }
+    }
+
+    @Override
     public int burnTime(net.minecraft.world.item.ItemStack stack) {
         try {
             Integer v = net.fabricmc.fabric.api.registry.FuelRegistry.INSTANCE.get(stack.getItem());

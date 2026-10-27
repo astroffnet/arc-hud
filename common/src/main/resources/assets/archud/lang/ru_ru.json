@@ -1479,5 +1479,7 @@
   "archud.recipes.type.archud.brewing": "Варочная стойка",
   "archud.recipes.brew_note": "топливо — огненный порошок",
   "archud.save.error": "Не удалось сохранить мир: %s",
-  "archud.config.guiBatching": "Быстрая отрисовка окон Arc HUD"
+  "archud.config.guiBatching": "Быстрая отрисовка окон Arc HUD",
+  "archud.config.jeiPlugins": "Понимать плагины модов для JEI (рецепты, категории, GUI)",
+  "archud.recipes.info": "Описание"
 }

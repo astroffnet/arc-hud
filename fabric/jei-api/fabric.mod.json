@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "jei",
+  "version": "15.74.0+archud.api",
+  "name": "JEI API (Arc HUD)",
+  "description": "Only the public JEI API (MIT, mezz), bundled by Arc HUD so that mods' JEI plugins show their recipes in Arc HUD's recipe viewer. The real JEI, if installed, replaces it.",
+  "authors": ["mezz"],
+  "license": "MIT",
+  "environment": "*",
+  "custom": { "fabric-loom:generated": true }
+}

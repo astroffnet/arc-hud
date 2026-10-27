@@ -1420,5 +1420,7 @@
   "archud.recipes.type.archud.brewing": "Brewing",
   "archud.recipes.brew_note": "fuel — blaze powder",
   "archud.save.error": "Could not save the world: %s",
-  "archud.config.guiBatching": "Fast rendering of Arc HUD windows"
+  "archud.config.guiBatching": "Fast rendering of Arc HUD windows",
+  "archud.config.jeiPlugins": "Use mods' JEI plugins (recipes, categories, GUI)",
+  "archud.recipes.info": "Information"
 }

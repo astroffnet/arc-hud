@@ -398,6 +398,8 @@ public class ArcConfig {
     public boolean guiBatching = true;
     /** Список всех предметов справа от окон. */
     public boolean recipeItemList = true;
+    /** Понимать плагины модов, написанные для JEI (категории, рецепты, подсказки, области GUI). */
+    public boolean jeiPlugins = true;
     public boolean chatAnimation = true;
     public boolean inventoryStats = true;
     public boolean inventoryButtons = true;
