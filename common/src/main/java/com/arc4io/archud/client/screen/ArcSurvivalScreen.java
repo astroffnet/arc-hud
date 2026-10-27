@@ -57,11 +57,34 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
 
     public ArcSurvivalScreen(AbstractContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
+        Map<String, List<Slot>> groups = new java.util.LinkedHashMap<>();
+        groups.put("Aether", new ArrayList<>());
+        groups.put("Curios", new ArrayList<>());
+        groups.put("Legends Core", new ArrayList<>());
         for (int i = 46; i < menu.slots.size(); i++) {
             Slot s = menu.slots.get(i);
-            if (s instanceof AccessoryInfo) accessories.add(s);
+            if (s instanceof AccessoryInfo ai) groups.get(ai.group().startsWith("aether_") ? "Aether" : "Curios").add(s);
+        }
+        if (menu instanceof com.arc4io.archud.menu.AccessoryProvider ap) groups.get("Legends Core").addAll(ap.extraAccessorySlots());
+        for (Map.Entry<String, List<Slot>> e : groups.entrySet()) {
+            if (e.getValue().isEmpty()) continue;
+            accLines.add(new AccLine(e.getKey(), null));
+            List<Slot> list = e.getValue();
+            for (int i = 0; i < list.size(); i += 4) accLines.add(new AccLine(null, list.subList(i, Math.min(list.size(), i + 4))));
+            accessories.addAll(list);
         }
     }
+
+    /** Строка правой колонки: заголовок группы (Aether, Curios, Legends Core) или ряд из 4 слотов. */
+    private record AccLine(String title, List<Slot> slots) {
+        int height() {
+            return title != null ? 11 : 18;
+        }
+    }
+
+    private final List<AccLine> accLines = new ArrayList<>();
+    private final List<Object[]> accHeaders = new ArrayList<>();
+    private int accArea, accMaxScroll;
 
     /** Слоты Curios/Aether встроены в инвентарь — их кнопки не нужны. */
     private boolean integrated() {
@@ -72,6 +95,8 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     protected void init() {
         modButtons = ModButtons.harvest(minecraft, width, height, cls -> integrated()
                 && (cls.startsWith("top.theillusivec4.curios") || (cls.startsWith("com.aetherteam") && cls.contains("Accessor"))));
+        modButtons = new ArrayList<>(modButtons);
+        ModButtons.addShortcuts(minecraft, modButtons);
         hasRight = !accessories.isEmpty() || !modButtons.isEmpty();
         imageWidth = hasRight ? COL_M + 162 + 8 + RIGHT_W + 6 : COL_M + 162 + 8;
         imageHeight = 246;
@@ -121,19 +146,34 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         // аксессуары
         accY = HDR + 14;
         int modsH = modButtons.isEmpty() ? 0 : 14 + ((modButtons.size() + 3) / 4) * 22;
-        accVisibleRows = Math.max(1, (imageHeight - 8 - modsH - accY) / ROW);
-        accRows = (accessories.size() + 3) / 4;
-        accScroll = Math.max(0, Math.min(accScroll, accRows - accVisibleRows));
+        accArea = Math.max(18, imageHeight - 8 - modsH - accY - (modsH > 0 ? 4 : 0));
+        // самая дальняя прокрутка, при которой хвост списка ещё заполняет область
+        accMaxScroll = 0;
+        int tail = 0;
+        for (int i = accLines.size() - 1; i >= 0; i--) {
+            tail += accLines.get(i).height();
+            if (tail > accArea) {
+                accMaxScroll = i + 1;
+                break;
+            }
+        }
+        accRows = accLines.size();
+        accVisibleRows = accRows - accMaxScroll;
+        accScroll = Math.max(0, Math.min(accScroll, accMaxScroll));
         layoutAccessories();
     }
 
     private void layoutAccessories() {
         int rx = COL_M + 162 + 8 + 9;
-        for (int i = 0; i < accessories.size(); i++) {
-            int row = i / 4 - accScroll;
-            Slot s = accessories.get(i);
-            if (row < 0 || row >= accVisibleRows) place(s, -10000, -10000);
-            else place(s, rx + (i % 4) * ROW, accY + row * ROW);
+        for (Slot s : accessories) place(s, -10000, -10000);
+        accHeaders.clear();
+        int yy = accY;
+        for (int li = accScroll; li < accLines.size(); li++) {
+            AccLine l = accLines.get(li);
+            if (yy + l.height() > accY + accArea) break;
+            if (l.title() != null) accHeaders.add(new Object[]{l.title(), yy});
+            else for (int k = 0; k < l.slots().size(); k++) place(l.slots().get(k), rx + k * ROW, yy);
+            yy += l.height();
         }
     }
 
@@ -171,6 +211,9 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         Slot hs = hoveredSlot;
         if (hs instanceof AccessoryInfo ai && !hs.hasItem() && menu.getCarried().isEmpty()) {
             g.renderTooltip(font, ai.label(), mouseX, mouseY);
+        } else if (hs != null && !hs.hasItem() && menu.getCarried().isEmpty() && menu instanceof com.arc4io.archud.menu.AccessoryProvider ap
+                && ap.accessoryLabel(hs) != null) {
+            g.renderTooltip(font, ap.accessoryLabel(hs), mouseX, mouseY);
         }
     }
 
@@ -221,9 +264,13 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
                 Draw.panel(g, sx - 4, sy - 4, 26, 26, 0xD0060A10, Draw.alpha(accent, 0xA0));
                 continue;
             }
-            boolean acc = s instanceof AccessoryInfo;
+            boolean acc = s instanceof AccessoryInfo || accessories.contains(s);
             int border = i == selected ? Draw.alpha(accent, 0xFF) : acc ? Draw.alpha(0xFFB388FF, 0x70) : 0x30FFFFFF;
             Draw.panel(g, sx, sy, 18, 18, 0xC0080C12, border);
+            if (acc && !s.hasItem() && menu instanceof com.arc4io.archud.menu.AccessoryProvider ap) {
+                Component sh = ap.accessoryShort(s);
+                if (sh != null) Draw.smallCentered(g, font, sh.getString(), sx + 9, sy + 7, 0x90B388FF, 0.5F);
+            }
         }
         // хотбар — подложка
         g.fill(mx - 2, y + HDR + 80 + 3 * ROW + 4, mx + 164, y + HDR + 80 + 3 * ROW + 6, Draw.alpha(accent, 0x30));
@@ -236,10 +283,15 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             g.fill(rx - 4, y + HDR, rx - 3, y + h - 8, Draw.alpha(accent, 0x30));
             if (!accessories.isEmpty()) {
                 Draw.small(g, font, Component.translatable("archud.inv.accessories").getString(), rx, y + HDR + 4, Draw.TEXT_DIM, 0.75F);
-                if (accRows > accVisibleRows) {
-                    int bh = accVisibleRows * ROW;
-                    int th = Math.max(8, bh * accVisibleRows / accRows);
-                    int ty = y + accY + (bh - th) * accScroll / Math.max(1, accRows - accVisibleRows);
+                for (Object[] hd : accHeaders) {
+                    int hy = y + (Integer) hd[1];
+                    Draw.small(g, font, (String) hd[0], rx + 9, hy + 3, Draw.alpha(0xFFB388FF, 0xD0), 0.6F);
+                    g.fill(rx + 9 + Math.round(font.width((String) hd[0]) * 0.6F) + 3, hy + 5, rx + 9 + 4 * ROW, hy + 6, 0x30FFFFFF);
+                }
+                if (accMaxScroll > 0) {
+                    int bh = accArea;
+                    int th = Math.max(8, bh * accVisibleRows / Math.max(1, accRows));
+                    int ty = y + accY + (bh - th) * accScroll / Math.max(1, accMaxScroll);
                     g.fill(rx + 83, y + accY, rx + 85, y + accY + bh, 0x30FFFFFF);
                     g.fill(rx + 83, ty, rx + 85, ty + th, Draw.alpha(accent, 0xC0));
                 }
@@ -285,6 +337,27 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     }
 
     /** Эффекты: карточки 2 в ряд; что не помещается — в «+N» с подсказкой. */
+    private static final Map<Class<?>, java.util.Optional<java.lang.reflect.Method>> ICON_CHECK = new java.util.HashMap<>();
+
+    /** Способности Legends — тоже эффекты; часть из них мод сам прячет из списка (shouldRenderIcon). */
+    private static boolean modWantsIcon(MobEffectInstance e) {
+        Class<?> c = e.getEffect().getClass();
+        java.lang.reflect.Method m = ICON_CHECK.computeIfAbsent(c, k -> {
+            try {
+                java.lang.reflect.Method mm = k.getMethod("shouldRenderIcon");
+                return java.util.Optional.ofNullable(mm.getReturnType() == boolean.class ? mm : null);
+            } catch (Throwable t) {
+                return java.util.Optional.empty();
+            }
+        }).orElse(null);
+        if (m == null) return true;
+        try {
+            return (Boolean) m.invoke(e.getEffect());
+        } catch (Throwable t) {
+            return true;
+        }
+    }
+
     private void renderEffects(GuiGraphics g, int x, int y, int w, int maxY) {
         hiddenEffects.clear();
         chipHits.clear();
@@ -295,7 +368,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         Collection<MobEffectInstance> all = p.getActiveEffects();
         if (all.isEmpty()) return;
         List<MobEffectInstance> list = new ArrayList<>();
-        for (MobEffectInstance e : all) if (e.showIcon()) list.add(e);
+        for (MobEffectInstance e : all) if (e.showIcon() && modWantsIcon(e)) list.add(e);
         list.sort(java.util.Comparator.comparingInt(MobEffectInstance::getDuration));
         int cardW = (w - 4) / 2, cardH = 22;
         int rows = Math.max(0, (maxY - y) / (cardH + 2));
@@ -369,8 +442,8 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
         int rx = leftPos + COL_M + 162 + 8;
-        if (hasRight && mx >= rx && accRows > accVisibleRows) {
-            accScroll = Math.max(0, Math.min(accRows - accVisibleRows, accScroll - (int) Math.signum(delta)));
+        if (hasRight && mx >= rx && accMaxScroll > 0) {
+            accScroll = Math.max(0, Math.min(accMaxScroll, accScroll - (int) Math.signum(delta)));
             layoutAccessories();
             return true;
         }

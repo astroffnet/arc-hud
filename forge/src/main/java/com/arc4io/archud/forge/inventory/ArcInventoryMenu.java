@@ -31,7 +31,7 @@ import java.util.Optional;
  * InventoryMenu (результат, крафт 2×2, броня, инвентарь, хотбар, вторая рука), 46+ — все слоты Curios игрока,
  * включая те, что моды прячут из меню Curios (например, перчатки, кольца и кулоны Aether).
  */
-public class ArcInventoryMenu extends AbstractContainerMenu {
+public class ArcInventoryMenu extends AbstractContainerMenu implements com.arc4io.archud.menu.AccessoryProvider {
     private static final ResourceLocation[] ARMOR_ICONS = {InventoryMenu.EMPTY_ARMOR_SLOT_HELMET, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
             InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS};
     private static final EquipmentSlot[] ARMOR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -43,8 +43,9 @@ public class ArcInventoryMenu extends AbstractContainerMenu {
     private final ResultContainer result = new ResultContainer();
     private final Player owner;
     private final int accStart;
+    private int legendsStart = -1;
 
-    private ArcInventoryMenu(int id, Inventory inv, List<Acc> acc, boolean server) {
+    private ArcInventoryMenu(int id, Inventory inv, List<Acc> acc, boolean server, boolean legends) {
         super(ForgeInventory.TYPE.get(), id);
         this.owner = inv.player;
         addSlot(new ResultSlot(inv.player, craft, result, 0, 0, 0));
@@ -96,8 +97,36 @@ public class ArcInventoryMenu extends AbstractContainerMenu {
             }
         });
         accStart = slots.size();
-        if (server) CuriosSlots.addServer(this, inv.player, acc);
-        else CuriosSlots.addClient(this, inv.player, acc);
+        if (!acc.isEmpty()) {
+            if (server) CuriosSlots.addServer(this, inv.player, acc);
+            else CuriosSlots.addClient(this, inv.player, acc);
+        }
+        if (legends) {
+            legendsStart = slots.size();
+            for (Slot s : LegendsEquipment.create(inv)) addSlot(s);
+        }
+    }
+
+    private boolean isLegends(int index) {
+        return legendsStart >= 0 && index >= legendsStart && index < legendsStart + LegendsEquipment.COUNT;
+    }
+
+    @Override
+    public List<Slot> extraAccessorySlots() {
+        if (legendsStart < 0) return List.of();
+        return slots.subList(legendsStart, legendsStart + LegendsEquipment.COUNT);
+    }
+
+    @Override
+    public net.minecraft.network.chat.Component accessoryLabel(Slot slot) {
+        int i = slots.indexOf(slot);
+        return isLegends(i) ? LegendsEquipment.label(i - legendsStart) : null;
+    }
+
+    @Override
+    public net.minecraft.network.chat.Component accessoryShort(Slot slot) {
+        int i = slots.indexOf(slot);
+        return isLegends(i) ? LegendsEquipment.shortLabel(i - legendsStart) : null;
     }
 
     /** Добавить слот (для CuriosSlots). */
@@ -105,12 +134,19 @@ public class ArcInventoryMenu extends AbstractContainerMenu {
         return addSlot(s);
     }
 
-    public static ArcInventoryMenu server(int id, Inventory inv, List<Acc> acc) {
-        return new ArcInventoryMenu(id, inv, acc, true);
+    public static ArcInventoryMenu server(int id, Inventory inv, List<Acc> acc, boolean legends) {
+        return new ArcInventoryMenu(id, inv, acc, true, legends);
     }
 
     public static ArcInventoryMenu client(int id, Inventory inv, FriendlyByteBuf buf) {
-        return new ArcInventoryMenu(id, inv, read(buf), false);
+        List<Acc> acc = read(buf);
+        boolean legends = buf.isReadable() && buf.readBoolean();
+        return new ArcInventoryMenu(id, inv, acc, false, legends);
+    }
+
+    public static void write(FriendlyByteBuf buf, List<Acc> acc, boolean legends) {
+        write(buf, acc);
+        buf.writeBoolean(legends);
     }
 
     public static void write(FriendlyByteBuf buf, List<Acc> acc) {
@@ -183,6 +219,15 @@ public class ArcInventoryMenu extends AbstractContainerMenu {
         if (index == 0) {
             if (!moveItemStackTo(stack, 9, end, true)) return ItemStack.EMPTY;
             slot.onQuickCraft(stack, copy);
+        } else if (isLegends(index)) {
+            // снимаем через сам слот Legends — он вызывает «снять экипировку»
+            ItemStack taken = slot.remove(1);
+            if (taken.isEmpty()) return ItemStack.EMPTY;
+            if (!moveItemStackTo(taken, 9, end, false)) {
+                slot.set(taken);
+                return ItemStack.EMPTY;
+            }
+            return copy;
         } else if (index >= accStart) {
             if (!moveItemStackTo(stack, 9, end, false)) return ItemStack.EMPTY;
         } else if (index >= 1 && index < 9) {

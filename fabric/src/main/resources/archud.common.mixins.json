@@ -73,6 +73,7 @@
     "ArmorLayerModelsMixin",
     "RecipeKeyboardMixin",
     "RecipeMouseMixin",
+    "KeyMappingClickAccessor",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",
