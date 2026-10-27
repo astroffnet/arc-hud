@@ -263,7 +263,7 @@ final class JeiHelpers {
                 .on("createAndSetIngredients", 4, a -> {
                     List<List<ItemStack>> lists = new ArrayList<>();
                     for (Object o : (List<?>) a[1]) lists.add(o == null ? List.of() : List.of(((Ingredient) o).getItems()));
-                    grid((IRecipeLayoutBuilder) a[0], VanillaTypes.ITEM_STACK, lists, (Integer) a[2], (Integer) a[3]);
+                    grid((IRecipeLayoutBuilder) a[0], VanillaTypes.ITEM_STACK, (List) lists, (Integer) a[2], (Integer) a[3]);
                     return null;
                 })
                 .on("createAndSetOutputs", 3, a -> ((IRecipeLayoutBuilder) a[0]).addSlot(RecipeIngredientRole.OUTPUT, 95, 19)
