@@ -126,7 +126,7 @@ public final class ScreenSwapper {
             var platform = com.arc4io.archud.client.ArcClient.platform();
             if (platform.classicInventory()) return new ArcInventoryScreen(mc.player);
             // с Curios — меню с аксессуарами откроет сервер (экран придёт следом)
-            if (platform.openServerInventory(mc)) return current instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> ? null : current;
+            if (platform.openServerInventory(mc)) return null;
             return ArcSurvivalScreen.vanilla(mc.player);
         }
         if (cfg.customCreative && c == net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen.class && mc.player != null) {
