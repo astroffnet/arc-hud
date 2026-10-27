@@ -99,7 +99,8 @@ public final class RecipeOverlay {
         if (s instanceof AbstractContainerScreen<?> cs) {
             ContainerScreenAccessor a = (ContainerScreenAccessor) cs;
             attach(s, a.archud$left() + a.archud$width());
-        } else {
+        } else if (owner != s) {
+            // свои окна (просмотр рецептов) размечают список сами в init(); остальным — без списка
             owner = s;
             cols = rows = 0;
         }

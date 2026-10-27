@@ -87,7 +87,14 @@ jobs:
               FA=$(grep '^fabric_version' $GITHUB_WORKSPACE/fabric/gradle.properties | cut -d= -f2)
               curl -sSLo server.jar "https://meta.fabricmc.net/v2/versions/loader/1.20.1/$LV/1.0.1/server/jar"
               mkdir -p mods
-              curl -sSLo mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FA/fabric-api-$FA.jar"
+              if [ "${{ matrix.name }}" = fabric-jei ]; then
+                # JEI для Fabric требует свежие загрузчик и Fabric API
+                LV=$(curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '[.[] | select(.stable)][0].version')
+                curl -sSLo server.jar "https://meta.fabricmc.net/v2/versions/loader/1.20.1/$LV/1.0.1/server/jar"
+              fi
+              mkdir -p mods
+              if [ "${{ matrix.name }}" = fabric-jei ]; then curl -sSLo mods/fabric-api.jar "https://cdn.modrinth.com/data/P7dR8mSH/versions/rvI2dfzR/fabric-api-0.92.12%2B1.20.1.jar"
+              else curl -sSLo mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FA/fabric-api-$FA.jar"; fi
               if [ "${{ matrix.name }}" = fabric ]; then cp $GITHUB_WORKSPACE/fabric/build/libs/archud-server-fabric-*.jar mods/
               else
                 cp $(ls $GITHUB_WORKSPACE/fabric/build/libs/archud-fabric-*.jar | grep -v -e sources -e server) mods/
