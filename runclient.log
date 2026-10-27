@@ -1,0 +1,1057 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+MixinGradle did not locate the diffplug APT plugin, skipping eclipse task configuration
+
+> Task :downloadMcpConfig
+> Task :extractSrg
+> Task :createMcpToSrg
+
+> Task :compileJava
+Note: SpongePowered MIXIN Annotation Processor Version=0.8.5 (MixinGradle Version=0.7.38)
+Note: Supported obfuscation types: ObfuscationServiceMCP supports [notch] ObfuscationServiceFG3 supports [searge]
+Note: Loading searge mappings from /home/runner/work/arc-hud/arc-hud/forge/build/createMcpToSrg/output.tsrg
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/mixin/GameRendererCamMixin.java:67: warning: Unable to determine descriptor for @Inject target method
+    @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
+    ^
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+/home/runner/work/arc-hud/arc-hud/forge/src/main/java/com/arc4io/archud/forge/ForgeClient.java:69: warning: [removal] get() in ModLoadingContext has been deprecated and marked for removal
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+                         ^
+/home/runner/work/arc-hud/arc-hud/forge/src/main/java/com/arc4io/archud/forge/ArcHudForge.java:36: warning: [removal] get() in FMLJavaModLoadingContext has been deprecated and marked for removal
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+                                                   ^
+/home/runner/work/arc-hud/arc-hud/forge/src/main/java/com/arc4io/archud/forge/inventory/CuriosSlots.java:46: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+            ResourceLocation icon = t != null && t.getIcon() != null ? t.getIcon() : new ResourceLocation("curios", "slot/empty_curio_slot");
+                                                                                     ^
+/home/runner/work/arc-hud/arc-hud/forge/src/main/java/com/arc4io/archud/forge/cit/CitPack.java:95: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                    rule.model = new ResourceLocation("minecraft", "item/" + name);
+                                 ^
+/home/runner/work/arc-hud/arc-hud/forge/src/main/java/com/arc4io/archud/forge/cit/CitPack.java:208: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+            out.accept(new ResourceLocation("minecraft", e.getKey()), () -> new ByteArrayInputStream(data));
+                       ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/ArcHud.java:34: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        return new ResourceLocation(MODID, path);
+               ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/dev/CompatDriver.java:292: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "beef_stew"))), false), null);
+                                                                                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/dev/CompatDriver.java:295: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "cutting_board"))), true), null);
+                                                                                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/dev/CompatDriver.java:298: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "tomato"))), false), null);
+                                                                                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/dev/CompatDriver.java:301: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                if (mc.screen instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen rs) rs.selectCategory(new net.minecraft.resources.ResourceLocation("jei", "information"));
+                                                                                                                ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/screen/ModButtons.java:148: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(e[1]));
+                                                                                ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/screen/ArcPackScreen.java:34: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+    private static final ResourceLocation UNKNOWN_PACK = new ResourceLocation("textures/misc/unknown_pack.png");
+                                                         ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:164: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("crafting"), new ArrayList<>(List.of(new ItemStack(Items.CRAFTING_TABLE))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:165: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("smelting"), new ArrayList<>(List.of(new ItemStack(Items.FURNACE))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:166: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("blasting"), new ArrayList<>(List.of(new ItemStack(Items.BLAST_FURNACE))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:167: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("smoking"), new ArrayList<>(List.of(new ItemStack(Items.SMOKER))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:168: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("campfire_cooking"), new ArrayList<>(List.of(new ItemStack(Items.CAMPFIRE), new ItemStack(Items.SOUL_CAMPFIRE))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:169: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("stonecutting"), new ArrayList<>(List.of(new ItemStack(Items.STONECUTTER))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:170: warning: [removal] ResourceLocation(String) in ResourceLocation has been deprecated and marked for removal
+        CATALYSTS.put(new ResourceLocation("smithing"), new ArrayList<>(List.of(new ItemStack(Items.SMITHING_TABLE))));
+                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:198: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        Entry e = new Entry(new ResourceLocation(ArcHud.MODID, "brewing/" + (brewCounter++)), BREWING, null,
+                            ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/recipes/RecipeIndex.java:301: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+        if (type == null) type = new ResourceLocation("unknown", "unknown");
+                                 ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:139: warning: [removal] getBackground() in IRecipeCategory has been deprecated and marked for removal
+            bg = cat.getBackground();
+                    ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:303: warning: [removal] getTooltip(T,TooltipFlag) in IIngredientRenderer has been deprecated and marked for removal
+                        lines.addAll(renderer.getTooltip(v, TooltipFlag.Default.NORMAL));
+                                             ^
+  where T is a type-variable:
+    T extends Object declared in interface IIngredientRenderer
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:312: warning: [removal] IRecipeSlotTooltipCallback in mezz.jei.api.gui.ingredient has been deprecated and marked for removal
+                    } else if (cb instanceof IRecipeSlotTooltipCallback old) {
+                                             ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:313: warning: [removal] onTooltip(IRecipeSlotView,List<Component>) in IRecipeSlotTooltipCallback has been deprecated and marked for removal
+                        old.onTooltip(s.view(), lines);
+                           ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiHelpers.java:209: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                        RecipeIndex.addExternal(new RecipeIndex.Entry(new ResourceLocation("archud", "jei_brewing/" + System.identityHashCode(in)),
+                                                                      ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiBridge.java:62: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+    public static final ResourceLocation INFO = new ResourceLocation("jei", "information");
+                                                ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiBridge.java:241: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+                        if (id == null) id = new ResourceLocation(uid.getNamespace(), uid.getPath() + "/" + n);
+                                             ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiBridge.java:285: warning: [removal] ResourceLocation(String,String) in ResourceLocation has been deprecated and marked for removal
+            RecipeIndex.addExternal(new RecipeIndex.Entry(new ResourceLocation(INFO.getNamespace(), INFO.getPath() + "/" + (infoN++)), INFO, null,
+                                                          ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+30 warnings
+
+> Task :processResources
+> Task :classes
+> Task :addMixinsToJeiApiDevJar
+> Task :jeiApiDevJar
+> Task :createSrgToMcp
+> Task :downloadMCMeta
+> Task :downloadAssets
+> Task :extractNatives
+> Task :makeSrcDirs
+> Task :prepareRuns
+> Task :prepareRunClient
+> Task :prepareRunClientCompile
+
+> Task :runClient
+2026-10-27 05:20:41,615 main WARN Advanced terminal features are not available in this environment
+[05:20:41] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, MOD_DEV, --assetIndex, 5, --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --gameDir, ., --fml.forgeVersion, 47.4.28, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --width, 1920, --height, 1080, --mixin.config, archud.forge.mixins.json]
+[05:20:41] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.20.1 by Eclipse Adoptium; OS Linux arch amd64 version 6.17.0-1022-azure
+[05:20:41] [main/WARN] [ne.mi.fm.lo.FMLConfig/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/fml.toml is not correct. Correcting
+[05:20:41] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
+[05:20:41] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowLogHelpMessage] was corrected from null to true
+[05:20:41] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
+[05:20:41] [main/INFO] [ne.mi.fm.lo.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
+[05:20:41] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[05:20:42] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[05:20:42] [main/INFO] [EARLYDISPLAY/]: If this message is the only thing at the bottom of your log before a crash, you probably have a driver issue.
+
+Possible solutions:
+A) Make sure Minecraft is set to prefer high performance graphics in the OS and/or driver control panel
+B) Check for driver updates on the graphics brand's website
+C) Try reinstalling your graphics drivers
+D) If still not working after trying all of the above, ask for further help on the Forge forums or Discord
+
+You can safely ignore this message if the game starts up successfully.
+[05:20:42] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.5
+[05:20:43] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.5 got version 4.5
+[05:20:43] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23120!/ Service=ModLauncher Env=CLIENT
+[05:20:43] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: llvmpipe (LLVM 20.1.2, 256 bits) GL version 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4, Mesa
+[05:20:44] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.28/2f0765ea31561e9dfaf8eb8b54ac0548cd857559/javafmllanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[05:20:44] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.28/4e54a5f415a61888bd9c5d61b140ae5f86bf665f/lowcodelanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[05:20:44] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.28/4d3efb7da0466927cc5b1e4487c3d3c33ba842d0/mclanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[05:20:44] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.28/99808794b6f9f27ca527ad9db1203409fb8552f8/fmlcore-1.20.1-47.4.28.jar is missing mods.toml file
+[05:20:44] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: photon. Using Mod File: /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/curse/maven/photon-871522/7501597_mapped_official_1.20.1/photon-871522-7501597_mapped_official_1.20.1.jar
+[05:20:44] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: curios. Using Mod File: /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/top/theillusivec4/curios/curios-forge/5.14.1+1.20.1_mapped_official_1.20.1/curios-forge-5.14.1+1.20.1_mapped_official_1.20.1.jar
+[05:20:44] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: playeranimator. Using Mod File: /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/playeranimator/xe2EVE6q_mapped_official_1.20.1/playeranimator-xe2EVE6q_mapped_official_1.20.1.jar
+[05:20:44] [main/WARN] [ne.mi.ja.se.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: ldlib. Using Mod File: /home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/ldlib/ONxYJpRz_mapped_official_1.20.1/ldlib-ONxYJpRz_mapped_official_1.20.1.jar
+[05:20:44] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: Found 5 dependencies adding them to mods collection
+[05:20:47] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[05:20:47] [main/ERROR] [mixin/]: Mixin config regen.mixins.json does not specify "minVersion" property
+[05:20:47] [main/ERROR] [mixin/]: Mixin config azurelibarmor.mixins.json does not specify "minVersion" property
+[05:20:47] [main/ERROR] [mixin/]: Mixin config azurelibarmor.forge.mixins.json does not specify "minVersion" property
+[05:20:47] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, MOD_DEV, --gameDir, ., --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --assetIndex, 5, --width, 1920, --height, 1080]
+[05:20:47] [main/WARN] [mixin/]: Reference map 'archud.refmap.json' for archud.forge.mixins.json could not be read. If this is a development environment you can ignore this message
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap farmersdelight.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap Regeneration-v1.20.1-42.1.1-common-common-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap Regeneration-v1.20.1-42.1.1-forge-forge-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap cumulus_menus.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap mixins.legendsmod.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap ldlib-common-1.20.1-ldlib-common-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap ldlib-forge-1.20.1-ldlib-forge-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap player-animation-lib-minecraft_common-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap aether.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap photon-common-1.20.1-photon-common-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap photon-forge-1.20.1-photon-forge-refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap azurelib.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap azurelib.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/WARN] [mixin/]: Reference map 'nitrogen_internals.refmap.json' for nitrogen_internals.mixins.json could not be read. If this is a development environment you can ignore this message
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap azurelibarmor.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap azurelibarmor.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:47] [main/INFO] [mixin/]: Remapping refMap curios.refmap.json using /home/runner/work/arc-hud/arc-hud/forge/build/createSrgToMcp/output.srg
+[05:20:48] [main/WARN] [mixin/]: Error loading class: earth/terrarium/adastra/client/screens/player/OverlayScreen (java.lang.ClassNotFoundException: earth.terrarium.adastra.client.screens.player.OverlayScreen)
+[05:20:48] [main/WARN] [mixin/]: Error loading class: me/jellysquid/mods/sodium/client/render/immediate/model/ModelCuboid (java.lang.ClassNotFoundException: me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid)
+[05:20:48] [main/WARN] [mixin/]: Error loading class: mezz/jei/library/gui/recipes/layout/builder/RecipeSlotBuilder (java.lang.ClassNotFoundException: mezz.jei.library.gui.recipes.layout.builder.RecipeSlotBuilder)
+[05:20:48] [main/WARN] [mixin/]: @Mixin target mezz.jei.library.gui.recipes.layout.builder.RecipeSlotBuilder was not found ldlib-common.mixins.json:jei.RecipeSlotBuilderMixin
+[05:20:48] [main/WARN] [mixin/]: Error loading class: mezz/jei/library/gui/ingredients/RecipeSlot (java.lang.ClassNotFoundException: mezz.jei.library.gui.ingredients.RecipeSlot)
+[05:20:48] [main/WARN] [mixin/]: @Mixin target mezz.jei.library.gui.ingredients.RecipeSlot was not found ldlib-common.mixins.json:jei.RecipeSlotMixin
+[05:20:48] [main/WARN] [mixin/]: Error loading class: mezz/jei/gui/events/GuiEventHandler (java.lang.ClassNotFoundException: mezz.jei.gui.events.GuiEventHandler)
+[05:20:48] [main/WARN] [mixin/]: @Mixin target mezz.jei.gui.events.GuiEventHandler was not found aether.mixins.json:client.jei.GuiEventHandlerMixin
+[05:20:48] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[05:20:56] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/assets/.mcassetsroot' uses unexpected schema
+[05:20:56] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/data/.mcassetsroot' uses unexpected schema
+[05:20:56] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[05:20:56] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Dev
+[05:20:56] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.1 build 7
+[05:20:57] [modloading-worker-0/INFO] [LowDragLib/]: LowDragLib is initializing on platform: Forge
+[05:20:57] [modloading-worker-0/INFO] [LowDragLib/]: create ldlib config folder
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Looks like no skins have been downloaded! Commencing first time set up!
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Setup missing Regeneration Folder: ./regen_data/skins
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Setup missing Regeneration Folder: ./regen_data/skins/default
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Setup missing Regeneration Folder: ./regen_data/skins/slim
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Setup missing Regeneration Folder: ./regen_data/skins/default/web
+[05:20:57] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: Setup missing Regeneration Folder: ./regen_data/skins/slim/web
+[05:20:57] [Skins Downloader/WARN] [mc.cr.so.re.Regeneration/]: Downloading new Trending skins
+[05:20:57] [modloading-worker-0/INFO] [Photon/]: Photon is initializing on platform: Forge
+[05:20:58] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/a13f3a0f5a208f57.png || Name: web_1747429641506 || Path: ./regen_data/skins/slim/web
+[05:20:58] [modloading-worker-0/INFO] [azurelib/FileWatching]: Registered azurelib config for auto-sync function
+[05:20:58] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.28, for MC 1.20.1 with MCP 20230612.114412
+[05:20:58] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.28 Initialized
+[05:20:58] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c8646a34746935ec.png || Name: web_1747428523083 || Path: ./regen_data/skins/slim/web
+[05:20:58] [modloading-worker-0/INFO] [Photon/]: creat the photon fx folder
+[05:20:58] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/92bf4c44383240fd.png || Name: web_1741902513530 || Path: ./regen_data/skins/slim/web
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/6bd413c5b693f958.png || Name: web_1749647925777 || Path: ./regen_data/skins/slim/web
+[05:20:59] [modloading-worker-0/INFO] [co.ar.ar.ArcHud/]: Arc HUD by arc4io loaded on Forge
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/1f73a997ff6e3408.png || Name: web_1749647961857 || Path: ./regen_data/skins/slim/web
+[05:20:59] [modloading-worker-0/INFO] [co.ar.ar.ArcHud/]: Arc HUD: интеграция с Regeneration включена
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/f8f6612c7daff343.png || Name: web_1747428549565 || Path: ./regen_data/skins/slim/web
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/a291977cf2f83d16.png || Name: web_1749647941461 || Path: ./regen_data/skins/slim/web
+[05:20:59] [modloading-worker-0/INFO] [co.ar.ar.ArcHud/]: [Compat] enabled
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/cd18b1d80251bc0a.png || Name: web_1749647898392 || Path: ./regen_data/skins/slim/web
+[05:20:59] [Render thread/INFO] [co.ti.le.LegendsMod/]: legendsmod: capabilities are registered!
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c648f3c87749e4df.png || Name: web_1747429574642 || Path: ./regen_data/skins/slim/web
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/cc30f392968d2195.png || Name: web_1747428563393 || Path: ./regen_data/skins/slim/web
+[05:20:59] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/8c7f788e22135c1b.png || Name: web_1749647948237 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/ba05f919aa3ac35c.png || Name: web_1749647963270 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/5d45baa9c1c3231f.png || Name: web_1747428541232 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/5be81484cd8f291c.png || Name: web_1749647949573 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/9c6b2e3e2e0f1879.png || Name: web_1749647982306 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/eb8bb20c750155ed.png || Name: web_1747429663122 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/0bace9583f417e62.png || Name: web_1749647922977 || Path: ./regen_data/skins/default/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/48f7700ad12e00fe.png || Name: web_1741902507952 || Path: ./regen_data/skins/slim/web
+[05:21:00] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/03ca01dd33d1dd28.png || Name: web_1747429604841 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/bea289021b5764fd.png || Name: web_1747429534675 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/0362978e234916e2.png || Name: web_1747429503848 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/8d8595ffd8023236.png || Name: web_1747429613493 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/a477985d16e77c1b.png || Name: web_1747429492619 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/b3731e4f397ff763.png || Name: web_1747429593482 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/e3c114d04efc9caa.png || Name: web_1749647914828 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/ecccd614a8c3ad7f.png || Name: web_1747428386852 || Path: ./regen_data/skins/slim/web
+[05:21:01] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/fa9693909a546eaf.png || Name: web_1747429683152 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/a4737efb992c260a.png || Name: web_1747429678926 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/922a06067dd335c6.png || Name: web_1747429630485 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d21438298bfd7d42.png || Name: web_1747429637194 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/b93977630919c735.png || Name: web_1749647953663 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/31f6a7d64b7ec422.png || Name: web_1747428569041 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/294570e6bc0e3cab.png || Name: web_1747429507167 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d4742ef7ab8370d2.png || Name: web_1747428537007 || Path: ./regen_data/skins/slim/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/847c90af2b452782.png || Name: web_1747428570431 || Path: ./regen_data/skins/default/web
+[05:21:02] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c78bc6518ca91131.png || Name: web_1747429556321 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/b96f1b31a397585b.png || Name: web_1749647935368 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/995a7ccd565abe2b.png || Name: web_1746909762104 || Path: ./regen_data/skins/default/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/8494691bba435066.png || Name: web_1747428527327 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/00580a7c8438a110.png || Name: web_1749647931300 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/316c4fe4c4c5a24e.png || Name: web_1747429553546 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/5782b9c2c83eed13.png || Name: web_1747428530088 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/f2f06cf54969ecb2.png || Name: web_1747429482819 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/9eb436198fa749dd.png || Name: web_1747429617975 || Path: ./regen_data/skins/slim/web
+[05:21:03] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/b09b72aae3492ef5.png || Name: web_1747429644606 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c326612972fc2d28.png || Name: web_1747428531465 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c3c8c1f373324279.png || Name: web_1747428539835 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/e86c216550540300.png || Name: web_1741902517716 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/fb925c2f6314535d.png || Name: web_1747429554957 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d712492ee6a8affa.png || Name: web_1747429510036 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/710671688eac6ea1.png || Name: web_1747429529016 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/863029080bc3f01c.png || Name: web_1746909760470 || Path: ./regen_data/skins/slim/web
+[05:21:04] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: http://textures.minecraft.net/texture/3a3499efdf3b6e751f8ef3ce980f7b9b7d75a15220407bcc46bf1e2b23705b7a || Name: web_1750158617410 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d47205bca706d61b.png || Name: web_1747428518740 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/39e3f23d782941da.png || Name: web_1747428520233 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/1db4f380f4ec908c.png || Name: web_1747428566312 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/f234a40727667336.png || Name: web_1749647902478 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/aaa23fe2c6ae32c2.png || Name: web_1749647886677 || Path: ./regen_data/skins/default/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/ea274f782628cf65.png || Name: web_1749647924378 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/05fbc9f307494c54.png || Name: web_1749647906583 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/313934cd0d7c2946.png || Name: web_1747428542624 || Path: ./regen_data/skins/slim/web
+[05:21:05] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/5a8b1b932f0019ec.png || Name: web_1747429671703 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/279d5969df2a354e.png || Name: web_1749647974109 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/31241ef32cc07bda.png || Name: web_1746909754400 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/4dd625200d139ce2.png || Name: web_1749647910673 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: built-in pack rodnoe_slovo extracted to /home/runner/work/arc-hud/arc-hud/forge/run/config/archud/builtin/rodnoe_slovo
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/1a7563bb64828f56.png || Name: web_1749647920281 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/23f1c3996e795c81.png || Name: web_1747428538382 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/5a7c2aea88e23ebb.png || Name: web_1749647959102 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c7d93edb91ee4a8a.png || Name: web_1741902514966 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Render thread/INFO] [ne.mi.ga.ForgeGameTestHooks/]: Enabled Gametest Namespaces: []
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d20259a0102b40e5.png || Name: web_1747428545376 || Path: ./regen_data/skins/slim/web
+[05:21:06] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/55dee9763e00e535.png || Name: web_1749647927192 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/3e719b79c09113a8.png || Name: web_1747429491199 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/b4b096ef111c017f.png || Name: web_1747429631943 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/94be3608785b0259.png || Name: web_1747429496844 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Render thread/ERROR] [mojang/Narrator]: Error while loading the narrator
+com.mojang.text2speech.Narrator$InitializeException: Failed to load library flite
+	at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:69) ~[text2speech-1.17.9.jar:?] {}
+	at com.mojang.text2speech.NarratorLinux.<init>(NarratorLinux.java:18) ~[text2speech-1.17.9.jar:?] {}
+	at com.mojang.text2speech.Narrator.getNarrator(Narrator.java:41) ~[text2speech-1.17.9.jar:?] {}
+	at net.minecraft.client.GameNarrator.<init>(GameNarrator.java:19) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.client.Minecraft.<init>(Minecraft.java:553) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+	at net.minecraft.client.main.Main.main(Main.java:182) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+Caused by: java.lang.UnsatisfiedLinkError: Unable to load library 'flite':
+libflite.so: cannot open shared object file: No such file or directory
+libflite.so: cannot open shared object file: No such file or directory
+Native library (linux-x86-64/libflite.so) not found in resource path (/home/runner/work/arc-hud/arc-hud/forge/build/classes/java/main:/home/runner/work/arc-hud/arc-hud/forge/build/resources/main:/home/runner/work/arc-hud/arc-hud/forge/build/jei-api-dev/jei-api-archud-forge-dev.jar:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/aether/2411kUqF_mapped_official_1.20.1/aether-2411kUqF_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/azurelib/BF48e0nr_mapped_official_1.20.1/azurelib-BF48e0nr_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/azurelib-armor/ZzJnDHAP_mapped_official_1.20.1/azurelib-armor-ZzJnDHAP_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/playeranimator/xe2EVE6q_mapped_official_1.20.1/playeranimator-xe2EVE6q_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/regeneration/OIui6HZO_mapped_official_1.20.1/regeneration-OIui6HZO_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/legends-mod-core/nCsrAjfS_mapped_official_1.20.1/legends-mod-core-nCsrAjfS_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/curse/maven/photon-871522/7501597_mapped_official_1.20.1/photon-871522-7501597_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/ldlib/ONxYJpRz_mapped_official_1.20.1/ldlib-ONxYJpRz_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/farmers-delight/SiIpcZzM_mapped_official_1.20.1/farmers-delight-SiIpcZzM_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/top/theillusivec4/curios/curios-forge/5.14.1+1.20.1_mapped_official_1.20.1/curios-forge-5.14.1+1.20.1_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlearlydisplay/1.20.1-47.4.28/3dadce8bfe5d10799189cac6196ea1162a04b9ae/fmlearlydisplay-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.28/2f0765ea31561e9dfaf8eb8b54ac0548cd857559/javafmllanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.28/4e54a5f415a61888bd9c5d61b140ae5f86bf665f/lowcodelanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.28/4d3efb7da0466927cc5b1e4487c3d3c33ba842d0/mclanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.28/99808794b6f9f27ca527ad9db1203409fb8552f8/fmlcore-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlloader/1.20.1-47.4.28/ef60cc90bbcd259cb40881e459c49a7350ed2002/fmlloader-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarSelector/0.3.19/376cc9c8ea60720cf027c01fc033de915699801c/JarJarSelector-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarMetadata/0.3.19/83feaa9b770e6ac0e96ee4fc23fa89325c5fe2/JarJarMetadata-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/4.0.43/2ff9d747a77570a07a60d32ac77eb6162ad2a2d9/authlib-4.0.43.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/datafixerupper/6.0.8/3ba4a30557a9b057760af4011f909ba619fc5125/datafixerupper-6.0.8.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/patchy/2.2.10/da05971b07cbb379d002cf7eaec6a2048211fefc/patchy-2.2.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/text2speech/1.17.9/3cad216e3a7f0c19b4b394388bc9ffc446f13b14/text2speech-1.17.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/31.1-jre/60458f877d055d0c9114d9e1a2efb737b4bc282c/guava-31.1-jre.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/ca.weblite/java-objc-bridge/1.1/1227f9e0666314f9de41477e3ec277e542ed7f7b/java-objc-bridge-1.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/forgespi/7.0.1/3b4972a0cdb135853dba219be61a79b22cff1309/forgespi-7.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mergetool/1.1.5/f3da18e12c696d35a47c82cbb2cc8b5aa15e1154/mergetool-1.1.5-api.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/24.0.1/13c5c75c4206580aa4d683bffee658caae6c9f43/annotations-24.0.1.jar:/home/runner/.gradle/caches/forge_gradle/mcp_repo/net/minecraft/mapping/1.20.1/mapping-1.20.1-mapping.zip:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/accesstransformers/8.0.4/272d240aa73f42195b2a68e2ebd8b701ecf41f63/accesstransformers-8.0.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/modlauncher/10.0.9/6d9443f56f50bb85cea383686ff9c867391458b/modlauncher-10.0.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/bootstraplauncher/1.1.2/c546e00443d8432cda6baa1c860346980742628/bootstraplauncher-1.1.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/securejarhandler/2.1.10/51e6a22c6c716beb11e244bf5b8be480f51dd6b5/securejarhandler-2.1.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/eventbus/6.2.33/3fae69cfa9c5095bcc25c0a8a3ed9b26c156f922/eventbus-6.2.33.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/coremods/5.2.4/e30bab269d896613e38396274711410b3a0e4b87/coremods-5.2.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.openjdk.nashorn/nashorn-core/15.4/f67f5ffaa5f5130cf6fb9b133da00c7df3b532a5/nashorn-core-15.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-commons/9.9.1/ab35de4c537184a09339069f1a3b3aacf2289149/asm-commons-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-util/9.9.1/e51f5b0ae0b0c1960687ae970a2a3434d39d8abb/asm-util-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-analysis/9.9.1/1ab8d9316ef7a67240087919a708246c37ed1660/asm-analysis-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-tree/9.9.1/b6b1b3366296163b4b1f540731aad0a2baa484d8/asm-tree-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm/9.9.1/2ceea6ab43bcae1979b2a6d85fc0ca429877e5ab/asm-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4/4.9.1/e92af8ab33e428461927b484e90bb155a4f3a052/antlr4-4.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4-runtime/4.9.1/428664f05d2b7f7b7610204b5aa7c1763f62011a/antlr4-runtime-4.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/unsafe/0.2.0/54d7a0a5e8fdb71b973025caa46f341ae5904f39/unsafe-0.2.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.electronwill.night-config/toml/3.6.4/51d6cefb2b55ee55ee26b16391212fb2c7dfb4f4/toml-3.6.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.electronwill.night-config/core/3.6.4/510f174abbf1c947494db50ef2445683bd52c230/core-3.6.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.8.5/4433f50c07debefaed0553bd0068f4f48d449313/maven-artifact-3.8.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.jodah/typetools/0.6.3/a01aaa6ddaea9ec07ec4f209487b7a46a526283a/typetools-0.6.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecrell/terminalconsoleappender/1.2.0/96d02cd3b384ff015a8fef4223bcb4ccf1717c95/terminalconsoleappender-1.2.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jline/jline-reader/3.12.1/4382ab1382c7b6f379377ed5f665dc2f6e1218bc/jline-reader-3.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jline/jline-terminal/3.12.1/c777448314e050d980a6b697c140f3bfe9eb7416/jline-terminal-3.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarFileSystems/0.3.19/2464eb7d6b9ddb9db36a82cf8a95193e5c6fe020/JarJarFileSystems-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.github.oshi/oshi-core/6.2.2/54f5efc19bca95d709d9a37d19ffcbba3d21c1a6/oshi-core-6.2.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.10/dd9b193aef96e973d5a11ab13cd17430c2e4306b/gson-2.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.1/1dcf1de382a0bf95a3d8b0849546c88bac1292c9/failureaccess-1.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.ibm.icu/icu4j/71.1/9e7d3304c23f9ba5cb71915f7cce23231a57a445/icu4j-71.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/blocklist/1.0.10/5c685c5ffa94c4cd39496c7184c1d122e515ecef/blocklist-1.0.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/brigadier/1.1.8/5244ce82c3337bba4a196a3ce858bfaecc74404a/brigadier-1.1.8.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/logging/1.1.1/832b8e6674a9b325a5175a3a6267dfaf34c85139/logging-1.1.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.13/e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada/httpclient-4.5.13.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.15/49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d/commons-codec-1.15.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.11.0/a2503f302b11ebde7ebc3df41daebe0e4eea3689/commons-io-2.11.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.82.Final/644041d1fa96a5d3130a29e8978630d716d76e38/netty-handler-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.82.Final/b77200379acb345a9ffdece1c605e591ac3e4e0a/netty-codec-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.82.Final/476409d6255001ca53a55f65b01c13822f8dc93a/netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.82.Final/c7350a71920f3ae9142945e25fed4846cce53374/netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-classes-epoll/4.1.82.Final/e7c7dd18deac93105797f30057c912651ea76521/netty-transport-classes-epoll-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.1.82.Final/3e895b35ca1b8a0eca56cacff4c2dde5d2c6abce/netty-transport-native-unix-common-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.82.Final/e431a218d91acb6476ccad5f5aafde50aa3945ca/netty-transport-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.82.Final/a544270cf1ae8b8077082f5036436a9a9971ea71/netty-buffer-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.82.Final/38f665ae8dcd29032eea31245ba7806bed2e0fa8/netty-resolver-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.82.Final/22d148e85c3f5ebdacc0ce1f5aabb1d420f73f3/netty-common-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/it.unimi.dsi/fastutil/8.5.9/bb7ea75ecdb216654237830b3a96d87ad91f8cc5/fastutil-8.5.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/5.12.1/97406a297c852f4a41e688a176ec675f72e8329/jna-platform-5.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.12.1/b1e93a735caea94f503e95e6fe79bf9cdc1e985d/jna-5.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.sf.jopt-simple/jopt-simple/5.0.4/4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c/jopt-simple-5.0.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.21/4ec95b60d4e86b5c95a0e919cb172a0af98011ef/commons-compress-1.21.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.12.0/c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e/commons-lang3-3.12.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.15/7f2e0c573eaa7a74bac2e89b359e1f73d92a0a1d/httpcore-4.4.15.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.19.0/3b6eeb4de4c49c0fe38a4ee27188ff5fee44d0bb/log4j-core-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-slf4j2-impl/2.19.0/5c04bfdd63ce9dceb2e284b81e96b6a70010ee10/log4j-slf4j2-impl-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.19.0/ea1b37f38c327596b216542bc636cfdc0b8036fa/log4j-api-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.5/22566d58af70ad3d72308bab63b8339906deb649/joml-1.10.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.1/cbac1b8d30cb4795149c1ef540f912671a8616d0/lwjgl-glfw-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.1/81716978214ecbda15050ca394b06ef61501a49e/lwjgl-glfw-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.1/a817bcf213db49f710603677457567c37d53e103/lwjgl-jemalloc-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.1/33dbb017b6ed6b25f993ad9d56741a49e7937718/lwjgl-jemalloc-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.1/2623a6b8ae1dfcd880738656a9f0243d2e6840bd/lwjgl-openal-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.1/f906b6439f6daa66001182ea7727e3467a93681b/lwjgl-openal-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.1/831a5533a21a5f4f81bbc51bb13e9899319b5411/lwjgl-opengl-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.1/ab9ab6fde3743e3550fa5d46d785ecb45b047d99/lwjgl-opengl-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.1/b119297cf8ed01f247abe8685857f8e7fcf5980f/lwjgl-stb-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.1/3ee7aec8686e52867677110415566a5342a80230/lwjgl-stb-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.1/ff1914111ef2e3e0110ef2dabc8d8cdaad82347/lwjgl-tinyfd-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.1/a35110b9471bea8cde826ab297550ee8c22f5035/lwjgl-tinyfd-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.1/ae58664f88e18a9bb2c77b063833ca7aaec484cb/lwjgl-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.1/1de885aba434f934201b99f2f1afb142036ac189/lwjgl-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.machinezoo.noexception/noexception/1.7.1/b65330c98e38a1f915fa54a6e5eca496505e3f0a/noexception-1.7.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-simple/1.7.30/e606eac955f55ecf1d8edcccba04eb8ac98088dd/slf4j-simple-1.7.30.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.1/f48d81adce2abf5ad3cfe463df517952749e03bc/slf4j-api-2.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/srgutils/0.4.11/fbad1341ffdb47d276bbdc40ecb06da49e053e74/srgutils-0.4.11.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-utils/3.3.0/cf43b5391de623b36fe066a21127baef82c64022/plexus-utils-3.3.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/b421526c5f297295adef1c886e5246c39d4ac629/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.12.0/d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5/checker-qual-3.12.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.11.0/c5a0ace696d3f8b1c1d8cc036d8c03cc0cbe6b69/error_prone_annotations-2.11.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/1.3/ba035118bc8bac37d7eff77700720999acd9986d/j2objc-annotations-1.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/ST4/4.3/92f2c1ad8d84abcbeead6cf7f2c53a04166293c2/ST4-4.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr-runtime/3.5.2/cd9cd41361c155f3af0f653009dcecb08d8b4afd/antlr-runtime-3.5.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.abego.treelayout/org.abego.treelayout.core/1.0.3/457216e8e6578099ae63667bb1e4439235892028/org.abego.treelayout.core-1.0.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.glassfish/javax.json/1.0.4/3178f73569fd7a1e5ffc464e680f7a8cc784b85a/javax.json-1.0.4.jar)
+	at com.sun.jna.NativeLibrary.loadLibrary(NativeLibrary.java:307) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+	at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:467) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+	at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:409) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+	at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:67) ~[text2speech-1.17.9.jar:?] {}
+	... 21 more
+	Suppressed: java.lang.UnsatisfiedLinkError: libflite.so: cannot open shared object file: No such file or directory
+		at com.sun.jna.Native.open(Native Method) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.loadLibrary(NativeLibrary.java:197) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:467) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:409) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:67) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.NarratorLinux.<init>(NarratorLinux.java:18) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.Narrator.getNarrator(Narrator.java:41) ~[text2speech-1.17.9.jar:?] {}
+		at net.minecraft.client.GameNarrator.<init>(GameNarrator.java:19) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at net.minecraft.client.Minecraft.<init>(Minecraft.java:553) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+		at net.minecraft.client.main.Main.main(Main.java:182) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+	Suppressed: java.lang.UnsatisfiedLinkError: libflite.so: cannot open shared object file: No such file or directory
+		at com.sun.jna.Native.open(Native Method) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.loadLibrary(NativeLibrary.java:210) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:467) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:409) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:67) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.NarratorLinux.<init>(NarratorLinux.java:18) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.Narrator.getNarrator(Narrator.java:41) ~[text2speech-1.17.9.jar:?] {}
+		at net.minecraft.client.GameNarrator.<init>(GameNarrator.java:19) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at net.minecraft.client.Minecraft.<init>(Minecraft.java:553) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+		at net.minecraft.client.main.Main.main(Main.java:182) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+	Suppressed: java.io.IOException: Native library (linux-x86-64/libflite.so) not found in resource path (/home/runner/work/arc-hud/arc-hud/forge/build/classes/java/main:/home/runner/work/arc-hud/arc-hud/forge/build/resources/main:/home/runner/work/arc-hud/arc-hud/forge/build/jei-api-dev/jei-api-archud-forge-dev.jar:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/aether/2411kUqF_mapped_official_1.20.1/aether-2411kUqF_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/azurelib/BF48e0nr_mapped_official_1.20.1/azurelib-BF48e0nr_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/azurelib-armor/ZzJnDHAP_mapped_official_1.20.1/azurelib-armor-ZzJnDHAP_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/playeranimator/xe2EVE6q_mapped_official_1.20.1/playeranimator-xe2EVE6q_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/regeneration/OIui6HZO_mapped_official_1.20.1/regeneration-OIui6HZO_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/legends-mod-core/nCsrAjfS_mapped_official_1.20.1/legends-mod-core-nCsrAjfS_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/curse/maven/photon-871522/7501597_mapped_official_1.20.1/photon-871522-7501597_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/ldlib/ONxYJpRz_mapped_official_1.20.1/ldlib-ONxYJpRz_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/maven/modrinth/farmers-delight/SiIpcZzM_mapped_official_1.20.1/farmers-delight-SiIpcZzM_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/deobf_dependencies/top/theillusivec4/curios/curios-forge/5.14.1+1.20.1_mapped_official_1.20.1/curios-forge-5.14.1+1.20.1_mapped_official_1.20.1.jar:/home/runner/.gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlearlydisplay/1.20.1-47.4.28/3dadce8bfe5d10799189cac6196ea1162a04b9ae/fmlearlydisplay-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.28/2f0765ea31561e9dfaf8eb8b54ac0548cd857559/javafmllanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.28/4e54a5f415a61888bd9c5d61b140ae5f86bf665f/lowcodelanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.28/4d3efb7da0466927cc5b1e4487c3d3c33ba842d0/mclanguage-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.28/99808794b6f9f27ca527ad9db1203409fb8552f8/fmlcore-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlloader/1.20.1-47.4.28/ef60cc90bbcd259cb40881e459c49a7350ed2002/fmlloader-1.20.1-47.4.28.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarSelector/0.3.19/376cc9c8ea60720cf027c01fc033de915699801c/JarJarSelector-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarMetadata/0.3.19/83feaa9b770e6ac0e96ee4fc23fa89325c5fe2/JarJarMetadata-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/authlib/4.0.43/2ff9d747a77570a07a60d32ac77eb6162ad2a2d9/authlib-4.0.43.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/datafixerupper/6.0.8/3ba4a30557a9b057760af4011f909ba619fc5125/datafixerupper-6.0.8.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/patchy/2.2.10/da05971b07cbb379d002cf7eaec6a2048211fefc/patchy-2.2.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/text2speech/1.17.9/3cad216e3a7f0c19b4b394388bc9ffc446f13b14/text2speech-1.17.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/31.1-jre/60458f877d055d0c9114d9e1a2efb737b4bc282c/guava-31.1-jre.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/ca.weblite/java-objc-bridge/1.1/1227f9e0666314f9de41477e3ec277e542ed7f7b/java-objc-bridge-1.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/forgespi/7.0.1/3b4972a0cdb135853dba219be61a79b22cff1309/forgespi-7.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mergetool/1.1.5/f3da18e12c696d35a47c82cbb2cc8b5aa15e1154/mergetool-1.1.5-api.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/24.0.1/13c5c75c4206580aa4d683bffee658caae6c9f43/annotations-24.0.1.jar:/home/runner/.gradle/caches/forge_gradle/mcp_repo/net/minecraft/mapping/1.20.1/mapping-1.20.1-mapping.zip:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/accesstransformers/8.0.4/272d240aa73f42195b2a68e2ebd8b701ecf41f63/accesstransformers-8.0.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/modlauncher/10.0.9/6d9443f56f50bb85cea383686ff9c867391458b/modlauncher-10.0.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/bootstraplauncher/1.1.2/c546e00443d8432cda6baa1c860346980742628/bootstraplauncher-1.1.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/cpw.mods/securejarhandler/2.1.10/51e6a22c6c716beb11e244bf5b8be480f51dd6b5/securejarhandler-2.1.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/eventbus/6.2.33/3fae69cfa9c5095bcc25c0a8a3ed9b26c156f922/eventbus-6.2.33.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/coremods/5.2.4/e30bab269d896613e38396274711410b3a0e4b87/coremods-5.2.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.openjdk.nashorn/nashorn-core/15.4/f67f5ffaa5f5130cf6fb9b133da00c7df3b532a5/nashorn-core-15.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-commons/9.9.1/ab35de4c537184a09339069f1a3b3aacf2289149/asm-commons-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-util/9.9.1/e51f5b0ae0b0c1960687ae970a2a3434d39d8abb/asm-util-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-analysis/9.9.1/1ab8d9316ef7a67240087919a708246c37ed1660/asm-analysis-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-tree/9.9.1/b6b1b3366296163b4b1f540731aad0a2baa484d8/asm-tree-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm/9.9.1/2ceea6ab43bcae1979b2a6d85fc0ca429877e5ab/asm-9.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4/4.9.1/e92af8ab33e428461927b484e90bb155a4f3a052/antlr4-4.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4-runtime/4.9.1/428664f05d2b7f7b7610204b5aa7c1763f62011a/antlr4-runtime-4.9.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/unsafe/0.2.0/54d7a0a5e8fdb71b973025caa46f341ae5904f39/unsafe-0.2.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.electronwill.night-config/toml/3.6.4/51d6cefb2b55ee55ee26b16391212fb2c7dfb4f4/toml-3.6.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.electronwill.night-config/core/3.6.4/510f174abbf1c947494db50ef2445683bd52c230/core-3.6.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.8.5/4433f50c07debefaed0553bd0068f4f48d449313/maven-artifact-3.8.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.jodah/typetools/0.6.3/a01aaa6ddaea9ec07ec4f209487b7a46a526283a/typetools-0.6.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecrell/terminalconsoleappender/1.2.0/96d02cd3b384ff015a8fef4223bcb4ccf1717c95/terminalconsoleappender-1.2.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jline/jline-reader/3.12.1/4382ab1382c7b6f379377ed5f665dc2f6e1218bc/jline-reader-3.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.jline/jline-terminal/3.12.1/c777448314e050d980a6b697c140f3bfe9eb7416/jline-terminal-3.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarFileSystems/0.3.19/2464eb7d6b9ddb9db36a82cf8a95193e5c6fe020/JarJarFileSystems-0.3.19.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.github.oshi/oshi-core/6.2.2/54f5efc19bca95d709d9a37d19ffcbba3d21c1a6/oshi-core-6.2.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.10/dd9b193aef96e973d5a11ab13cd17430c2e4306b/gson-2.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.1/1dcf1de382a0bf95a3d8b0849546c88bac1292c9/failureaccess-1.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.ibm.icu/icu4j/71.1/9e7d3304c23f9ba5cb71915f7cce23231a57a445/icu4j-71.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/blocklist/1.0.10/5c685c5ffa94c4cd39496c7184c1d122e515ecef/blocklist-1.0.10.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/brigadier/1.1.8/5244ce82c3337bba4a196a3ce858bfaecc74404a/brigadier-1.1.8.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.mojang/logging/1.1.1/832b8e6674a9b325a5175a3a6267dfaf34c85139/logging-1.1.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.13/e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada/httpclient-4.5.13.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.15/49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d/commons-codec-1.15.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.11.0/a2503f302b11ebde7ebc3df41daebe0e4eea3689/commons-io-2.11.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.82.Final/644041d1fa96a5d3130a29e8978630d716d76e38/netty-handler-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.82.Final/b77200379acb345a9ffdece1c605e591ac3e4e0a/netty-codec-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.82.Final/476409d6255001ca53a55f65b01c13822f8dc93a/netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.1.82.Final/c7350a71920f3ae9142945e25fed4846cce53374/netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-classes-epoll/4.1.82.Final/e7c7dd18deac93105797f30057c912651ea76521/netty-transport-classes-epoll-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.1.82.Final/3e895b35ca1b8a0eca56cacff4c2dde5d2c6abce/netty-transport-native-unix-common-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.82.Final/e431a218d91acb6476ccad5f5aafde50aa3945ca/netty-transport-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.82.Final/a544270cf1ae8b8077082f5036436a9a9971ea71/netty-buffer-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.82.Final/38f665ae8dcd29032eea31245ba7806bed2e0fa8/netty-resolver-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.82.Final/22d148e85c3f5ebdacc0ce1f5aabb1d420f73f3/netty-common-4.1.82.Final.jar:/home/runner/.gradle/caches/modules-2/files-2.1/it.unimi.dsi/fastutil/8.5.9/bb7ea75ecdb216654237830b3a96d87ad91f8cc5/fastutil-8.5.9.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/5.12.1/97406a297c852f4a41e688a176ec675f72e8329/jna-platform-5.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.12.1/b1e93a735caea94f503e95e6fe79bf9cdc1e985d/jna-5.12.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.sf.jopt-simple/jopt-simple/5.0.4/4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c/jopt-simple-5.0.4.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.21/4ec95b60d4e86b5c95a0e919cb172a0af98011ef/commons-compress-1.21.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.12.0/c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e/commons-lang3-3.12.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.15/7f2e0c573eaa7a74bac2e89b359e1f73d92a0a1d/httpcore-4.4.15.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.19.0/3b6eeb4de4c49c0fe38a4ee27188ff5fee44d0bb/log4j-core-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-slf4j2-impl/2.19.0/5c04bfdd63ce9dceb2e284b81e96b6a70010ee10/log4j-slf4j2-impl-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.19.0/ea1b37f38c327596b216542bc636cfdc0b8036fa/log4j-api-2.19.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.5/22566d58af70ad3d72308bab63b8339906deb649/joml-1.10.5.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.1/cbac1b8d30cb4795149c1ef540f912671a8616d0/lwjgl-glfw-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.3.1/81716978214ecbda15050ca394b06ef61501a49e/lwjgl-glfw-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.1/a817bcf213db49f710603677457567c37d53e103/lwjgl-jemalloc-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.3.1/33dbb017b6ed6b25f993ad9d56741a49e7937718/lwjgl-jemalloc-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.1/2623a6b8ae1dfcd880738656a9f0243d2e6840bd/lwjgl-openal-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.3.1/f906b6439f6daa66001182ea7727e3467a93681b/lwjgl-openal-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.1/831a5533a21a5f4f81bbc51bb13e9899319b5411/lwjgl-opengl-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.3.1/ab9ab6fde3743e3550fa5d46d785ecb45b047d99/lwjgl-opengl-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.1/b119297cf8ed01f247abe8685857f8e7fcf5980f/lwjgl-stb-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.3.1/3ee7aec8686e52867677110415566a5342a80230/lwjgl-stb-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.1/ff1914111ef2e3e0110ef2dabc8d8cdaad82347/lwjgl-tinyfd-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-tinyfd/3.3.1/a35110b9471bea8cde826ab297550ee8c22f5035/lwjgl-tinyfd-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.1/ae58664f88e18a9bb2c77b063833ca7aaec484cb/lwjgl-3.3.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.3.1/1de885aba434f934201b99f2f1afb142036ac189/lwjgl-3.3.1-natives-linux.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.machinezoo.noexception/noexception/1.7.1/b65330c98e38a1f915fa54a6e5eca496505e3f0a/noexception-1.7.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-simple/1.7.30/e606eac955f55ecf1d8edcccba04eb8ac98088dd/slf4j-simple-1.7.30.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.1/f48d81adce2abf5ad3cfe463df517952749e03bc/slf4j-api-2.0.1.jar:/home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/srgutils/0.4.11/fbad1341ffdb47d276bbdc40ecb06da49e053e74/srgutils-0.4.11.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-utils/3.3.0/cf43b5391de623b36fe066a21127baef82c64022/plexus-utils-3.3.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/b421526c5f297295adef1c886e5246c39d4ac629/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.12.0/d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5/checker-qual-3.12.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.11.0/c5a0ace696d3f8b1c1d8cc036d8c03cc0cbe6b69/error_prone_annotations-2.11.0.jar:/home/runner/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/1.3/ba035118bc8bac37d7eff77700720999acd9986d/j2objc-annotations-1.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/ST4/4.3/92f2c1ad8d84abcbeead6cf7f2c53a04166293c2/ST4-4.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.antlr/antlr-runtime/3.5.2/cd9cd41361c155f3af0f653009dcecb08d8b4afd/antlr-runtime-3.5.2.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.abego.treelayout/org.abego.treelayout.core/1.0.3/457216e8e6578099ae63667bb1e4439235892028/org.abego.treelayout.core-1.0.3.jar:/home/runner/.gradle/caches/modules-2/files-2.1/org.glassfish/javax.json/1.0.4/3178f73569fd7a1e5ffc464e680f7a8cc784b85a/javax.json-1.0.4.jar)
+		at com.sun.jna.Native.extractFromResourcePath(Native.java:1145) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.loadLibrary(NativeLibrary.java:281) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:467) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:409) ~[jna-5.12.1.jar:5.12.1 (b0)] {}
+		at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:67) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.NarratorLinux.<init>(NarratorLinux.java:18) ~[text2speech-1.17.9.jar:?] {}
+		at com.mojang.text2speech.Narrator.getNarrator(Narrator.java:41) ~[text2speech-1.17.9.jar:?] {}
+		at net.minecraft.client.GameNarrator.<init>(GameNarrator.java:19) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at net.minecraft.client.Minecraft.<init>(Minecraft.java:553) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+		at net.minecraft.client.main.Main.main(Main.java:182) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+		at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+[05:21:07] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources, archud_rodnoe_slovo, archud_cit, ldlib
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/7140ac84ef3d1f75.png || Name: web_1747429612046 || Path: ./regen_data/skins/slim/web
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/cumulus_menus-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Menu was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Menu.Enable Menu API was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Menu.Active Menu was corrected from null to its default, cumulus_menus:minecraft. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Menu.Enables menu selection button was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/farmersdelight-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key enableNourishmentHungerOverlay was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key enableComfortHealthOverlay was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key enableFoodEffectTooltip was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/regen-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.changeMySkin was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.changePerspective was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.timelordRenderSecondLayers was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.downloadTrendingSkins was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.downloadInternalSkins was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/legendsmod-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Skin Type was corrected from null to its default, DEFAULT. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Helmet Layer was corrected from null to its default, DEFAULT. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Battle Damage was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Stealth Visuals Self was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Suit Render Type was corrected from null to its default, DEFAULT. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Hand Renderer was corrected from null to its default, DEFAULT. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Mod IDs for Renders was corrected from null to its default, . 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Play Extended Sound Clip Ability Sounds was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Display Stand Render Distance was corrected from null to its default, 48. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Display Stand Dark Mode was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.X-Ray Passages was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.X-Ray Passage Range was corrected from null to its default, 24. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.X-Ray Blur was corrected from null to its default, 0.0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Hearing Ignore Self was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Hear Movement was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Hear Combat was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Hear Creatures was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Hear Mechanisms was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Tinnitus Intensity was corrected from null to its default, 0.6. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Enhanced Senses.Tinnitus Volume was corrected from null to its default, 0.5. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Visuals was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Gore was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Landing Sounds was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Part Limit was corrected from null to its default, 64. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/forge-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.alwaysSetupTerrainOffThread was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.experimentalForgeLightPipelineEnabled was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.showLoadWarnings was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.useCombinedDepthStencilAttachment was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.compressLanIPv6Addresses was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.calculateAllNormals was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.stabilizeDirectionGetNearest was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.allowMipmapLowering was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/curios-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.renderCurios was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.enableButton was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.buttonXOffset was corrected from null to its default, 0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.buttonYOffset was corrected from null to its default, 0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.creativeButtonXOffset was corrected from null to its default, 0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.creativeButtonYOffset was corrected from null to its default, 0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key client.buttonCorner was corrected from null to its default, TOP_LEFT. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/aether-client.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Rendering was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Rendering.Switches to legacy mob models was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Rendering.Disables Aether custom skybox was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Rendering.Makes lightmap colder was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Rendering.Enables green sunrise/sunset was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables Aether menu button was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables world preview was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables toggle world button was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables quick load button was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Align menu elements left with world preview was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Default Aether menu style was corrected from null to its default, aether:the_aether_left. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Default Minecraft menu style was corrected from null to its default, cumulus_menus:minecraft. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables random trivia was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables silver life shard hearts was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Disables the accessories button was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Portal text y-coordinate in loading screens was corrected from null to its default, 50. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button x-coordinate in inventory menus was corrected from null to its default, 27. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button y-coordinate in inventory menus was corrected from null to its default, 68. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button x-coordinate in creative menu was corrected from null to its default, 74. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button y-coordinate in creative menu was corrected from null to its default, 40. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button x-coordinate in accessories menu was corrected from null to its default, 9. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Button y-coordinate in accessories menu was corrected from null to its default, 68. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Layout x-coordinate in pause menu was corrected from null to its default, -116. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Layout y-coordinate in pause menu was corrected from null to its default, 0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gui.Enables Hammer of Kingbdogz' cooldown overlay was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Blue Aercloud bouncing sounds was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Set backup minimum music delay was corrected from null to its default, 12000. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Set backup maximum music delay was corrected from null to its default, 24000. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Disables Aether music manager was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Disables Aether boss music was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Disables Aether menu music was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Disables vanilla world preview menu music was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Audio.Disables Aether world preview menu music was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Miscellaneous was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Miscellaneous.Disable Cumulus button was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Miscellaneous.Enables server button was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/farmersdelight-common.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key settings was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key settings.enableFarmerFDTrades was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key settings.enableWanderingTraderFDTrades was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key settings.enableRopeReeling was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key settings.canvasSignDarkBackgroundList was corrected from null to its default, [gray, purple, blue, brown, green, red, black]. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key farming was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key farming.richSoilBoostChance was corrected from null to its default, 0.2. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key farming.enableTomatoVineClimbingTaggedRopes was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key farming.defaultTomatoVineRope was corrected from null to its default, farmersdelight:rope. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key crafting was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key crafting.enableCookingPotRecipeBook was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key crafting.enableVanillaCropCrates was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key crafting.cuttingBoardFortuneBonus was corrected from null to its default, 0.1. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.enableVanillaSoupExtraEffects was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.enableRabbitStewJumpBoost was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.enablePumpkinPieSneakToPlace was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.enableCuttingBoardDispenserBehavior was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.stack_size was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.stack_size.enableStackableSoupItems was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key overrides.stack_size.soupItemList was corrected from null to its default, [minecraft:mushroom_stew, minecraft:beetroot_soup, minecraft:rabbit_stew]. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key world was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key world.generateFDChestLoot was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key world.generateVillageCompostHeaps was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key world.generateFDCropsOnVillageFarms was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key debug was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key debug.enableTomatoRopePermanence was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/regen-common.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.loseRegensOnDeath was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.fieryRegen was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.fireImmunity was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.mobsHaveRegens was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.sendRegenDeathMessages was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration.postRegenDuration was corrected from null to its default, 360. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration.postRegenLevel was corrected from null to its default, 4. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration.resetHunger was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration.resetOxygen was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Post Regeneration.absorbtionLevel was corrected from null to its default, 10. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage.gracePhaseLength was corrected from null to its default, 900. 
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/07d0e6d12e2cd8f4.png || Name: web_1747429667381 || Path: ./regen_data/skins/slim/web
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage.criticalDamageChance was corrected from null to its default, 1. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage.criticalPhaseLength was corrected from null to its default, 60. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage.handGlowInterval was corrected from null to its default, 120. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.Grace Stage.handTriggerDelay was corrected from null to its default, 10. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating.regenKillRange was corrected from null to its default, 4. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating.regenerativeKnockback was corrected from null to its default, 2.5. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating.regenerativeKnockbackRange was corrected from null to its default, 7. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating.regenerationKnocksbackPlayers was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key common.While Regenerating.upwardsMotion was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/legendsmod-common.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Heightened Perception Classic Mode was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Configs for Legends Mod.Damage Cap was corrected from null to its default, 150.0. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/curios-common.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key slots was corrected from null to its default, []. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/aether-common.toml is not correct. Correcting
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Use default Curios' menu was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Gives player Aether Portal Frame item was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Gives starting loot on entry was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Reposition attack message above hotbar was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Repeat Sun Spirit's battle dialogue was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Show Patreon message was corrected from null to its default, true. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Data Pack was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Data Pack.Add Temporary Freezing automatically was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Data Pack.Add Ruined Portals automatically was corrected from null to its default, false. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:07] [modloading-worker-0/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Randomize boss names was corrected from null to its default, true. 
+[05:21:07] [Thread-4/WARN] [ne.mi.fm.co.ConfigFileTypeHandler/CONFIG]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/legendsmod-common.toml is not correct. Correcting
+[05:21:07] [Thread-4/WARN] [ne.mi.fm.co.ConfigFileTypeHandler/CONFIG]: Configuration file /home/runner/work/arc-hud/arc-hud/forge/run/config/legendsmod-common.toml is not correct. Correcting
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c3892bc4344a1964.png || Name: web_1747429563424 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/6c5da19a786e1ec2.png || Name: web_1741902500612 || Path: ./regen_data/skins/slim/web
+[05:21:07] [Worker-Main-2/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.0.06.hex, loading
+[05:21:07] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/bc8953a6ecce6fe8.png || Name: web_1747428532836 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/896a29de2f4a207b.png || Name: web_1747429589562 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/d6aebafc3f96ef57.png || Name: web_1749647946872 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/73389903e3fada6f.png || Name: web_1747428525923 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/e4af6b5d065f42dc.png || Name: web_1747429487133 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/3632f12cbe61dc1c.png || Name: web_1747429537603 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/2bb888f190511336.png || Name: web_1747429686354 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: http://textures.minecraft.net/texture/bbc30c0028d1b3a157d1b1e1e661de8e231a949f7574b8b264a07db2a348819e || Name: web_1741903931946 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/84c5474a1e084463.png || Name: web_1747429591506 || Path: ./regen_data/skins/slim/web
+[05:21:08] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/bc5f66edeea823e6.png || Name: web_1747428535611 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/eeeb681f6c268e0c.png || Name: web_1747429550967 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/af5d1f675ea1208c.png || Name: web_1747429522267 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/bb3cb2a94e8d1d13.png || Name: web_1747429515641 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Worker-Main-3/WARN] [minecraft/SpriteLoader]: Texture legendsmod:item/rope with size 20x20 limits mip level from 4 to 2
+[05:21:09] [Worker-Main-3/WARN] [minecraft/SpriteLoader]: Texture legendsmod:item/wisp_essence with size 15x15 limits mip level from 2 to 0
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/80686cea932bcf1d.png || Name: web_1749647978216 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/92ae2289de76a396.png || Name: web_1747429673136 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/8dd6df2b37f31b61.png || Name: web_1746909755963 || Path: ./regen_data/skins/slim/web
+[05:21:09] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/e6498414c2816b7f.png || Name: web_1747429531825 || Path: ./regen_data/skins/slim/web
+[05:21:10] [Worker-Main-2/INFO] [co.ti.le.LegendsMod/]: Legends Mod starting up
+[05:21:10] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/c3a20835334a50ec.png || Name: web_1747429675967 || Path: ./regen_data/skins/slim/web
+[05:21:10] [Worker-Main-2/INFO] [co.ti.le.LegendsMod/]: legendsmod has added 7 gamerules
+[05:21:10] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/589cf0c492e9adb6.png || Name: web_1747429654573 || Path: ./regen_data/skins/slim/web
+[05:21:10] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/0f350074fc36e0bc.png || Name: web_1749647917567 || Path: ./regen_data/skins/slim/web
+[05:21:10] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [regen] Starting version check at https://mc-api.craig.software/update?mod=regen
+[05:21:10] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/e5c3a4cec35d3d22.png || Name: web_1747429498243 || Path: ./regen_data/skins/default/web
+[05:21:10] [Skins Downloader/INFO] [mc.cr.so.re.Regeneration/]: URL: https://namemc.com/texture/9d18d07e34ca7827.png || Name: web_1747429627712 || Path: ./regen_data/skins/slim/web
+[05:21:10] [Skins Downloader/WARN] [mc.cr.so.re.Regeneration/]: Re-downloading internal skins
+[05:21:10] [Forge Version Check/WARN] [ne.mi.fm.VersionChecker/]: Failed to process update information
+com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $
+	at com.google.gson.Gson.fromJson(Gson.java:1226) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1124) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1034) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:969) ~[gson-2.10.jar%23122!/:?] {}
+	at net.minecraftforge.fml.VersionChecker$1.process(VersionChecker.java:186) ~[fmlcore-1.20.1-47.4.28.jar%23185!/:?] {}
+	at java.lang.Iterable.forEach(Iterable.java:75) ~[?:?] {re:mixin}
+	at net.minecraftforge.fml.VersionChecker$1.run(VersionChecker.java:117) ~[fmlcore-1.20.1-47.4.28.jar%23185!/:?] {}
+Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $
+	at com.google.gson.stream.JsonReader.beginObject(JsonReader.java:393) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:182) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:144) ~[gson-2.10.jar%23122!/:?] {}
+	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23122!/:?] {}
+	... 6 more
+[05:21:10] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [cumulus_menus] Starting version check at https://github.com/The-Aether-Team/Cumulus/raw/1.20.1-develop/update.json
+[05:21:11] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: Legends — выносливость и мана подключены
+[05:21:11] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: Legends — панель способностей подключена
+[05:21:11] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [cumulus_menus] Found status: UP_TO_DATE Current: 1.20.1-1.0.1-neoforge Target: null
+[05:21:11] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [aether] Starting version check at https://github.com/The-Aether-Team/The-Aether/raw/1.20.1-develop/update.json
+[05:21:11] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [aether] Found status: UP_TO_DATE Current: 1.20.1-1.5.2-neoforge Target: null
+[05:21:11] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[05:21:11] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: UP_TO_DATE Current: 47.4.28 Target: null
+[05:21:12] [Worker-Main-1/WARN] [minecraft/ModelManager]: Missing textures in model legendsmod:rune_forge#inventory:
+    minecraft:textures/atlas/blocks.png:minecraft:rune_forger
+[05:21:15] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[05:21:15] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[05:21:15] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: aether:entity.sentry.ambient
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5731:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5731:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+[05:21:15] [Render thread/ERROR] [minecraft/SoundEngine]: Error starting SoundSystem. Turning off sounds & music
+java.lang.IllegalStateException: Failed to open OpenAL device
+	at com.mojang.blaze3d.audio.Library.openDeviceOrFallback(Library.java:283) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at com.mojang.blaze3d.audio.Library.init(Library.java:153) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.client.sounds.SoundEngine.loadLibrary(SoundEngine.java:104) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:A}
+	at net.minecraft.client.sounds.SoundEngine.reload(SoundEngine.java:96) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:A}
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:125) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:40) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.server.packs.resources.SimplePreparableReloadListener.lambda$reload$1(SimplePreparableReloadListener.java:13) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:718) ~[?:?] {}
+	at java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:482) ~[?:?] {}
+	at net.minecraft.server.packs.resources.SimpleReloadInstance.lambda$new$3(SimpleReloadInstance.java:69) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:156) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:computing_frames,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:23) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,re:computing_frames,re:classloading}
+	at net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:130) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:computing_frames,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:115) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:computing_frames,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B}
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1106) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+	at net.minecraft.client.Minecraft.archud$runTick(Minecraft.java) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+	at net.minecraft.client.Minecraft.redirect$zep000$archud$guardedTick(Minecraft.java:3430) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+	at net.minecraft.client.Minecraft.run(Minecraft.java:718) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:APP:photon-common.mixins.json:accessor.MinecraftAccessor,pl:mixin:APP:azurelib.forge.mixins.json:MinecraftMixin,pl:mixin:A}
+	at net.minecraft.client.main.Main.main(Main.java:218) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar:?] {re:classloading}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.28.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 4096x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/signs.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[05:21:15] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[05:21:16] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[05:21:16] [Render thread/WARN] [minecraft/ShaderInstance]: Shader legendsmod:rendertype_armor_cutout_no_cull_shiny could not find sampler named Sampler1 in the specified shader program.
+[05:21:16] [Render thread/WARN] [minecraft/ShaderInstance]: Shader legendsmod:rendertype_armor_cutout_no_cull_shiny could not find sampler named Sampler2 in the specified shader program.
+[05:21:16] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 4096x2048x0 minecraft:textures/atlas/particles.png-atlas
+[05:21:16] [Render thread/WARN] [minecraft/ParticleEngine]: Missing particle sprites: legends_superheroes:revolver_bullet
+[05:21:16] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[05:21:16] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/mob_effects.png-atlas
+[05:21:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening AccessibilityOnboardingScreen (current null) -> AccessibilityOnboardingScreen
+[05:21:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: найден мод 'aether' со своим главным меню — меню Arc HUD не подменяется
+[05:21:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening TitleScreen (current AccessibilityOnboardingScreen) -> TitleScreen
+[05:21:16] [Realms Notification Availability checker #1/INFO] [mojang/RealmsClient]: Could not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: 0
+[05:21:25] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening TitleScreen (current TitleScreen) -> TitleScreen
+[05:21:26] [Render thread/INFO] [minecraft/MinecraftServer]: Found new data pack builtin/aether_accessories, loading it automatically
+[05:21:28] [Render thread/INFO] [minecraft/RecipeManager]: Loaded 21 recipes
+[05:21:28] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 2269 advancements
+[05:21:28] [Render thread/INFO] [to.th.cu.Curios/]: Loaded 16 curio slots
+[05:21:28] [Render thread/INFO] [to.th.cu.Curios/]: Loaded 9 curio entities
+[05:21:29] [Render thread/WARN] [azurelib/IO]: Correcting config value 'floatArray[0]' from '135.32' to '500.0'
+[05:21:29] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ProgressScreen (current TitleScreen) -> ProgressScreen
+[05:21:29] [Server thread/INFO] [minecraft/IntegratedServer]: Starting integrated minecraft server version 1.20.1
+[05:21:29] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./saves/ArcHudCompat/serverconfig/legendsmod-server.toml is not correct. Correcting
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Shadow Eidolon was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Shadow Eidolon.Nightmare Mode was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Players was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Blood was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Limb Chance was corrected from null to its default, 0.3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Limb Cooldown was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Player Recovery was corrected from null to its default, 240. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Dismemberment.Death Parts was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./saves/ArcHudCompat/serverconfig/legendsmod-guilds.toml is not correct. Correcting
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.baseMembers was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.membersPerLevel was corrected from null to its default, 2. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.maxMembers was corrected from null to its default, 50. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.maxLevel was corrected from null to its default, 20. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.xpPerLevel was corrected from null to its default, 1000. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.joinCooldownMinutes was corrected from null to its default, 1440. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.inviteHours was corrected from null to its default, 24. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.maxApplications was corrected from null to its default, 50. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.lockRosterDuringWar was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.maxAllies was corrected from null to its default, 2. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key membership.identityCooldownMinutes was corrected from null to its default, 1440. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.dimensions was corrected from null to its default, []. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.protectPeacefulDimensions was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.combatTagSeconds was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.combatLogPenalty was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.repeatOpponentHours was corrected from null to its default, 24. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.formerGuildmateProtectionDays was corrected from null to its default, 7. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.minimumGuildMembers was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.minimumPlayMinutes was corrected from null to its default, 120. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.dailyScoringKillsPerPlayer was corrected from null to its default, 20. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.warDurationMinutes was corrected from null to its default, 60. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.warOpponentCooldownHours was corrected from null to its default, 24. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.winPoints was corrected from null to its default, 100. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.lossPoints was corrected from null to its default, 25. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key war.winExperience was corrected from null to its default, 250. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.worldKillRewards was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.killPoints was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.deathPointLoss was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.killExperience was corrected from null to its default, 20. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.rankedExternalMatches was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key scoring.dailyRankedMatchesPerGuild was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.resetTimezone was corrected from null to its default, -05:00. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.dailyBuildingBlocks was corrected from null to its default, 64. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.buildingCompletionPoints was corrected from null to its default, 0. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.dailyEligibleKills was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.dailyWarMinutes was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.completionPoints was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key contracts.completionExperience was corrected from null to its default, 100. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key home was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key home.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key home.unlockLevel was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key home.warmupSeconds was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key home.cooldownSeconds was corrected from null to its default, 300. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics.holograms was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics.hologramLevel was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics.portraits was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics.bannerUnlockLevel was corrected from null to its default, 2. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key cosmetics.crests was corrected from null to its default, [shield|Shield|legendsmod:textures/gui/guild/crests/shield.png||false, swords|Swords|legendsmod:textures/gui/guild/crests/swords.png||false, star|Star|legendsmod:textures/gui/guild/crests/star.png||false, crown|Crown|legendsmod:textures/gui/guild/crests/crown.png||true]. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation.textFilter was corrected from null to its default, SLURS_ONLY. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation.blockedWords was corrected from null to its default, []. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation.allowedWords was corrected from null to its default, []. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation.logGuildChat was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key moderation.chatHistory was corrected from null to its default, 50. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.maximumSupplies was corrected from null to its default, 100000. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.contractSupplies was corrected from null to its default, 12. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.contractContributorCommendations was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.deliverySupplies was corrected from null to its default, 8. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.deliveryCommendations was corrected from null to its default, 4. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.deliveryExperience was corrected from null to its default, 25. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.weeklyMilestones was corrected from null to its default, [3|20|5, 8|40|10, 16|60|15]. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.dailyCommendationLimit was corrected from null to its default, 40. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingHallUpgradeCost was corrected from null to its default, 25. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingHallMaxRank was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingBasePercent was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingPercentPerRank was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingMinutes was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingCommendationCost was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.trainingSupplyCost was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.deliveryItems was corrected from null to its default, [minecraft:iron_ingot|16, minecraft:gold_ingot|8, minecraft:redstone|32]. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key progression.supplyShop was corrected from null to its default, [rations|Field Rations|minecraft:bread|16|3|2|8, lights|Trail Lights|minecraft:torch|32|2|1|8, arrows|Arrow Bundle|minecraft:arrow|32|3|2|8, expression|Character Expression Token|legendsmod:legends_token|1|40|20|1]. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.startingPages was corrected from null to its default, 1. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.levelsPerExtraPage was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.maximumPages was corrected from null to its default, 6. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.extraPageSupplyCost was corrected from null to its default, 40. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.purchasedExtraPages was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.warLossWithdrawalLockMinutes was corrected from null to its default, 15. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key storage.warLossSupplyPercent was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.enabled was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.captureSeconds was corrected from null to its default, 60. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.holdSecondsPerReward was corrected from null to its default, 120. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.rotationMinutes was corrected from null to its default, 30. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.holdSupplies was corrected from null to its default, 15. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.holdCommendations was corrected from null to its default, 3. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.holdSeasonPoints was corrected from null to its default, 5. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.holdGuildExperience was corrected from null to its default, 25. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key outposts.locations was corrected from null to its default, []. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./saves/ArcHudCompat/serverconfig/forge-server.toml is not correct. Correcting
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBaseSummonChance was corrected from null to its default, 0.1. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.zombieBabyChance was corrected from null to its default, 0.05. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key server.useItemWithDurationZero was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./saves/ArcHudCompat/serverconfig/curios-server.toml is not correct. Correcting
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key keepCurios was corrected from null to its default, DEFAULT. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.enableLegacyMenu was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.minimumColumns was corrected from null to its default, 1. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key menu.experimental.maxSlotsPerPage was corrected from null to its default, 48. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Configuration file ./saves/ArcHudCompat/serverconfig/aether-server.toml is not correct. Correcting
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Beds explode was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Debuff non-Aether tools was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Ambrosium Shards are edible was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Berry Bush consistency was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Crystal Fruit Leaves consistency was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Gummy Swets restore health was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Maximum consumable Life Shards was corrected from null to its default, 10. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Cooldown for the Hammer of Kingbdogz projectile was corrected from null to its default, 50. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Cooldown for the Cloud Staff was corrected from null to its default, 40. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Gameplay.Require gloves for set abilities was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Loot was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Loot.Golden Feather in loot was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Loot.Valkyrie Cape in loot was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key World Generation was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key World Generation.Generate Tall Grass in the Aether was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key World Generation.Generate Holiday Trees always was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key World Generation.Generate Holiday Trees seasonally was corrected from null to its default, true. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Multiplayer was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Multiplayer.Balance Invisibility Cloak for PVP was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Multiplayer.Invisibility Cloak visibility timer was corrected from null to its default, 50. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Multiplayer.Only whitelisted users access Sun Altars was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Multiplayer.Configure Sun Altar dimensions was corrected from null to its default, [aether:the_aether]. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack was corrected from null to its default, SimpleCommentedConfig:{}. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Spawns the player in the Aether was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Disables Aether Portal creation was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Disables falling into the Overworld was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Disables eternal day was corrected from null to its default, false. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Sets portal destination dimension was corrected from null to its default, aether:the_aether. 
+[05:21:29] [Server thread/WARN] [ne.mi.co.ForgeConfigSpec/CORE]: Incorrect key Modpack.Sets portal return dimension was corrected from null to its default, minecraft:overworld. 
+[05:21:29] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening LevelLoadingScreen (current ProgressScreen) -> LevelLoadingScreen
+[05:21:30] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[05:21:31] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[05:21:31] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[05:21:31] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[05:21:32] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 1%
+[05:21:32] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[05:21:32] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 15%
+[05:21:33] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 43%
+[05:21:34] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 78%
+[05:21:34] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 89%
+[05:21:34] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[05:21:34] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 4325 ms
+[05:21:34] [Server thread/INFO] [minecraft/IntegratedServer]: Changing view distance to 12, from 10
+[05:21:34] [Server thread/INFO] [minecraft/IntegratedServer]: Changing simulation distance to 12, from 0
+[05:21:35] [Render thread/WARN] [io.ne.ut.in.SystemPropertyUtil/]: Unable to parse the boolean system property 'java.net.preferIPv6Addresses':system - using the default value: false
+[05:21:35] [Netty Local Client IO #0/INFO] [ne.mi.ne.NetworkHooks/]: Connected to a modded server.
+[05:21:35] [Server thread/INFO] [minecraft/PlayerList]: Dev[local:E:79189a71] logged in with entity id 16 at (-1.5, -60.0, 2.5)
+[05:21:35] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ProgressScreen (current LevelLoadingScreen) -> ProgressScreen
+[05:21:35] [Server thread/INFO] [minecraft/MinecraftServer]: Dev joined the game
+[05:21:36] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ReceivingLevelScreen (current ProgressScreen) -> ReceivingLevelScreen
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/healing
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/saturation
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:microscope/legendsmod:microscope_tadpole_d
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/forcefield
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/mission_uplink
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/security
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:microscope/legendsmod:microscope_tadpole
+[05:21:36] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: legendsmod:rune_forging/legendsmod:rune_forging/indestructible
+[05:21:37] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:21] The Legends Mod is still in early access. Many features are not yet complete and subject to change.
+[05:21:37] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:21] 
+[05:21:37] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:21] You feel the sundering of the realm as you enter the world...
+[05:21:37] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 2 advancements
+[05:21:38] [Server thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: stored waypoints of Dev -> dev@1.json.gz (22 bytes)
+[05:21:40] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 23 advancements
+[05:21:40] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 26 advancements
+[05:21:44] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] mods: aether=true curios=true legends=true regen=true
+[05:21:47] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening InventoryScreen[InventoryMenu] (current null) -> null
+[05:21:47] [Server thread/INFO] [co.ar.ar.ArcHud/]: [Compat] server opens inventory with 11 accessory slots
+[05:21:48] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current null) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:21:48] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: playerAnimator found — accessories follow animated limbs
+[05:21:49] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: 5 JEI plugins found: [JEIPlugin, JEILegendsPlugin, JEIPlugin, AetherJEIPlugin, CuriosJeiPlugin]
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of ldlib:test_category: java.lang.ClassCastException: class jdk.proxy3.$Proxy74 cannot be cast to class mezz.jei.api.ingredients.IIngredientType (jdk.proxy3.$Proxy74 is in module jdk.proxy3 of loader 'TRANSFORMER' @383caf89; mezz.jei.api.ingredients.IIngredientType is in module jei@15.74.0.230 of loader 'TRANSFORMER' @383caf89)
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:ambrosium_enchanting: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:swet_ball_conversion: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:icestone_freezable: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:accessory_freezable: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:placement_conversion: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:item_placement_ban: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/WARN] [co.ar.ar.ArcHud/]: Arc HUD: cannot show JEI recipe of aether:block_placement_ban: java.lang.NoClassDefFoundError: mezz/jei/common/platform/Services
+[05:21:49] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: JEI bridge — 20 categories, 272 recipes, 16 info pages, 7 GUI handlers in 250 ms
+[05:21:49] [Render thread/INFO] [co.ar.ar.ArcHud/]: Arc HUD: recipe index — 2705 of 2341 recipes, 2565 items in 736 ms
+[05:21:49] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] inventory screen at scale 2 (fps 0): com.arc4io.archud.client.screen.ArcSurvivalScreen menu=ArcInventoryMenu
+[05:21:50] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c01_inv_s2
+[05:21:50] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening InventoryScreen[InventoryMenu] (current null) -> null
+[05:21:50] [Server thread/INFO] [co.ar.ar.ArcHud/]: [Compat] server opens inventory with 11 accessory slots
+[05:21:50] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current null) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:21:51] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] inventory screen at scale 3 (fps 7): com.arc4io.archud.client.screen.ArcSurvivalScreen menu=ArcInventoryMenu
+[05:21:52] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c01_inv_s3
+[05:21:53] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening InventoryScreen[InventoryMenu] (current null) -> null
+[05:21:53] [Server thread/INFO] [co.ar.ar.ArcHud/]: [Compat] server opens inventory with 11 accessory slots
+[05:21:53] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current null) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:21:53] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] inventory screen at scale 4 (fps 8): com.arc4io.archud.client.screen.ArcSurvivalScreen menu=ArcInventoryMenu
+[05:21:55] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c01_inv_s4
+[05:21:55] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] menu com.arc4io.archud.forge.inventory.ArcInventoryMenu slots=66 shift-clicked=5
+[05:21:55] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] accessories equipped: [51=aether:blue_cape, 52=aether:iron_gloves, 53=aether:iron_pendant, 54=aether:iron_ring, 55=aether:golden_ring]
+[05:21:55] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] Legends equipment slots: [BodyEquipmentSlot:Head, BodyEquipmentSlot:Head add-on, BodyEquipmentSlot:Body, BodyEquipmentSlot:Left arm, BodyEquipmentSlot:Right arm, BodyEquipmentSlot:Left leg, BodyEquipmentSlot:Right leg, BodyEquipmentSlot:Both arms, BodyEquipmentSlot:Both legs]
+[05:21:57] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c02_inv_equipped
+[05:21:59] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] aether items still in inventory (not equipped): []
+[05:22:00] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening InventoryScreen[InventoryMenu] (current null) -> null
+[05:22:00] [Server thread/INFO] [co.ar.ar.ArcHud/]: [Compat] server opens inventory with 11 accessory slots
+[05:22:00] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current null) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:22:00] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] accessory slots after right-click: [51=aether:blue_cape, 52=aether:iron_gloves, 53=aether:iron_pendant, 54=aether:iron_ring, 55=aether:golden_ring] (screen ArcSurvivalScreen)
+[05:22:02] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c02b_inv_after_equip
+[05:22:02] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] widgets: [com.arc4io.archud.client.screen.ArcButton, com.arc4io.archud.client.screen.ArcButton]
+[05:22:04] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c03_idle
+[05:22:04] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c03_idle_side
+[05:22:05] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c04_ab2_a
+[05:22:06] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c04_ab2_b
+[05:22:06] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c04_ab2_side
+[05:22:06] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c04_ab2_34
+[05:22:10] [Server thread/INFO] [minecraft/MinecraftServer]: Dev has made the advancement [Monster Hunter]
+[05:22:10] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:22] Dev has made the advancement [Monster Hunter]
+[05:22:10] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 57 advancements
+[05:22:10] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c05_ab4_a
+[05:22:11] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c05_ab4_b
+[05:22:11] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c05_ab4_side
+[05:22:11] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c05_ab4_34
+[05:22:15] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c06_ab1_a
+[05:22:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c06_ab1_b
+[05:22:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c06_ab1_side
+[05:22:16] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c06_ab1_34
+[05:22:20] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c07_ab3_a
+[05:22:21] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c07_ab3_b
+[05:22:21] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c07_ab3_side
+[05:22:21] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c07_ab3_34
+[05:22:26] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening InventoryScreen[InventoryMenu] (current null) -> null
+[05:22:26] [Server thread/INFO] [co.ar.ar.ArcHud/]: [Compat] server opens inventory with 11 accessory slots
+[05:22:26] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current null) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:22:28] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c12_inv_itemlist
+[05:22:28] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcRecipeScreen (current ArcSurvivalScreen[ArcInventoryMenu]) -> ArcRecipeScreen
+[05:22:28] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] recipe screen: ArcRecipeScreen
+[05:22:29] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c13_recipes
+[05:22:30] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c14_uses
+[05:22:31] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c15_brewing
+[05:22:31] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] fps with recipe screen: 9
+[05:22:32] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcSurvivalScreen[ArcInventoryMenu] (current ArcRecipeScreen) -> ArcSurvivalScreen[ArcInventoryMenu]
+[05:22:32] [Server thread/INFO] [minecraft/MinecraftServer]: Dev has made the advancement [Stone Age]
+[05:22:32] [Server thread/INFO] [minecraft/MinecraftServer]: Dev has made the advancement [Acquire Hardware]
+[05:22:33] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:22] Dev has made the advancement [Stone Age]
+[05:22:33] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:22] Dev has made the advancement [Acquire Hardware]
+[05:22:33] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 115 advancements
+[05:22:33] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ContainerScreen[ChestMenu] (current null) -> ArcBackpackScreen[ChestMenu]
+[05:22:34] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] backpack screen: ArcBackpackScreen
+[05:22:36] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c08_backpack
+[05:22:37] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] looking at BLOCK
+[05:22:37] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening AnvilScreen[AnvilMenu] (current null) -> ArcAnvilScreen[AnvilMenu]
+[05:22:37] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] anvil screen: ArcAnvilScreen
+[05:22:39] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c09_anvil
+[05:22:40] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] JEI bridge: api=true real=false categories=[ldlib:test_category, aether:incubation, aether:accessory_freezable, aether:swet_ball_conversion, aether:repairing, aether:freezing, aether:fuel, legendsmod:rune_forging, legendsmod:nexus, aether:item_placement_ban, aether:block_placement_ban, farmersdelight:decomposition, aether:icestone_freezable, aether:enchanting, jei:information, legendsmod:ultramorphic_replicator, aether:placement_conversion, legendsmod:microscope, aether:ambrosium_enchanting, farmersdelight:cooking, farmersdelight:cutting]
+[05:22:40] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening CookingPotScreen[CookingPotMenu] (current null) -> CookingPotScreen[CookingPotMenu]
+[05:22:40] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] cooking pot screen: vectorwing.farmersdelight.client.gui.CookingPotScreen
+[05:22:42] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c16_fd_pot
+[05:22:42] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcRecipeScreen (current CookingPotScreen[CookingPotMenu]) -> ArcRecipeScreen
+[05:22:42] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] cooking pot click area: true -> ArcRecipeScreen
+[05:22:43] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c17_fd_clickarea
+[05:22:43] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening CookingPotScreen[CookingPotMenu] (current ArcRecipeScreen) -> CookingPotScreen[CookingPotMenu]
+[05:22:44] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ArcRecipeScreen (current null) -> ArcRecipeScreen
+[05:22:45] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c18_fd_recipe
+[05:22:46] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c19_fd_board
+[05:22:47] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c20_fd_info
+[05:22:49] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c21_fd_info_page
+[05:22:49] [Server thread/INFO] [minecraft/MinecraftServer]: [Not Secure] <Dev> Тест чата с головой игрока
+[05:22:49] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:22] <Notch> привет, как дела?
+[05:22:49] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [05:22] [Сервер] Рестарт через 5 минут
+[05:22:49] [Render thread/INFO] [minecraft/ChatComponent]: [CHAT] [05:22] Dev › Тест чата с головой игрока
+[05:22:50] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ChatScreen (current null) -> ChatScreen
+[05:22:51] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c10_chat
+[05:22:52] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screenshot c11_chat_hud
+[05:22:52] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] done
+[05:22:52] [Render thread/INFO] [minecraft/Minecraft]: Stopping!
+[05:22:52] [Render thread/WARN] [azurelib/IO]: Correcting config value 'floatArray[0]' from '135.32' to '500.0'
+[05:22:52] [Render thread/INFO] [co.ar.ar.ArcHud/]: [Compat] screen opening ProgressScreen (current null) -> ProgressScreen
+[05:22:52] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Dev lost connection: Disconnected
+[05:22:52] [Server thread/INFO] [minecraft/MinecraftServer]: Dev left the game
+[05:22:52] [Server thread/INFO] [minecraft/ServerGamePacketListenerImpl]: Stopping singleplayer server as player logged out
+[05:22:52] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[05:22:52] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[05:22:52] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Compat]'/minecraft:overworld
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Compat]'/minecraft:the_end
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Compat]'/minecraft:the_nether
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[Compat]'/aether:the_aether
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (ArcHudCompat): All chunks are saved
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (the_aether): All chunks are saved
+[05:22:53] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1793078411528.json
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 49s
+13 actionable tasks: 13 executed
+exit code: 0
