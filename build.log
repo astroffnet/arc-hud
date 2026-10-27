@@ -1,0 +1,58 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Fabric Loom: 1.7.4
+:remapping 55 mods from modImplementation (java-api)
+:remapping 5 mods from modCompileOnly (java-api)
+:remapping 2 mods from modLocalRuntime (java-runtime)
+
+[ERROR] [MIXIN] Cannot resolve class org/lwjgl/glfw/GLFW
+[ERROR] [MIXIN] Cannot resolve class org/lwjgl/glfw/GLFW
+[ERROR] [MIXIN] Cannot resolve class org/lwjgl/opengl/GL
+
+> Task :compileJava
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/mixin/GameRendererCamMixin.java:67: warning: Unable to determine descriptor for @Inject target method
+    @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
+    ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:139: warning: [removal] getBackground() in IRecipeCategory has been deprecated and marked for removal
+            bg = cat.getBackground();
+                    ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:303: warning: [removal] getTooltip(T,TooltipFlag) in IIngredientRenderer has been deprecated and marked for removal
+                        lines.addAll(renderer.getTooltip(v, TooltipFlag.Default.NORMAL));
+                                             ^
+  where T is a type-variable:
+    T extends Object declared in interface IIngredientRenderer
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:312: warning: [removal] IRecipeSlotTooltipCallback in mezz.jei.api.gui.ingredient has been deprecated and marked for removal
+                    } else if (cb instanceof IRecipeSlotTooltipCallback old) {
+                                             ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:313: warning: [removal] onTooltip(IRecipeSlotView,List<Component>) in IRecipeSlotTooltipCallback has been deprecated and marked for removal
+                        old.onTooltip(s.view(), lines);
+                           ^
+Note: /home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/dev/ShowcaseDriver.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+5 warnings
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :processIncludeJars
+> Task :jeiApiJar
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :validateAccessWidener NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :jeiApiRemapJar
+> Task :remapJar
+> Task :remapSourcesJar SKIPPED
+> Task :assemble
+> Task :injectJeiApi
+> Task :serverMeta
+> Task :serverJar
+> Task :build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793078383212.json
+
+BUILD SUCCESSFUL in 25s
+10 actionable tasks: 10 executed
