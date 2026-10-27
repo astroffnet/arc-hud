@@ -105,6 +105,52 @@ public final class ModButtons {
         return out;
     }
 
+    /** Кнопка-ярлык: иконка предмета; нажатие закрывает инвентарь и «нажимает» клавишу мода. */
+    private static final class KeyShortcut extends AbstractWidget {
+        private final net.minecraft.world.item.ItemStack icon;
+        private final net.minecraft.client.KeyMapping key;
+
+        KeyShortcut(net.minecraft.world.item.ItemStack icon, net.minecraft.client.KeyMapping key, Component name) {
+            super(0, 0, 18, 18, name);
+            this.icon = icon;
+            this.key = key;
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mx, int my, float pt) {
+            if (isHovered()) g.fill(getX(), getY(), getX() + 18, getY() + 18, 0x30FFFFFF);
+            g.renderItem(icon, getX() + 1, getY() + 1);
+        }
+
+        @Override
+        public void onClick(double mx, double my) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.screen != null) mc.screen.onClose();
+            var acc = (com.arc4io.archud.mixin.KeyMappingClickAccessor) key;
+            acc.archud$setClicks(acc.archud$clicks() + 1);
+        }
+
+        @Override
+        protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput out) {
+        }
+    }
+
+    /** Меню модов, у которых нет кнопки в инвентаре, но есть клавиша (Legends Core: мастерство, гильдия). */
+    public static void addShortcuts(Minecraft mc, List<Entry> out) {
+        if (!ArcHud.platform().isModLoaded("legendsmod")) return;
+        String[][] list = {
+                {"legendsmod.key.mastery", "legendsmod:book_of_legends", "archud.inv.btn.legends_mastery"},
+                {"legendsmod.key.guild", "minecraft:white_banner", "archud.inv.btn.legends_guild"}};
+        for (String[] e : list) {
+            net.minecraft.client.KeyMapping km = null;
+            for (net.minecraft.client.KeyMapping k : mc.options.keyMappings) if (k.getName().equals(e[0])) km = k;
+            if (km == null) continue;
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(e[1]));
+            Component name = Component.translatable(e[2]);
+            out.add(new Entry(new KeyShortcut(new net.minecraft.world.item.ItemStack(item), km, name), name));
+        }
+    }
+
     /** Подпись кнопки: её текст или известный мод по пакету. */
     private static Component name(AbstractWidget w, String cls) {
         if (!w.getMessage().getString().isBlank()) return w.getMessage();

@@ -234,7 +234,7 @@ public final class ForgeClient implements ClientPlatform {
     @Override
     public boolean openServerInventory(net.minecraft.client.Minecraft mc) {
         // слоты Curios (и скрытые слоты Aether) — только через меню на сервере с Arc HUD
-        if (!com.arc4io.archud.forge.inventory.ForgeInventory.curios() || !com.arc4io.archud.client.ArcClientNet.modServer()) return false;
+        if (!com.arc4io.archud.forge.inventory.ForgeInventory.needed() || !com.arc4io.archud.client.ArcClientNet.modServer()) return false;
         com.arc4io.archud.network.ArcNet.sendToServer(com.arc4io.archud.network.ArcNet.create("open_inv"));
         return true;
     }

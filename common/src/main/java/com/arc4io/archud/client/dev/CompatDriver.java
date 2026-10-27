@@ -145,6 +145,10 @@ public final class CompatDriver {
                     if (sl.hasItem()) acc.add(i + "=" + BuiltInRegistries.ITEM.getKey(sl.getItem().getItem()));
                 }
                 ArcHud.LOGGER.info("[Compat] accessories equipped: {}", acc);
+                if (menu instanceof com.arc4io.archud.menu.AccessoryProvider ap) {
+                    ArcHud.LOGGER.info("[Compat] Legends equipment slots: {}", ap.extraAccessorySlots().stream()
+                            .map(sl -> sl.getClass().getSimpleName() + ":" + ap.accessoryLabel(sl).getString()).toList());
+                }
             }
         }, "c02_inv_equipped");
         // надеть аксессуары как игрок: выбрать в хотбаре и нажать ПКМ (у Aether/Curios это надевает в слот)

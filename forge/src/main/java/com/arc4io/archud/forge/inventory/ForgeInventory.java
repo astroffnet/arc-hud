@@ -33,9 +33,14 @@ public final class ForgeInventory {
         return ModList.get().isLoaded("curios");
     }
 
+    /** Новый инвентарь через сервер нужен, если есть Curios или Legends Core (их слоты живут на сервере). */
+    public static boolean needed() {
+        return curios() || LegendsEquipment.available();
+    }
+
     /** Открыть новый инвентарь с аксессуарами (на сервере). */
     public static void open(ServerPlayer player) {
-        if (!curios()) return;
+        if (!needed()) return;
         if (player.containerMenu != player.inventoryMenu) {
             // у клиента экрана нет (он прислал запрос из игры) — значит, на сервере висит забытое меню
             ArcHud.LOGGER.info("Arc HUD: closing stale menu {} before opening inventory", player.containerMenu.getClass().getName());
@@ -43,13 +48,14 @@ public final class ForgeInventory {
         }
         List<ArcInventoryMenu.Acc> acc;
         try {
-            acc = CuriosSlots.list(player);
+            acc = curios() ? CuriosSlots.list(player) : List.of();
         } catch (Throwable t) {
             ArcHud.LOGGER.warn("Arc HUD: cannot read Curios slots", t);
             return;
         }
         if (System.getenv("ARCHUD_SHOWCASE") != null) ArcHud.LOGGER.info("[Compat] server opens inventory with {} accessory slots", acc.size());
-        NetworkHooks.openScreen(player, new SimpleMenuProvider((id, inv, p) -> ArcInventoryMenu.server(id, inv, acc),
-                Component.translatable("archud.inv.title")), buf -> ArcInventoryMenu.write(buf, acc));
+        boolean legends = LegendsEquipment.available();
+        NetworkHooks.openScreen(player, new SimpleMenuProvider((id, inv, p) -> ArcInventoryMenu.server(id, inv, acc, legends),
+                Component.translatable("archud.inv.title")), buf -> ArcInventoryMenu.write(buf, acc, legends));
     }
 }
