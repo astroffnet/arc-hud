@@ -65,6 +65,9 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
                 ChatStyler.postRender(s, graphics);
                 InventoryExtras.onRender(s, graphics);
                 RecipeChoiceUI.onRender(s, graphics, mouseX, mouseY);
+                if (!(s instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen)) {
+                    com.arc4io.archud.client.recipes.RecipeOverlay.render(s, graphics, mouseX, mouseY);
+                }
             });
             ScreenMouseEvents.allowMouseClick(screen).register((s, mouseX, mouseY, button) -> !RecipeChoiceUI.onClick(s, mouseX, mouseY, button));
         });
@@ -91,6 +94,16 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
             }
         }
         return new com.arc4io.archud.client.mods.ArcModListScreen(parent);
+    }
+
+    @Override
+    public int burnTime(net.minecraft.world.item.ItemStack stack) {
+        try {
+            Integer v = net.fabricmc.fabric.api.registry.FuelRegistry.INSTANCE.get(stack.getItem());
+            return v == null ? 0 : v;
+        } catch (Throwable t) {
+            return 0;
+        }
     }
 
     @Override

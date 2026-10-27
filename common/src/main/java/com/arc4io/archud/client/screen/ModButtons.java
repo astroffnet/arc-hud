@@ -78,10 +78,14 @@ public final class ModButtons {
         try {
             InventoryScreen hidden = new InventoryScreen(mc.player);
             ModButtonsHarvest.active = true;
+            // книга рецептов ванильного инвентаря при init подменяет player.containerMenu — тогда клиент
+            // перестаёт принимать содержимое открытого меню (слоты аксессуаров пустые). Возвращаем как было.
+            var menuBefore = mc.player.containerMenu;
             try {
                 hidden.init(mc, width, height);
             } finally {
                 ModButtonsHarvest.active = false;
+                mc.player.containerMenu = menuBefore;
             }
             for (GuiEventListener l : hidden.children()) {
                 if (!(l instanceof AbstractWidget w) || !w.visible) continue;

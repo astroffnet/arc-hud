@@ -14,4 +14,10 @@ public interface ContainerScreenAccessor {
 
     @Accessor("imageWidth")
     int archud$width();
+
+    @Accessor("imageHeight")
+    int archud$height();
+
+    @Accessor("hoveredSlot")
+    net.minecraft.world.inventory.Slot archud$hovered();
 }
