@@ -94,6 +94,16 @@ public class ArcRecipeScreen extends Screen {
         return true;
     }
 
+    /** Переключиться на категорию (если она есть среди открытых). */
+    public boolean selectCategory(ResourceLocation type) {
+        int i = cats.indexOf(type);
+        if (i < 0) return false;
+        category = i;
+        page = 0;
+        paginate();
+        return true;
+    }
+
     private void navigate(ItemStack stack, boolean u) {
         Map<ResourceLocation, List<RecipeIndex.Entry>> d = u ? RecipeIndex.usesOf(stack) : RecipeIndex.recipesFor(stack);
         if (d.isEmpty()) return;

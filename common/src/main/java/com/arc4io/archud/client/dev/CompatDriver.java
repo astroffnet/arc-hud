@@ -297,6 +297,10 @@ public final class CompatDriver {
             add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen,
                     new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "tomato"))), false), null);
             add(20, mc -> {}, "c20_fd_info");
+            add(5, mc -> {
+                if (mc.screen instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen rs) rs.selectCategory(new net.minecraft.resources.ResourceLocation("jei", "information"));
+            }, null);
+            add(20, mc -> {}, "c21_fd_info_page");
             add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
             add(10, mc -> closeScreen(mc), null);
         }

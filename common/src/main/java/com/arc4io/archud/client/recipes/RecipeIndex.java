@@ -415,6 +415,9 @@ public final class RecipeIndex {
                 List<Entry> all = BY_TYPE.get(c.getKey());
                 if (is && all != null && !all.isEmpty() && !map.containsKey(c.getKey())) map.put(c.getKey(), new ArrayList<>(all));
             }
+            // топливо — в конце, после рецептов и станков
+            List<Entry> f = map.remove(FUEL);
+            if (f != null) map.put(FUEL, f);
         }
         return map;
     }
