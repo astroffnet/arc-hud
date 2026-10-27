@@ -1,0 +1,74 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+MixinGradle did not locate the diffplug APT plugin, skipping eclipse task configuration
+
+> Task :downloadMcpConfig
+> Task :extractSrg
+> Task :createMcpToSrg
+
+> Task :compileJava
+Note: SpongePowered MIXIN Annotation Processor Version=0.8.5 (MixinGradle Version=0.7.38)
+Note: Supported obfuscation types: ObfuscationServiceMCP supports [notch] ObfuscationServiceFG3 supports [searge]
+Note: Loading searge mappings from /home/runner/work/arc-hud/arc-hud/forge/build/createMcpToSrg/output.tsrg
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/mixin/GameRendererCamMixin.java:67: warning: Unable to determine descriptor for @Inject target method
+    @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
+    ^
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing refmap to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-refmap.json
+Note: Writing searge composite mappings to /home/runner/work/arc-hud/arc-hud/forge/build/tmp/compileJava/compileJava-mappings.tsrg
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:139: warning: [removal] getBackground() in IRecipeCategory has been deprecated and marked for removal
+            bg = cat.getBackground();
+                    ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:303: warning: [removal] getTooltip(T,TooltipFlag) in IIngredientRenderer has been deprecated and marked for removal
+                        lines.addAll(renderer.getTooltip(v, TooltipFlag.Default.NORMAL));
+                                             ^
+  where T is a type-variable:
+    T extends Object declared in interface IIngredientRenderer
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:312: warning: [removal] IRecipeSlotTooltipCallback in mezz.jei.api.gui.ingredient has been deprecated and marked for removal
+                    } else if (cb instanceof IRecipeSlotTooltipCallback old) {
+                                             ^
+/home/runner/work/arc-hud/arc-hud/common/src/main/java/com/arc4io/archud/client/jei/JeiCard.java:313: warning: [removal] onTooltip(IRecipeSlotView,List<Component>) in IRecipeSlotTooltipCallback has been deprecated and marked for removal
+                        old.onTooltip(s.view(), lines);
+                           ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+5 warnings
+
+> Task :addMixinsToJar
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :configureReobfTaskForReobfJar
+> Task :reobfJar
+> Task :configureReobfTaskForReobfJarJar
+> Task :addMixinsToJarJar
+> Task :jarJar SKIPPED
+> Task :reobfJarJar SKIPPED
+> Task :addMixinsToJeiApiJar
+> Task :jeiApiJar
+> Task :configureReobfTaskForReobfJeiApiJar
+> Task :reobfJeiApiJar
+> Task :assemble
+> Task :bundleJarJar
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :serverJar
+> Task :build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793078389966.json
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 36s
+17 actionable tasks: 17 executed
