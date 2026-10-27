@@ -14,17 +14,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(GuiGraphics.class)
 public abstract class GuiBatchMixin {
-    private boolean archud$managed() {
+    private boolean archud$batching() {
         return ((GuiGraphicsAccessor) (Object) this).archud$managed();
     }
 
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V", at = @At("HEAD"), require = 0)
     private void archud$flushBeforeBlit(CallbackInfo ci) {
-        if (archud$managed()) ((GuiGraphics) (Object) this).flush();
+        if (archud$batching()) ((GuiGraphics) (Object) this).flush();
     }
 
     @Inject(method = "innerBlit(Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V", at = @At("HEAD"), require = 0)
     private void archud$flushBeforeBlitColored(CallbackInfo ci) {
-        if (archud$managed()) ((GuiGraphics) (Object) this).flush();
+        if (archud$batching()) ((GuiGraphics) (Object) this).flush();
     }
 }
