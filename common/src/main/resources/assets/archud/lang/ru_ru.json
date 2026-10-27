@@ -1426,5 +1426,6 @@
   "archud.backpack.tier.iron": "железный",
   "archud.backpack.tier.diamond": "алмазный",
   "archud.config.customBackpackScreen": "Новый экран рюкзака",
-  "archud.config.customAnvil": "Новая наковальня"
+  "archud.config.customAnvil": "Новая наковальня",
+  "archud.config.accessoryAnimFix": "Аксессуары следуют анимациям рук"
 }

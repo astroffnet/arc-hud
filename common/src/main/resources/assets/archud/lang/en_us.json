@@ -1367,5 +1367,6 @@
   "archud.backpack.tier.iron": "iron",
   "archud.backpack.tier.diamond": "diamond",
   "archud.config.customBackpackScreen": "New backpack screen",
-  "archud.config.customAnvil": "New anvil"
+  "archud.config.customAnvil": "New anvil",
+  "archud.config.accessoryAnimFix": "Accessories follow arm animations"
 }

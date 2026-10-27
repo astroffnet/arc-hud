@@ -388,6 +388,8 @@ public class ArcConfig {
     public boolean chatStyle = true;
     public boolean customBackpackScreen = true;
     public boolean customAnvil = true;
+    /** Аксессуары следуют анимациям рук (playerAnimator: Legends, Emotecraft…). */
+    public boolean accessoryAnimFix = true;
     public boolean chatAnimation = true;
     public boolean inventoryStats = true;
     public boolean inventoryButtons = true;

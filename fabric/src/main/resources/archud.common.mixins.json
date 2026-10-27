@@ -69,6 +69,8 @@
     "ChatComponentMixin",
     "ChatHeadsMixin",
     "AnvilScreenAccessor",
+    "HumanoidCopyMixin",
+    "ArmorLayerModelsMixin",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",
