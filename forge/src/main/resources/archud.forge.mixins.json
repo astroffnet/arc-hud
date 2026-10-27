@@ -73,6 +73,8 @@
     "AnvilScreenAccessor",
     "HumanoidCopyMixin",
     "ArmorLayerModelsMixin",
+    "RecipeKeyboardMixin",
+    "RecipeMouseMixin",
     "AbstractButtonMixin",
     "AbstractSliderButtonMixin",
     "AdAstraOverlayMixin",

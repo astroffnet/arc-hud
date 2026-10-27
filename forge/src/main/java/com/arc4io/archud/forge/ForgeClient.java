@@ -184,6 +184,9 @@ public final class ForgeClient implements ClientPlatform {
         ChatStyler.postRender(event.getScreen(), event.getGuiGraphics());
         InventoryExtras.onRender(event.getScreen(), event.getGuiGraphics());
         RecipeChoiceUI.onRender(event.getScreen(), event.getGuiGraphics(), event.getMouseX(), event.getMouseY());
+        if (!(event.getScreen() instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen)) {
+            com.arc4io.archud.client.recipes.RecipeOverlay.render(event.getScreen(), event.getGuiGraphics(), event.getMouseX(), event.getMouseY());
+        }
     }
 
     private static void onScreenMouse(ScreenEvent.MouseButtonPressed.Pre event) {
@@ -217,6 +220,15 @@ public final class ForgeClient implements ClientPlatform {
     public Screen swapPlatformScreen(Screen next, Screen current) {
         if (ArcConfig.get().customModList && next != null && next.getClass() == ModListScreen.class) return new com.arc4io.archud.client.mods.ArcModListScreen(current);
         return next;
+    }
+
+    @Override
+    public int burnTime(net.minecraft.world.item.ItemStack stack) {
+        try {
+            return net.minecraftforge.common.ForgeHooks.getBurnTime(stack, null);
+        } catch (Throwable t) {
+            return 0;
+        }
     }
 
     @Override

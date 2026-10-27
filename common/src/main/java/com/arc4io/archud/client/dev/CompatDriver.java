@@ -206,6 +206,15 @@ public final class CompatDriver {
             add(60, mc -> {}, null);
         }
         add(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON), null);
+        // просмотр рецептов: список предметов у инвентаря и экран рецептов
+        add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
+        add(30, mc -> {}, "c12_inv_itemlist");
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_PICKAXE), false), null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] recipe screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c13_recipes");
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT), true), null);
+        add(20, mc -> {}, "c14_uses");
+        add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+        add(10, mc -> closeScreen(mc), null);
         // рюкзак, наковальня, чат
         add(10, mc -> {
             cmd(mc, "give @s archud:diamond_backpack");
@@ -214,15 +223,15 @@ public final class CompatDriver {
             cmd(mc, "give @s minecraft:diamond_pickaxe");
             cmd(mc, "give @s minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:efficiency\",lvl:4s},{id:\"minecraft:unbreaking\",lvl:3s}]}");
             cmd(mc, "experience add @s 30 levels");
-            cmd(mc, "setblock ~ ~ ~2 minecraft:anvil");
+            cmd(mc, "setblock ~ ~ ~1 minecraft:anvil");
         }, null);
         add(20, mc -> com.arc4io.archud.client.ArcClient.platform().sendToServer(com.arc4io.archud.network.ArcPacket.OPEN_BACKPACK), null);
         add(30, mc -> ArcHud.LOGGER.info("[Compat] backpack screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c08_backpack");
         add(10, mc -> closeScreen(mc), null);
         add(10, mc -> {
-            mc.player.setXRot(45F);
+            mc.player.setXRot(60F);
             mc.player.setYRot(0F);
-            var pos = mc.player.blockPosition().south(2);
+            var pos = mc.player.blockPosition().south(1);
             mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND,
                     new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
         }, null);

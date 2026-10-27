@@ -28,6 +28,11 @@ public interface ClientPlatform {
     }
 
     /** Оставить прежний инвентарь (например, Trinkets на Fabric сам встраивает слоты в ванильный). */
+    /** Время горения предмета в печи с учётом топлива модов (тики). */
+    default int burnTime(net.minecraft.world.item.ItemStack stack) {
+        return 0;
+    }
+
     default boolean classicInventory() {
         return false;
     }

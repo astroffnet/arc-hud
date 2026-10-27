@@ -390,6 +390,10 @@ public class ArcConfig {
     public boolean customAnvil = true;
     /** Аксессуары следуют анимациям рук (playerAnimator: Legends, Emotecraft…). */
     public boolean accessoryAnimFix = true;
+    /** Просмотр рецептов (как JEI): клавиша R и экран рецептов. */
+    public boolean recipeViewer = true;
+    /** Список всех предметов справа от окон. */
+    public boolean recipeItemList = true;
     public boolean chatAnimation = true;
     public boolean inventoryStats = true;
     public boolean inventoryButtons = true;
