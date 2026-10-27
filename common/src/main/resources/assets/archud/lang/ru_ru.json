@@ -1470,5 +1470,7 @@
   "archud.inv.legends.short.both_arms": "Руки",
   "archud.inv.legends.short.both_legs": "Ноги",
   "archud.inv.btn.legends_mastery": "Legends: мастерство персонажа",
-  "archud.inv.btn.legends_guild": "Legends: гильдия"
+  "archud.inv.btn.legends_guild": "Legends: гильдия",
+  "archud.loading.resources": "Загрузка ресурсов…",
+  "archud.config.styledLoading": "Экран загрузки ресурсов в стиле Arc HUD"
 }
