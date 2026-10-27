@@ -33,6 +33,17 @@ import java.util.WeakHashMap;
  */
 public final class ArcChatRenderer {
     private static final Map<GuiMessage.Line, Long> SEEN = new WeakHashMap<>();
+    /** Ширина строки и признак «сообщение игрока» — считаются один раз, а не каждый кадр (прокрутка чата). */
+    private static final Map<FormattedCharSequence, int[]> INFO = new WeakHashMap<>();
+
+    private static int[] info(Font font, FormattedCharSequence seq) {
+        int[] i = INFO.get(seq);
+        if (i == null) {
+            i = new int[]{font.width(seq), plain(seq).startsWith("<") ? 1 : 0};
+            INFO.put(seq, i);
+        }
+        return i;
+    }
 
     private record Row(int index, GuiMessage.Line line, int alpha) {}
 
@@ -115,9 +126,11 @@ public final class ArcChatRenderer {
             int textW = 0;
             for (Row r : group) {
                 alpha = Math.max(alpha, r.alpha());
-                textW = Math.max(textW, font.width(r.line().content()));
+                textW = Math.max(textW, info(font, r.line().content())[0]);
             }
-            long seen = SEEN.computeIfAbsent(bottom.line(), k -> now);
+            // анимация появления — только у действительно новых сообщений, а не у строк, прокрученных в видимую часть
+            final int addedAgo = tickCount - bottom.line().addedTime();
+            long seen = SEEN.computeIfAbsent(bottom.line(), k -> addedAgo <= 10 ? now : 0L);
             float appear = Draw.easeOut((now - seen) / 260F);
             int off = Math.round((1F - appear) * -36F);
             int a = (int) (alpha * Math.min(1F, 0.25F + appear));
@@ -127,12 +140,12 @@ public final class ArcChatRenderer {
             int x1 = -4 + off;
             int x2 = (focused ? width + 4 : textW + gut + 6) + off;
 
-            String firstText = plain(topRow.line().content());
+            boolean angle = info(font, topRow.line().content())[1] == 1;
             GuiMessageTag tag = bottom.line().tag();
             ChatHeads.Sender sender = gut > 0 ? ChatHeads.sender(topRow.line().content()) : null;
             int typeColor = tag != null ? 0xFF000000 | tag.indicatorColor()
                     : sender != null && sender.name() != null ? 0xFF000000 | ChatHeads.nameColor(sender.name())
-                    : sender != null || firstText.startsWith("<") ? accent
+                    : sender != null || angle ? accent
                     : 0xFF90A4AE;
 
             if (!focused) {

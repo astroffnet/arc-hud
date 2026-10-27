@@ -30,18 +30,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Новый инвентарь выживания (с нуля, не ретекстур). Три колонки:
+ * Новый инвентарь выживания (свой интерфейс, не ретекстур). Три отдельные карточки:
  * <ul>
- *   <li>персонаж: броня и вторая рука вокруг модели игрока, уровень и опыт, характеристики;</li>
- *   <li>крафт 2×2, инвентарь и хотбар, эффекты снизу (не вылезают за окно — лишние сворачиваются в «+N»);</li>
- *   <li>аксессуары — слоты Curios, Aether и др. прямо в инвентаре, без отдельных кнопок; кнопки других модов
- *       (Регенерация и т. п.) — в полосе «Моды». Нет модов — нет колонки.</li>
+ *   <li>слева — характеристики персонажа и эффекты (много эффектов — компактные плашки, не вылезают за окно);</li>
+ *   <li>в центре — привычная раскладка: броня, модель игрока, вторая рука, крафт 2×2, инвентарь и хотбар;</li>
+ *   <li>справа — аксессуары по модам (Aether, Curios, Legends Core) и кнопки модов (Регенерация и др.).
+ *       Нет модов — нет карточки.</li>
  * </ul>
  * Книги рецептов нет. Работает с ванильным меню инвентаря (индексы 0–45) и с меню Arc HUD с аксессуарами (46+).
  */
 public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainerMenu> {
-    private static final int HDR = 20, COL_L = 8, COL_M = 128, ROW = 18;
-    private static final int RIGHT_W = 90;
+    private static final int ROW = 18, GAP = 4;
+    private static final int LW = 112, CW = 176, RW = 88, H = 194;
+    private static final int ACC = 0xFFB388FF;
 
     private final Map<Slot, int[]> original = new LinkedHashMap<>();
     private final List<Slot> accessories = new ArrayList<>();
@@ -53,11 +54,11 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     private final List<MobEffectInstance> hiddenEffects = new ArrayList<>();
     private final List<int[]> chipHits = new ArrayList<>();
     private final List<MobEffectInstance> chipList = new ArrayList<>();
-    private int moreX = -1, moreY;
+    private int moreX = -1, moreY, moreW;
 
     public ArcSurvivalScreen(AbstractContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        Map<String, List<Slot>> groups = new java.util.LinkedHashMap<>();
+        Map<String, List<Slot>> groups = new LinkedHashMap<>();
         groups.put("Aether", new ArrayList<>());
         groups.put("Curios", new ArrayList<>());
         groups.put("Legends Core", new ArrayList<>());
@@ -75,7 +76,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         }
     }
 
-    /** Строка правой колонки: заголовок группы (Aether, Curios, Legends Core) или ряд из 4 слотов. */
+    /** Строка правой карточки: заголовок группы (Aether, Curios, Legends Core) или ряд из 4 слотов. */
     private record AccLine(String title, List<Slot> slots) {
         int height() {
             return title != null ? 11 : 18;
@@ -91,24 +92,31 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         return !accessories.isEmpty() || menu.getClass() != net.minecraft.world.inventory.InventoryMenu.class;
     }
 
+    private static int coreX() {
+        return LW + GAP;
+    }
+
+    private static int rightX() {
+        return LW + GAP + CW + GAP;
+    }
+
     @Override
     protected void init() {
-        modButtons = ModButtons.harvest(minecraft, width, height, cls -> integrated()
-                && (cls.startsWith("top.theillusivec4.curios") || (cls.startsWith("com.aetherteam") && cls.contains("Accessor"))));
-        modButtons = new ArrayList<>(modButtons);
+        modButtons = new ArrayList<>(ModButtons.harvest(minecraft, width, height, cls -> integrated()
+                && (cls.startsWith("top.theillusivec4.curios") || (cls.startsWith("com.aetherteam") && cls.contains("Accessor")))));
         ModButtons.addShortcuts(minecraft, modButtons);
         hasRight = !accessories.isEmpty() || !modButtons.isEmpty();
-        imageWidth = hasRight ? COL_M + 162 + 8 + RIGHT_W + 6 : COL_M + 162 + 8;
-        imageHeight = 246;
+        imageWidth = hasRight ? rightX() + RW : LW + GAP + CW;
+        imageHeight = H;
         ScreenFit.ensure(this, imageWidth + 8, imageHeight + 8);
         super.init();
         layoutSlots();
 
-        int mx = leftPos + COL_M;
-        sortBtn = addRenderableWidget(new ArcButton(mx + 162 - 38, topPos + HDR + 50, 18, 16, Component.empty(),
+        int cx = leftPos + coreX();
+        sortBtn = addRenderableWidget(new ArcButton(cx + 100, topPos + 76, 18, 16, Component.empty(),
                 b -> ArcClient.platform().sendToServer(ArcPacket.SORT_INVENTORY)).icon(Icons.SORT));
         sortBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.sort.tooltip")));
-        packBtn = addRenderableWidget(new ArcButton(mx + 162 - 18, topPos + HDR + 50, 18, 16, Component.empty(),
+        packBtn = addRenderableWidget(new ArcButton(cx + 120, topPos + 76, 18, 16, Component.empty(),
                 b -> ArcClient.platform().sendToServer(ArcPacket.OPEN_BACKPACK)).icon(Icons.BACKPACK));
         packBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("key.archud.backpack")));
         boolean hasPack = false;
@@ -132,22 +140,20 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     private void layoutSlots() {
         List<Slot> sl = menu.slots;
         if (sl.size() < 46) return;
-        // персонаж: броня слева от модели, вторая рука под ней
-        for (int i = 0; i < 4; i++) place(sl.get(5 + i), COL_L + 1, HDR + 6 + i * 19);
-        place(sl.get(45), COL_L + 1, HDR + 6 + 4 * 19 + 4);
+        int c = coreX();
+        // броня — столбик слева от модели, вторая рука — в углу окна модели (как в ванилле)
+        for (int i = 0; i < 4; i++) place(sl.get(5 + i), c + 8, 21 + i * ROW);
+        place(sl.get(45), c + 77, 75);
         // крафт 2×2 и результат
-        int mx = COL_M;
-        for (int i = 0; i < 4; i++) place(sl.get(1 + i), mx + 1 + (i % 2) * ROW, HDR + 14 + (i / 2) * ROW);
-        place(sl.get(0), mx + 75, HDR + 23);
+        for (int i = 0; i < 4; i++) place(sl.get(1 + i), c + 101 + (i % 2) * ROW, 30 + (i / 2) * ROW);
+        place(sl.get(0), c + 153, 39);
         // инвентарь и хотбар
-        int invY = HDR + 80;
-        for (int i = 0; i < 27; i++) place(sl.get(9 + i), mx + 1 + (i % 9) * ROW, invY + (i / 9) * ROW);
-        for (int i = 0; i < 9; i++) place(sl.get(36 + i), mx + 1 + i * ROW, invY + 3 * ROW + 6);
+        for (int i = 0; i < 27; i++) place(sl.get(9 + i), c + 8 + (i % 9) * ROW, 111 + (i / 9) * ROW);
+        for (int i = 0; i < 9; i++) place(sl.get(36 + i), c + 8 + i * ROW, 170);
         // аксессуары
-        accY = HDR + 14;
-        int modsH = modButtons.isEmpty() ? 0 : 14 + ((modButtons.size() + 3) / 4) * 22;
-        accArea = Math.max(18, imageHeight - 8 - modsH - accY - (modsH > 0 ? 4 : 0));
-        // самая дальняя прокрутка, при которой хвост списка ещё заполняет область
+        accY = 18;
+        int modsH = modButtons.isEmpty() ? 0 : 14 + ((modButtons.size() + 2) / 3) * 24;
+        accArea = Math.max(18, H - 6 - modsH - accY);
         accMaxScroll = 0;
         int tail = 0;
         for (int i = accLines.size() - 1; i >= 0; i--) {
@@ -164,7 +170,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     }
 
     private void layoutAccessories() {
-        int rx = COL_M + 162 + 8 + 9;
+        int rx = rightX() + 7;
         for (Slot s : accessories) place(s, -10000, -10000);
         accHeaders.clear();
         int yy = accY;
@@ -172,7 +178,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             AccLine l = accLines.get(li);
             if (yy + l.height() > accY + accArea) break;
             if (l.title() != null) accHeaders.add(new Object[]{l.title(), yy});
-            else for (int k = 0; k < l.slots().size(); k++) place(l.slots().get(k), rx + k * ROW, yy);
+            else for (int k = 0; k < l.slots().size(); k++) place(l.slots().get(k), rx + 1 + k * ROW, yy + 1);
             yy += l.height();
         }
     }
@@ -203,7 +209,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
                 g.renderTooltip(font, effectName(e).copy().append(" ").append(MobEffectUtil.formatDuration(e, 1.0F)), mouseX, mouseY);
             }
         }
-        if (moreX >= 0 && mouseX >= moreX && mouseX < moreX + 40 && mouseY >= moreY && mouseY < moreY + 22) {
+        if (moreX >= 0 && mouseX >= moreX && mouseX < moreX + moreW && mouseY >= moreY && mouseY < moreY + 14) {
             List<Component> lines = new ArrayList<>();
             for (MobEffectInstance e : hiddenEffects) lines.add(effectName(e).copy().append(" ").append(MobEffectUtil.formatDuration(e, 1.0F)));
             g.renderComponentTooltip(font, lines, mouseX, mouseY);
@@ -217,44 +223,82 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         }
     }
 
+    private void card(GuiGraphics g, int x, int y, int w, int h, int accent, String title) {
+        Draw.panel(g, x, y, w, h, 0xF20E1217, Draw.alpha(accent, 0x80));
+        g.fill(x + 3, y, x + w - 3, y + 1, Draw.alpha(accent, 0xE0));
+        g.fillGradient(x + 1, y + 1, x + w - 1, y + 24, Draw.alpha(accent, 0x18), 0x00000000);
+        if (title != null) Draw.small(g, font, title, x + 7, y + 6, Draw.alpha(accent, 0xFF), 0.75F);
+    }
+
     @Override
     protected void renderBg(GuiGraphics g, float pt, int mouseX, int mouseY) {
         int accent = Theme.accent();
-        int x = leftPos, y = topPos, w = imageWidth, h = imageHeight;
-        Draw.panel(g, x, y, w, h, 0xF20E1217, Draw.alpha(accent, 0x90));
-        g.fill(x + 3, y, x + w - 3, y + 1, Draw.alpha(accent, 0xE0));
-        g.fillGradient(x + 1, y + 1, x + w - 1, y + 36, Draw.alpha(accent, 0x1C), 0x00000000);
+        int x = leftPos, y = topPos;
         LocalPlayer p = minecraft.player;
-        // заголовок: имя и уровень
-        g.drawString(font, title, x + COL_L, y + 6, Draw.alpha(accent, 0xFF), true);
-        if (p != null) {
-            String name = p.getGameProfile().getName();
-            g.drawString(font, name, x + COL_M + 162 - font.width(name), y + 6, Draw.TEXT, true);
-        }
 
-        // --- персонаж
-        int cx = x + COL_L, cy = y + HDR;
-        Draw.panel(g, cx + 22, cy + 2, 92, 98, 0xB0060A10, Draw.alpha(accent, 0x50));
-        g.fillGradient(cx + 23, cy + 3, cx + 113, cy + 99, Draw.alpha(accent, 0x26), 0x08000000);
+        // ---------- левая карточка: характеристики и эффекты
+        card(g, x, y, LW, H, accent, Component.translatable("archud.inv.stats").getString());
+        if (p != null) renderStats(g, p, x + 7, y + 17);
+        int effY = y + 17 + 6 * 10 + 6;
+        g.fill(x + 7, effY - 3, x + LW - 7, effY - 2, 0x20FFFFFF);
+        Draw.small(g, font, Component.translatable("archud.inv.effects").getString(), x + 7, effY + 1, Draw.alpha(accent, 0xFF), 0.75F);
+        renderEffects(g, x + 6, effY + 11, LW - 12, y + H - 6);
+
+        // ---------- центр: персонаж, крафт, инвентарь
+        int c = x + coreX();
+        card(g, c, y, CW, H, accent, null);
         if (p != null) {
-            int ex = cx + 68, ey = cy + 92;
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, ex, ey, 38, ex - xMouse, ey - 60 - yMouse, p);
-            // опыт
-            float xp = p.experienceProgress;
-            g.fill(cx + 1, cy + 104, cx + 113, cy + 107, 0x90000000);
-            g.fill(cx + 1, cy + 104, cx + 1 + Math.round(112 * xp), cy + 107, 0xFF9CFF5A);
+            g.drawString(font, p.getGameProfile().getName(), c + 7, y + 6, Draw.TEXT, true);
+            // уровень и опыт справа в шапке
             String lvl = Component.translatable("archud.inv.level", p.experienceLevel).getString();
-            Draw.small(g, font, lvl, cx + 1, cy + 109, 0xFF9CFF5A, 0.75F);
-            renderStats(g, p, cx, cy + 120);
+            int lw = Math.round(font.width(lvl) * 0.75F);
+            int bx = c + CW - 7 - 56;
+            Draw.small(g, font, lvl, bx - 5 - lw, y + 6.5F, 0xFF9CFF5A, 0.75F);
+            g.fill(bx, y + 8, bx + 56, y + 11, 0x90000000);
+            g.fill(bx, y + 8, bx + Math.round(56 * p.experienceProgress), y + 11, 0xFF9CFF5A);
+        }
+        // окно модели
+        Draw.panel(g, c + 26, y + 20, 70, 74, 0xB0060A10, Draw.alpha(accent, 0x50));
+        g.fillGradient(c + 27, y + 21, c + 95, y + 93, Draw.alpha(accent, 0x24), 0x08000000);
+        if (p != null) {
+            int ex = c + 61, ey = y + 88;
+            InventoryScreen.renderEntityInInventoryFollowsMouse(g, ex, ey, 30, ex - xMouse, ey - 50 - yMouse, p);
+        }
+        Draw.small(g, font, Component.translatable("archud.inv.crafting").getString(), c + 101, y + 21, Draw.TEXT_DIM, 0.75F);
+        g.drawString(font, "➜", c + 139, y + 44, Draw.alpha(accent, 0xC0), false);
+        Draw.small(g, font, Component.translatable("archud.inv.inventory").getString(), c + 8, y + 101, Draw.TEXT_DIM, 0.75F);
+
+        // ---------- правая карточка: аксессуары и моды
+        if (hasRight) {
+            int rx = x + rightX();
+            card(g, rx, y, RW, H, accent, accessories.isEmpty() ? null : Component.translatable("archud.inv.accessories").getString());
+            for (Object[] hd : accHeaders) {
+                int hy = y + (Integer) hd[1];
+                String t = (String) hd[0];
+                Draw.small(g, font, t, rx + 8, hy + 3, Draw.alpha(ACC, 0xD0), 0.6F);
+                g.fill(rx + 8 + Math.round(font.width(t) * 0.6F) + 3, hy + 5, rx + 8 + 4 * ROW, hy + 6, 0x30FFFFFF);
+            }
+            if (accMaxScroll > 0) {
+                int bh = accArea;
+                int th = Math.max(8, bh * accVisibleRows / Math.max(1, accRows));
+                int ty = y + accY + (bh - th) * accScroll / Math.max(1, accMaxScroll);
+                g.fill(rx + RW - 5, y + accY, rx + RW - 3, y + accY + bh, 0x30FFFFFF);
+                g.fill(rx + RW - 5, ty, rx + RW - 3, ty + th, Draw.alpha(accent, 0xC0));
+            }
+            if (!modButtons.isEmpty()) {
+                int rows = (modButtons.size() + 2) / 3;
+                int my = y + H - 6 - rows * 24;
+                g.fill(rx + 7, my - 13, rx + RW - 7, my - 12, 0x20FFFFFF);
+                Draw.small(g, font, Component.translatable("archud.inv.mods").getString(), rx + 7, my - 9, Draw.alpha(accent, 0xFF), 0.75F);
+                for (int i = 0; i < modButtons.size(); i++) {
+                    int bx = rx + 8 + (i % 3) * 25, by = my + (i / 3) * 24;
+                    Draw.panel(g, bx, by, 22, 22, 0x90060A10, 0x40FFFFFF);
+                    modButtons.get(i).place(bx + 1, by + 1, 20, 20);
+                }
+            }
         }
 
-        // --- крафт
-        int mx = x + COL_M;
-        Draw.small(g, font, Component.translatable("archud.inv.crafting").getString(), mx, y + HDR + 4, Draw.TEXT_DIM, 0.75F);
-        g.drawString(font, "➜", mx + 46 + 4, y + HDR + 27, Draw.alpha(accent, 0xC0), false);
-        Draw.small(g, font, Component.translatable("archud.inv.inventory").getString(), mx, y + HDR + 70, Draw.TEXT_DIM, 0.75F);
-
-        // ячейки
+        // ---------- ячейки
         int selected = p == null ? -1 : 36 + p.getInventory().selected;
         for (int i = 0; i < menu.slots.size(); i++) {
             Slot s = menu.slots.get(i);
@@ -265,65 +309,38 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
                 continue;
             }
             boolean acc = s instanceof AccessoryInfo || accessories.contains(s);
-            int border = i == selected ? Draw.alpha(accent, 0xFF) : acc ? Draw.alpha(0xFFB388FF, 0x70) : 0x30FFFFFF;
+            int border = i == selected ? Draw.alpha(accent, 0xFF) : acc ? Draw.alpha(ACC, 0x70) : 0x30FFFFFF;
             Draw.panel(g, sx, sy, 18, 18, 0xC0080C12, border);
             if (acc && !s.hasItem() && menu instanceof com.arc4io.archud.menu.AccessoryProvider ap) {
                 Component sh = ap.accessoryShort(s);
                 if (sh != null) Draw.smallCentered(g, font, sh.getString(), sx + 9, sy + 7, 0x90B388FF, 0.5F);
             }
         }
-        // хотбар — подложка
-        g.fill(mx - 2, y + HDR + 80 + 3 * ROW + 4, mx + 164, y + HDR + 80 + 3 * ROW + 6, Draw.alpha(accent, 0x30));
-
-        renderEffects(g, mx, y + HDR + 80 + 4 * ROW + 12, 162, y + h - 6);
-
-        // --- правая колонка
-        if (hasRight) {
-            int rx = x + COL_M + 162 + 8;
-            g.fill(rx - 4, y + HDR, rx - 3, y + h - 8, Draw.alpha(accent, 0x30));
-            if (!accessories.isEmpty()) {
-                Draw.small(g, font, Component.translatable("archud.inv.accessories").getString(), rx, y + HDR + 4, Draw.TEXT_DIM, 0.75F);
-                for (Object[] hd : accHeaders) {
-                    int hy = y + (Integer) hd[1];
-                    Draw.small(g, font, (String) hd[0], rx + 9, hy + 3, Draw.alpha(0xFFB388FF, 0xD0), 0.6F);
-                    g.fill(rx + 9 + Math.round(font.width((String) hd[0]) * 0.6F) + 3, hy + 5, rx + 9 + 4 * ROW, hy + 6, 0x30FFFFFF);
-                }
-                if (accMaxScroll > 0) {
-                    int bh = accArea;
-                    int th = Math.max(8, bh * accVisibleRows / Math.max(1, accRows));
-                    int ty = y + accY + (bh - th) * accScroll / Math.max(1, accMaxScroll);
-                    g.fill(rx + 83, y + accY, rx + 85, y + accY + bh, 0x30FFFFFF);
-                    g.fill(rx + 83, ty, rx + 85, ty + th, Draw.alpha(accent, 0xC0));
-                }
-            }
-            if (!modButtons.isEmpty()) {
-                int rows = (modButtons.size() + 3) / 4;
-                int my = y + h - 8 - rows * 22;
-                Draw.small(g, font, Component.translatable("archud.inv.mods").getString(), rx, my - 11, Draw.TEXT_DIM, 0.75F);
-                for (int i = 0; i < modButtons.size(); i++) {
-                    int bx = rx + (i % 4) * 22, by = my + (i / 4) * 22;
-                    Draw.panel(g, bx, by, 20, 20, 0x90060A10, 0x40FFFFFF);
-                    modButtons.get(i).place(bx, by, 20, 20);
-                }
-            }
-        }
+        // разделитель хотбара
+        g.fill(c + 7, y + 166, c + CW - 7, y + 167, Draw.alpha(accent, 0x40));
     }
 
     private void renderStats(GuiGraphics g, LocalPlayer p, int x, int y) {
-        String[][] rows = {
-                {Component.translatable("archud.stat.health").getString(), HudRenderer.fmt(p.getHealth()) + " / " + HudRenderer.fmt(p.getMaxHealth())},
-                {Component.translatable("archud.stat.armor").getString(), p.getArmorValue() + ""},
-                {Component.translatable("archud.stat.damage").getString(), HudRenderer.fmt(InventoryExtras.withHeld(p, Attributes.ATTACK_DAMAGE))},
-                {Component.translatable("archud.stat.attack_speed").getString(), String.format("%.2f", InventoryExtras.withHeld(p, Attributes.ATTACK_SPEED))},
-                {Component.translatable("archud.stat.speed").getString(), String.format("%.2f", p.getAttributeValue(Attributes.MOVEMENT_SPEED) * 43.17F)},
-                {Component.translatable("archud.stat.food").getString(), p.getFoodData().getFoodLevel() + " / 20"},
+        Object[][] rows = {
+                {Icons.HEART, Component.translatable("archud.stat.health").getString(), HudRenderer.fmt(p.getHealth()) + "/" + HudRenderer.fmt(p.getMaxHealth())},
+                {Icons.ARMOR, Component.translatable("archud.stat.armor").getString(), p.getArmorValue() + ""},
+                {Icons.SWORD, Component.translatable("archud.stat.damage").getString(), HudRenderer.fmt(InventoryExtras.withHeld(p, Attributes.ATTACK_DAMAGE))},
+                {Icons.BOLT, Component.translatable("archud.stat.attack_speed").getString(), String.format("%.2f", InventoryExtras.withHeld(p, Attributes.ATTACK_SPEED))},
+                {Icons.SPEED, Component.translatable("archud.stat.speed").getString(), String.format("%.2f", p.getAttributeValue(Attributes.MOVEMENT_SPEED) * 43.17F)},
+                {Icons.FOOD, Component.translatable("archud.stat.food").getString(), p.getFoodData().getFoodLevel() + "/20"},
         };
-        int maxY = topPos + imageHeight - 8;
-        for (String[] r : rows) {
-            if (y + 9 > maxY) break;
-            Draw.small(g, font, r[0], x + 1, y + 1, Draw.TEXT_DIM, 0.75F);
-            float vw = font.width(r[1]) * 0.75F;
-            Draw.small(g, font, r[1], x + 113 - vw, y + 1, Draw.TEXT, 0.75F);
+        for (Object[] r : rows) {
+            g.pose().pushPose();
+            g.pose().translate(x, y, 0);
+            g.pose().scale(0.75F, 0.75F, 1F);
+            Draw.icon(g, (Integer) r[0], 0, 0);
+            g.pose().popPose();
+            String label = (String) r[1], value = (String) r[2];
+            float vw = font.width(value) * 0.7F;
+            float maxL = (LW - 14 - 10 - vw - 4) / 0.7F;
+            if (font.width(label) > maxL) label = font.plainSubstrByWidth(label, (int) maxL - font.width("…")) + "…";
+            Draw.small(g, font, label, x + 9, y + 1.5F, Draw.TEXT_DIM, 0.7F);
+            Draw.small(g, font, value, x + LW - 14 - vw, y + 1.5F, Draw.TEXT, 0.7F);
             y += 10;
         }
     }
@@ -336,7 +353,6 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         return n;
     }
 
-    /** Эффекты: карточки 2 в ряд; что не помещается — в «+N» с подсказкой. */
     private static final Map<Class<?>, java.util.Optional<java.lang.reflect.Method>> ICON_CHECK = new java.util.HashMap<>();
 
     /** Способности Legends — тоже эффекты; часть из них мод сам прячет из списка (shouldRenderIcon). */
@@ -358,6 +374,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         }
     }
 
+    /** Эффекты: карточки в столбик; если не помещаются — компактные плашки по две в ряд; остаток — «+N». */
     private void renderEffects(GuiGraphics g, int x, int y, int w, int maxY) {
         hiddenEffects.clear();
         chipHits.clear();
@@ -366,35 +383,37 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         LocalPlayer p = minecraft.player;
         if (p == null) return;
         Collection<MobEffectInstance> all = p.getActiveEffects();
-        if (all.isEmpty()) return;
         List<MobEffectInstance> list = new ArrayList<>();
         for (MobEffectInstance e : all) if (e.showIcon() && modWantsIcon(e)) list.add(e);
+        if (list.isEmpty()) {
+            Draw.small(g, font, Component.translatable("archud.inv.no_effects").getString(), x + 1, y + 2, 0x60FFFFFF, 0.65F);
+            return;
+        }
         list.sort(java.util.Comparator.comparingInt(MobEffectInstance::getDuration));
-        int cardW = (w - 4) / 2, cardH = 22;
-        int rows = Math.max(0, (maxY - y) / (cardH + 2));
-        if (list.size() > rows * 2) {
+        int cardH = 20;
+        int rows = Math.max(0, (maxY - y + 2) / (cardH + 2));
+        if (list.size() > rows) {
             renderEffectChips(g, list, x, y, w, maxY);
             return;
         }
         for (int i = 0; i < list.size(); i++) {
             MobEffectInstance e = list.get(i);
-            int ex = x + (i % 2) * (cardW + 4), ey = y + (i / 2) * (cardH + 2);
+            int ey = y + i * (cardH + 2);
             int col = e.getEffect().isBeneficial() ? 0xFF9CFF5A : 0xFFFF6B6B;
-            Draw.panel(g, ex, ey, cardW, cardH, 0xB0060A10, Draw.alpha(col, 0x60));
+            Draw.panel(g, x, ey, w, cardH, 0xB0060A10, Draw.alpha(col, 0x60));
             TextureAtlasSprite sprite = minecraft.getMobEffectTextures().get(e.getEffect());
-            g.blit(ex + 2, ey + 2, 0, 18, 18, sprite);
+            g.blit(x + 2, ey + 2, 0, 16, 16, sprite);
             String name = effectName(e).getString();
-            float maxW = (cardW - 24) / 0.75F;
+            float maxW = (w - 22) / 0.7F;
             if (font.width(name) > maxW) name = font.plainSubstrByWidth(name, (int) maxW - 6) + "…";
-            Draw.small(g, font, name, ex + 22, ey + 3, Draw.TEXT, 0.75F);
-            Draw.small(g, font, MobEffectUtil.formatDuration(e, 1.0F).getString(), ex + 22, ey + 12, Draw.alpha(col, 0xFF), 0.75F);
+            Draw.small(g, font, name, x + 20, ey + 3, Draw.TEXT, 0.7F);
+            Draw.small(g, font, MobEffectUtil.formatDuration(e, 1.0F).getString(), x + 20, ey + 11, Draw.alpha(col, 0xFF), 0.7F);
         }
     }
 
-    /** Много эффектов — компактные «фишки»: иконка + время, имя во всплывающей подсказке. */
     private void renderEffectChips(GuiGraphics g, List<MobEffectInstance> list, int x, int y, int w, int maxY) {
-        int chipW = 39, chipH = 14, gap = 2;
-        int perRow = Math.max(1, (w + gap) / (chipW + gap));
+        int gap = 2, perRow = 2;
+        int chipW = (w - gap) / perRow, chipH = 14;
         int rows = Math.max(0, (maxY - y + gap) / (chipH + gap));
         int capacity = perRow * rows;
         boolean overflow = list.size() > capacity;
@@ -411,8 +430,8 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             TextureAtlasSprite sprite = minecraft.getMobEffectTextures().get(e.getEffect());
             g.blit(ex + 1, ey + 1, 0, 12, 12, sprite);
             String t = MobEffectUtil.formatDuration(e, 1.0F).getString();
-            if (e.getAmplifier() > 0 && t.length() <= 5) t = t + " " + (e.getAmplifier() + 1);
-            Draw.small(g, font, t, ex + 14, ey + 4.5F, Draw.alpha(col, 0xFF), 0.6F);
+            if (e.getAmplifier() > 0) t = t + " ·" + (e.getAmplifier() + 1);
+            Draw.small(g, font, t, ex + 15, ey + 4.5F, Draw.alpha(col, 0xFF), 0.6F);
             chipHits.add(new int[]{ex, ey, chipW, chipH, i});
             chipList.add(e);
         }
@@ -420,6 +439,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             int i = shown;
             moreX = x + (i % perRow) * (chipW + gap);
             moreY = y + (i / perRow) * (chipH + gap);
+            moreW = chipW;
             Draw.panel(g, moreX, moreY, chipW, chipH, 0xB0060A10, 0x60FFFFFF);
             g.drawCenteredString(font, "+" + hiddenEffects.size(), moreX + chipW / 2, moreY + 3, Draw.TEXT);
         }
@@ -441,7 +461,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        int rx = leftPos + COL_M + 162 + 8;
+        int rx = leftPos + rightX();
         if (hasRight && mx >= rx && accMaxScroll > 0) {
             accScroll = Math.max(0, Math.min(accMaxScroll, accScroll - (int) Math.signum(delta)));
             layoutAccessories();
@@ -463,5 +483,4 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     public static boolean enabled() {
         return ArcConfig.get().customInventory;
     }
-
 }

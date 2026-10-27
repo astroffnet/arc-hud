@@ -79,7 +79,7 @@ public final class CompatDriver {
                 closeScreen(m);
             }, null);
             add(10, m -> m.setScreen(new InventoryScreen(m.player)), null);
-            add(30, m -> ArcHud.LOGGER.info("[Compat] inventory screen at scale {}: {}", s, (m.screen == null ? "none" : m.screen.getClass().getName()) + " menu=" + m.player.containerMenu.getClass().getSimpleName()),
+            add(30, m -> ArcHud.LOGGER.info("[Compat] inventory screen at scale {} (fps {}): {}", s, m.getFps(), (m.screen == null ? "none" : m.screen.getClass().getName()) + " menu=" + m.player.containerMenu.getClass().getSimpleName()),
                     tag + "_s" + s);
         }
     }
@@ -221,6 +221,11 @@ public final class CompatDriver {
         add(20, mc -> ArcHud.LOGGER.info("[Compat] recipe screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c13_recipes");
         add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT), true), null);
         add(20, mc -> {}, "c14_uses");
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHER_WART), true), null);
+        add(20, mc -> {}, "c15_brewing");
+        add(5, mc -> {
+            ArcHud.LOGGER.info("[Compat] fps with recipe screen: {}", mc.getFps());
+        }, null);
         add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
         add(10, mc -> closeScreen(mc), null);
         add(5, mc -> {

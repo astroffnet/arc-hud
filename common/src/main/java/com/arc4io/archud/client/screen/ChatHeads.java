@@ -115,7 +115,20 @@ public final class ChatHeads {
         return false;
     }
 
+    private static final Map<Sender, Object[]> SKINS = new java.util.HashMap<>();
+
+    /** Скин отправителя, кэш на 2 секунды (поиск по списку игроков не каждый кадр). */
     public static ResourceLocation skin(Sender s) {
+        long now = net.minecraft.Util.getMillis();
+        Object[] c = SKINS.get(s);
+        if (c != null && now - (Long) c[1] < 2000L) return (ResourceLocation) c[0];
+        if (SKINS.size() > 256) SKINS.clear();
+        ResourceLocation r = lookupSkin(s);
+        SKINS.put(s, new Object[]{r, now});
+        return r;
+    }
+
+    private static ResourceLocation lookupSkin(Sender s) {
         Minecraft mc = Minecraft.getInstance();
         ClientPacketListener c = mc.getConnection();
         PlayerInfo pi = null;

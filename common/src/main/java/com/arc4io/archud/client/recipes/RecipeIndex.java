@@ -51,6 +51,7 @@ public final class RecipeIndex {
     private static List<ItemStack> allItems = List.of();
 
     public static final ResourceLocation FUEL = ArcHud.id("fuel");
+    public static final ResourceLocation BREWING = ArcHud.id("brewing");
 
     private RecipeIndex() {}
 
@@ -84,6 +85,11 @@ public final class RecipeIndex {
                 // рецепт мода, который не умеет показываться без своего мира — пропускаем
             }
         }
+        try {
+            ok += addBrewing();
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: cannot read brewing recipes", t);
+        }
         rebuildItems(mc);
         ArcHud.LOGGER.info("Arc HUD: recipe index — {} of {} recipes, {} items in {} ms", ok, recipes.size(), allItems.size(),
                 (System.nanoTime() - t0) / 1_000_000);
@@ -108,6 +114,94 @@ public final class RecipeIndex {
     public static List<ItemStack> items() {
         ensure();
         return allItems;
+    }
+
+    // ------------------------------------------------------------------ зелья (варочная стойка)
+
+    private static Object unwrap(Object o) {
+        if (o instanceof net.minecraft.core.Holder<?> h) return h.value();
+        if (o instanceof java.util.function.Supplier<?> sp) return sp.get();
+        return o;
+    }
+
+    private static void index(Entry e) {
+        TYPE_ICON.putIfAbsent(e.type(), e.catalyst());
+        Set<Item> outs = new LinkedHashSet<>();
+        for (List<ItemStack> alt : e.outputs()) for (ItemStack st : alt) outs.add(st.getItem());
+        for (Item i : outs) BY_OUTPUT.computeIfAbsent(i, k -> new ArrayList<>()).add(e);
+        Set<Item> ins = new LinkedHashSet<>();
+        for (List<ItemStack> alt : e.inputs()) for (ItemStack st : alt) ins.add(st.getItem());
+        for (Item i : ins) BY_INPUT.computeIfAbsent(i, k -> new ArrayList<>()).add(e);
+    }
+
+    private static ItemStack potion(Item container, net.minecraft.world.item.alchemy.Potion p) {
+        return net.minecraft.world.item.alchemy.PotionUtils.setPotion(new ItemStack(container), p);
+    }
+
+    private static int brewCounter;
+
+    private static void brew(ItemStack in, List<ItemStack> ingredient, ItemStack out) {
+        if (in.isEmpty() || out.isEmpty() || ingredient.isEmpty()) return;
+        Entry e = new Entry(new ResourceLocation(ArcHud.MODID, "brewing/" + (brewCounter++)), BREWING, null,
+                List.of(List.of(in), ingredient), 0, List.of(List.of(out)),
+                net.minecraft.network.chat.Component.translatable("archud.recipes.brew_note").getString(), new ItemStack(Items.BREWING_STAND));
+        index(e);
+    }
+
+    /** Ванильные смеси зелий (и добавленные модами в тот же список), смены колбы и рецепты Forge BrewingRecipeRegistry. */
+    private static int addBrewing() throws Exception {
+        brewCounter = 0;
+        Class<?> pb = net.minecraft.world.item.alchemy.PotionBrewing.class;
+        List<Object[]> potionMixes = new ArrayList<>(), containerMixes = new ArrayList<>();
+        for (Field f : pb.getDeclaredFields()) {
+            if (!Modifier.isStatic(f.getModifiers()) || !List.class.isAssignableFrom(f.getType())) continue;
+            f.setAccessible(true);
+            Object v = f.get(null);
+            if (!(v instanceof List<?> list)) continue;
+            for (Object mix : list) {
+                if (mix == null || mix instanceof Ingredient) continue;
+                Object from = null, to = null;
+                Ingredient ing = null;
+                for (Field mf : fields(mix.getClass())) {
+                    Object x = mf.get(mix);
+                    if (x instanceof Ingredient i) ing = i;
+                    else if (from == null) from = unwrap(x);
+                    else if (to == null) to = unwrap(x);
+                }
+                if (ing == null || from == null || to == null) continue;
+                if (from instanceof net.minecraft.world.item.alchemy.Potion) potionMixes.add(new Object[]{from, ing, to});
+                else if (from instanceof Item) containerMixes.add(new Object[]{from, ing, to});
+            }
+        }
+        Item[] containers = {Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION};
+        for (Object[] m : potionMixes) {
+            var from = (net.minecraft.world.item.alchemy.Potion) m[0];
+            var to = (net.minecraft.world.item.alchemy.Potion) m[2];
+            for (Item c : containers) brew(potion(c, from), alts((Ingredient) m[1]), potion(c, to));
+        }
+        for (Object[] m : containerMixes) {
+            for (var p : BuiltInRegistries.POTION) {
+                if (p == net.minecraft.world.item.alchemy.Potions.EMPTY) continue;
+                brew(potion((Item) m[0], p), alts((Ingredient) m[1]), potion((Item) m[2], p));
+            }
+        }
+        // Forge: рецепты модов через BrewingRecipeRegistry (класс BrewingRecipe: вход, ингредиент, результат)
+        try {
+            Class<?> reg = Class.forName("net.minecraftforge.common.brewing.BrewingRecipeRegistry");
+            Object list = reg.getMethod("getRecipes").invoke(null);
+            if (list instanceof List<?> l) {
+                for (Object r : l) {
+                    if (!r.getClass().getName().equals("net.minecraftforge.common.brewing.BrewingRecipe")) continue;
+                    Ingredient in = (Ingredient) r.getClass().getMethod("getInput").invoke(r);
+                    Ingredient ing = (Ingredient) r.getClass().getMethod("getIngredient").invoke(r);
+                    ItemStack out = (ItemStack) r.getClass().getMethod("getOutput").invoke(r);
+                    for (ItemStack st : alts(in)) brew(st, alts(ing), out);
+                }
+            }
+        } catch (ClassNotFoundException ignored) {
+            // Fabric
+        }
+        return brewCounter;
     }
 
     // ------------------------------------------------------------------ разбор рецепта

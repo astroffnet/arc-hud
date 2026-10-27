@@ -32,6 +32,7 @@ import java.util.Locale;
  */
 public final class RecipeOverlay {
     private static final int CELL = 18;
+    private static final ItemBatch BATCH = new ItemBatch();
     private static Screen owner;
     private static int x, y, w, h, cols, rows;
     private static int pageStart;
@@ -81,7 +82,7 @@ public final class RecipeOverlay {
         y = 6;
         w = s.width - left - 4;
         h = s.height - 6 - 4;
-        cols = Math.max(0, (w - 4) / CELL);
+        cols = Math.max(0, Math.min(12, (w - 4) / CELL));
         rows = Math.max(0, (h - 20 - 14) / CELL);
         if (cols < 3 || rows < 3) {
             cols = 0;
@@ -159,6 +160,7 @@ public final class RecipeOverlay {
         g.drawString(font, "‹", x + 4, y + 4, hovPrev ? 0xFFFFFFFF : 0xFF8C9AAB);
         g.drawString(font, "›", x + w - 10, y + 4, hovNext ? 0xFFFFFFFF : 0xFF8C9AAB);
         int gy = y + 16;
+        BATCH.clear();
         for (int i = 0; i < perPage && pageStart + i < list.size(); i++) {
             ItemStack st = list.get(pageStart + i);
             int ix = x + 2 + (i % cols) * CELL, iy = gy + (i / cols) * CELL;
@@ -166,8 +168,9 @@ public final class RecipeOverlay {
                 g.fill(ix, iy, ix + CELL, iy + CELL, 0x50FFFFFF);
                 hovered = st;
             }
-            g.renderItem(st, ix + 1, iy + 1);
+            BATCH.add(st, ix + 1, iy + 1);
         }
+        BATCH.draw(g, 100F);
         // поиск
         int sy = y + h - 16;
         Draw.panel(g, x, sy, w - 2, 14, 0xE0070A0E, searchFocused ? Draw.alpha(accent, 0xE0) : 0x50FFFFFF);
