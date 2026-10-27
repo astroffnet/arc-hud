@@ -76,7 +76,7 @@ public final class ArcChatRenderer {
         double spacing = mc.options.chatLineSpacing().get();
         int lh = (int) (9.0 * (spacing + 1.0));
         int textOff = (int) Math.round(-8.0 * (spacing + 1.0) + 4.0 * spacing);
-        int base = Mth.floor((g.guiHeight() - 40) / scale);
+        int base = Mth.floor((g.guiHeight() - 40 - com.arc4io.archud.client.hud.HudRenderer.chatLift()) / scale);
         long now = Util.getMillis();
         int accent = Theme.accent();
         int gut = ChatHeads.gutter();

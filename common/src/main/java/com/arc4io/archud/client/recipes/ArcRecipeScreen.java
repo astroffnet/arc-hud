@@ -291,8 +291,8 @@ public class ArcRecipeScreen extends Screen {
             if (mx >= x + cw - 14 && mx < x + cw - 4 && my >= y + 3 && my < y + 13) hoverStack = cat;
         }
         if (!e.note().isEmpty()) Draw.small(g, font, e.note(), x + 6, y + ch - 9, Draw.TEXT_DIM, 0.6F);
-        if (e.recipe() != null && cw > 200) {
-            String id = e.id().toString();
+        if (e.recipe() != null && cw > 200 && !e.id().getNamespace().equals("minecraft")) {
+            String id = e.id().getNamespace();
             float sw = font.width(id) * 0.5F;
             if (sw < cw - 120) Draw.small(g, font, id, x + cw - 4 - sw, y + ch - 7, 0x50FFFFFF, 0.5F);
         }
