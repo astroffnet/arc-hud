@@ -149,7 +149,7 @@ public final class RecipeOverlay {
         if (pageStart >= list.size()) pageStart = 0;
         g.pose().pushPose();
         g.pose().translate(0, 0, 200);
-        Draw.panel(g, x - 2, y, w + 2, h, 0xC00B0F14, Draw.alpha(accent, 0x50));
+        Draw.panel(g, x - 2, y, w + 2, h, 0xF00B0F14, Draw.alpha(accent, 0x50));
         // страница
         int pages = Math.max(1, (list.size() + perPage - 1) / perPage);
         String pg = (pageStart / perPage + 1) + "/" + pages;
