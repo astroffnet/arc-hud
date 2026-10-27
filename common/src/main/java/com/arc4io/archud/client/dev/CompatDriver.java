@@ -147,6 +147,40 @@ public final class CompatDriver {
                 ArcHud.LOGGER.info("[Compat] accessories equipped: {}", acc);
             }
         }, "c02_inv_equipped");
+        // надеть аксессуары как игрок: выбрать в хотбаре и нажать ПКМ (у Aether/Curios это надевает в слот)
+        add(10, mc -> mc.setScreen(null), null);
+        for (int k = 0; k < 9; k++) {
+            final int slot = k;
+            add(4, mc -> {
+                var it = mc.player.getInventory().getItem(slot);
+                String id = BuiltInRegistries.ITEM.getKey(it.getItem()).toString();
+                if (!id.startsWith("aether:")) return;
+                mc.player.getInventory().selected = slot;
+                var res = mc.gameMode.useItem(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND);
+                ArcHud.LOGGER.info("[Compat] right-click {} in slot {} -> {}", id, slot, res);
+            }, null);
+        }
+        add(20, mc -> {
+            List<String> left = new ArrayList<>();
+            for (int i = 0; i < 36; i++) {
+                String id = BuiltInRegistries.ITEM.getKey(mc.player.getInventory().getItem(i).getItem()).toString();
+                if (id.startsWith("aether:")) left.add(i + "=" + id);
+            }
+            ArcHud.LOGGER.info("[Compat] aether items still in inventory (not equipped): {}", left);
+            mc.player.getInventory().selected = 8; // пустая рука
+        }, null);
+        add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
+        add(30, mc -> {
+            if (mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> s) {
+                List<String> acc = new ArrayList<>();
+                var menu = s.getMenu();
+                for (int i = 46; i < menu.slots.size(); i++) {
+                    Slot sl = menu.slots.get(i);
+                    if (sl.hasItem()) acc.add(i + "=" + BuiltInRegistries.ITEM.getKey(sl.getItem().getItem()));
+                }
+                ArcHud.LOGGER.info("[Compat] accessory slots after right-click: {} (screen {})", acc, s.getClass().getSimpleName());
+            }
+        }, "c02b_inv_after_equip");
         // кнопки модов
         add(10, mc -> {
             if (mc.screen != null) ArcHud.LOGGER.info("[Compat] widgets: {}", mc.screen.children().stream().map(c -> c.getClass().getName()).toList());
