@@ -1,0 +1,71 @@
+Downloading mojang_1.20.1.jar
+Applying patches
+Starting org.bukkit.craftbukkit.Main
+*** Warning, you've not updated in a while! ***
+*** Please download a new build as per instructions from https://papermc.io/downloads/paper ***
+System Info: Java 17 (OpenJDK 64-Bit Server VM 17.0.20.1+1) Host: Linux 6.17.0-1022-azure (amd64)
+Loading libraries, please wait...
+2026-10-27 05:20:35,987 ServerMain WARN Advanced terminal features are not available in this environment
+[05:20:41 INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[05:20:42 INFO]: Found new data pack file/bukkit, loading it automatically
+[05:20:43 INFO]: Loaded 7 recipes
+[05:20:43 INFO]: Starting minecraft server version 1.20.1
+[05:20:43 INFO]: Loading properties
+[05:20:43 INFO]: This server is running Paper version git-Paper-196 (MC: 1.20.1) (Implementing API version 1.20.1-R0.1-SNAPSHOT) (Git: 773dd72)
+[05:20:44 INFO]: Server Ping Player Sample Count: 12
+[05:20:44 INFO]: Using 4 threads for Netty based IO
+[05:20:44 INFO]: [ChunkTaskScheduler] Chunk system is using 1 I/O threads, 1 worker threads, and gen parallelism of 1 threads
+[05:20:44 WARN]: [!] The timings profiler has been enabled but has been scheduled for removal from Paper in the future.
+    We recommend installing the spark profiler as a replacement: https://spark.lucko.me/
+    For more information please visit: https://github.com/PaperMC/Paper/issues/8948
+[05:20:44 INFO]: Default game type: SURVIVAL
+[05:20:44 INFO]: Generating keypair
+[05:20:44 INFO]: Starting Minecraft server on *:25565
+[05:20:44 INFO]: Using epoll channel type
+[05:20:44 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+[05:20:44 INFO]: Paper: Using OpenSSL 3.0.x (Linux x86_64) cipher from Velocity.
+[05:20:45 INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+[05:20:45 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[05:20:45 WARN]: The server will make no attempt to authenticate usernames. Beware.
+[05:20:45 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[05:20:45 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[05:20:45 INFO]: Preparing level "world"
+[05:20:55 INFO]: Preparing start region for dimension minecraft:overworld
+[05:20:55 INFO]: Time elapsed: 43 ms
+[05:20:55 INFO]: Preparing start region for dimension minecraft:the_nether
+[05:20:55 INFO]: Time elapsed: 26 ms
+[05:20:55 INFO]: Preparing start region for dimension minecraft:the_end
+[05:20:55 INFO]: Time elapsed: 21 ms
+[05:20:55 INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+[05:20:55 INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+[05:20:56 INFO]: Running delayed init tasks
+[05:20:56 INFO]: Done (12.242s)! For help, type "help"
+[05:20:56 INFO]: Timings Reset
+[05:21:16 INFO]: Stopping the server
+[05:21:16 INFO]: Stopping server
+[05:21:16 INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
+[05:21:16 INFO]: Saving players
+[05:21:16 INFO]: Saving worlds
+[05:21:16 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[05:21:16 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world'
+[05:21:16 INFO]: [ChunkHolderManager] Halted chunk system for world 'world'
+[05:21:16 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world'
+[05:21:17 INFO]: [ChunkHolderManager] Saved 1089 block chunks, 121 entity chunks, 4 poi chunks in world 'world' in 0.89s
+[05:21:17 INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[05:21:17 INFO]: Saving chunks for level 'ServerLevel[world_nether]'/minecraft:the_nether
+[05:21:17 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world_nether'
+[05:21:17 INFO]: [ChunkHolderManager] Halted chunk system for world 'world_nether'
+[05:21:17 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world_nether'
+[05:21:17 INFO]: [ChunkHolderManager] Saved 1089 block chunks, 121 entity chunks, 0 poi chunks in world 'world_nether' in 0.38s
+[05:21:17 INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[05:21:17 INFO]: Saving chunks for level 'ServerLevel[world_the_end]'/minecraft:the_end
+[05:21:17 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world_the_end'
+[05:21:17 INFO]: [ChunkHolderManager] Halted chunk system for world 'world_the_end'
+[05:21:17 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world_the_end'
+[05:21:18 INFO]: [ChunkHolderManager] Saved 1089 block chunks, 121 entity chunks, 0 poi chunks in world 'world_the_end' in 0.22s
+[05:21:18 INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[05:21:18 INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
+[05:21:18 INFO]: Flushing Chunk IO
+[05:21:18 INFO]: Closing Thread Pool
+2026-10-27 05:21:18,102 Log4j2-AsyncAppenderEventDispatcher-1-Async WARN Advanced terminal features are not available in this environment
+[05:21:18 INFO]: Closing Server
