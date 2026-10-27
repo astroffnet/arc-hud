@@ -113,14 +113,15 @@ public class ArcBackpackScreen extends ContainerScreen {
         g.pose().scale(0.75F, 0.75F, 1F);
         g.renderItem(icon, 0, 0);
         g.pose().popPose();
-        String name = font.plainSubstrByWidth(title.getString(), imageWidth - 80);
+        // заголовок не заходит на полосу заполненности справа (44 px + отступы)
+        int maxName = imageWidth - 19 - 8 - 44 - 5;
+        String name = title.getString();
+        if (font.width(name) > maxName) name = font.plainSubstrByWidth(name, maxName - font.width("…")) + "…";
         g.drawString(font, name, 19, 5, 0xFFEAF2FA, true);
         int used = 0, total = rows * 9;
         for (int i = 0; i < total; i++) if (menu.getSlot(i).hasItem()) used++;
-        String cnt = used + "/" + total;
-        Draw.small(g, font, cnt, imageWidth - 8 - 44 - 3 - font.width(cnt) * 0.6F, 4.5F, Draw.alpha(tc, 0xFF), 0.6F);
-        Draw.small(g, font, Component.translatable("archud.backpack.tier." + tier.name().toLowerCase(java.util.Locale.ROOT)).getString(),
-                imageWidth - 8 - 44, 10F, Draw.TEXT_DIM, 0.5F);
+        String cnt = used + " / " + total;
+        Draw.small(g, font, cnt, imageWidth - 8 - font.width(cnt) * 0.6F, 10F, Draw.alpha(tc, 0xFF), 0.6F);
         g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF9AA7B4, false);
     }
 }

@@ -33,9 +33,10 @@ public final class ChatExtras {
     public static Component process(ChatComponent chat, Component msg) {
         com.arc4io.archud.client.net.E4mcBridge.onChat(msg.getString());
         ArcConfig cfg = ArcConfig.get();
+        String original = msg.getString();
         msg = com.arc4io.archud.client.screen.ChatHeads.restyle(msg);
         if (!cfg.chatTimestamps && !cfg.chatCollapse && !cfg.chatMentions) return msg;
-        String text = msg.getString();
+        String text = original;
         long now = Util.getMillis();
         // повтор того же сообщения — убираем прошлое и добавляем счётчик
         if (cfg.chatCollapse && text.equals(lastText) && now - lastTime < 60_000L && lastDecorated != null) {
@@ -57,7 +58,8 @@ public final class ChatExtras {
             String name = mc.player.getGameProfile().getName();
             String lower = text.toLowerCase(Locale.ROOT);
             mention = name.length() >= 3 && lower.contains(name.toLowerCase(Locale.ROOT))
-                    && !lower.startsWith("<" + name.toLowerCase(Locale.ROOT) + ">");
+                    && !lower.startsWith("<" + name.toLowerCase(Locale.ROOT) + ">")
+                    && !lower.startsWith(name.toLowerCase(Locale.ROOT) + " "); // свои сообщения и «Ник получил достижение»
         }
         if (mention) out.append(Component.literal("» ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
         out.append(msg);
