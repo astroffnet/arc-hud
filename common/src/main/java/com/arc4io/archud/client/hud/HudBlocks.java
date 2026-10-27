@@ -151,36 +151,29 @@ final class HudBlocks {
                 if (ml != null) start.put(mid, (h - total(ml)) / 2);
             }
         }
-        // средняя стопка края всё ещё не влезает (большой размер интерфейса, много панелей модов) —
-        // уменьшаем её, чтобы ничего не уходило за экран и не налезало на нижний угол
+        // средняя и нижняя стопки края не влезают под верхнюю (большой интерфейс, много панелей модов,
+        // уведомления о подборе) — уменьшаем обе, чтобы ничего не уходило за экран и не налезало друг на друга
         for (int col = 0; col <= 2; col++) {
             HudAnchor top = HudAnchor.at(col, 0), mid = HudAnchor.at(col, 1), bot = HudAnchor.at(col, 2);
-            List<Block> ml = map.get(mid);
-            if (ml == null || ml.isEmpty()) continue;
-            int ceil = map.containsKey(top) ? start.get(top) + total(map.get(top)) + 3 : 2;
-            int floor = map.containsKey(bot) ? start.get(bot) - 3 : h - 2;
+            List<Block> ml = map.get(mid), bl = map.get(bot);
+            boolean hasMid = ml != null && !ml.isEmpty(), hasBot = bl != null && !bl.isEmpty();
+            if (!hasMid && !hasBot) continue;
+            if (col == 1 && hasBot) continue; // низ по центру — хотбар и полосы, их не трогаем
+            int ceil = map.containsKey(top) && !map.get(top).isEmpty() ? start.get(top) + total(map.get(top)) + 3 : 2;
+            int floor = h - 2;
+            int need = (hasMid ? total(ml) : 0) + (hasBot ? total(bl) : 0) + (hasMid && hasBot ? 3 : 0);
             int avail = floor - ceil;
-            int tot = total(ml);
-            if (tot <= avail || avail < 24) {
-                if (start.get(mid) + tot > floor) start.put(mid, Math.max(ceil, floor - tot));
-                continue;
+            if (need > avail && avail > 8) {
+                float f = Math.max(0.4F, avail / (float) need);
+                if (hasMid) ml.replaceAll(bk -> scaled(bk, f));
+                if (hasBot) bl.replaceAll(bk -> scaled(bk, f));
             }
-            float f = Math.max(0.5F, avail / (float) tot);
-            ml.replaceAll(b -> scaled(b, f));
-            start.put(mid, ceil + Math.max(0, (avail - total(ml)) / 2));
-        }
-        // нижняя стопка не залезает выше верхней
-        for (int col = 0; col <= 2; col++) {
-            HudAnchor top = HudAnchor.at(col, 0), bot = HudAnchor.at(col, 2);
-            List<Block> bl = map.get(bot);
-            if (bl == null || bl.isEmpty() || !map.containsKey(top)) continue;
-            int ceil = start.get(top) + total(map.get(top)) + 3;
-            int tot = total(bl);
-            int avail = h - 2 - ceil;
-            if (tot > avail && avail >= 24) {
-                float f = Math.max(0.5F, avail / (float) tot);
-                bl.replaceAll(b -> scaled(b, f));
-                start.put(bot, h - 2 - total(bl));
+            int botStart = hasBot ? floor - total(bl) : floor + 3;
+            if (hasBot) start.put(bot, Math.max(ceil, botStart));
+            if (hasMid) {
+                int tm = total(ml);
+                int centered = (h - tm) / 2;
+                start.put(mid, Math.max(ceil, Math.min(centered, botStart - 3 - tm)));
             }
         }
         for (Map.Entry<HudAnchor, List<Block>> e : map.entrySet()) {
