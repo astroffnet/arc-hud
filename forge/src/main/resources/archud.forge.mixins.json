@@ -119,6 +119,7 @@
     "ClientTextTooltipAccessor",
     "LoadingOverlayAccessor",
     "BackgroundReloadMixin",
+    "LoadingOverlayStyleMixin",
     "FastPaintingMixin",
     "ParticleEngineInvoker",
     "AsyncParticleMixin",

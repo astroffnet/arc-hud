@@ -365,6 +365,13 @@ public final class ShowcaseDriver {
         add(6, mc -> {}, "22_bg_reload");
         add(200, mc -> ArcHud.LOGGER.info("[Showcase] background reload active={} overlay={}",
                 com.arc4io.archud.client.resources.BackgroundReload.active(), mc.getOverlay()), null);
+        // обычная перезагрузка (как с OptiFine) — экран загрузки в стиле Arc вместо красного Mojang
+        add(10, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().backgroundReload = false;
+            mc.reloadResourcePacks();
+        }, null);
+        add(25, mc -> ArcHud.LOGGER.info("[Showcase] styled reload overlay={}", mc.getOverlay()), "22b_styled_reload");
+        add(200, mc -> com.arc4io.archud.config.ArcConfig.get().backgroundReload = true, null);
         // мод без кода — подгружается без перезапуска
         add(5, ShowcaseDriver::dropResourceMod, null);
         add(300, mc -> ArcHud.LOGGER.info("[Showcase] hot-load packs={} restartPending={}",

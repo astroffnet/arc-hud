@@ -392,6 +392,8 @@ public class ArcConfig {
     public boolean accessoryAnimFix = true;
     /** Просмотр рецептов (как JEI): клавиша R и экран рецептов. */
     public boolean recipeViewer = true;
+    /** Экран перезагрузки ресурсов в стиле Arc HUD (вместо красного экрана Mojang). */
+    public boolean styledLoading = true;
     /** Список всех предметов справа от окон. */
     public boolean recipeItemList = true;
     public boolean chatAnimation = true;

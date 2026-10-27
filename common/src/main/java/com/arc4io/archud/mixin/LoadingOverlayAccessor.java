@@ -18,4 +18,13 @@ public interface LoadingOverlayAccessor {
 
     @Accessor("fadeIn")
     boolean archud$fadeIn();
+
+    @Accessor("currentProgress")
+    float archud$progress();
+
+    @Accessor("fadeOutStart")
+    long archud$fadeOutStart();
+
+    @Accessor("fadeInStart")
+    long archud$fadeInStart();
 }

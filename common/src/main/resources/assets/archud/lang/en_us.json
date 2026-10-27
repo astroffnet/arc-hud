@@ -1411,5 +1411,7 @@
   "archud.inv.legends.short.both_arms": "Arms",
   "archud.inv.legends.short.both_legs": "Legs",
   "archud.inv.btn.legends_mastery": "Legends: character mastery",
-  "archud.inv.btn.legends_guild": "Legends: guild"
+  "archud.inv.btn.legends_guild": "Legends: guild",
+  "archud.loading.resources": "Loading resources…",
+  "archud.config.styledLoading": "Arc HUD style resource loading screen"
 }
