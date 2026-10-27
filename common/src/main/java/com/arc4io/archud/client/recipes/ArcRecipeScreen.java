@@ -33,9 +33,11 @@ public class ArcRecipeScreen extends Screen {
     private Map<ResourceLocation, List<RecipeIndex.Entry>> data = Map.of();
     private List<ResourceLocation> cats = List.of();
     private int category, page, tabScroll;
-    private final List<List<RecipeIndex.Entry>> pages = new ArrayList<>();
+    private final List<List<Placed>> pages = new ArrayList<>();
     private int x0, y0, w, h;
     private ItemStack hoverStack = ItemStack.EMPTY;
+    private final ItemBatch batch = new ItemBatch();
+    private final List<Object[]> decorations = new ArrayList<>();
     private ResourceLocation hoverCat;
     private ArcButton modeBtn, backBtn, prevBtn, nextBtn;
 
@@ -102,22 +104,39 @@ public class ArcRecipeScreen extends Screen {
         return Math.max(rows, outRows) * 18 + 10 + (e.note().isEmpty() ? 0 : 9);
     }
 
+    /** Карточка на странице: позиция и размер относительно области карточек. */
+    private record Placed(RecipeIndex.Entry e, int x, int y, int w, int h) {}
+
+    private static int naturalW(RecipeIndex.Entry e, net.minecraft.client.gui.Font font) {
+        int n = e.outputs().size();
+        int outW = n == 0 ? (e.type().equals(RecipeIndex.FUEL) ? 14 : 0) : n == 1 ? 22 : ((n + 2) / 3) * 20;
+        int body = 6 + cols(e) * 18 + 6 + 24 + outW + 16;
+        int note = e.note().isEmpty() ? 0 : Math.round(font.width(e.note()) * 0.6F) + 12;
+        return Math.max(body, note);
+    }
+
+    /** Карточки сеткой: ширина колонки — по самому широкому рецепту категории, остаток растягивается. */
     private void paginate() {
         pages.clear();
         if (cats.isEmpty()) return;
         List<RecipeIndex.Entry> list = data.get(cats.get(category));
-        int avail = h - 26 - 22;
-        List<RecipeIndex.Entry> cur = new ArrayList<>();
-        int used = 0;
-        for (RecipeIndex.Entry e : list) {
-            int ch = cardH(e) + 3;
-            if (!cur.isEmpty() && used + ch > avail) {
+        int areaW = w - 36, avail = h - 26 - 22;
+        int nat = 110;
+        for (RecipeIndex.Entry e : list) nat = Math.max(nat, naturalW(e, font));
+        int columns = Math.max(1, Math.min(4, (areaW + 4) / (nat + 4)));
+        int cw = (areaW - (columns - 1) * 4) / columns;
+        List<Placed> cur = new ArrayList<>();
+        int y = 0;
+        for (int i = 0; i < list.size(); i += columns) {
+            int rowH = 0;
+            for (int k = i; k < Math.min(list.size(), i + columns); k++) rowH = Math.max(rowH, cardH(list.get(k)));
+            if (!cur.isEmpty() && y + rowH > avail) {
                 pages.add(cur);
                 cur = new ArrayList<>();
-                used = 0;
+                y = 0;
             }
-            cur.add(e);
-            used += ch;
+            for (int k = i; k < Math.min(list.size(), i + columns); k++) cur.add(new Placed(list.get(k), (k - i) * (cw + 4), y, cw, rowH));
+            y += rowH + 4;
         }
         if (!cur.isEmpty()) pages.add(cur);
         page = Math.max(0, Math.min(page, pages.size() - 1));
@@ -125,7 +144,7 @@ public class ArcRecipeScreen extends Screen {
 
     @Override
     protected void init() {
-        w = Math.min(width - 16, 360);
+        w = Math.min(width - 16, 460);
         // справа оставляем место под список предметов
         int free = width - w - 16;
         x0 = free >= 110 ? 8 + Math.max(0, (width - 16 - w - 130) / 2) : (width - w) / 2;
@@ -183,12 +202,11 @@ public class ArcRecipeScreen extends Screen {
         g.fill(x0 + 4, y0 + 23, x0 + w - 4, y0 + 24, Draw.alpha(accent, 0x40));
 
         renderTabs(g, mouseX, mouseY, accent);
+        batch.clear();
+        decorations.clear();
         if (!cats.isEmpty() && !pages.isEmpty()) {
-            int cy = y0 + 27;
-            for (RecipeIndex.Entry e : pages.get(page)) {
-                int ch = cardH(e);
-                renderCard(g, e, x0 + 32, cy, w - 36, ch, mouseX, mouseY, accent);
-                cy += ch + 3;
+            for (Placed pl : pages.get(page)) {
+                renderCard(g, pl.e(), x0 + 32 + pl.x(), y0 + 27 + pl.y(), pl.w(), pl.h(), mouseX, mouseY, accent);
             }
             String pg = (page + 1) + " / " + pages.size();
             ResourceLocation c = cats.get(category);
@@ -196,6 +214,8 @@ public class ArcRecipeScreen extends Screen {
             g.drawCenteredString(font, pg, x0 + 32 + (w - 36) / 2, y0 + h - 16, 0xFFCFD8DC);
             Draw.small(g, font, font.plainSubstrByWidth(cname, (int) ((w - 36 - 100) / 0.6F)), x0 + 54, y0 + h - 14, Draw.TEXT_DIM, 0.6F);
         }
+        batch.draw(g, 100F);
+        for (Object[] d : decorations) g.renderItemDecorations(font, (ItemStack) d[0], (Integer) d[1], (Integer) d[2]);
         prevBtn.active = page > 0;
         nextBtn.active = page < pages.size() - 1;
         super.render(g, mouseX, mouseY, pt);
@@ -239,8 +259,8 @@ public class ArcRecipeScreen extends Screen {
         Draw.panel(g, x, y, s, s, 0xE0070A0E, border);
         if (alts.isEmpty()) return;
         ItemStack st = alts.get((int) ((Util.getMillis() / 1000) % alts.size()));
-        g.renderItem(st, x + o, y + o);
-        g.renderItemDecorations(font, st, x + o, y + o);
+        batch.add(st, x + o, y + o);
+        if (st.getCount() > 1) decorations.add(new Object[]{st, x + o, y + o});
         if (mx >= x && mx < x + s && my >= y && my < y + s) {
             g.fill(x + 1, y + 1, x + s - 1, y + s - 1, 0x40FFFFFF);
             hoverStack = st;

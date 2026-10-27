@@ -40,7 +40,7 @@ public abstract class IntegratedCommandsMixin {
             OpCommand.register(d);
             PardonCommand.register(d);
             PardonIpCommand.register(d);
-            SaveAllCommand.register(d);
+            com.arc4io.archud.server.SaveAllIntegrated.register(d);
             SaveOffCommand.register(d);
             SaveOnCommand.register(d);
             SetPlayerIdleTimeoutCommand.register(d);

@@ -1298,7 +1298,7 @@
   "archud.save.button": "Сохранить мир",
   "archud.save.saving": "Сохранение…",
   "archud.save.waiting": "Сохранение… сервер занят (%s с)",
-  "archud.save.done": "Мир сохранён ✔",
+  "archud.save.done": "Мир сохранён (%s мс)",
   "archud.save.done_in": "Мир сохранён (%s с)",
   "archud.save.auto_done": "Автосохранение (%s с)",
   "archud.save.failed": "Не удалось сохранить мир (см. лог)",
@@ -1472,5 +1472,12 @@
   "archud.inv.btn.legends_mastery": "Legends: мастерство персонажа",
   "archud.inv.btn.legends_guild": "Legends: гильдия",
   "archud.loading.resources": "Загрузка ресурсов…",
-  "archud.config.styledLoading": "Экран загрузки ресурсов в стиле Arc HUD"
+  "archud.config.styledLoading": "Экран загрузки ресурсов в стиле Arc HUD",
+  "archud.inv.stats": "Персонаж",
+  "archud.inv.effects": "Эффекты",
+  "archud.inv.no_effects": "нет активных эффектов",
+  "archud.recipes.type.archud.brewing": "Варочная стойка",
+  "archud.recipes.brew_note": "топливо — огненный порошок",
+  "archud.save.error": "Не удалось сохранить мир: %s",
+  "archud.config.guiBatching": "Быстрая отрисовка окон Arc HUD"
 }

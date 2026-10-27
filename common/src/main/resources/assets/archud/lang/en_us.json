@@ -1239,7 +1239,7 @@
   "archud.save.button": "Save world",
   "archud.save.saving": "Saving…",
   "archud.save.waiting": "Saving… server busy (%s s)",
-  "archud.save.done": "World saved ✔",
+  "archud.save.done": "World saved (%s ms)",
   "archud.save.done_in": "World saved (%s s)",
   "archud.save.auto_done": "Autosave (%s s)",
   "archud.save.failed": "Couldn't save the world (see log)",
@@ -1413,5 +1413,12 @@
   "archud.inv.btn.legends_mastery": "Legends: character mastery",
   "archud.inv.btn.legends_guild": "Legends: guild",
   "archud.loading.resources": "Loading resources…",
-  "archud.config.styledLoading": "Arc HUD style resource loading screen"
+  "archud.config.styledLoading": "Arc HUD style resource loading screen",
+  "archud.inv.stats": "Character",
+  "archud.inv.effects": "Effects",
+  "archud.inv.no_effects": "no active effects",
+  "archud.recipes.type.archud.brewing": "Brewing",
+  "archud.recipes.brew_note": "fuel — blaze powder",
+  "archud.save.error": "Could not save the world: %s",
+  "archud.config.guiBatching": "Fast rendering of Arc HUD windows"
 }
