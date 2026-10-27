@@ -1,0 +1,2 @@
+13:[27Oct2026 05:20:26.616] [main/WARN] [net.minecraftforge.jarjar.selection.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: jei. Using Mod File: /tmp/srv/mods/jei.jar
+22:[27Oct2026 05:20:32.260] [modloading-worker-0/INFO] [com.arc4io.archud.ArcHud/]: Arc HUD by arc4io loaded on Forge
