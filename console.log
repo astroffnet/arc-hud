@@ -1,0 +1,83 @@
+Downloading mojang_1.21.1.jar
+Applying patches
+Starting org.bukkit.craftbukkit.Main
+*** Warning, you've not updated in a while! ***
+*** Please download a new build as per instructions from https://papermc.io/downloads/paper ***
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[05:19:59 INFO]: [bootstrap] Running Java 21 (OpenJDK 64-Bit Server VM 21.0.12.1+1-LTS; Eclipse Adoptium Temurin-21.0.12.1+1) on Linux 6.17.0-1022-azure (amd64)
+[05:19:59 INFO]: [bootstrap] Loading Paper 1.21.1-133-ver/1.21.1@3cb8529 (2025-03-28T16:14:36Z) for Minecraft 1.21.1
+[05:20:00 INFO]: [PluginInitializerManager] Initializing plugins...
+[05:20:00 INFO]: [ReobfServer] Remapping server...
+[05:20:06 INFO]: [ReobfServer] Done remapping server in 6152ms.
+[05:20:06 INFO]: [PluginRemapper] Remapping plugin 'plugins/archud-server-bukkit-1.2.0.jar'...
+[05:20:06 INFO]: [PluginRemapper] Done remapping plugin 'plugins/archud-server-bukkit-1.2.0.jar' in 106ms.
+[05:20:06 INFO]: [PluginInitializerManager] Initialized 1 plugin
+[05:20:06 INFO]: [PluginInitializerManager] Bukkit plugins (1):
+ - ArcHUD (1.2.0)
+[05:20:10 INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[05:20:11 INFO]: Found new data pack file/bukkit, loading it automatically
+[05:20:11 INFO]: Found new data pack paper, loading it automatically
+[05:20:11 INFO]: No existing world data, creating new world
+[05:20:12 INFO]: Loaded 1290 recipes
+[05:20:12 INFO]: Loaded 1399 advancements
+[05:20:12 INFO]: Starting minecraft server version 1.21.1
+[05:20:12 INFO]: Loading properties
+[05:20:12 INFO]: This server is running Paper version 1.21.1-133-ver/1.21.1@3cb8529 (2025-03-28T16:14:36Z) (Implementing API version 1.21.1-R0.1-SNAPSHOT)
+[05:20:13 INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
+[05:20:13 INFO]: Server Ping Player Sample Count: 12
+[05:20:13 INFO]: Using 4 threads for Netty based IO
+[05:20:14 INFO]: [ChunkTaskScheduler] Chunk system is using 1 I/O threads, 1 worker threads, and population gen parallelism of 1 threads
+[05:20:14 INFO]: Default game type: SURVIVAL
+[05:20:14 INFO]: Generating keypair
+[05:20:14 INFO]: Starting Minecraft server on *:25565
+[05:20:14 INFO]: Using epoll channel type
+[05:20:14 INFO]: Paper: Using libdeflate (Linux x86_64) compression from Velocity.
+[05:20:14 INFO]: Paper: Using OpenSSL 3.x.x (Linux x86_64) cipher from Velocity.
+[05:20:14 INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+[05:20:14 WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[05:20:14 WARN]: The server will make no attempt to authenticate usernames. Beware.
+[05:20:14 WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[05:20:14 WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[05:20:14 INFO]: Preparing level "world"
+[05:20:27 INFO]: Preparing start region for dimension minecraft:overworld
+[05:20:33 INFO]: Time elapsed: 5956 ms
+[05:20:33 INFO]: Preparing start region for dimension minecraft:the_nether
+[05:20:35 INFO]: Time elapsed: 1894 ms
+[05:20:35 INFO]: Preparing start region for dimension minecraft:the_end
+[05:20:36 INFO]: Time elapsed: 560 ms
+[05:20:36 INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+[05:20:36 INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+[05:20:36 INFO]: [spark] Starting background profiler...
+[05:20:36 INFO]: Done preparing level "world" (21.846s)
+[05:20:36 INFO]: Running delayed init tasks
+[05:20:36 INFO]: Done (38.831s)! For help, type "help"
+[05:20:36 INFO]: *************************************************************************************
+[05:20:36 INFO]: This is the first time you're starting this server.
+[05:20:36 INFO]: It's recommended you read our 'Getting Started' documentation for guidance.
+[05:20:36 INFO]: View this and more helpful information here: https://docs.papermc.io/paper/next-steps
+[05:20:36 INFO]: *************************************************************************************
+[05:20:36 INFO]: Timings Reset
+[05:20:57 INFO]: Stopping the server
+[05:20:57 INFO]: Stopping server
+[05:20:57 INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
+[05:20:57 INFO]: Saving players
+[05:20:57 INFO]: Saving worlds
+[05:20:57 INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[05:20:57 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world'
+[05:20:57 INFO]: [ChunkHolderManager] Halted chunk system for world 'world'
+[05:20:57 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world'
+[05:20:58 INFO]: [ChunkHolderManager] Saved 841 block chunks, 49 entity chunks, 0 poi chunks in world 'world' in 0.97s
+[05:20:58 INFO]: Saving chunks for level 'ServerLevel[world_nether]'/minecraft:the_nether
+[05:20:58 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world_nether'
+[05:20:58 INFO]: [ChunkHolderManager] Halted chunk system for world 'world_nether'
+[05:20:58 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world_nether'
+[05:20:58 INFO]: [ChunkHolderManager] Saved 841 block chunks, 49 entity chunks, 0 poi chunks in world 'world_nether' in 0.28s
+[05:20:58 INFO]: Saving chunks for level 'ServerLevel[world_the_end]'/minecraft:the_end
+[05:20:58 INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'world_the_end'
+[05:20:58 INFO]: [ChunkHolderManager] Halted chunk system for world 'world_the_end'
+[05:20:58 INFO]: [ChunkHolderManager] Saving all chunkholders for world 'world_the_end'
+[05:20:58 INFO]: [ChunkHolderManager] Saved 841 block chunks, 49 entity chunks, 0 poi chunks in world 'world_the_end' in 0.25s
+[05:20:58 INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[05:20:58 INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[05:20:58 INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[05:20:58 INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
