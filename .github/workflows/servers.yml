@@ -22,6 +22,16 @@ jobs:
           - name: fabric
             project: fabric
             java: 17
+          # полный jar + настоящий JEI: должен загрузиться JEI, а не вложенный в Arc HUD API «jei»
+          - name: forge-jei
+            project: forge
+            java: 17
+          - name: forge-full
+            project: forge
+            java: 17
+          - name: fabric-jei
+            project: fabric
+            java: 17
           - name: paper-1.20.1
             project: bukkit
             java: 17
@@ -63,19 +73,26 @@ jobs:
           echo "eula=true" > eula.txt
           printf 'online-mode=false\nspawn-protection=0\nview-distance=4\n' > server.properties
           case "${{ matrix.name }}" in
-            forge)
+            forge|forge-jei|forge-full)
               FV=$(grep '^forge_version' $GITHUB_WORKSPACE/forge/gradle.properties | cut -d= -f2)
               curl -sSLo installer.jar "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-$FV/forge-1.20.1-$FV-installer.jar"
               java -jar installer.jar --installServer > install.log 2>&1
-              mkdir -p mods && cp $GITHUB_WORKSPACE/forge/build/libs/archud-server-forge-*.jar mods/
+              mkdir -p mods
+              if [ "${{ matrix.name }}" = forge ]; then cp $GITHUB_WORKSPACE/forge/build/libs/archud-server-forge-*.jar mods/
+              else cp $(ls $GITHUB_WORKSPACE/forge/build/libs/archud-forge-*.jar | grep -v -e sources -e server) mods/; fi
+              if [ "${{ matrix.name }}" = forge-jei ]; then curl -sSLo mods/jei.jar "https://cdn.modrinth.com/data/u6dRKJwZ/versions/SOmd9h8c/jei-1.20.1-forge-15.74.0.230.jar"; fi
               echo 'bash run.sh nogui' > start.sh ;;
-            fabric)
+            fabric|fabric-jei)
               LV=$(grep '^loader_version' $GITHUB_WORKSPACE/fabric/gradle.properties | cut -d= -f2)
               FA=$(grep '^fabric_version' $GITHUB_WORKSPACE/fabric/gradle.properties | cut -d= -f2)
               curl -sSLo server.jar "https://meta.fabricmc.net/v2/versions/loader/1.20.1/$LV/1.0.1/server/jar"
               mkdir -p mods
               curl -sSLo mods/fabric-api.jar "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$FA/fabric-api-$FA.jar"
-              cp $GITHUB_WORKSPACE/fabric/build/libs/archud-server-fabric-*.jar mods/
+              if [ "${{ matrix.name }}" = fabric ]; then cp $GITHUB_WORKSPACE/fabric/build/libs/archud-server-fabric-*.jar mods/
+              else
+                cp $(ls $GITHUB_WORKSPACE/fabric/build/libs/archud-fabric-*.jar | grep -v -e sources -e server) mods/
+                curl -sSLo mods/jei.jar "https://cdn.modrinth.com/data/u6dRKJwZ/versions/NKdcms4C/jei-1.20.1-fabric-15.74.0.230.jar"
+              fi
               echo 'java -Xmx2G -jar server.jar nogui' > start.sh ;;
             paper-*)
               URL=$(curl -s "https://fill.papermc.io/v3/projects/paper/versions/${{ matrix.mc }}/builds/latest" | jq -r '.downloads."server:default".url')
@@ -96,7 +113,7 @@ jobs:
           # ошибки Arc HUD: миксины, исключения, отключение плагина
           grep -n -i -E "archud|arc hud" server.log | grep -i -E "error|exception|fail|could not|disabl" | grep -v -E "Disabling ArcHUD|\] \[ArcHUD\] Disabling" > archud-errors.txt || true
           if [ -s archud-errors.txt ]; then STATUS=failure; fi
-          grep -n -i -E "archud|arc hud" server.log | head -40 > archud-lines.txt || true
+          grep -n -i -E "archud|arc hud|jei" server.log | head -60 > archud-lines.txt || true
           echo "$GITHUB_SHA $STATUS" > STATUS.txt
           echo "STATUS=$STATUS" >> $GITHUB_ENV
           cat STATUS.txt archud-lines.txt archud-errors.txt

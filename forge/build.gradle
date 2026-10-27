@@ -116,7 +116,7 @@ dependencies {
     if (project.hasProperty('compatMods')) {
         // мод с плагином для JEI (без самого JEI) — проверка моста
         runtimeOnly fg.deobf("maven.modrinth:farmers-delight:SiIpcZzM")
-        runtimeOnly files(layout.buildDirectory.file('jei-api/jei-api-archud-forge.jar')) { builtBy 'jeiApiJar' }
+        runtimeOnly files(layout.buildDirectory.file('jei-api-dev/jei-api-archud-forge-dev.jar')) { builtBy 'jeiApiDevJar' }
     }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
@@ -153,18 +153,21 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 // API JEI отдельным модом «jei» (lowcodefml): классы API из maven + mods.toml и лицензия MIT; переводится в SRG (reobf)
-def jeiApiJar = tasks.register('jeiApiJar', Jar) {
-    archiveFileName = 'jei-api-archud-forge.jar'
-    destinationDirectory = layout.buildDirectory.dir('jei-api')
-    from({ configurations.jeiApi.resolve().collect { zipTree(it) } }) {
+def jeiApiContents = { Jar t, String name, String dir ->
+    t.archiveFileName = name
+    t.destinationDirectory = layout.buildDirectory.dir(dir)
+    t.from({ configurations.jeiApi.resolve().collect { zipTree(it) } }) {
         exclude 'META-INF/**', 'pack.mcmeta', '*.png'
     }
-    from(file('jei-api'))
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest { attributes(['Implementation-Title': 'jei-api', 'Implementation-Version': jei_version, 'Automatic-Module-Name': 'jei.api.archud']) }
+    t.from(file('jei-api'))
+    t.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    t.manifest { attributes(['Implementation-Title': 'jei-api', 'Implementation-Version': jei_version, 'Automatic-Module-Name': 'jei.api.archud']) }
 }
+tasks.register('jeiApiJar', Jar) { jeiApiContents(it, 'jei-api-archud-forge.jar', 'jei-api') }
+// то же без перевода в SRG — для тестового запуска в среде разработки
+tasks.register('jeiApiDevJar', Jar) { jeiApiContents(it, 'jei-api-archud-forge-dev.jar', 'jei-api-dev') }
 reobf {
-    jeiApiJar {}
+    create('jeiApiJar')
 }
 tasks.matching { it.name == 'jeiApiJar' }.configureEach { finalizedBy 'reobfJeiApiJar' }
 

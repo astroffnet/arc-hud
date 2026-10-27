@@ -345,7 +345,10 @@ public final class JeiBridge {
         for (Object[] h : CONTAINER_HANDLERS) {
             if (!((Class<?>) h[0]).isInstance(s) || !(s instanceof AbstractContainerScreen<?> cs)) continue;
             try {
-                for (Rect2i r : ((IGuiContainerHandler) h[1]).getGuiExtraAreas(cs)) out.add(new int[]{r.getX(), r.getY(), r.getWidth(), r.getHeight()});
+                for (Object o : ((IGuiContainerHandler) h[1]).getGuiExtraAreas(cs)) {
+                    Rect2i r = (Rect2i) o;
+                    out.add(new int[]{r.getX(), r.getY(), r.getWidth(), r.getHeight()});
+                }
             } catch (Throwable ignored) {
             }
         }
