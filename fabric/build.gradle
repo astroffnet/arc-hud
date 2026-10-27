@@ -19,6 +19,16 @@ repositories {
         }
         filter { includeGroup 'maven.modrinth' }
     }
+    // API JEI (MIT) — только публичные интерфейсы, для плагинов модов, написанных для JEI
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'BlameJared'
+                url = 'https://maven.blamejared.com'
+            }
+        }
+        filter { includeGroup 'mezz.jei' }
+    }
     maven {
         name = 'TerraformersMC'
         url = 'https://maven.terraformersmc.com/releases/'
@@ -46,7 +56,15 @@ sourceSets.main {
     resources.srcDir '../common/src/main/resources'
 }
 
+configurations {
+    jeiApi
+}
+
 dependencies {
+    // API JEI: компилируемся против него; в jar вкладывается отдельным модом «jei» (только API)
+    compileOnly "mezz.jei:jei-1.20.1-common-api:${project.jei_version}"
+    jeiApi("mezz.jei:jei-1.20.1-common-api:${project.jei_version}") { transitive = false }
+    jeiApi("mezz.jei:jei-1.20.1-fabric-api:${project.jei_version}") { transitive = false }
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     // Официальные маппинги Mojang — те же имена классов, что и в Forge, поэтому общий код один
     mappings loom.officialMojangMappings()
@@ -89,10 +107,58 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
 }
 
+// API JEI отдельным модом «jei»: классы API + fabric.mod.json и лицензия MIT, переведённые в intermediary
+def jeiApiJar = tasks.register('jeiApiJar', Jar) {
+    archiveFileName = 'jei-api-archud-fabric-dev.jar'
+    destinationDirectory = layout.buildDirectory.dir('jei-api')
+    from({ configurations.jeiApi.resolve().collect { zipTree(it) } }) {
+        exclude 'META-INF/**', 'fabric.mod.json', 'pack.mcmeta', '*.png', '*.mixins.json', '*refmap*'
+    }
+    from(file('jei-api'))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+def jeiApiRemap = tasks.register('jeiApiRemapJar', net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn jeiApiJar
+    inputFile = jeiApiJar.flatMap { it.archiveFile }
+    archiveFileName = 'jei-api-archud-fabric.jar'
+    destinationDirectory = layout.buildDirectory.dir('jei-api-remapped')
+    addNestedDependencies = false
+}
+// вложить его в готовый jar (META-INF/jars + список jars в fabric.mod.json)
+def injectJeiApi = tasks.register('injectJeiApi') {
+    dependsOn 'remapJar', jeiApiRemap
+    doLast {
+        def jar = tasks.named('remapJar').get().archiveFile.get().asFile
+        def api = jeiApiRemap.get().archiveFile.get().asFile
+        def text = null
+        new java.util.zip.ZipFile(jar).withCloseable { z -> text = z.getInputStream(z.getEntry('fabric.mod.json')).getText('UTF-8') }
+        def json = new groovy.json.JsonSlurper().parseText(text)
+        def jars = (json.jars ?: []) as List
+        def path = "META-INF/jars/${api.name}"
+        if (!jars.any { it.file == path }) jars << [file: path]
+        json.jars = jars
+        def tmp = new File(buildDir, 'jei-inject')
+        tmp.deleteDir()
+        tmp.mkdirs()
+        def meta = new File(tmp, 'fabric.mod.json')
+        meta.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json)), 'UTF-8')
+        def out = new File(jar.parentFile, jar.name + '.tmp')
+        ant.zip(destfile: out) {
+            zipfileset(src: jar) { exclude(name: 'fabric.mod.json'); exclude(name: path) }
+            zipfileset(file: meta, fullpath: 'fabric.mod.json')
+            zipfileset(file: api, fullpath: path)
+        }
+        jar.delete()
+        out.renameTo(jar)
+    }
+}
+tasks.named('remapJar') { finalizedBy injectJeiApi }
+tasks.named('build') { dependsOn injectJeiApi }
+
 // Серверный jar: тот же мод без клиентских ресурсов (встроенный ресурспак «Родное слово», текстуры, шейдеры,
 // звуки) и без вложенных клиентских модов (CIT Resewn, e4mc) — для выделенного сервера Fabric 1.20.1.
 def serverMeta = tasks.register('serverMeta') {
-    dependsOn 'remapJar'
+    dependsOn 'remapJar', injectJeiApi
     def out = layout.buildDirectory.file('server-meta/fabric.mod.json')
     outputs.file out
     doLast {

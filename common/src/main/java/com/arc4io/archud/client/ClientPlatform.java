@@ -33,6 +33,21 @@ public interface ClientPlatform {
         return 0;
     }
 
+    /** Плагины модов для JEI (классы с @JeiPlugin на Forge, точка входа jei_mod_plugin на Fabric). */
+    default java.util.List<Object> jeiPlugins() {
+        return java.util.List.of();
+    }
+
+    /** Текстура жидкости (в атласе блоков) или null. */
+    default ResourceLocation fluidSprite(net.minecraft.world.level.material.Fluid fluid) {
+        return null;
+    }
+
+    /** Цвет жидкости ARGB. */
+    default int fluidTint(net.minecraft.world.level.material.Fluid fluid) {
+        return fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) ? 0xFF3F76E4 : 0xFFFFFFFF;
+    }
+
     default boolean classicInventory() {
         return false;
     }

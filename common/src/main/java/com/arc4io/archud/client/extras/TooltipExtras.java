@@ -51,7 +51,7 @@ public final class TooltipExtras {
     private static boolean hasRecipeViewer() {
         if (recipeViewer == null) {
             var p = ArcHud.platform();
-            recipeViewer = p.isModLoaded("jei") || p.isModLoaded("roughlyenoughitems") || p.isModLoaded("emi");
+            recipeViewer = com.arc4io.archud.client.jei.JeiGate.realJei() || p.isModLoaded("roughlyenoughitems") || p.isModLoaded("emi");
         }
         return recipeViewer;
     }

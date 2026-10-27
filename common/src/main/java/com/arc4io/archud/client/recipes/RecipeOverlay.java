@@ -51,7 +51,7 @@ public final class RecipeOverlay {
 
     private static boolean otherViewer() {
         if (otherViewer == null) {
-            otherViewer = ArcHud.platform().isModLoaded("jei") || ArcHud.platform().isModLoaded("roughlyenoughitems")
+            otherViewer = com.arc4io.archud.client.jei.JeiGate.realJei() || ArcHud.platform().isModLoaded("roughlyenoughitems")
                     || ArcHud.platform().isModLoaded("emi");
         }
         return otherViewer;
@@ -70,6 +70,10 @@ public final class RecipeOverlay {
             if (l instanceof AbstractWidget wd && wd.visible && wd.getX() >= guiRight - 4 && wd.getX() < guiRight + 60) {
                 r = Math.max(r, wd.getX() + wd.getWidth());
             }
+        }
+        // панели, которые мод объявил для JEI (дополнительные области GUI)
+        for (int[] a : com.arc4io.archud.client.jei.JeiGate.extraAreas(s)) {
+            if (a[0] >= guiRight - 4 && a[0] < guiRight + 120) r = Math.max(r, a[0] + a[2]);
         }
         return r;
     }
@@ -210,6 +214,10 @@ public final class RecipeOverlay {
 
     public static boolean click(Screen s, double mx, double my, int button) {
         if (!enabled()) return false;
+        // «кликабельные области» GUI модов для JEI (стрелка прогресса машины → её рецепты)
+        if (button == 0 && s instanceof AbstractContainerScreen<?> && !otherViewer() && Minecraft.getInstance().player != null
+                && Minecraft.getInstance().player.containerMenu.getCarried().isEmpty() && !inside(mx, my)
+                && com.arc4io.archud.client.jei.JeiGate.clickArea(s, mx, my)) return true;
         if (!listFor(s)) return false;
         ensureAttached(s);
         if (cols == 0) return false;

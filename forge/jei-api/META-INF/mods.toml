@@ -1,0 +1,13 @@
+modLoader="lowcodefml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="jei"
+version="15.74.0.230"
+displayName="JEI API (Arc HUD)"
+authors="mezz"
+description='''
+Only the public JEI API (MIT, mezz), bundled by Arc HUD so that mods' JEI plugins
+show their recipes in Arc HUD's recipe viewer. The real JEI, if installed, replaces it.
+'''

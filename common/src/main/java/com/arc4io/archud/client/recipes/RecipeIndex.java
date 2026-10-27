@@ -37,7 +37,12 @@ import java.util.Set;
 public final class RecipeIndex {
     /** Рецепт в общем виде. alternatives: каждая ячейка — список вариантов (теги, «любая доска»…). */
     public record Entry(ResourceLocation id, ResourceLocation type, Recipe<?> recipe, List<List<ItemStack>> inputs, int gridW,
-                        List<List<ItemStack>> outputs, String note, ItemStack catalyst) {}
+                        List<List<ItemStack>> outputs, String note, ItemStack catalyst, RecipeCard card) {
+        public Entry(ResourceLocation id, ResourceLocation type, Recipe<?> recipe, List<List<ItemStack>> inputs, int gridW,
+                     List<List<ItemStack>> outputs, String note, ItemStack catalyst) {
+            this(id, type, recipe, inputs, gridW, outputs, note, catalyst, null);
+        }
+    }
 
     /** Категория — тип рецепта или особый раздел (топливо, зелья). */
     public record Category(ResourceLocation id, ItemStack icon) {}
@@ -47,6 +52,11 @@ public final class RecipeIndex {
     private static final Map<Item, List<Entry>> BY_OUTPUT = new HashMap<>();
     private static final Map<Item, List<Entry>> BY_INPUT = new HashMap<>();
     private static final Map<ResourceLocation, ItemStack> TYPE_ICON = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, List<Entry>> BY_TYPE = new LinkedHashMap<>();
+    /** Категории модов (через API JEI): название, иконка, станки-катализаторы. */
+    public static final Map<ResourceLocation, net.minecraft.network.chat.Component> TITLES = new HashMap<>();
+    public static final Map<ResourceLocation, java.util.function.BiConsumer<net.minecraft.client.gui.GuiGraphics, int[]>> ICON_DRAWERS = new HashMap<>();
+    public static final Map<ResourceLocation, List<ItemStack>> CATALYSTS = new LinkedHashMap<>();
     private static final Map<Class<?>, List<Field>> FIELDS = new IdentityHashMap<>();
     private static List<ItemStack> allItems = List.of();
 
@@ -65,7 +75,12 @@ public final class RecipeIndex {
         managerSize = recipes.size();
         BY_OUTPUT.clear();
         BY_INPUT.clear();
+        BY_TYPE.clear();
         TYPE_ICON.clear();
+        TITLES.clear();
+        ICON_DRAWERS.clear();
+        CATALYSTS.clear();
+        vanillaCatalysts();
         RegistryAccess ra = mc.level.registryAccess();
         long t0 = System.nanoTime();
         int ok = 0;
@@ -74,13 +89,7 @@ public final class RecipeIndex {
                 Entry e = build(r, ra);
                 if (e == null) continue;
                 ok++;
-                TYPE_ICON.putIfAbsent(e.type(), e.catalyst());
-                Set<Item> outs = new LinkedHashSet<>();
-                for (List<ItemStack> alt : e.outputs()) for (ItemStack s : alt) outs.add(s.getItem());
-                for (Item i : outs) BY_OUTPUT.computeIfAbsent(i, k -> new ArrayList<>()).add(e);
-                Set<Item> ins = new LinkedHashSet<>();
-                for (List<ItemStack> alt : e.inputs()) for (ItemStack s : alt) ins.add(s.getItem());
-                for (Item i : ins) BY_INPUT.computeIfAbsent(i, k -> new ArrayList<>()).add(e);
+                index(e);
             } catch (Throwable t) {
                 // рецепт мода, который не умеет показываться без своего мира — пропускаем
             }
@@ -91,6 +100,9 @@ public final class RecipeIndex {
             ArcHud.LOGGER.warn("Arc HUD: cannot read brewing recipes", t);
         }
         rebuildItems(mc);
+        // плагины модов, написанные для JEI (если самого JEI нет — их понимает Arc HUD)
+        int jei = com.arc4io.archud.client.jei.JeiGate.load();
+        if (jei > 0) ok += jei;
         ArcHud.LOGGER.info("Arc HUD: recipe index — {} of {} recipes, {} items in {} ms", ok, recipes.size(), allItems.size(),
                 (System.nanoTime() - t0) / 1_000_000);
     }
@@ -124,7 +136,48 @@ public final class RecipeIndex {
         return o;
     }
 
+    /** Рецепт из внешнего источника (плагин JEI, страница-подсказка). */
+    public static void addExternal(Entry e) {
+        index(e);
+    }
+
+    /** Категории, которые мод показывает сам (через API JEI): обычный разбор рецептов этого типа больше не нужен. */
+    public static void replaceGenericType(ResourceLocation type) {
+        List<Entry> list = BY_TYPE.get(type);
+        if (list == null) return;
+        List<Entry> generic = new ArrayList<>();
+        for (Entry e : list) if (e.card() == null) generic.add(e);
+        if (generic.size() == list.size()) return; // своих карточек мод не дал — оставляем наши
+        list.removeAll(generic);
+        Set<Entry> drop = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+        drop.addAll(generic);
+        for (List<Entry> l : BY_OUTPUT.values()) l.removeIf(drop::contains);
+        for (List<Entry> l : BY_INPUT.values()) l.removeIf(drop::contains);
+    }
+
+    public static List<Entry> entriesOf(ResourceLocation type) {
+        ensure();
+        return BY_TYPE.getOrDefault(type, List.of());
+    }
+
+    private static void vanillaCatalysts() {
+        CATALYSTS.put(new ResourceLocation("crafting"), new ArrayList<>(List.of(new ItemStack(Items.CRAFTING_TABLE))));
+        CATALYSTS.put(new ResourceLocation("smelting"), new ArrayList<>(List.of(new ItemStack(Items.FURNACE))));
+        CATALYSTS.put(new ResourceLocation("blasting"), new ArrayList<>(List.of(new ItemStack(Items.BLAST_FURNACE))));
+        CATALYSTS.put(new ResourceLocation("smoking"), new ArrayList<>(List.of(new ItemStack(Items.SMOKER))));
+        CATALYSTS.put(new ResourceLocation("campfire_cooking"), new ArrayList<>(List.of(new ItemStack(Items.CAMPFIRE), new ItemStack(Items.SOUL_CAMPFIRE))));
+        CATALYSTS.put(new ResourceLocation("stonecutting"), new ArrayList<>(List.of(new ItemStack(Items.STONECUTTER))));
+        CATALYSTS.put(new ResourceLocation("smithing"), new ArrayList<>(List.of(new ItemStack(Items.SMITHING_TABLE))));
+        CATALYSTS.put(BREWING, new ArrayList<>(List.of(new ItemStack(Items.BREWING_STAND))));
+        CATALYSTS.put(FUEL, new ArrayList<>(List.of(new ItemStack(Items.FURNACE), new ItemStack(Items.BLAST_FURNACE), new ItemStack(Items.SMOKER))));
+    }
+
+    public static List<ItemStack> catalysts(ResourceLocation type) {
+        return CATALYSTS.getOrDefault(type, List.of());
+    }
+
     private static void index(Entry e) {
+        BY_TYPE.computeIfAbsent(e.type(), k -> new ArrayList<>()).add(e);
         TYPE_ICON.putIfAbsent(e.type(), e.catalyst());
         Set<Item> outs = new LinkedHashSet<>();
         for (List<ItemStack> alt : e.outputs()) for (ItemStack st : alt) outs.add(st.getItem());
@@ -229,6 +282,17 @@ public final class RecipeIndex {
             }
             return out;
         });
+    }
+
+    /** Разобрать рецепт в общий вид (для рецептов, которые плагины JEI добавили в стандартные категории). */
+    public static Entry fromRecipe(Recipe<?> r) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return null;
+        try {
+            return build(r, mc.level.registryAccess());
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     private static Entry build(Recipe<?> r, RegistryAccess ra) throws Exception {
@@ -344,6 +408,13 @@ public final class RecipeIndex {
                         net.minecraft.network.chat.Component.translatable("archud.recipes.burn", String.format(java.util.Locale.ROOT, "%.1f", burn / 20F), String.format(java.util.Locale.ROOT, "%.1f", burn / 200F)).getString(), new ItemStack(Items.FURNACE));
                 map.put(FUEL, new ArrayList<>(List.of(fuel)));
             }
+            // предмет — станок категории (верстак, печь, станки модов): показать все её рецепты, как в JEI
+            for (Map.Entry<ResourceLocation, List<ItemStack>> c : CATALYSTS.entrySet()) {
+                boolean is = false;
+                for (ItemStack cs : c.getValue()) is |= cs.getItem() == stack.getItem();
+                List<Entry> all = BY_TYPE.get(c.getKey());
+                if (is && all != null && !all.isEmpty() && !map.containsKey(c.getKey())) map.put(c.getKey(), new ArrayList<>(all));
+            }
         }
         return map;
     }
@@ -359,6 +430,8 @@ public final class RecipeIndex {
 
     public static ItemStack icon(ResourceLocation type) {
         if (type.equals(FUEL)) return new ItemStack(Items.FURNACE);
+        List<ItemStack> cat = CATALYSTS.get(type);
+        if (cat != null && !cat.isEmpty()) return cat.get(0);
         ItemStack s = TYPE_ICON.get(type);
         return s == null ? new ItemStack(Items.BOOK) : s;
     }

@@ -269,6 +269,37 @@ public final class CompatDriver {
         }, null);
         add(30, mc -> {}, "c09_anvil");
         add(10, mc -> closeScreen(mc), null);
+        // плагин Farmer's Delight для JEI (без JEI): его категории в нашем окне рецептов и «кликабельная стрелка» котелка
+        if (ArcHud.platform().isModLoaded("farmersdelight")) {
+            add(5, mc -> {
+                ArcHud.LOGGER.info("[Compat] JEI bridge: api={} real={} categories={}", com.arc4io.archud.client.jei.JeiGate.apiPresent(),
+                        com.arc4io.archud.client.jei.JeiGate.realJei(), com.arc4io.archud.client.recipes.RecipeIndex.TITLES.keySet());
+                cmd(mc, "setblock ~ ~ ~1 farmersdelight:cooking_pot");
+            }, null);
+            add(10, mc -> KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(mc.options.keyUse.saveString())), null);
+            add(20, mc -> ArcHud.LOGGER.info("[Compat] cooking pot screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getName()), "c16_fd_pot");
+            add(5, mc -> {
+                if (mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> s) {
+                    var acc = (com.arc4io.archud.mixin.ContainerScreenAccessor) s;
+                    boolean ok = com.arc4io.archud.client.jei.JeiGate.clickArea(s, acc.archud$left() + 100, acc.archud$top() + 33);
+                    ArcHud.LOGGER.info("[Compat] cooking pot click area: {} -> {}", ok, mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+                }
+            }, null);
+            add(20, mc -> {}, "c17_fd_clickarea");
+            add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+            add(10, mc -> closeScreen(mc), null);
+            add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen,
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "beef_stew"))), false), null);
+            add(20, mc -> {}, "c18_fd_recipe");
+            add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen,
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "cutting_board"))), true), null);
+            add(20, mc -> {}, "c19_fd_board");
+            add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen,
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "tomato"))), false), null);
+            add(20, mc -> {}, "c20_fd_info");
+            add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+            add(10, mc -> closeScreen(mc), null);
+        }
         add(10, mc -> {
             cmd(mc, "tellraw @a [{\"text\":\"<Notch> \"},{\"text\":\"привет, как дела?\"}]");
             cmd(mc, "tellraw @a {\"text\":\"[Сервер] Рестарт через 5 минут\",\"color\":\"gold\"}");
