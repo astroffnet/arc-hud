@@ -1,0 +1,154 @@
+---- Minecraft Crash Report ----
+// Who set us up the TNT?
+
+Time: 2026-10-27 03:19:42
+Description: Arc HUD: recovered crash
+
+java.lang.IllegalStateException: Arc HUD showcase: test crash
+	at com.arc4io.archud.client.dev.ShowcaseDriver.tick(ShowcaseDriver.java:634) ~[main/:?] {re:classloading}
+	at com.arc4io.archud.client.ArcClient.tick(ArcClient.java:37) ~[main/:?] {re:classloading}
+	at com.arc4io.archud.forge.ForgeClient.onClientTick(ForgeClient.java:154) ~[main/:?] {re:classloading}
+	at net.minecraftforge.eventbus.EventBus.doCastFilter(EventBus.java:260) ~[eventbus-6.0.5.jar:?] {}
+	at net.minecraftforge.eventbus.EventBus.lambda$addListener$11(EventBus.java:252) ~[eventbus-6.0.5.jar:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:315) ~[eventbus-6.0.5.jar:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:296) ~[eventbus-6.0.5.jar:?] {}
+	at net.minecraftforge.event.ForgeEventFactory.onPostClientTick(ForgeEventFactory.java:940) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:classloading}
+	at net.minecraft.client.Minecraft.tick(Minecraft.java:1875) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1112) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.archud$runTick(Minecraft.java) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.redirect$zep000$archud$guardedTick(Minecraft.java:3430) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.run(Minecraft.java:718) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.main.Main.main(Main.java:218) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:classloading,pl:runtimedistcleaner:A}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Suspected Mod: 
+	Arc HUD (archud), Version: 1.2.0
+		Issue tracker URL: 
+		at TRANSFORMER/archud@1.2.0/com.arc4io.archud.client.dev.ShowcaseDriver.tick(ShowcaseDriver.java:634)
+Stacktrace:
+	at com.arc4io.archud.client.dev.ShowcaseDriver.tick(ShowcaseDriver.java:634) ~[%23186!/:?] {re:classloading}
+	at com.arc4io.archud.client.ArcClient.tick(ArcClient.java:37) ~[%23186!/:?] {re:classloading}
+	at com.arc4io.archud.forge.ForgeClient.onClientTick(ForgeClient.java:154) ~[%23186!/:?] {re:classloading}
+	at net.minecraftforge.eventbus.EventBus.doCastFilter(EventBus.java:260) ~[eventbus-6.0.5.jar%23106!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.lambda$addListener$11(EventBus.java:252) ~[eventbus-6.0.5.jar%23106!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:315) ~[eventbus-6.0.5.jar%23106!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:296) ~[eventbus-6.0.5.jar%23106!/:?] {}
+	at net.minecraftforge.event.ForgeEventFactory.onPostClientTick(ForgeEventFactory.java:940) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar%23180%23187!/:?] {re:classloading}
+-- Last reload --
+Details:
+	Reload number: 5
+	Reload reason: manual
+	Finished: Yes
+	Packs: vanilla, mod_resources, archud_cit, file/arc_cit_test, file/Rodnoe_slovo_ru_RU_by_arc4io.zip
+Stacktrace:
+	at net.minecraft.client.ResourceLoadStateTracker.fillCrashReport(ResourceLoadStateTracker.java:49) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:classloading,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.fillReport(Minecraft.java:2326) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at com.arc4io.archud.client.crash.AntiCrash.recover(AntiCrash.java:74) ~[main/:?] {re:mixin,re:classloading}
+	at net.minecraft.client.Minecraft.redirect$zep000$archud$guardedTick(Minecraft.java:3432) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.Minecraft.run(Minecraft.java:718) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:mixin,pl:accesstransformer:B,pl:runtimedistcleaner:A,re:classloading,pl:accesstransformer:B,pl:mixin:APP:archud.forge.mixins.json:PerspectiveCycleMixin,pl:mixin:APP:archud.forge.mixins.json:AntiCrashMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftTargetAccessor,pl:mixin:APP:archud.forge.mixins.json:MinecraftUserAccessor,pl:mixin:APP:archud.forge.mixins.json:DynamicFpsMixin,pl:mixin:APP:archud.forge.mixins.json:MinecraftInvoker,pl:mixin:APP:archud.forge.mixins.json:BackgroundReloadMixin,pl:mixin:A,pl:runtimedistcleaner:A}
+	at net.minecraft.client.main.Main.main(Main.java:218) ~[forge-1.20.1-47.3.0_mapped_official_1.20.1.jar:?] {re:classloading,pl:runtimedistcleaner:A}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?] {}
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?] {}
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?] {}
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.3.0.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?] {}
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?] {}
+
+
+-- System Details --
+Details:
+	Minecraft Version: 1.20.1
+	Minecraft Version ID: 1.20.1
+	Operating System: Linux (amd64) version 6.17.0-1022-azure
+	Java Version: 17.0.20.1, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+	Memory: 471749312 bytes (449 MiB) / 1419771904 bytes (1354 MiB) up to 4192206848 bytes (3998 MiB)
+	CPUs: 4
+	Processor Vendor: AuthenticAMD
+	Processor Name: AMD EPYC 9V74 80-Core Processor
+	Identifier: AuthenticAMD Family 25 Model 17 Stepping 1
+	Microarchitecture: Zen 3
+	Frequency (GHz): -0.00
+	Number of physical packages: 1
+	Number of physical CPUs: 2
+	Number of logical CPUs: 4
+	Graphics card #0 name: hyperv_drmdrmfb
+	Graphics card #0 vendor: unknown
+	Graphics card #0 VRAM (MB): 0.00
+	Graphics card #0 deviceId: unknown
+	Graphics card #0 versionInfo: unknown
+	Virtual memory max (MB): 11066.84
+	Virtual memory used (MB): 6606.78
+	Swap memory total (MB): 3072.00
+	Swap memory used (MB): 0.00
+	JVM Flags: 0 total; 
+	Launched Version: MOD_DEV
+	Backend library: LWJGL version 3.3.1 build 7
+	Backend API: llvmpipe (LLVM 20.1.2, 256 bits) GL version 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4, Mesa
+	Window size: 1920x1080
+	GL Caps: Using framebuffer using OpenGL 3.2
+	GL debug messages: 
+	Using VBOs: Yes
+	Is Modded: Definitely; Client brand changed to 'forge'
+	Type: Client (map_client.txt)
+	Graphics mode: fancy
+	Resource Packs: vanilla, mod_resources, archud_cit, file/archud-hot-showcase-res-mod, file/arc_cit_test, file/Rodnoe_slovo_ru_RU_by_arc4io.zip
+	Current Language: ru_ru
+	CPU: 4x AMD EPYC 9V74 80-Core Processor
+	ModLauncher: 10.0.9+10.0.9+main.dcd20f30
+	ModLauncher launch target: forgeclientuserdev
+	ModLauncher naming: mcp
+	ModLauncher services: 
+		mixin-0.8.5.jar mixin PLUGINSERVICE 
+		eventbus-6.0.5.jar eventbus PLUGINSERVICE 
+		fmlloader-1.20.1-47.3.0.jar slf4jfixer PLUGINSERVICE 
+		fmlloader-1.20.1-47.3.0.jar object_holder_definalize PLUGINSERVICE 
+		fmlloader-1.20.1-47.3.0.jar runtime_enum_extender PLUGINSERVICE 
+		fmlloader-1.20.1-47.3.0.jar capability_token_subclass PLUGINSERVICE 
+		accesstransformers-8.0.4.jar accesstransformer PLUGINSERVICE 
+		fmlloader-1.20.1-47.3.0.jar runtimedistcleaner PLUGINSERVICE 
+		modlauncher-10.0.9.jar mixin TRANSFORMATIONSERVICE 
+		modlauncher-10.0.9.jar fml TRANSFORMATIONSERVICE 
+	FML Language Providers: 
+		minecraft@1.0
+		lowcodefml@null
+		javafml@null
+	Mod List: 
+		forge-1.20.1-47.3.0_mapped_official_1.20.1.jar    |Minecraft                     |minecraft                     |1.20.1              |DONE      |Manifest: a1:d4:5e:04:4f:d3:d6:e0:7b:37:97:cf:77:b0:de:ad:4a:47:ce:8c:96:49:5f:0a:cf:8c:ae:b2:6d:4b:8a:3f
+		                                                  |Forge                         |forge                         |47.3.0              |DONE      |Manifest: NOSIGNATURE
+		curios-forge-5.14.1+1.20.1_mapped_official_1.20.1.|Curios API                    |curios                        |5.14.1+1.20.1       |DONE      |Manifest: NOSIGNATURE
+		main                                              |Arc HUD                       |archud                        |1.2.0               |DONE      |Manifest: NOSIGNATURE
+	Crash Report UUID: ebc881d1-6dbc-4012-86fa-2c5692fe04f1
+	FML: 47.3
+	Forge: net.minecraftforge:47.3.0
