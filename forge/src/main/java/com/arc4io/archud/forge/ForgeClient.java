@@ -157,7 +157,18 @@ public final class ForgeClient implements ClientPlatform {
     private static void onScreenOpening(ScreenEvent.Opening event) {
         Screen next = event.getNewScreen();
         Screen swapped = ScreenSwapper.swap(next, event.getCurrentScreen());
-        if (swapped != next) event.setNewScreen(swapped);
+        if (com.arc4io.archud.client.dev.CompatDriver.enabled()) {
+            com.arc4io.archud.ArcHud.LOGGER.info("[Compat] screen opening {} (current {}) -> {}", name(next), name(event.getCurrentScreen()), name(swapped));
+        }
+        if (swapped == null) event.setCanceled(true); // экран придёт с сервера (меню инвентаря с аксессуарами)
+        else if (swapped != next) event.setNewScreen(swapped);
+    }
+
+    private static String name(Screen s) {
+        if (s == null) return "null";
+        String n = s.getClass().getSimpleName();
+        if (s instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> c) n += "[" + c.getMenu().getClass().getSimpleName() + "]";
+        return n;
     }
 
     private static void onScreenInit(ScreenEvent.Init.Post event) {

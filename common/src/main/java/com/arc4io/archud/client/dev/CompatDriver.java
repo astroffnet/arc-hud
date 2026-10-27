@@ -76,7 +76,7 @@ public final class CompatDriver {
             add(5, m -> {
                 m.options.guiScale().set(s);
                 m.resizeDisplay();
-                m.setScreen(null);
+                closeScreen(m);
             }, null);
             add(10, m -> m.setScreen(new InventoryScreen(m.player)), null);
             add(30, m -> ArcHud.LOGGER.info("[Compat] inventory screen at scale {}: {}", s, (m.screen == null ? "none" : m.screen.getClass().getName()) + " menu=" + m.player.containerMenu.getClass().getSimpleName()),
@@ -93,7 +93,7 @@ public final class CompatDriver {
             mc.setScreen(new TitleScreen());
         }, null);
         add(40, mc -> {
-            mc.setScreen(null);
+            closeScreen(mc);
             LevelSettings settings = new LevelSettings("Compat", GameType.SURVIVAL, false, Difficulty.NORMAL, true, new GameRules(),
                     WorldDataConfiguration.DEFAULT);
             mc.createWorldOpenFlows().createFreshLevel("ArcHudCompat", settings, new WorldOptions(20250101L, true, false),
@@ -148,7 +148,7 @@ public final class CompatDriver {
             }
         }, "c02_inv_equipped");
         // надеть аксессуары как игрок: выбрать в хотбаре и нажать ПКМ (у Aether/Curios это надевает в слот)
-        add(10, mc -> mc.setScreen(null), null);
+        add(10, mc -> closeScreen(mc), null);
         for (int k = 0; k < 9; k++) {
             final int slot = k;
             add(4, mc -> {
@@ -185,7 +185,7 @@ public final class CompatDriver {
         add(10, mc -> {
             if (mc.screen != null) ArcHud.LOGGER.info("[Compat] widgets: {}", mc.screen.children().stream().map(c -> c.getClass().getName()).toList());
         }, null);
-        add(10, mc -> mc.setScreen(null), null);
+        add(10, mc -> closeScreen(mc), null);
         // способности Legends: вид от третьего лица спереди, перчатки на руках
         add(20, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT), "c03_idle");
         add(10, mc -> com.arc4io.archud.client.camera.ArcCamera.devView(mc, 90F, 10F), "c03_idle_side");
@@ -206,10 +206,61 @@ public final class CompatDriver {
             add(60, mc -> {}, null);
         }
         add(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON), null);
+        // рюкзак, наковальня, чат
+        add(10, mc -> {
+            cmd(mc, "give @s archud:diamond_backpack");
+            cmd(mc, "give @s minecraft:cobblestone 40");
+            cmd(mc, "give @s minecraft:iron_ingot 20");
+            cmd(mc, "give @s minecraft:diamond_pickaxe");
+            cmd(mc, "give @s minecraft:enchanted_book{StoredEnchantments:[{id:\"minecraft:efficiency\",lvl:4s},{id:\"minecraft:unbreaking\",lvl:3s}]}");
+            cmd(mc, "experience add @s 30 levels");
+            cmd(mc, "setblock ~ ~ ~2 minecraft:anvil");
+        }, null);
+        add(20, mc -> com.arc4io.archud.client.ArcClient.platform().sendToServer(com.arc4io.archud.network.ArcPacket.OPEN_BACKPACK), null);
+        add(30, mc -> ArcHud.LOGGER.info("[Compat] backpack screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c08_backpack");
+        add(10, mc -> closeScreen(mc), null);
+        add(10, mc -> {
+            mc.player.setXRot(45F);
+            mc.player.setYRot(0F);
+            var pos = mc.player.blockPosition().south(2);
+            mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND,
+                    new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
+        }, null);
+        add(20, mc -> {
+            ArcHud.LOGGER.info("[Compat] anvil screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+            if (mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> s) {
+                var menu = s.getMenu();
+                for (int i = 3; i < menu.slots.size(); i++) {
+                    String id = BuiltInRegistries.ITEM.getKey(menu.slots.get(i).getItem().getItem()).getPath();
+                    if (id.equals("diamond_pickaxe")) mc.gameMode.handleInventoryMouseClick(menu.containerId, i, 0, ClickType.QUICK_MOVE, mc.player);
+                }
+                for (int i = 3; i < menu.slots.size(); i++) {
+                    String id = BuiltInRegistries.ITEM.getKey(menu.slots.get(i).getItem().getItem()).getPath();
+                    if (id.equals("enchanted_book")) mc.gameMode.handleInventoryMouseClick(menu.containerId, i, 0, ClickType.QUICK_MOVE, mc.player);
+                }
+            }
+        }, null);
+        add(30, mc -> {}, "c09_anvil");
+        add(10, mc -> closeScreen(mc), null);
+        add(10, mc -> {
+            cmd(mc, "tellraw @a [{\"text\":\"<Notch> \"},{\"text\":\"привет, как дела?\"}]");
+            cmd(mc, "tellraw @a {\"text\":\"[Сервер] Рестарт через 5 минут\",\"color\":\"gold\"}");
+            mc.player.connection.sendChat("Тест чата с головой игрока");
+        }, null);
+        add(20, mc -> mc.setScreen(new net.minecraft.client.gui.screens.ChatScreen("")), "c10_chat");
+        add(10, mc -> mc.setScreen(null), null);
+        add(10, mc -> {}, "c11_chat_hud");
+
         add(20, mc -> {
             ArcHud.LOGGER.info("[Compat] done");
             mc.stop();
         }, null);
+    }
+
+    /** Закрыть экран как игрок (Esc): контейнер закрывается и на сервере. */
+    private static void closeScreen(Minecraft mc) {
+        if (mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> s) s.onClose();
+        else mc.setScreen(null);
     }
 
     public static void init() {
@@ -233,7 +284,7 @@ public final class CompatDriver {
         Step step = STEPS.get(index);
         if (step.delay() < 0) {
             if (mc.level != null && mc.player != null && mc.screen == null) next(mc);
-            else if (mc.level != null && mc.player != null && mc.screen != null && mc.screen.isPauseScreen()) mc.setScreen(null);
+            else if (mc.level != null && mc.player != null && mc.screen != null && mc.screen.isPauseScreen()) closeScreen(mc);
             return;
         }
         if (held != null) held.setDown(true);
