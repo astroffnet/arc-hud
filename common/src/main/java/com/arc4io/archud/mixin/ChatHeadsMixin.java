@@ -18,6 +18,12 @@ public abstract class ChatHeadsMixin {
         return Math.max(40, width - ChatHeads.gutter());
     }
 
+    /** Чат поднят над полосами HUD — клики по строкам сдвигаются так же. */
+    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "screenToChatY", at = @At("HEAD"), argsOnly = true, require = 0)
+    private double archud$chatY(double y) {
+        return com.arc4io.archud.client.screen.ArcChatRenderer.enabled() ? y + com.arc4io.archud.client.hud.HudRenderer.chatLift() : y;
+    }
+
     @Inject(method = "screenToChatX", at = @At("RETURN"), cancellable = true, require = 0)
     private void archud$chatX(double x, CallbackInfoReturnable<Double> cir) {
         int gut = ChatHeads.gutter();

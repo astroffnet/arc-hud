@@ -131,6 +131,14 @@ public final class HudRenderer {
     }
 
     /** Сколько пикселей снизу занимает HUD (для Forge leftHeight/rightHeight, чтобы HUD других модов вставал выше). */
+    private static long occupiedAt;
+
+    /** На сколько поднять чат, чтобы он не налезал на полосы HUD над хотбаром (0 — HUD сейчас не рисуется). */
+    public static int chatLift() {
+        if (net.minecraft.Util.getMillis() - occupiedAt > 250) return 0;
+        return Math.max(0, occupied + 2 - 40);
+    }
+
     public static int occupiedHeight() {
         return occupied;
     }
@@ -408,6 +416,7 @@ public final class HudRenderer {
             }
         }
         occupied = Math.max(54, h - Math.min(leftY, rightY) - 6);
+        occupiedAt = net.minecraft.Util.getMillis();
     }
 
     private static float[] values(ArcHudApi.Bar bar) {

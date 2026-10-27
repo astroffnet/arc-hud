@@ -207,6 +207,10 @@ public final class CompatDriver {
         }
         add(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON), null);
         // просмотр рецептов: список предметов у инвентаря и экран рецептов
+        add(5, mc -> {
+            mc.options.guiScale().set(2);
+            mc.resizeDisplay();
+        }, null);
         add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
         add(30, mc -> {}, "c12_inv_itemlist");
         add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_PICKAXE), false), null);
@@ -215,6 +219,10 @@ public final class CompatDriver {
         add(20, mc -> {}, "c14_uses");
         add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
         add(10, mc -> closeScreen(mc), null);
+        add(5, mc -> {
+            mc.options.guiScale().set(3);
+            mc.resizeDisplay();
+        }, null);
         // рюкзак, наковальня, чат
         add(10, mc -> {
             cmd(mc, "give @s archud:diamond_backpack");
@@ -231,9 +239,10 @@ public final class CompatDriver {
         add(10, mc -> {
             mc.player.setXRot(60F);
             mc.player.setYRot(0F);
-            var pos = mc.player.blockPosition().south(1);
-            mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND,
-                    new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
+        }, null);
+        add(5, mc -> {
+            ArcHud.LOGGER.info("[Compat] looking at {}", mc.hitResult == null ? "nothing" : mc.hitResult.getType());
+            KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(mc.options.keyUse.saveString()));
         }, null);
         add(20, mc -> {
             ArcHud.LOGGER.info("[Compat] anvil screen: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
