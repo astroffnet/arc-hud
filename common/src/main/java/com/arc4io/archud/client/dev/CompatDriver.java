@@ -440,11 +440,13 @@ public final class CompatDriver {
             var c = com.arc4io.archud.config.ArcConfig.get();
             c.shaderEnabled = true;
             c.shaderPlayerShadows = true;
-            mc.player.setXRot(20F);
+            cmd(mc, "tp @s ~ ~ ~-6");
+            mc.player.setXRot(55F);
             mc.player.setYRot(0F);
-            mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
+            mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
         }, null);
         add(30, mc -> {}, "c31_player_shadow");
+        add(5, mc -> cmd(mc, "tp @s ~ ~ ~6"), null);
         add(5, mc -> {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             cmd(mc, "fill ~-1 ~-1 ~3 ~1 ~-1 ~4 minecraft:water");
@@ -455,13 +457,15 @@ public final class CompatDriver {
             mc.player.setXRot(25F);
             mc.player.setYRot(0F);
         }, null);
-        add(30, mc -> {}, "c32_native");
+        add(10, mc -> cmd(mc, "particle minecraft:flame ~ ~1.5 ~4 0.6 0.4 0.6 0 300 force"), null);
+        add(3, mc -> cmd(mc, "particle minecraft:happy_villager ~ ~1.5 ~4 0.6 0.4 0.6 0 200 force"), "c32_native");
         add(5, mc -> {
             var c = com.arc4io.archud.config.ArcConfig.get();
             c.renderScale = 50;
             c.upscaler = 1;
         }, null);
-        add(30, mc -> {}, "c33_fsr50");
+        add(10, mc -> cmd(mc, "particle minecraft:flame ~ ~1.5 ~4 0.6 0.4 0.6 0 300 force"), null);
+        add(3, mc -> cmd(mc, "particle minecraft:happy_villager ~ ~1.5 ~4 0.6 0.4 0.6 0 200 force"), "c33_fsr50");
         add(5, mc -> com.arc4io.archud.config.ArcConfig.get().upscaler = 2, null);
         add(40, mc -> {}, "c34_tsr50");
         add(5, mc -> {
