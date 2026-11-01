@@ -761,6 +761,15 @@ public final class CompatDriver {
         add(10, mc -> ArcHud.LOGGER.info("[Compat] recipe list shown={} screen={} width={}", com.arc4io.archud.client.recipes.RecipeOverlay.shown(),
                 mc.screen == null ? "none" : mc.screen.getClass().getSimpleName(), mc.screen == null ? 0 : mc.screen.width), "c75_list_tooltip");
         add(7, mc -> {}, "c75b_list_tooltip_later");
+        add(3, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().invStatsHidden = true;
+            if (mc.screen != null) mc.screen.init(mc, mc.screen.width, mc.screen.height);
+        }, null);
+        add(10, mc -> {}, "c77_inv_stats_hidden");
+        add(3, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().invStatsHidden = false;
+            if (mc.screen != null) mc.screen.init(mc, mc.screen.width, mc.screen.height);
+        }, null);
         add(5, CompatDriver::closeScreen, null);
         add(5, mc -> {
             var w = mc.getWindow();

@@ -92,12 +92,21 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         return !accessories.isEmpty() || menu.getClass() != net.minecraft.world.inventory.InventoryMenu.class;
     }
 
+    /** Ширина левой карточки: характеристики можно свернуть в узкую полоску с кнопкой «›». */
+    private static int lw() {
+        return com.arc4io.archud.config.ArcConfig.get().invStatsHidden ? 14 : LW;
+    }
+
+    private static boolean statsShown() {
+        return !com.arc4io.archud.config.ArcConfig.get().invStatsHidden;
+    }
+
     private static int coreX() {
-        return LW + GAP;
+        return lw() + GAP;
     }
 
     private static int rightX() {
-        return LW + GAP + CW + GAP;
+        return lw() + GAP + CW + GAP;
     }
 
     @Override
@@ -106,13 +115,21 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
                 && (cls.startsWith("top.theillusivec4.curios") || (cls.startsWith("com.aetherteam") && cls.contains("Accessor")))));
         ModButtons.addShortcuts(minecraft, modButtons);
         hasRight = !accessories.isEmpty() || !modButtons.isEmpty();
-        imageWidth = hasRight ? rightX() + RW : LW + GAP + CW;
+        imageWidth = hasRight ? rightX() + RW : lw() + GAP + CW;
         imageHeight = H;
         ScreenFit.ensure(this, imageWidth + 8, imageHeight + 8);
         super.init();
         layoutSlots();
 
         int cx = leftPos + coreX();
+        // свернуть / развернуть характеристики
+        boolean shown = statsShown();
+        ArcButton statsBtn = shown
+                ? new ArcButton(leftPos + LW - 15, topPos + 3, 12, 11, Component.literal("‹"), b -> toggleStats())
+                : new ArcButton(leftPos + 1, topPos + 1, 12, H - 2, Component.literal("›"), b -> toggleStats());
+        statsBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.translatable(shown ? "archud.inv.stats_hide" : "archud.inv.stats_show")));
+        addRenderableWidget(statsBtn);
         sortBtn = addRenderableWidget(new ArcButton(cx + 100, topPos + 76, 18, 16, Component.empty(),
                 b -> ArcClient.platform().sendToServer(ArcPacket.SORT_INVENTORY)).icon(Icons.SORT));
         sortBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.inv.sort")));
@@ -128,6 +145,13 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
             tempadBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.inv.tempad")));
             tempadIcon = tp.stack().copy();
         }
+    }
+
+    private void toggleStats() {
+        var cfg = com.arc4io.archud.config.ArcConfig.get();
+        cfg.invStatsHidden = !cfg.invStatsHidden;
+        com.arc4io.archud.config.ArcConfig.save();
+        init(minecraft, width, height);
     }
 
     private net.minecraft.world.item.ItemStack tempadIcon = net.minecraft.world.item.ItemStack.EMPTY;
@@ -283,12 +307,17 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         LocalPlayer p = minecraft.player;
 
         // ---------- левая карточка: характеристики и эффекты
-        card(g, x, y, LW, H, accent, Component.translatable("archud.inv.stats").getString());
-        if (p != null) renderStats(g, p, x + 7, y + 17);
-        int effY = y + 17 + 6 * 10 + 6;
-        g.fill(x + 7, effY - 3, x + LW - 7, effY - 2, 0x20FFFFFF);
-        Draw.small(g, font, Component.translatable("archud.inv.effects").getString(), x + 7, effY + 1, Draw.alpha(accent, 0xFF), 0.75F);
-        renderEffects(g, x + 6, effY + 11, LW - 12, y + H - 6);
+        if (statsShown()) {
+            card(g, x, y, LW, H, accent, Component.translatable("archud.inv.stats").getString());
+            if (p != null) renderStats(g, p, x + 7, y + 17);
+            int effY = y + 17 + 6 * 10 + 6;
+            g.fill(x + 7, effY - 3, x + LW - 7, effY - 2, 0x20FFFFFF);
+            Draw.small(g, font, Component.translatable("archud.inv.effects").getString(), x + 7, effY + 1, Draw.alpha(accent, 0xFF), 0.75F);
+            renderEffects(g, x + 6, effY + 11, LW - 12, y + H - 6);
+        } else {
+            chipHits.clear();
+            moreX = -1;
+        }
 
         // ---------- центр: персонаж, крафт, инвентарь
         int c = x + coreX();
