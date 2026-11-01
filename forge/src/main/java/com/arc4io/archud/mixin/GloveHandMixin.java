@@ -16,6 +16,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Перчатки Aether от первого лица: рисуются вместе с рукой, а не отдельным проходом. */
 @Mixin(PlayerRenderer.class)
 public abstract class GloveHandMixin {
+    @Inject(method = "renderRightHand", at = @At("HEAD"), require = 0)
+    private void archud$right(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, CallbackInfo ci) {
+        AetherGloves.fpRight = true;
+    }
+
+    @Inject(method = "renderLeftHand", at = @At("HEAD"), require = 0)
+    private void archud$left(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, CallbackInfo ci) {
+        AetherGloves.fpRight = false;
+    }
+
     @Inject(method = "renderHand", at = @At("HEAD"), require = 0)
     private void archud$handBegin(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve,
                                   CallbackInfo ci) {

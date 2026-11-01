@@ -50,7 +50,9 @@ public final class AetherGloves {
     private static Class<?> glovesItem, glovesRenderer;
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
-    private static int errors, dbg, dbgPart, dbgEnd;
+    private static int errors;
+    /** Какая рука рисуется от первого лица (renderRightHand / renderLeftHand). */
+    public static boolean fpRight = true;
 
     /** Отложенная перчатка: рука уже нарисована, перчатка будет дорисована после модели. */
     private record Pending(boolean right, PoseStack.Pose pose, PartPose part, float sx, float sy, float sz, int light) {}
@@ -119,7 +121,6 @@ public final class AetherGloves {
         PENDING.clear();
         if (!(e instanceof Player) || !(model instanceof HumanoidModel<?> hm) || !enabled()) return;
         ItemStack s = find(e);
-        if (fp && dbg++ < 4) ArcHud.LOGGER.info("[Gloves] begin fp gloves={} model={}", s, model.getClass().getName());
         if (s.isEmpty()) return;
         current = e;
         playerModel = hm;
@@ -131,9 +132,15 @@ public final class AetherGloves {
     /** Рисуется часть модели: если это рука игрока — запомнить её итоговое положение. */
     public static void part(ModelPart part, PoseStack pose, int light) {
         if (current == null || drawing || !part.visible) return;
-        if (firstPerson && dbgPart++ < 6) ArcHud.LOGGER.info("[Gloves] part fp right={} left={}", part == playerModel.rightArm, part == playerModel.leftArm);
-        boolean right = part == playerModel.rightArm;
-        if (!right && part != playerModel.leftArm) return;
+        boolean right;
+        if (firstPerson) {
+            // от первого лица моды могут подменять саму часть руки — берём первую часть, нарисованную в renderHand
+            if (!PENDING.isEmpty()) return;
+            right = fpRight;
+        } else {
+            right = part == playerModel.rightArm;
+            if (!right && part != playerModel.leftArm) return;
+        }
         PoseStack.Pose p = pose.last();
         PoseStack copy = new PoseStack();
         copy.last().pose().set(p.pose());
@@ -148,7 +155,6 @@ public final class AetherGloves {
 
     /** После модели игрока / руки: дорисовать перчатки там, где были руки. */
     public static void end(LivingEntity e) {
-        if (firstPerson && current != null && dbgEnd++ < 4) ArcHud.LOGGER.info("[Gloves] end fp pending={} same={}", PENDING.size(), current == e);
         if (current == null || current != e || drawing) return;
         drawing = true;
         try {
