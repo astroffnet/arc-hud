@@ -50,7 +50,7 @@ public final class AetherGloves {
     private static Class<?> glovesItem, glovesRenderer;
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
-    private static int errors, dbgDraw;
+    private static int errors;
     /** Punchy рисует руку от первого лица сам (своей моделью игрока) — начало и конец его отрисовки руки. */
     public static void punchyArm(LivingEntity player, Object model, boolean right, MultiBufferSource b) {
         fpRight = right;
@@ -99,10 +99,27 @@ public final class AetherGloves {
             getRenderer = Class.forName("top.theillusivec4.curios.api.client.CuriosRendererRegistry").getMethod("getRenderer", Item.class);
             ok = true;
             ArcHud.LOGGER.info("Arc HUD: Aether gloves follow arm animations");
+            takeOverFromPunchy();
         } catch (Throwable t) {
             ok = false;
         }
         return ok;
+    }
+
+    /**
+     * Punchy для Aether переключается на ванильный код рук (чтобы Aether смог надеть перчатку) — тогда анимации Punchy
+     * обрезаны, а перчатка Aether всё равно стоит в ванильном положении. Arc HUD сам надевает перчатку на руку Punchy,
+     * поэтому этот режим совместимости забирается через официальный API Punchy: руки остаются анимированными.
+     */
+    private static void takeOverFromPunchy() {
+        if (!ArcConfig.get().aetherGlovesFix) return;
+        try {
+            Class.forName("punchy.api.PunchyApi").getMethod("remove", String.class).invoke(null, "aether");
+            ArcHud.LOGGER.info("Arc HUD: Punchy keeps its own animated arms, Aether gloves are put on them by Arc HUD");
+        } catch (ClassNotFoundException ignored) {
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: Punchy API call failed: {}", t.toString());
+        }
     }
 
     private static Field field(String name) throws NoSuchFieldException {
@@ -267,7 +284,6 @@ public final class AetherGloves {
         Object renderer = ((Optional<?>) getRenderer.invoke(null, gloves.getItem())).orElse(null);
         if (!glovesRenderer.isInstance(renderer)) return;
         if (firstPerson && duplicate(p)) return;
-        if (firstPerson && dbgDraw++ < 3) ArcHud.LOGGER.info("[Gloves] fp draw light={} pose={}", Integer.toHexString(p.light()), p.pose().pose());
         Item item = gloves.getItem();
         PoseStack pose = new PoseStack();
         pose.last().pose().set(p.pose().pose());
