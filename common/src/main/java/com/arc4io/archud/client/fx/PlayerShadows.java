@@ -24,7 +24,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -109,12 +108,28 @@ public final class PlayerShadows {
         private VertexConsumer out;
         private int alpha;
         private double x, y, z;
+        /** Сдвиг сущности относительно камеры и источник света в координатах сущности (w = 1 — точка, 0 — направление). */
+        private double tx, ty, tz, lx, ly, lz, h;
+        private boolean point;
+        /** Поворот камеры: модель рисуется в мировых осях, а наружу вершины уходят уже в осях камеры. */
+        private org.joml.Matrix4f view;
         private float u, v;
         private boolean started;
 
         void set(VertexConsumer out, int alpha) {
             this.out = out;
             this.alpha = alpha;
+        }
+
+        void light(double tx, double ty, double tz, double lx, double ly, double lz, boolean point, double h) {
+            this.tx = tx;
+            this.ty = ty;
+            this.tz = tz;
+            this.lx = lx;
+            this.ly = ly;
+            this.lz = lz;
+            this.point = point;
+            this.h = h;
         }
 
         @Override
@@ -157,7 +172,19 @@ public final class PlayerShadows {
         public void endVertex() {
             if (!started) return;
             started = false;
-            out.vertex(x, y, z).color(0, 0, 0, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(0F, 1F, 0F).endVertex();
+            // луч от источника через вершину до плоскости земли (с честным делением — без матрицы)
+            double vx = x - tx, vy = y - ty, vz = z - tz, px, pz;
+            if (point) {
+                double top = Math.min(vy, ly - 0.05);
+                double k = (ly - h) / (ly - top);
+                px = lx + (vx - lx) * k;
+                pz = lz + (vz - lz) * k;
+            } else {
+                double k = (vy - h) / ly;
+                px = vx - lx * k;
+                pz = vz - lz * k;
+            }
+            out.vertex(view, (float) (px + tx), (float) (h + ty), (float) (pz + tz)).color(0, 0, 0, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(0F, 1F, 0F).endVertex();
         }
 
         @Override
@@ -269,21 +296,6 @@ public final class PlayerShadows {
 
     // ------------------------------------------------------------------ проекция
 
-    /**
-     * Матрица проекции на плоскость y = h от источника L (в координатах сущности): L = (x, y, z, 1) — точка
-     * (факел), L = (x, y, z, 0) — направление на бесконечно далёкий источник (солнце). M = (n·L)·I − L·nᵀ.
-     */
-    private static Matrix4f shadowMatrix(double lx, double ly, double lz, double lw, double h) {
-        double[] n = {0, 1, 0, -h};
-        double[] l = {lx, ly, lz, lw};
-        double d = n[1] * l[1] + n[3] * l[3];
-        float[] m = new float[16];
-        for (int c = 0; c < 4; c++) {
-            for (int r = 0; r < 4; r++) m[c * 4 + r] = (float) ((r == c ? d : 0) - l[r] * n[c]);
-        }
-        return new Matrix4f().set(m);
-    }
-
     private static boolean casts(Entity e) {
         return e instanceof LivingEntity || e instanceof ItemEntity || e instanceof AbstractMinecart || e instanceof Boat;
     }
@@ -365,7 +377,7 @@ public final class PlayerShadows {
                             double j = samples == 1 ? 0 : (s - 1) * 0.045; // угловой размер солнца
                             double dx = sx + j * 0.7, dz = sz + j, dy = sy;
                             budget -= draw(pose, dispatcher, e, pt, src, wrapped, out, alpha, ex, ey, ez, cam,
-                                    shadowMatrix(dx, dy, dz, 0, g - ey + 0.012 + layer++ * 0.002));
+                                    dx, dy, dz, false, g - ey + 0.012 + layer++ * 0.002);
                         }
                     }
                 }
@@ -410,7 +422,7 @@ public final class PlayerShadows {
                             double j = samples == 1 ? 0 : (s == 0 ? -0.18 : 0.18); // размер пламени
                             double px = lxLocal + j * (-lzLocal / horiz), pz = lzLocal + j * (lxLocal / horiz);
                             budget -= draw(pose, dispatcher, e, pt, src, wrapped, out, alpha, ex, ey, ez, cam,
-                                    shadowMatrix(px, lyLocal, pz, 1, g - ey + 0.012 + layer++ * 0.002));
+                                    px, lyLocal, pz, true, g - ey + 0.012 + layer++ * 0.002);
                         }
                     }
                 }
@@ -423,18 +435,18 @@ public final class PlayerShadows {
 
     private static int draw(PoseStack pose, net.minecraft.client.renderer.entity.EntityRenderDispatcher dispatcher, Entity e, float pt,
                             MultiBufferSource src, ShadowConsumer wrapped, VertexConsumer out, int alpha, double ex, double ey, double ez,
-                            Vec3 cam, Matrix4f m) {
+                            Vec3 cam, double lx, double ly, double lz, boolean point, double h) {
         wrapped.set(out, Math.min(255, alpha));
-        pose.pushPose();
-        pose.translate(ex - cam.x, ey - cam.y, ez - cam.z);
-        pose.mulPoseMatrix(m);
+        wrapped.light(ex - cam.x, ey - cam.y, ez - cam.z, lx, ly, lz, point, h);
+        wrapped.view = pose.last().pose();
+        PoseStack local = new PoseStack();
+        local.translate(ex - cam.x, ey - cam.y, ez - cam.z);
         try {
             @SuppressWarnings({"unchecked", "rawtypes"})
             net.minecraft.client.renderer.entity.EntityRenderer<Entity> r = (net.minecraft.client.renderer.entity.EntityRenderer) dispatcher.getRenderer(e);
-            r.render(e, Mth.lerp(pt, e.yRotO, e.getYRot()), pt, pose, src, 0xF000F0);
+            r.render(e, Mth.lerp(pt, e.yRotO, e.getYRot()), pt, local, src, 0xF000F0);
         } catch (Throwable ignored) {
         }
-        pose.popPose();
         return 1;
     }
 }
