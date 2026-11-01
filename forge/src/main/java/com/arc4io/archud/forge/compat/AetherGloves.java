@@ -51,11 +51,26 @@ public final class AetherGloves {
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
     private static int errors;
+    /** Punchy рисует руку от первого лица сам (своей моделью игрока) — начало и конец его отрисовки руки. */
+    public static void punchyArm(LivingEntity player, Object model, boolean right, MultiBufferSource b) {
+        fpRight = right;
+        begin(player, model, b, true);
+    }
+
     /** Какая рука рисуется от первого лица (renderRightHand / renderLeftHand). */
     public static boolean fpRight = true;
 
     /** Отложенная перчатка: рука уже нарисована, перчатка будет дорисована после модели. */
-    private record Pending(boolean right, PoseStack.Pose pose, PartPose part, float sx, float sy, float sz, int light) {}
+    /** Полная матрица руки — уже после {@code translateAndRotate} (вместе с преобразованиями модов вроде Punchy). */
+    private record Pending(boolean right, PoseStack.Pose pose, int light) {}
+
+    private static Pending capture(boolean right, ModelPart part, PoseStack pose, int light) {
+        PoseStack copy = new PoseStack();
+        copy.last().pose().set(pose.last().pose());
+        copy.last().normal().set(pose.last().normal());
+        part.translateAndRotate(copy);
+        return new Pending(right, copy.last(), light);
+    }
 
     private static LivingEntity current;
     private static HumanoidModel<?> playerModel;
@@ -141,11 +156,7 @@ public final class AetherGloves {
             right = part == playerModel.rightArm;
             if (!right && part != playerModel.leftArm) return;
         }
-        PoseStack.Pose p = pose.last();
-        PoseStack copy = new PoseStack();
-        copy.last().pose().set(p.pose());
-        copy.last().normal().set(p.normal());
-        PENDING.add(new Pending(right, copy.last(), part.storePose(), part.xScale, part.yScale, part.zScale, light));
+        PENDING.add(capture(right, part, pose, light));
     }
 
     /**
@@ -154,10 +165,7 @@ public final class AetherGloves {
      */
     public static void endHand(LivingEntity e, ModelPart arm, PoseStack pose, int light) {
         if (current != null && current == e && firstPerson && PENDING.isEmpty() && arm != null && !drawing) {
-            PoseStack copy = new PoseStack();
-            copy.last().pose().set(pose.last().pose());
-            copy.last().normal().set(pose.last().normal());
-            PENDING.add(new Pending(fpRight, copy.last(), arm.storePose(), arm.xScale, arm.yScale, arm.zScale, light));
+            PENDING.add(capture(fpRight, arm, pose, light));
         }
         end(e);
     }
@@ -192,10 +200,11 @@ public final class AetherGloves {
 
     private static ModelPart arm(HumanoidModel<?> m, Pending p) {
         ModelPart part = p.right() ? m.rightArm : m.leftArm;
-        part.loadPose(p.part());
-        part.xScale = p.sx();
-        part.yScale = p.sy();
-        part.zScale = p.sz();
+        // положение уже в матрице — сама часть перчатки ничего не сдвигает и не поворачивает
+        part.loadPose(PartPose.ZERO);
+        part.xScale = 1F;
+        part.yScale = 1F;
+        part.zScale = 1F;
         part.visible = true;
         if (!firstPerson) PlayerAnimCompat.syncArmBends(playerModel, m);
         return part;

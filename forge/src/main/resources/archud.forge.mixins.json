@@ -32,6 +32,7 @@
     "GloveHandMixin",
     "AetherGlovesRendererMixin",
     "AetherHandOverlayMixin",
+    "PunchyGlovesMixin",
     "PerfEntityRenderMixin",
     "PerfLayerMixin",
     "LivingEntityRendererAccessor",

@@ -290,6 +290,17 @@ public final class CompatDriver {
         add(10, mc -> mc.options.keyShift.setDown(true), null);
         add(8, mc -> {}, "c45_glove_fp_sneak");
         add(3, mc -> mc.options.keyShift.setDown(false), null);
+        // с мечом в руке (Punchy показывает руку и с предметом), удар мечом, ходьба
+        add(5, mc -> mc.player.getInventory().selected = 5, null);
+        add(15, mc -> {}, "c49_glove_fp_sword");
+        add(2, mc -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND), null);
+        add(3, mc -> {}, "c50_glove_fp_sword_swing");
+        add(2, mc -> mc.options.keyUp.setDown(true), null);
+        add(12, mc -> {}, "c51_glove_fp_walk");
+        add(2, mc -> {
+            mc.options.keyUp.setDown(false);
+            mc.player.getInventory().selected = 8;
+        }, null);
         for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c46_glove_fp_ab2"}, {"legendsmod.key.ability_1", "c47_glove_fp_ab1"},
                 {"legendsmod.key.ability_3", "c48_glove_fp_ab3"}}) {
             add(3, mc -> ability(mc, ab[0], true), null);
