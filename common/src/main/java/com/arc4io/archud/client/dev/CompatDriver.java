@@ -751,17 +751,16 @@ public final class CompatDriver {
         }, null);
 
         // список предметов прижат к правому краю, подсказка предмета инвентаря — поверх списка
-        add(5, mc -> mc.player.connection.sendCommand("give @s minecraft:diamond_sword{display:{Lore:['\"Long tooltip line to overlap the item list panel\"']}}"), null);
+        add(5, mc -> mc.player.connection.sendCommand("item replace entity @s hotbar.8 with minecraft:golden_sword{display:{Lore:['\"Tooltip over the item list!!\"']}}"), null);
         add(20, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
         add(10, mc -> {
-            var inv = mc.player.getInventory();
-            net.minecraft.world.item.Item it = null;
-            for (int i = 0; i < inv.getContainerSize() && it == null; i++) if (!inv.getItem(i).isEmpty()) it = inv.getItem(i).getItem();
-            if (it != null) hover(mc, it);
+            net.minecraft.world.item.Item it = net.minecraft.world.item.Items.GOLDEN_SWORD;
+            hover(mc, it);
             ArcHud.LOGGER.info("[Compat] hover for list test: {}", it);
         }, null);
         add(10, mc -> ArcHud.LOGGER.info("[Compat] recipe list shown={} screen={} width={}", com.arc4io.archud.client.recipes.RecipeOverlay.shown(),
                 mc.screen == null ? "none" : mc.screen.getClass().getSimpleName(), mc.screen == null ? 0 : mc.screen.width), "c75_list_tooltip");
+        add(7, mc -> {}, "c75b_list_tooltip_later");
         add(5, CompatDriver::closeScreen, null);
         add(5, mc -> {
             var w = mc.getWindow();

@@ -181,9 +181,7 @@ public final class RecipeOverlay {
 
     /** Кадр и экран, для которых панель уже нарисована (из AbstractContainerScreen.render, до подсказки окна). */
     private static Screen panelDrawnFor;
-    private static long panelDrawnFrame = -1;
-
-    private static long frames;
+    private static long panelDrawnAt;
 
     /** Только панель (без подсказок) — вызывается в конце отрисовки окна, до его собственной подсказки. */
     public static void renderPanel(Screen s, GuiGraphics g) {
@@ -193,13 +191,15 @@ public final class RecipeOverlay {
         double my = mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / Math.max(1, mc.getWindow().getScreenHeight());
         drawPanel(s, g, (int) mx, (int) my);
         panelDrawnFor = s;
-        panelDrawnFrame = frames;
+        panelDrawnAt = net.minecraft.Util.getMillis();
     }
 
     /** После всей отрисовки окна: панель (если окно её не нарисовало), подсказка предмета списка, перетаскивание. */
     public static void render(Screen s, GuiGraphics g, int mx, int my) {
-        boolean drawn = panelDrawnFor == s && panelDrawnFrame == frames;
-        frames++;
+        // окно рисует панель само (до своей подсказки). Кэш окон (GuiCache) перерисовывает окно не каждый кадр —
+        // в промежуточных кадрах панель уже есть в готовой картинке, поверх её рисовать нельзя (мигание и
+        // панель поверх подсказки). Сами рисуем, только если окно не вызывало отрисовку контейнера вовсе.
+        boolean drawn = panelDrawnFor == s && net.minecraft.Util.getMillis() - panelDrawnAt < 3000;
         if (!drawn) drawPanel(s, g, mx, my);
         if (!listFor(s) || cols == 0) return;
         Minecraft mc = Minecraft.getInstance();
@@ -226,7 +226,7 @@ public final class RecipeOverlay {
         int perPage = cols * rows;
         if (pageStart >= list.size()) pageStart = 0;
         g.pose().pushPose();
-        g.pose().translate(0, 0, 200);
+        // без подъёма по глубине: предметы списка не должны перекрывать подсказку окна (она на z=400)
         Draw.panel(g, x - 2, y, w + 2, h, 0xF00B0F14, Draw.alpha(accent, 0x50));
         // страница
         int pages = Math.max(1, (list.size() + perPage - 1) / perPage);
