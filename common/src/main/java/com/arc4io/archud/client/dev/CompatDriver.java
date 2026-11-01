@@ -672,14 +672,16 @@ public final class CompatDriver {
             cmd(mc, "spawnpoint @s " + bx + " " + by + " " + bz);
             bed = new int[]{bx, by, bz};
         }, null);
-        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint before break={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
-                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN)), null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint before break={} respawn={} block={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
+                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN), com.arc4io.archud.client.map.WaypointManager.respawnInfo(),
+                mc.level.getBlockState(new net.minecraft.core.BlockPos(bed[0], bed[1], bed[2]))), null);
         add(5, mc -> {
             cmd(mc, "setblock " + bed[0] + " " + bed[1] + " " + bed[2] + " minecraft:air");
             cmd(mc, "setblock " + (bed[0] + 1) + " " + bed[1] + " " + bed[2] + " minecraft:air");
         }, null);
-        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint after break={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
-                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN)), null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint after break={} respawn={} block={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
+                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN), com.arc4io.archud.client.map.WaypointManager.respawnInfo(),
+                mc.level.getBlockState(new net.minecraft.core.BlockPos(bed[0], bed[1], bed[2]))), null);
         // консоль «~»
         add(5, mc -> mc.setScreen(new com.arc4io.archud.client.console.ConsoleScreen()), null);
         add(5, mc -> {
@@ -720,7 +722,7 @@ public final class CompatDriver {
                 com.arc4io.archud.config.ArcConfig.get().shaderPack = idx < packs.size() ? packs.get(idx) : "";
                 com.arc4io.archud.client.fx.pack.PackPipeline.reload();
             }, null);
-            add(40, mc -> ArcHud.LOGGER.info("[Compat] shader pack {} status: {}", com.arc4io.archud.config.ArcConfig.get().shaderPack,
+            add(60, mc -> ArcHud.LOGGER.info("[Compat] shader pack {} status: {}", com.arc4io.archud.config.ArcConfig.get().shaderPack,
                     com.arc4io.archud.client.fx.pack.PackPipeline.describe()), "c7" + idx + "_shaderpack");
         }
         add(5, mc -> {

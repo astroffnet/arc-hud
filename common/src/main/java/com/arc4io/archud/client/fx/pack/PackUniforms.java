@@ -81,6 +81,12 @@ public final class PackUniforms {
         v.put("fogStart", RenderSystem.getShaderFogStart());
         v.put("fogEnd", RenderSystem.getShaderFogEnd());
         v.put("fogDensity", 0.0F);
+        float fs = RenderSystem.getShaderFogStart(), fe = RenderSystem.getShaderFogEnd();
+        v.put("archud_Fog.color", new float[]{RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2], 1F});
+        v.put("archud_Fog.start", fs);
+        v.put("archud_Fog.end", fe);
+        v.put("archud_Fog.density", 0.0F);
+        v.put("archud_Fog.scale", fe > fs ? 1F / (fe - fs) : 0F);
         if (mc.level != null) {
             long day = mc.level.getDayTime();
             v.put("worldTime", (int) (day % 24000L));
