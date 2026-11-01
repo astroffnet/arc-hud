@@ -76,6 +76,8 @@ public final class WaypointManager {
     }
 
     /** Кровать / якорь сломаны — метки точки возрождения больше нет (проверяется, когда чанк загружен). */
+    private static int respawnCheckTick;
+
     private static void checkRespawnBlock(Minecraft mc) {
         if (respawnPos == null || respawnDim == null || mc.level == null || mc.player == null) return;
         if (!respawnDim.equals(mc.level.dimension().location().toString()) || !mc.level.isLoaded(respawnPos)) return;
@@ -235,7 +237,8 @@ public final class WaypointManager {
             loadRespawn();
         }
         trackBed(mc);
-        if (mc.level.getGameTime() % 20 == 0) checkRespawnBlock(mc);
+        // своё счётчик тиков: время мира на клиенте подправляется сервером и может «перепрыгивать» кратные 20
+        if (++respawnCheckTick % 20 == 0) checkRespawnBlock(mc);
         trackDeath(mc);
     }
 
