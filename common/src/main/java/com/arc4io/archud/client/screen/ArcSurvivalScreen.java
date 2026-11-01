@@ -50,7 +50,7 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
     private boolean hasRight;
     private int accScroll, accRows, accVisibleRows, accY;
     private float xMouse, yMouse;
-    private ArcButton sortBtn, packBtn;
+    private ArcButton sortBtn, packBtn, tempadBtn;
     private final List<MobEffectInstance> hiddenEffects = new ArrayList<>();
     private final List<int[]> chipHits = new ArrayList<>();
     private final List<MobEffectInstance> chipList = new ArrayList<>();
@@ -121,6 +121,43 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         packBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("key.archud.backpack")));
         // рюкзак открывается и надетый, и лежащий в инвентаре/руке — кнопка всегда доступна (сервер скажет, если рюкзака нет)
         packBtn.active = true;
+        // Tempad: если он есть в инвентаре или в слоте браслета — открыть его экран прямо отсюда
+        var tp = com.arc4io.archud.compat.TempadCompat.find(minecraft.player);
+        if (tp != null) {
+            tempadBtn = addRenderableWidget(new ArcButton(cx + 140, topPos + 76, 18, 16, Component.empty(), b -> openTempad()));
+            tempadBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.inv.tempad")));
+            tempadIcon = tp.stack().copy();
+        }
+    }
+
+    private net.minecraft.world.item.ItemStack tempadIcon = net.minecraft.world.item.ItemStack.EMPTY;
+
+    /** Открыть Tempad: через сервер Arc HUD (из любого места инвентаря), иначе — если он на хотбаре, «использовать» его. */
+    private void openTempad() {
+        if (com.arc4io.archud.client.ArcClientNet.tempadDoors()) {
+            com.arc4io.archud.client.ArcClientNet.tempadScreen();
+            return;
+        }
+        var inv = minecraft.player.getInventory();
+        for (int i = 0; i < 9; i++) {
+            if (com.arc4io.archud.compat.TempadCompat.isTempad(inv.getItem(i))) {
+                inv.selected = i;
+                onClose();
+                minecraft.gameMode.useItem(minecraft.player, net.minecraft.world.InteractionHand.MAIN_HAND);
+                return;
+            }
+        }
+        if (com.arc4io.archud.compat.TempadCompat.isTempad(minecraft.player.getOffhandItem())) {
+            onClose();
+            minecraft.gameMode.useItem(minecraft.player, net.minecraft.world.InteractionHand.OFF_HAND);
+            return;
+        }
+        minecraft.player.displayClientMessage(Component.translatable("archud.inv.tempad_need_server"), true);
+    }
+
+    /** Для теста: центр кнопки Tempad (или null). */
+    public int[] debugTempadButton() {
+        return tempadBtn == null ? null : new int[]{tempadBtn.getX() + tempadBtn.getWidth() / 2, tempadBtn.getY() + tempadBtn.getHeight() / 2};
     }
 
     /** Для теста: центр кнопки сортировки (0) или рюкзака (1). */
@@ -199,6 +236,13 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         yMouse = mouseY;
         renderBackground(g);
         super.render(g, mouseX, mouseY, pt);
+        if (tempadBtn != null && !tempadIcon.isEmpty()) {
+            g.pose().pushPose();
+            g.pose().translate(tempadBtn.getX() + 1, tempadBtn.getY(), 200);
+            g.pose().scale(1F, 1F, 1F);
+            g.renderItem(tempadIcon, 0, 0);
+            g.pose().popPose();
+        }
         for (ModButtons.Entry e : modButtons) e.render(g, mouseX, mouseY, pt);
         renderTooltip(g, mouseX, mouseY);
         for (ModButtons.Entry e : modButtons) {

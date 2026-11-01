@@ -106,7 +106,24 @@ public final class GameRestarter {
                     Component.translatable("archud.mods.changed"), Component.translatable("archud.mods.restart_manual"));
             return;
         }
-        // куда вернуться после перезапуска
+        String resume = writeResume(mc);
+        Path workDir = Path.of(System.getProperty("user.dir"));
+        ModWatcher.log("restarting: " + cmd.get(0) + " … (" + cmd.size() + " args), resume=" + resume);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                new ProcessBuilder(cmd).directory(workDir.toFile())
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                        .redirectError(ProcessBuilder.Redirect.DISCARD)
+                        .start();
+            } catch (Exception e) {
+                System.err.println("[Arc HUD] restart failed: " + e);
+            }
+        }, "ArcHud-Restart"));
+        stopGame(mc);
+    }
+
+    /** Куда вернуться после перезапуска (мир или сервер). */
+    static String writeResume(Minecraft mc) {
         String resume = null;
         if (mc.getSingleplayerServer() != null) {
             Path root = mc.getSingleplayerServer().getWorldPath(LevelResource.ROOT).toAbsolutePath().normalize();
@@ -120,19 +137,11 @@ public final class GameRestarter {
             else Files.deleteIfExists(f);
         } catch (Exception ignored) {
         }
-        Path workDir = Path.of(System.getProperty("user.dir"));
-        ModWatcher.log("restarting: " + cmd.get(0) + " … (" + cmd.size() + " args), resume=" + resume);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                new ProcessBuilder(cmd).directory(workDir.toFile())
-                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                        .redirectError(ProcessBuilder.Redirect.DISCARD)
-                        .start();
-            } catch (Exception e) {
-                System.err.println("[Arc HUD] restart failed: " + e);
-            }
-        }, "ArcHud-Restart"));
-        // как «Выйти в меню»: сохранить мир / отключиться, затем закрыть игру
+        return resume;
+    }
+
+    /** Как «Выйти в меню»: сохранить мир / отключиться, затем закрыть игру. */
+    static void stopGame(Minecraft mc) {
         if (mc.level != null) {
             boolean local = mc.isLocalServer();
             mc.level.disconnect();

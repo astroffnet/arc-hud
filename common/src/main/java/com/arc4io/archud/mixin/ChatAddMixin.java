@@ -14,6 +14,7 @@ public abstract class ChatAddMixin {
             at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
     private Component archud$decorate(Component msg) {
         com.arc4io.archud.client.screen.GuiCache.invalidate(com.arc4io.archud.client.screen.GuiCache.CHAT);
+        com.arc4io.archud.client.console.ConsoleScreen.log(msg);
         return ChatExtras.process((ChatComponent) (Object) this, msg);
     }
 }

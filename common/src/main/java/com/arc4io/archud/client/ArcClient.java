@@ -102,6 +102,9 @@ public final class ArcClient {
             mc.player.displayClientMessage(Component.translatable(cfg.bunnyHop ? "archud.msg.bhop_on" : "archud.msg.bhop_off")
                     .withStyle(cfg.bunnyHop ? ChatFormatting.GREEN : ChatFormatting.RED), true);
         }
+        while (ArcKeys.CONSOLE.consumeClick()) {
+            if (mc.screen == null) mc.setScreen(new com.arc4io.archud.client.console.ConsoleScreen());
+        }
         while (ArcKeys.OPEN_CONFIG.consumeClick()) {
             if (mc.screen == null) mc.setScreen(new ArcConfigScreen(null));
         }

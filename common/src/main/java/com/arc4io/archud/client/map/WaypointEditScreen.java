@@ -20,6 +20,8 @@ public class WaypointEditScreen extends ArcScreen {
     /** Выбранная иконка (null — ромб с буквами). */
     private String icon;
     private static final int ICON_CELL = 18, ICON_COLS = 15;
+    /** Администратор: метка станет глобальной (её сразу увидят все игроки). */
+    private boolean global;
 
     public WaypointEditScreen(Screen parent, Waypoint wp, boolean isNew) {
         super(Component.translatable(isNew ? "archud.wp.new" : "archud.wp.edit"), parent);
@@ -49,8 +51,17 @@ public class WaypointEditScreen extends ArcScreen {
         addRenderableWidget(new ArcButton(lx + 60, py + 72, w - 60, 18, Component.translatable("archud.wp.color"), b -> {
             colorIndex = (colorIndex + 1) % Waypoint.PALETTE.length;
         })).active = editable;
-        addRenderableWidget(CycleButton.onOffBuilder(wp.visible).create(lx, py + 136, w, 20, Component.translatable("archud.wp.visible"),
-                (b, v) -> wp.visible = v));
+        boolean canGlobal = WaypointManager.globalCanEdit() && editable;
+        addRenderableWidget(CycleButton.onOffBuilder(wp.visible).create(lx, py + 136, canGlobal ? (w - 4) / 2 : w, 20,
+                Component.translatable("archud.wp.visible"), (b, v) -> {
+                    if (isNew) wp.visible = v;
+                    else WaypointManager.setVisible(wp, v);
+                }));
+        if (canGlobal) {
+            addRenderableWidget(CycleButton.onOffBuilder(global).withTooltip(v -> net.minecraft.client.gui.components.Tooltip.create(
+                            Component.translatable("archud.wp.global.tooltip")))
+                    .create(lx + (w - 4) / 2 + 4, py + 136, w - (w - 4) / 2 - 4, 20, Component.translatable("archud.wp.global"), (b, v) -> global = v));
+        }
         if (!isNew) {
             // действия — только для уже сохранённой метки
             int bw = (w - 8) / 3;
@@ -74,11 +85,13 @@ public class WaypointEditScreen extends ArcScreen {
             // новая метка: «Отмена» (как и Esc) — ничего не сохраняется
             addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("gui.cancel"), b -> onClose()));
         } else {
+            boolean globalAdmin = wp.source == Waypoint.Source.GLOBAL && WaypointManager.globalCanEdit();
             ArcButton del = addRenderableWidget(new ArcButton(lx, py + ph - 24, 90, 18, Component.translatable("archud.wp.delete"), b -> {
-                WaypointManager.remove(wp);
+                if (wp.source == Waypoint.Source.GLOBAL) com.arc4io.archud.client.ArcClientNet.globalRemove(wp);
+                else WaypointManager.remove(wp);
                 onClose();
             }).danger());
-            del.active = editable;
+            del.active = editable || globalAdmin;
         }
         addRenderableWidget(new ArcButton(px + pw - 108, py + ph - 24, 100, 18, Component.translatable("gui.done"), b -> save()));
     }
@@ -140,7 +153,13 @@ public class WaypointEditScreen extends ArcScreen {
             wp.z = parse(z, wp.z);
             wp.color = Waypoint.PALETTE[colorIndex];
             wp.icon = icon;
-            WaypointManager.add(wp);
+            if (global) {
+                // глобальная метка хранится на сервере и приходит всем, в т.ч. обратно нам
+                com.arc4io.archud.client.ArcClientNet.globalAdd(wp);
+                if (!isNew) WaypointManager.remove(wp);
+            } else {
+                WaypointManager.add(wp);
+            }
         }
         onClose();
     }

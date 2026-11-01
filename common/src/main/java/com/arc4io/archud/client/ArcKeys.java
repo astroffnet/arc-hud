@@ -46,7 +46,10 @@ public final class ArcKeys {
 
     public static final KeyMapping SAVE_WORLD = new KeyMapping("key.archud.save_world", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F7, CATEGORY);
 
-    public static final List<KeyMapping> ALL = List.of(SAVE_WORLD, ZOOM, FREELOOK, FULLBRIGHT, COPY_COORDS, CLEAN_SCREENSHOT, AUTO_SPRINT, CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
+    /** Консоль как в играх на Source (клавиша «~» / «Ё»). */
+    public static final KeyMapping CONSOLE = new KeyMapping("key.archud.console", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, CATEGORY);
+
+    public static final List<KeyMapping> ALL = List.of(CONSOLE, SAVE_WORLD, ZOOM, FREELOOK, FULLBRIGHT, COPY_COORDS, CLEAN_SCREENSHOT, AUTO_SPRINT, CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
             WORLD_MAP, ADD_WAYPOINT, WAYPOINTS, ZOOM_IN, ZOOM_OUT, HOST_PANEL, RECIPES, USES);
 
     private ArcKeys() {}

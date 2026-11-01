@@ -42,6 +42,7 @@ public abstract class GameRendererCamMixin {
             target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
     private void archud$lens(float partialTick, long nanoTime, boolean renderLevel, CallbackInfo ci) {
         com.arc4io.archud.client.fx.RenderScale.end();
+        com.arc4io.archud.client.fx.pack.PackPipeline.process(partialTick);
         com.arc4io.archud.client.fx.ArcEffects.process(partialTick);
         FirstPersonCam.postProcess(partialTick);
     }

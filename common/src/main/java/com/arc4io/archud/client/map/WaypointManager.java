@@ -33,6 +33,11 @@ public final class WaypointManager {
     private static final List<Waypoint> SHARED = new CopyOnWriteArrayList<>();
     private static long modCacheTime;
     private static String worldKey = "";
+    /** Глобальные метки администратора (с сервера): видят все, удалить может только администратор. */
+    private static final List<Waypoint> GLOBAL = new CopyOnWriteArrayList<>();
+    private static boolean globalCanEdit;
+    /** Скрытые у себя метки любого типа (ключи {@link Waypoint#key()}), по миру. */
+    private static final java.util.Set<String> HIDDEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private WaypointManager() {}
 
@@ -49,6 +54,37 @@ public final class WaypointManager {
                     Waypoint.Source.SPAWN);
             return List.of(w);
         });
+        // путеводные камни: компасы, привязанные к путеводному камню, в инвентаре
+        PROVIDERS.add(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null) return List.of();
+            List<Waypoint> out = new ArrayList<>();
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            var inv = mc.player.getInventory();
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                net.minecraft.world.item.ItemStack st = inv.getItem(i);
+                if (st.isEmpty() || !net.minecraft.world.item.CompassItem.isLodestoneCompass(st) || st.getTag() == null) continue;
+                net.minecraft.core.GlobalPos gp = net.minecraft.world.item.CompassItem.getLodestonePosition(st.getTag());
+                if (gp == null) continue;
+                String dim = gp.dimension().location().toString();
+                if (!seen.add(dim + gp.pos().asLong())) continue;
+                String name = st.hasCustomHoverName() ? st.getHoverName().getString() : Component.translatable("archud.wp.lodestone").getString();
+                out.add(new Waypoint(name, gp.pos().getX(), gp.pos().getY() + 1, gp.pos().getZ(), 0xFFB0BEC5, dim, Waypoint.Source.LODESTONE));
+            }
+            return out;
+        });
+    }
+
+    /** Кровать / якорь сломаны — метки точки возрождения больше нет (проверяется, когда чанк загружен). */
+    private static void checkRespawnBlock(Minecraft mc) {
+        if (respawnPos == null || respawnDim == null || mc.level == null || mc.player == null) return;
+        if (!respawnDim.equals(mc.level.dimension().location().toString()) || !mc.level.isLoaded(respawnPos)) return;
+        if (!mc.level.hasChunk(respawnPos.getX() >> 4, respawnPos.getZ() >> 4)) return;
+        net.minecraft.world.level.block.Block b = mc.level.getBlockState(respawnPos).getBlock();
+        boolean ok = respawnAnchor ? b instanceof net.minecraft.world.level.block.RespawnAnchorBlock : b instanceof net.minecraft.world.level.block.BedBlock;
+        if (ok) return;
+        setRespawn(null, null, false, false);
+        respawnFromServer = false;
     }
 
     public static void setRespawn(String dim, net.minecraft.core.BlockPos pos, boolean anchor, boolean fromServer) {
@@ -113,7 +149,12 @@ public final class WaypointManager {
         }
         List<Waypoint> out = new ArrayList<>(USER);
         out.addAll(SHARED);
+        out.addAll(GLOBAL);
         out.addAll(modCache);
+        for (Waypoint w : out) {
+            // у своих меток видимость хранится в самой метке, у остальных (пересоздаются) — в списке скрытых
+            if (!w.editable() || w.source == Waypoint.Source.SHARED) w.visible = !HIDDEN.contains(w.key());
+        }
         return out;
     }
 
@@ -189,9 +230,20 @@ public final class WaypointManager {
             loadRespawn();
         }
         trackBed(mc);
+        if (mc.level.getGameTime() % 20 == 0) checkRespawnBlock(mc);
+    }
+
+    private static Path hiddenFile() {
+        return ArcHud.platform().configDir().resolve("archud").resolve("waypoints").resolve(worldKey + ".hidden.txt");
     }
 
     private static void load() {
+        HIDDEN.clear();
+        try {
+            Path h = hiddenFile();
+            if (Files.exists(h)) HIDDEN.addAll(Files.readAllLines(h, StandardCharsets.UTF_8));
+        } catch (Exception ignored) {
+        }
         USER.clear();
         try {
             Path f = file();
@@ -347,9 +399,42 @@ public final class WaypointManager {
         boolean multi = !SHARED.isEmpty() || (mc.getConnection() != null && !mc.isSingleplayer())
                 || (mc.getSingleplayerServer() != null && mc.getSingleplayerServer().isPublished());
         if (multi) out.add(Waypoint.Source.SHARED);
+        if (!GLOBAL.isEmpty() || globalCanEdit()) out.add(Waypoint.Source.GLOBAL);
+        out.add(Waypoint.Source.LODESTONE);
         if (ArcHud.platform().isModLoaded("waystones")) out.add(Waypoint.Source.WAYSTONE);
         if (ArcHud.platform().isModLoaded("tempad")) out.add(Waypoint.Source.TEMPAD);
         return out;
+    }
+
+    /** Показать / скрыть метку у себя (любого типа: свои, общие, глобальные, кровать, Tempad, вэйстоуны…). */
+    public static void setVisible(Waypoint w, boolean visible) {
+        w.visible = visible;
+        if (w.editable() && w.source != Waypoint.Source.SHARED) {
+            save();
+            return;
+        }
+        if (visible) HIDDEN.remove(w.key());
+        else HIDDEN.add(w.key());
+        modCacheTime = 0;
+        try {
+            Path h = hiddenFile();
+            Files.createDirectories(h.getParent());
+            Files.write(h, new ArrayList<>(HIDDEN), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("Arc HUD: cannot save hidden waypoints", e);
+        }
+    }
+
+    // ------------------------------------------------------------------ глобальные метки администратора
+    public static void setGlobal(List<Waypoint> list, boolean canEdit) {
+        GLOBAL.clear();
+        GLOBAL.addAll(list);
+        globalCanEdit = canEdit;
+    }
+
+    /** Этот игрок — администратор: может создавать и удалять глобальные метки. */
+    public static boolean globalCanEdit() {
+        return globalCanEdit && com.arc4io.archud.client.ArcClientNet.connected();
     }
 
     public static boolean sourceVisible(Waypoint.Source s) {
@@ -371,6 +456,8 @@ public final class WaypointManager {
 
     public static void clearShared() {
         SHARED.clear();
+        GLOBAL.clear();
+        globalCanEdit = false;
     }
 
     /** Поделиться меткой с игроком (target = ник) или со всеми (target пустой). Без Arc HUD на сервере — в чат. */

@@ -40,6 +40,7 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
     Auth auth;
     Admin admin;
     AntiEsp antiEsp;
+    GlobalStore global;
     private int tick;
 
     @Override
@@ -50,6 +51,7 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
         auth = new Auth(this);
         admin = new Admin(this);
         antiEsp = new AntiEsp(this);
+        global = new GlobalStore(this);
         var m = getServer().getMessenger();
         m.registerIncomingPluginChannel(this, FABRIC_IN, this);
         m.registerIncomingPluginChannel(this, FORGE, this);
@@ -128,6 +130,8 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
             case "safe_tp" -> {
                 if (arcPlayers.contains(p.getUniqueId())) safeTp(p, buf);
             }
+            case "wp_global_add" -> global.onAdd(p, buf);
+            case "wp_global_remove" -> global.onRemove(p, buf);
             case "admin_open", "admin_refresh" -> admin.sendState(p);
             case "admin_action" -> admin.onAction(p, buf.readUtf(64), buf.readUtf(64), buf.readUtf(256));
             default -> {
@@ -140,8 +144,9 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
         lastRespawn.remove(p.getUniqueId());
         var cfg = getConfig();
         send(p, packet("welcome").varInt(PROTOCOL).bool(cfg.getBoolean("map-sync", true)).bool(cfg.getBoolean("player-positions", true))
-                .bool(cfg.getBoolean("waypoint-sharing", true)).bool(false));
+                .bool(cfg.getBoolean("waypoint-sharing", true)).bool(false).bool(false).utf(global.worldId()));
         waypoints.sendSaved(p);
+        global.send(p);
         if (protocol == PROTOCOL && cfg.getBoolean("map-sync", true)) map.queueUpload(p);
         admin.markDirty(p);
     }
@@ -162,6 +167,7 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
         map.tick();
         if (tick % 20 == 0 && getConfig().getBoolean("player-positions", true)) sendPositions();
         if (tick % 40 == 0) sendRespawns();
+        if (tick % 40 == 0) global.tick();
         admin.tick(tick);
         if (tick % 5 == 0) antiEsp.tick();
         if (tick % (20 * 120) == 0) map.save();
@@ -203,6 +209,7 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
             if (!arcPlayers.contains(p.getUniqueId())) continue;
             Location bed = p.getBedSpawnLocation();
             boolean anchor = bed != null && bed.getBlock().getType().name().equals("RESPAWN_ANCHOR");
+            // Bukkit сам возвращает null, если кровать сломана (точка возрождения недействительна)
             String key = bed == null ? "none" : dimId(bed.getWorld()) + "|" + bed.getBlockX() + "," + bed.getBlockY() + "," + bed.getBlockZ() + "|" + anchor;
             if (key.equals(lastRespawn.get(p.getUniqueId()))) continue;
             lastRespawn.put(p.getUniqueId(), key);
@@ -253,6 +260,7 @@ public final class ArcHudPlugin extends JavaPlugin implements PluginMessageListe
         waypoints.forget(id);
         admin.forget(id);
         antiEsp.forget(e.getPlayer());
+        global.forget(id);
     }
 
     // ------------------------------------------------------------------ измерения

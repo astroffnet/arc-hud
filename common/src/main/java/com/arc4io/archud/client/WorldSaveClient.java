@@ -48,7 +48,10 @@ public final class WorldSaveClient {
             }
             case DONE -> {
                 long s = WorldSaver.secondsSinceSave();
-                if (s >= 0 && s < 4 && WorldSaver.lastManual()) return Component.translatable("archud.save.done");
+                // «Мир сохранён (N с)» — раньше перевод получал пустой аргумент и показывал «%s»
+                if (s >= 0 && s < 4 && WorldSaver.lastManual()) {
+                    return Component.translatable("archud.save.done_in", String.format("%.1f", WorldSaver.lastDurationMs() / 1000.0));
+                }
             }
             case FAILED -> {
                 return Component.translatable("archud.save.failed");
