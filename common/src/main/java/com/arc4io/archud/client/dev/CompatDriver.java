@@ -278,10 +278,21 @@ public final class CompatDriver {
             mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
         }, null);
         add(3, mc -> {}, "c43_glove_tp_swing");
-        add(20, mc -> {
-            mc.options.setCameraType(CameraType.FIRST_PERSON);
-            cmd(mc, "give @s minecraft:beef 3");
-        }, null);
+        add(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON), null);
+        // от первого лица: удар, присед, способности Legends — перчатка должна оставаться на кисти
+        add(3, mc -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND), null);
+        add(2, mc -> {}, "c44_glove_fp_swing");
+        add(10, mc -> mc.options.keyShift.setDown(true), null);
+        add(8, mc -> {}, "c45_glove_fp_sneak");
+        add(3, mc -> mc.options.keyShift.setDown(false), null);
+        for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c46_glove_fp_ab2"}, {"legendsmod.key.ability_1", "c47_glove_fp_ab1"},
+                {"legendsmod.key.ability_3", "c48_glove_fp_ab3"}}) {
+            add(3, mc -> ability(mc, ab[0], true), null);
+            add(6, mc -> {}, ab[1]);
+            add(3, mc -> ability(mc, ab[0], false), null);
+            add(40, mc -> {}, null);
+        }
+        add(20, mc -> cmd(mc, "give @s minecraft:beef 3"), null);
         // просмотр рецептов: список предметов у инвентаря и экран рецептов
         add(5, mc -> {
             mc.options.guiScale().set(2);
