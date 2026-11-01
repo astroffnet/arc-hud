@@ -85,8 +85,8 @@ public final class PackPipeline {
     /** Выбрать другой шейдерпак / перезагрузить. */
     public static void reload() {
         failed = false;
-        loadedKey = "";
-        RenderSystem.recordRenderCall(PackPipeline::unload);
+        status = "";
+        loadedKey = ""; // при следующем кадре старый пак выгрузится, новый загрузится (всё — в потоке отрисовки)
     }
 
     private static String dimFolder() {
@@ -392,8 +392,7 @@ public final class PackPipeline {
             if (u.location < 0) continue;
             if (isSampler(u.type)) {
                 int tex = samplerTexture(u);
-                GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + unit);
-                GlStateManager._bindTexture(tex);
+                bindUnit(unit, tex);
                 GL20C.glUniform1i(u.location, unit);
                 unit++;
             } else {
@@ -404,10 +403,22 @@ public final class PackPipeline {
         if (!toScreen) {
             for (int b : p.drawBuffers) if (b >= 0 && b < MAX_BUFFERS && TEX[b][1 - CUR[b]] != 0) CUR[b] = 1 - CUR[b];
         }
-        for (int i = unit - 1; i >= 0; i--) {
-            GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + i);
-            GlStateManager._bindTexture(0);
+        for (int i = unit - 1; i >= 0; i--) bindUnit(i, 0);
+    }
+
+    /** Minecraft помнит только 12 текстурных слотов — дальше привязка напрямую, без его кэша. */
+    private static final int MC_UNITS = 12;
+
+    private static void bindUnit(int unit, int tex) {
+        if (unit < MC_UNITS) {
+            GlStateManager._activeTexture(GL13C.GL_TEXTURE0 + unit);
+            GlStateManager._bindTexture(tex);
+            return;
         }
+        GL13C.glActiveTexture(GL13C.GL_TEXTURE0 + unit);
+        GL11C.glBindTexture(GL11C.GL_TEXTURE_2D, tex);
+        // вернуть активный слот, который помнит Minecraft
+        GL13C.glActiveTexture(GlStateManager._getActiveTexture());
     }
 
     private static boolean isSampler(int type) {

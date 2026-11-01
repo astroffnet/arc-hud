@@ -78,6 +78,9 @@ public final class GlslCompat {
                 .replaceAll("\\bshadow2DLod\\s*\\(", "archud_shadow2DLod(")
                 .replaceAll("\\bshadow2D\\s*\\(", "archud_shadow2D(");
         src = TEX_MATRIX.matcher(src).replaceAll("mat4(1.0)");
+        // gl_Fog из старого GLSL — своя uniform-структура с теми же полями
+        head.append("struct archud_FogParameters { vec4 color; float density; float start; float end; float scale; };\n");
+        head.append("uniform archud_FogParameters archud_Fog;\n#define gl_Fog archud_Fog\n");
         head.append("vec4 archud_shadow2D(sampler2DShadow s, vec3 c) { return vec4(texture(s, c)); }\n");
         head.append("vec4 archud_shadow2D(sampler2D s, vec3 c) { return vec4(step(c.z, texture(s, c.xy).r)); }\n");
         head.append("vec4 archud_shadow2DLod(sampler2DShadow s, vec3 c, float l) { return vec4(texture(s, c)); }\n");

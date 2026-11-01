@@ -100,6 +100,11 @@ public final class WaypointManager {
         ArcConfig.save();
     }
 
+    /** Для теста: точка возрождения, которую знает клиент. */
+    public static String respawnInfo() {
+        return respawnDim + " " + respawnPos + " anchor=" + respawnAnchor + " server=" + respawnFromServer;
+    }
+
     /** Без сервера Arc HUD: кровать запоминается, когда вы на ней спите. */
     private static void trackBed(Minecraft mc) {
         if (respawnFromServer || mc.player == null || mc.level == null || !mc.player.isSleeping()) return;
@@ -231,6 +236,33 @@ public final class WaypointManager {
         }
         trackBed(mc);
         if (mc.level.getGameTime() % 20 == 0) checkRespawnBlock(mc);
+        trackDeath(mc);
+    }
+
+    /**
+     * Смерть без экрана смерти (правило «мгновенное возрождение», моды): игрок умер, если здоровье упало до нуля
+     * или после возрождения появился новый игрок, а старый был мёртв. Метка — там, где игрок был жив в последний раз.
+     */
+    private static Object lastPlayer;
+    private static boolean lastDead;
+    private static double[] lastAlive;
+    private static String lastAliveDim;
+
+    private static void trackDeath(Minecraft mc) {
+        LocalPlayer p = mc.player;
+        if (p == null) return;
+        boolean dead = p.isDeadOrDying();
+        if (p != lastPlayer) {
+            if (lastPlayer != null && lastDead && lastAlive != null) onDeathAt(lastAlive[0], lastAlive[1], lastAlive[2], lastAliveDim);
+            lastPlayer = p;
+            lastDead = dead;
+        }
+        if (dead && !lastDead && lastAlive != null) onDeathAt(lastAlive[0], lastAlive[1], lastAlive[2], lastAliveDim);
+        lastDead = dead;
+        if (!dead) {
+            lastAlive = new double[]{p.getX(), p.getY(), p.getZ()};
+            lastAliveDim = currentDimension();
+        }
     }
 
     private static Path hiddenFile() {
@@ -362,14 +394,19 @@ public final class WaypointManager {
     /** История смертей: последние 5 точек, новые — ярче. */
     public static void onDeath() {
         Minecraft mc = Minecraft.getInstance();
-        if (!ArcConfig.get().deathWaypoint || mc.player == null) return;
+        if (mc.player == null) return;
+        onDeathAt(mc.player.getX(), mc.player.getY(), mc.player.getZ(), currentDimension());
+    }
+
+    private static void onDeathAt(double x, double y, double z, String dim) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!ArcConfig.get().deathWaypoint || mc.player == null || dim == null) return;
         long now = System.currentTimeMillis();
         if (now - lastDeath < 3000) return; // экран смерти может открываться повторно
         lastDeath = now;
-        LocalPlayer p = mc.player;
         String time = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
-        Waypoint w = new Waypoint(Component.translatable("archud.wp.death_at", time).getString(), p.getBlockX(), p.getBlockY(), p.getBlockZ(),
-                0xFFFF5252, currentDimension(), Waypoint.Source.DEATH);
+        Waypoint w = new Waypoint(Component.translatable("archud.wp.death_at", time).getString(), (int) Math.floor(x), (int) Math.floor(y),
+                (int) Math.floor(z), 0xFFFF5252, dim, Waypoint.Source.DEATH);
         USER.add(w);
         List<Waypoint> deaths = new ArrayList<>();
         for (Waypoint d : USER) if (d.source == Waypoint.Source.DEATH) deaths.add(d);
