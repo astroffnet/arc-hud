@@ -114,7 +114,10 @@ public final class AetherGloves {
     private static void takeOverFromPunchy() {
         if (!ArcConfig.get().aetherGlovesFix) return;
         try {
-            Class.forName("punchy.api.PunchyApi").getMethod("remove", String.class).invoke(null, "aether");
+            Method remove = Class.forName("punchy.api.PunchyApi").getMethod("remove", String.class);
+            // встроенная совместимость Punchy регистрируется под ключом «punchy/<id мода>»
+            remove.invoke(null, "punchy/aether");
+            remove.invoke(null, "aether");
             ArcHud.LOGGER.info("Arc HUD: Punchy keeps its own animated arms, Aether gloves are put on them by Arc HUD");
         } catch (ClassNotFoundException ignored) {
         } catch (Throwable t) {
