@@ -40,7 +40,7 @@ public abstract class GloveHandMixin {
     @Inject(method = "renderHand", at = @At("RETURN"), require = 0)
     private void archud$handEnd(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve,
                                 CallbackInfo ci) {
-        AetherGloves.end(player);
+        AetherGloves.endHand(player, arm, pose, light);
         if (CompatDriver.handTilt != 0F) pose.popPose();
     }
 }
