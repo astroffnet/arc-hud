@@ -37,6 +37,7 @@ final class EffectsPage {
             List<VideoEntry> packs = new ArrayList<>();
             packs.add(new PackChoice());
             packs.add(new Bool("shaderpack_linear", () -> c.shaderPackLinear, v -> c.shaderPackLinear = v, null));
+            packs.add(new Cycle("shaderpack_shadows", 2, () -> c.shaderPackShadows, v -> c.shaderPackShadows = v));
             packs.add(new OpenFolder());
             packs.add(new Info("shaderpack_status", () -> Component.literal(com.arc4io.archud.client.fx.pack.PackPipeline.describe())));
             p.group(Component.translatable("archud.fx.group.shaderpacks"), packs);

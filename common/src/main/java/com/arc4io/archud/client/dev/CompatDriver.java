@@ -736,7 +736,16 @@ public final class CompatDriver {
             add(60, mc -> ArcHud.LOGGER.info("[Compat] shader pack {} status: {}", com.arc4io.archud.config.ArcConfig.get().shaderPack,
                     com.arc4io.archud.client.fx.pack.PackPipeline.describe()), "c7" + idx + "_shaderpack");
         }
+        // Complementary с режимом «без теней: всё в тени»
         add(5, mc -> {
+            var packs = com.arc4io.archud.client.fx.pack.PackPipeline.packs();
+            com.arc4io.archud.config.ArcConfig.get().shaderPack = packs.size() > 2 ? packs.get(2) : "";
+            com.arc4io.archud.config.ArcConfig.get().shaderPackShadows = 1;
+            com.arc4io.archud.client.fx.pack.PackPipeline.reload();
+        }, null);
+        add(60, mc -> {}, "c74_shaderpack_dark_shadows");
+        add(5, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().shaderPackShadows = 0;
             com.arc4io.archud.config.ArcConfig.get().shaderPack = "";
             com.arc4io.archud.client.fx.pack.PackPipeline.reload();
         }, null);

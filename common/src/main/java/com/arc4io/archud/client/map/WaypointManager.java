@@ -82,6 +82,7 @@ public final class WaypointManager {
         if (!mc.level.hasChunk(respawnPos.getX() >> 4, respawnPos.getZ() >> 4)) return;
         net.minecraft.world.level.block.Block b = mc.level.getBlockState(respawnPos).getBlock();
         boolean ok = respawnAnchor ? b instanceof net.minecraft.world.level.block.RespawnAnchorBlock : b instanceof net.minecraft.world.level.block.BedBlock;
+        if (com.arc4io.archud.client.dev.CompatDriver.enabled()) ArcHud.LOGGER.info("[Compat] respawn check {} -> {}", b, ok);
         if (ok) return;
         setRespawn(null, null, false, false);
         respawnFromServer = false;

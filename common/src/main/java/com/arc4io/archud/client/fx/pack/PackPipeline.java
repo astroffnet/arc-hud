@@ -44,7 +44,7 @@ public final class PackPipeline {
     private static final int[][] TEX = new int[MAX_BUFFERS][2];
     private static final int[] CUR = new int[MAX_BUFFERS];
     private static final boolean[] USED = new boolean[MAX_BUFFERS];
-    private static int fbo, copyFbo, finalTex, vao, vbo, noiseTex, whiteTex, shadowTex, shadowCmpTex, depthTex;
+    private static int fbo, copyFbo, finalTex, vao, vbo, noiseTex, whiteTex, shadowTex, shadowCmpTex, shadowTexDark, shadowCmpTexDark, depthTex;
     private static int w = -1, h = -1;
     /** Своя маленькая программа: картинка мира → colortex0 в линейном цвете (как после gbuffers шейдерпаков). */
     private static int linearProg, linearSrc;
@@ -275,8 +275,10 @@ public final class PackPipeline {
             ByteBuffer white = BufferUtils.createByteBuffer(4);
             white.put(new byte[]{-1, -1, -1, -1}).flip();
             whiteTex = newTexture(GL11C.GL_RGBA8, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, 1, 1, white);
-            shadowTex = depthTexture(false);
-            shadowCmpTex = depthTexture(true);
+            shadowTex = depthTexture(false, 1F);
+            shadowCmpTex = depthTexture(true, 1F);
+            shadowTexDark = depthTexture(false, 0F);
+            shadowCmpTexDark = depthTexture(true, 0F);
         }
         if (width == w && height == h) return;
         w = width;
@@ -316,9 +318,9 @@ public final class PackPipeline {
     }
 
     /** 1×1 глубина 1.0 — «теней нет» (для sampler2DShadow — с режимом сравнения). */
-    private static int depthTexture(boolean compare) {
+    private static int depthTexture(boolean compare, float value) {
         FloatBuffer one = BufferUtils.createFloatBuffer(1);
-        one.put(1F).flip();
+        one.put(value).flip();
         int id = GlStateManager._genTexture();
         GlStateManager._bindTexture(id);
         GL11C.glTexImage2D(GL11C.GL_TEXTURE_2D, 0, GL14C.GL_DEPTH_COMPONENT24, 1, 1, 0, GL11C.GL_DEPTH_COMPONENT, GL11C.GL_FLOAT, one);
@@ -467,7 +469,9 @@ public final class PackPipeline {
         if (b >= 0) return TEX[b][CUR[b]] != 0 ? TEX[b][CUR[b]] : whiteTex;
         if (n.startsWith("depthtex") || n.equals("gdepthtex")) return depthTex;
         if (n.startsWith("shadowtex") || n.equals("shadow") || n.equals("watershadow")) {
-            return u.type == GL20C.GL_SAMPLER_2D_SHADOW ? shadowCmpTex : shadowTex;
+            // карты теней нет: «всё освещено» или «всё в тени» (второе убирает дымку объёмного света у некоторых паков)
+            boolean dark = ArcConfig.get().shaderPackShadows == 1;
+            return u.type == GL20C.GL_SAMPLER_2D_SHADOW ? (dark ? shadowCmpTexDark : shadowCmpTex) : (dark ? shadowTexDark : shadowTex);
         }
         if (n.equals("noisetex")) return noiseTex;
         return whiteTex;
