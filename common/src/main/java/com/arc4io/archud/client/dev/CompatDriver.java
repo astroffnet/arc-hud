@@ -672,6 +672,17 @@ public final class CompatDriver {
             cmd(mc, "spawnpoint @s " + bx + " " + by + " " + bz);
             bed = new int[]{bx, by, bz};
         }, null);
+        add(30, mc -> {
+            var server = mc.getSingleplayerServer();
+            var id = mc.player.getUUID();
+            if (server != null) server.execute(() -> {
+                var sp = server.getPlayerList().getPlayer(id);
+                if (sp == null) return;
+                var pos = sp.getRespawnPosition();
+                ArcHud.LOGGER.info("[Compat] server respawn={} dim={} block={} arc={}", pos, sp.getRespawnDimension().location(),
+                        pos == null ? "-" : sp.serverLevel().getBlockState(pos), com.arc4io.archud.server.ArcServer.isArcPlayer(id));
+            });
+        }, null);
         add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint before break={} respawn={} block={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
                 .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN), com.arc4io.archud.client.map.WaypointManager.respawnInfo(),
                 mc.level.getBlockState(new net.minecraft.core.BlockPos(bed[0], bed[1], bed[2]))), null);

@@ -1565,5 +1565,7 @@
   "archud.fx.shaderpack_folder.open": "Открыть",
   "archud.fx.shaderpack_status": "Состояние",
   "archud.fx.shaderpack_status.desc": "Сколько проходов шейдерпака запущено, сколько не скомпилировалось (подробности — в логе игры).",
-  "archud.config.shaderPack": "Шейдерпак (свой загрузчик)"
+  "archud.config.shaderPack": "Шейдерпак (свой загрузчик)",
+  "archud.fx.shaderpack_linear": "Линейный цвет на входе",
+  "archud.fx.shaderpack_linear.desc": "Шейдерпаки считают освещение в линейном цвете (в их gbuffers текстуры переводятся из sRGB). Включено — картинка мира переводится так же, и пак не пересвечивает. Выключите для паков, которые ждут обычный цвет."
 }

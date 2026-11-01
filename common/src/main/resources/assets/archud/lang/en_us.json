@@ -1506,5 +1506,7 @@
   "archud.fx.shaderpack_folder.open": "Open",
   "archud.fx.shaderpack_status": "Status",
   "archud.fx.shaderpack_status.desc": "How many pack passes run and how many failed to compile (details in the game log).",
-  "archud.config.shaderPack": "Shader pack (built-in loader)"
+  "archud.config.shaderPack": "Shader pack (built-in loader)",
+  "archud.fx.shaderpack_linear": "Linear color input",
+  "archud.fx.shaderpack_linear.desc": "Shader packs light the world in linear color (their gbuffers convert textures from sRGB). On: the world image is converted the same way so the pack does not overexpose. Turn off for packs that expect plain color."
 }

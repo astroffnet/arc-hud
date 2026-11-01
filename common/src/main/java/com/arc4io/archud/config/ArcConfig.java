@@ -410,6 +410,8 @@ public class ArcConfig {
     public boolean hideVanillaShadows = true;
     /** Шейдерпак из папки shaderpacks, который Arc HUD запускает сам (без Iris / OptiFine); пусто — выключено. */
     public String shaderPack = "";
+    /** Подавать шейдерпаку картинку мира в линейном цвете (как после его gbuffers). */
+    public boolean shaderPackLinear = true;
     /** Свой вывод интерфейса: окно рисуется в отдельный буфер и обновляется только при изменениях (не ест FPS). */
     public boolean guiCache = true;
     /** Сколько раз в секунду обновлять открытое окно, когда в нём ничего не происходит. */

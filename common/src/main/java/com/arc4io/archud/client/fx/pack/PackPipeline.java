@@ -46,6 +46,8 @@ public final class PackPipeline {
     private static final boolean[] USED = new boolean[MAX_BUFFERS];
     private static int fbo, copyFbo, finalTex, vao, vbo, noiseTex, whiteTex, shadowTex, shadowCmpTex, depthTex;
     private static int w = -1, h = -1;
+    /** Своя маленькая программа: картинка мира → colortex0 в линейном цвете (как после gbuffers шейдерпаков). */
+    private static int linearProg, linearSrc;
 
     private record Uniform(String name, int location, int type) {}
 
@@ -291,6 +293,28 @@ public final class PackPipeline {
         finalTex = newTexture(GL11C.GL_RGBA8, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE, w, h, null);
     }
 
+    private static int linearProgram() {
+        if (linearProg != 0) return linearProg;
+        int vs = shader(GL20C.GL_VERTEX_SHADER, "#version 150 core\nin vec3 archud_Position;\nin vec2 archud_UV0;\nout vec2 uv;\n"
+                + "void main() { gl_Position = vec4(archud_Position.xy * 2.0 - 1.0, 0.0, 1.0); uv = archud_UV0; }\n", "arc_linear.vsh");
+        int fs = shader(GL20C.GL_FRAGMENT_SHADER, "#version 150 core\nuniform sampler2D src;\nin vec2 uv;\nout vec4 o;\n"
+                + "void main() { vec4 c = texture(src, uv); o = vec4(pow(max(c.rgb, vec3(0.0)), vec3(2.2)), 1.0); }\n", "arc_linear.fsh");
+        if (vs == 0 || fs == 0) return 0;
+        int p = GL20C.glCreateProgram();
+        GL20C.glAttachShader(p, vs);
+        GL20C.glAttachShader(p, fs);
+        GL20C.glBindAttribLocation(p, 0, "archud_Position");
+        GL20C.glBindAttribLocation(p, 1, "archud_UV0");
+        GL30C.glBindFragDataLocation(p, 0, "o");
+        GL20C.glLinkProgram(p);
+        GL20C.glDeleteShader(vs);
+        GL20C.glDeleteShader(fs);
+        if (GL20C.glGetProgrami(p, GL20C.GL_LINK_STATUS) == 0) return 0;
+        linearProg = p;
+        linearSrc = GL20C.glGetUniformLocation(p, "src");
+        return p;
+    }
+
     /** 1×1 глубина 1.0 — «теней нет» (для sampler2DShadow — с режимом сравнения). */
     private static int depthTexture(boolean compare) {
         FloatBuffer one = BufferUtils.createFloatBuffer(1);
@@ -329,8 +353,19 @@ public final class PackPipeline {
             GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, copyFbo);
             GL30C.glFramebufferTexture2D(GL30C.GL_FRAMEBUFFER, GL30C.GL_COLOR_ATTACHMENT0, GL11C.GL_TEXTURE_2D, TEX[0][CUR[0]], 0);
             GL20C.glDrawBuffers(GL30C.GL_COLOR_ATTACHMENT0);
-            GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, main.frameBufferId);
-            GL30C.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_NEAREST);
+            if (ArcConfig.get().shaderPackLinear && linearProgram() != 0) {
+                // шейдерпаки считают в линейном цвете (gbuffers переводят текстуры из sRGB) — иначе всё пересвечено
+                GlStateManager._viewport(0, 0, w, h);
+                GlStateManager._glUseProgram(linearProg);
+                bindUnit(0, main.getColorTextureId());
+                GL20C.glUniform1i(linearSrc, 0);
+                GlStateManager._glBindVertexArray(vao);
+                GL11C.glDrawArrays(GL11C.GL_TRIANGLE_STRIP, 0, 4);
+                bindUnit(0, 0);
+            } else {
+                GlStateManager._glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, main.frameBufferId);
+                GL30C.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL11C.GL_COLOR_BUFFER_BIT, GL11C.GL_NEAREST);
+            }
             // остальные буферы — очистить (gdepth / colortex1 — белым, как в OptiFine)
             GlStateManager._glBindFramebuffer(GL30C.GL_FRAMEBUFFER, copyFbo);
             for (int i = 1; i < MAX_BUFFERS; i++) {
