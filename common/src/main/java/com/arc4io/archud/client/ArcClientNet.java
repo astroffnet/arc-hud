@@ -74,7 +74,6 @@ public final class ArcClientNet {
         });
         ArcNet.onClient("players", ArcClientNet::onPlayers);
         ArcNet.onClient("respawn", buf -> {
-            if (com.arc4io.archud.client.dev.CompatDriver.enabled()) com.arc4io.archud.ArcHud.LOGGER.info("[Compat] respawn packet, bytes={}", buf.readableBytes());
             if (buf.readBoolean()) {
                 String dim = buf.readUtf(128);
                 net.minecraft.core.BlockPos pos = buf.readBlockPos();
