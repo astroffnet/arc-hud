@@ -1508,5 +1508,9 @@
   "archud.fx.shaderpack_status.desc": "How many pack passes run and how many failed to compile (details in the game log).",
   "archud.config.shaderPack": "Shader pack (built-in loader)",
   "archud.fx.shaderpack_linear": "Linear color input",
-  "archud.fx.shaderpack_linear.desc": "Shader packs light the world in linear color (their gbuffers convert textures from sRGB). On: the world image is converted the same way so the pack does not overexpose. Turn off for packs that expect plain color."
+  "archud.fx.shaderpack_linear.desc": "Shader packs light the world in linear color (their gbuffers convert textures from sRGB). On: the world image is converted the same way so the pack does not overexpose. Turn off for packs that expect plain color.",
+  "archud.fx.shaderpack_shadows": "Without a shadow map",
+  "archud.fx.shaderpack_shadows.desc": "The loader has no shadows of its own. “All lit” — surfaces do not darken; “All shaded” — removes the white volumetric-light haze of packs that trace rays through shadows (e.g. Complementary).",
+  "archud.fx.shaderpack_shadows.0": "All lit",
+  "archud.fx.shaderpack_shadows.1": "All shaded"
 }
