@@ -272,7 +272,6 @@ public class ArcConfig {
     public boolean zoomEnabled = true;
     public boolean freelookEnabled = true;
     public boolean alwaysSprint = false;
-    public boolean fullbright = false;
     public boolean chatTimestamps = true;
     public boolean chatCollapse = true;
     public boolean chatMentions = true;
@@ -414,6 +413,10 @@ public class ArcConfig {
     public boolean shaderPackLinear = true;
     /** Карты теней у шейдерпака нет: 0 — всё освещено, 1 — всё в тени. */
     public int shaderPackShadows = 0;
+    /** F11 — полноэкранный в окне (без рамки) вместо эксклюзивного полноэкранного режима. */
+    public boolean borderlessF11 = true;
+    /** Игра была закрыта в режиме «полноэкранный в окне» — включить при запуске. */
+    public boolean borderlessActive = false;
     /** Свой вывод интерфейса: окно рисуется в отдельный буфер и обновляется только при изменениях (не ест FPS). */
     public boolean guiCache = true;
     /** Сколько раз в секунду обновлять открытое окно, когда в нём ничего не происходит. */

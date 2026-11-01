@@ -38,7 +38,7 @@ public final class SaveAllIntegrated {
             return 0;
         }
         long ms = (System.nanoTime() - t0) / 1_000_000L;
-        src.sendSuccess(() -> Component.translatable("archud.save.done", ms), true);
+        src.sendSuccess(() -> Component.translatable("archud.save.saved").append(" (" + ms + " ").append(Component.translatable("archud.save.unit_ms")).append(")"), true);
         return 1;
     }
 }

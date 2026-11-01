@@ -59,12 +59,6 @@ public abstract class GameRendererCamMixin {
         com.arc4io.archud.client.resources.BackgroundReload.frame(net.minecraft.client.Minecraft.getInstance());
     }
 
-    @Inject(method = "getNightVisionScale", at = @At("HEAD"), cancellable = true, require = 0)
-    private static void archud$fullbright(net.minecraft.world.entity.LivingEntity e, float pt, CallbackInfoReturnable<Float> cir) {
-        if (com.arc4io.archud.client.extras.Extras.fullbright() && e instanceof net.minecraft.client.player.LocalPlayer
-                && !e.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)) cir.setReturnValue(1.0F);
-    }
-
     @Inject(method = "onResourceManagerReload", at = @At("TAIL"), require = 0)
     private void archud$reload(net.minecraft.server.packs.resources.ResourceManager manager, CallbackInfo ci) {
         FirstPersonCam.reset();

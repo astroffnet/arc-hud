@@ -35,6 +35,16 @@ public final class WorldSaveClient {
         }
     }
 
+    /**
+     * «Мир сохранён (0.4 с)» без подстановки %s в перевод: число добавляется отдельным текстом, поэтому
+     * подпись не ломается, даже если перевод (ресурспак) не содержит места для числа или содержит лишнее.
+     */
+    public static net.minecraft.network.chat.MutableComponent savedLabel(String key, long ms) {
+        String num = ms < 1000 ? String.valueOf(ms) : String.format(java.util.Locale.ROOT, "%.1f", ms / 1000.0);
+        return Component.translatable(key).append(" (" + num + " ")
+                .append(Component.translatable(ms < 1000 ? "archud.save.unit_ms" : "archud.save.unit_s")).append(")");
+    }
+
     /** Подпись кнопки в меню паузы. */
     public static Component buttonLabel(Minecraft mc) {
         if (!mc.hasSingleplayerServer()) return Component.translatable("archud.save.button");
@@ -50,7 +60,7 @@ public final class WorldSaveClient {
                 long s = WorldSaver.secondsSinceSave();
                 // «Мир сохранён (N с)» — раньше перевод получал пустой аргумент и показывал «%s»
                 if (s >= 0 && s < 4 && WorldSaver.lastManual()) {
-                    return Component.translatable("archud.save.done_in", String.format("%.1f", WorldSaver.lastDurationMs() / 1000.0));
+                    return savedLabel("archud.save.saved", WorldSaver.lastDurationMs());
                 }
             }
             case FAILED -> {
@@ -94,8 +104,8 @@ public final class WorldSaveClient {
             if (mc.player != null && mc.hasSingleplayerServer() && (WorldSaver.lastManual() || ArcConfig.get().autosaveNotify)) {
                 Component msg = WorldSaver.state() == WorldSaver.State.FAILED
                         ? Component.translatable("archud.save.failed").withStyle(ChatFormatting.RED)
-                        : Component.translatable(WorldSaver.lastManual() ? "archud.save.done_in" : "archud.save.auto_done",
-                        String.format("%.1f", WorldSaver.lastDurationMs() / 1000.0)).withStyle(ChatFormatting.GREEN);
+                        : savedLabel(WorldSaver.lastManual() ? "archud.save.saved" : "archud.save.auto", WorldSaver.lastDurationMs())
+                        .withStyle(ChatFormatting.GREEN);
                 mc.player.displayClientMessage(msg, true);
             }
         }

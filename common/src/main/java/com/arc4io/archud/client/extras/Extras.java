@@ -107,12 +107,6 @@ public final class Extras {
         if (fl && !ArcCamera.freelook() && !ArcCamera.active()) ArcCamera.freelookStart(mc);
         else if (!fl && ArcCamera.freelook()) ArcCamera.freelookEnd(mc);
         // клавиши-переключатели
-        while (ArcKeys.FULLBRIGHT.consumeClick()) {
-            cfg.fullbright = !cfg.fullbright;
-            ArcConfig.save();
-            p.displayClientMessage(Component.translatable(cfg.fullbright ? "archud.extra.fullbright_on" : "archud.extra.fullbright_off")
-                    .withStyle(ChatFormatting.YELLOW), true);
-        }
         while (ArcKeys.AUTO_SPRINT.consumeClick()) {
             cfg.alwaysSprint = !cfg.alwaysSprint;
             ArcConfig.save();
@@ -271,10 +265,6 @@ public final class Extras {
         if (!zooming) return false;
         zoomTarget = Mth.clamp(zoomTarget * (delta > 0 ? 1.25F : 0.8F), 1.5F, 40F);
         return true;
-    }
-
-    public static boolean fullbright() {
-        return ArcConfig.get().fullbright;
     }
 
     // ================================================================== отрисовка
