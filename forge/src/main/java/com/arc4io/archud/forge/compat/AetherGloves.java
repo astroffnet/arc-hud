@@ -64,11 +64,21 @@ public final class AetherGloves {
     /** Полная матрица руки — уже после {@code translateAndRotate} (вместе с преобразованиями модов вроде Punchy). */
     private record Pending(boolean right, PoseStack.Pose pose, int light) {}
 
+    private static int dbg;
+
     private static Pending capture(boolean right, ModelPart part, PoseStack pose, int light) {
         PoseStack copy = new PoseStack();
         copy.last().pose().set(pose.last().pose());
         copy.last().normal().set(pose.last().normal());
+        org.joml.Matrix4f before = new org.joml.Matrix4f(copy.last().pose());
         part.translateAndRotate(copy);
+        if (firstPerson && dbg++ < 6) {
+            StackTraceElement[] st = Thread.currentThread().getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 2; i < Math.min(st.length, 9); i++) sb.append(" <- ").append(st[i].getClassName().replaceAll(".*\\.", "")).append('.').append(st[i].getMethodName());
+            ArcHud.LOGGER.info("[Gloves] fp capture part=({},{},{} r {},{},{} s {},{},{}) before={} after={} light={} via{}", part.x, part.y, part.z,
+                    part.xRot, part.yRot, part.zRot, part.xScale, part.yScale, part.zScale, before, copy.last().pose(), light, sb);
+        }
         return new Pending(right, copy.last(), light);
     }
 
