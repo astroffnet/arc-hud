@@ -179,7 +179,6 @@ public final class ArcServer {
                             && !(lvl.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.BedBlock)) pos = null;
                 }
                 String key = pos == null ? "none" : dim + "|" + pos.asLong() + "|" + anchor;
-                if (System.getenv("ARCHUD_SHOWCASE") != null) ArcHud.LOGGER.info("[Compat] server respawn key {} (last {})", key, LAST_RESPAWN.get(p.getUUID()));
                 if (key.equals(LAST_RESPAWN.get(p.getUUID()))) continue;
                 LAST_RESPAWN.put(p.getUUID(), key);
                 FriendlyByteBuf buf = ArcNet.create("respawn");

@@ -690,7 +690,7 @@ public final class CompatDriver {
             cmd(mc, "setblock " + bed[0] + " " + bed[1] + " " + bed[2] + " minecraft:air");
             cmd(mc, "setblock " + (bed[0] + 1) + " " + bed[1] + " " + bed[2] + " minecraft:air");
         }, null);
-        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint after break={} respawn={} block={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
+        add(110, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint after break={} respawn={} block={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
                 .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN), com.arc4io.archud.client.map.WaypointManager.respawnInfo(),
                 mc.level.getBlockState(new net.minecraft.core.BlockPos(bed[0], bed[1], bed[2]))), null);
         // консоль «~»
