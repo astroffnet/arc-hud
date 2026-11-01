@@ -22,7 +22,12 @@ public abstract class RecipeMouseMixin {
     @Inject(method = "onPress", at = @At("HEAD"), cancellable = true, require = 0)
     private void archud$press(long window, int button, int action, int mods, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
-        if (window != mc.getWindow().getWindow() || mc.screen == null || action != 1) return;
+        if (window != mc.getWindow().getWindow() || mc.screen == null) return;
+        if (action == 0) {
+            if (RecipeOverlay.release(mc.screen, archud$gx(mc), archud$gy(mc), button)) ci.cancel();
+            return;
+        }
+        if (action != 1) return;
         if (RecipeOverlay.click(mc.screen, archud$gx(mc), archud$gy(mc), button)) ci.cancel();
     }
 

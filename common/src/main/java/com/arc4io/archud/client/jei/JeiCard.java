@@ -109,14 +109,48 @@ final class JeiCard implements RecipeCard {
         return new JeiCard(cat, recipe, slots, widgets, Math.max(18, w), Math.max(18, h));
     }
 
+    /** Предметы слотов роли (жидкости — их вёдрами, чтобы рецепт находился по ведру). */
     List<List<ItemStack>> items(RecipeIngredientRole role) {
         List<List<ItemStack>> out = new ArrayList<>();
         for (JeiSlot s : slots) {
             if (s.role != role) continue;
-            List<ItemStack> l = s.itemStacks();
+            List<ItemStack> l = new ArrayList<>(s.itemStacks());
+            for (Object v : s.values) {
+                ItemStack b = bucketOf(v);
+                if (!b.isEmpty()) l.add(b);
+            }
             if (!l.isEmpty()) out.add(l);
         }
         return out;
+    }
+
+    Object recipe() {
+        return recipe;
+    }
+
+    IRecipeCategory category() {
+        return cat;
+    }
+
+    List<JeiSlot> slots() {
+        return slots;
+    }
+
+    IRecipeSlotsView slotsView() {
+        return slotsView;
+    }
+
+    /** Ведро жидкости (для перехода к её рецептам) или пусто. */
+    static ItemStack bucketOf(Object v) {
+        if (v instanceof ItemStack) return ItemStack.EMPTY;
+        Fluid f = v == null ? null : fluidOf(v);
+        if (f == null) return ItemStack.EMPTY;
+        try {
+            var bucket = f.getBucket();
+            return bucket == null || bucket == net.minecraft.world.item.Items.AIR ? ItemStack.EMPTY : new ItemStack(bucket);
+        } catch (Throwable t) {
+            return ItemStack.EMPTY;
+        }
     }
 
     @Override
@@ -158,6 +192,12 @@ final class JeiCard implements RecipeCard {
         try {
             cat.draw(recipe, slotsView, g, mx, my);
         } catch (Throwable ignored) {
+        }
+        for (Object d : JeiBridge.decorators(cat)) {
+            try {
+                ((mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator) d).draw(recipe, cat, slotsView, g, mx, my);
+            } catch (Throwable ignored) {
+            }
         }
         for (Widget w : widgets) drawWidget(g, w, mx, my);
         for (JeiSlot s : slots) {
@@ -273,7 +313,9 @@ final class JeiCard implements RecipeCard {
     @Override
     public ItemStack stackAt(int mx, int my) {
         JeiSlot s = slotAt(mx, my);
-        return s != null && s.displayed() instanceof ItemStack st ? st : ItemStack.EMPTY;
+        if (s == null) return ItemStack.EMPTY;
+        Object v = s.displayed();
+        return v instanceof ItemStack st ? st : bucketOf(v);
     }
 
     @Override
@@ -324,6 +366,12 @@ final class JeiCard implements RecipeCard {
         try {
             cat.getTooltip(tooltipBuilder(lines), recipe, slotsView, mx, my);
         } catch (Throwable ignored) {
+        }
+        for (Object d : JeiBridge.decorators(cat)) {
+            try {
+                ((mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator) d).decorateTooltips(tooltipBuilder(lines), recipe, cat, slotsView, mx, my);
+            } catch (Throwable ignored) {
+            }
         }
         return lines.isEmpty() ? null : lines;
     }

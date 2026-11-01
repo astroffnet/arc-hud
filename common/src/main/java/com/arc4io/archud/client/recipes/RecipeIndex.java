@@ -59,9 +59,21 @@ public final class RecipeIndex {
     public static final Map<ResourceLocation, List<ItemStack>> CATALYSTS = new LinkedHashMap<>();
     private static final Map<Class<?>, List<Field>> FIELDS = new IdentityHashMap<>();
     private static List<ItemStack> allItems = List.of();
+    /** Добавленные/скрытые плагинами JEI предметы списка и скрытые рецепты/категории. */
+    private static final List<ItemStack> EXTRA_ITEMS = new ArrayList<>();
+    private static final List<ItemStack> HIDDEN_ITEMS = new ArrayList<>();
+    private static final Set<Entry> HIDDEN = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+    private static final Set<ResourceLocation> HIDDEN_TYPES = new java.util.HashSet<>();
+    /** Рецепты «по запросу» (динамические плагины JEI): предмет, uses → рецепты. */
+    public static java.util.function.BiFunction<ItemStack, Boolean, List<Entry>> dynamic;
 
     public static final ResourceLocation FUEL = ArcHud.id("fuel");
     public static final ResourceLocation BREWING = ArcHud.id("brewing");
+    public static final ResourceLocation ANVIL = new ResourceLocation("anvil");
+    public static final ResourceLocation COMPOST = new ResourceLocation("compostable");
+    public static final ResourceLocation GRINDSTONE = new ResourceLocation("grindstone");
+    public static final ResourceLocation CRAFTING = new ResourceLocation("crafting");
+    public static final ResourceLocation SMITHING = new ResourceLocation("smithing");
 
     private RecipeIndex() {}
 
@@ -80,6 +92,11 @@ public final class RecipeIndex {
         TITLES.clear();
         ICON_DRAWERS.clear();
         CATALYSTS.clear();
+        EXTRA_ITEMS.clear();
+        HIDDEN_ITEMS.clear();
+        HIDDEN.clear();
+        HIDDEN_TYPES.clear();
+        dynamic = null;
         vanillaCatalysts();
         RegistryAccess ra = mc.level.registryAccess();
         long t0 = System.nanoTime();
@@ -100,6 +117,12 @@ public final class RecipeIndex {
             ArcHud.LOGGER.warn("Arc HUD: cannot read brewing recipes", t);
         }
         rebuildItems(mc);
+        // то, что JEI показывает «из коробки»: наковальня, компостер, всё топливо, особые крафты, отделка брони
+        try {
+            ok += VanillaRecipes.addAll(recipes, ra);
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: built-in recipe categories failed", t);
+        }
         // плагины модов, написанные для JEI (если самого JEI нет — их понимает Arc HUD)
         int jei = com.arc4io.archud.client.jei.JeiGate.load();
         if (jei > 0) ok += jei;
@@ -123,6 +146,53 @@ public final class RecipeIndex {
         allItems = list;
     }
 
+    private static boolean sameStack(ItemStack a, ItemStack b) {
+        return a.getItem() == b.getItem() && (!b.hasTag() || ItemStack.isSameItemSameTags(a, b));
+    }
+
+    /** Плагин JEI добавил предметы в список (книги всех уровней, заполненные предметы модов…). */
+    public static void addItems(Collection<ItemStack> stacks) {
+        List<ItemStack> list = new ArrayList<>(allItems);
+        for (ItemStack s : stacks) {
+            if (s == null || s.isEmpty()) continue;
+            boolean dup = false;
+            for (ItemStack e : list) if (ItemStack.isSameItemSameTags(e, s)) {
+                dup = true;
+                break;
+            }
+            if (!dup) {
+                list.add(s.copyWithCount(1));
+                EXTRA_ITEMS.add(s);
+            }
+        }
+        allItems = list;
+    }
+
+    /** Плагин JEI убрал предметы из списка. */
+    public static void removeItems(Collection<ItemStack> stacks) {
+        List<ItemStack> list = new ArrayList<>(allItems);
+        for (ItemStack s : stacks) {
+            if (s == null || s.isEmpty()) continue;
+            list.removeIf(e -> ItemStack.isSameItemSameTags(e, s));
+            HIDDEN_ITEMS.add(s);
+        }
+        allItems = list;
+    }
+
+    public static void hide(Collection<Entry> entries, boolean hidden) {
+        if (hidden) HIDDEN.addAll(entries);
+        else entries.forEach(HIDDEN::remove);
+    }
+
+    public static void hideType(ResourceLocation type, boolean hidden) {
+        if (hidden) HIDDEN_TYPES.add(type);
+        else HIDDEN_TYPES.remove(type);
+    }
+
+    private static boolean visible(Entry e) {
+        return !HIDDEN.contains(e) && !HIDDEN_TYPES.contains(e.type());
+    }
+
     public static List<ItemStack> items() {
         ensure();
         return allItems;
@@ -134,6 +204,20 @@ public final class RecipeIndex {
         if (o instanceof net.minecraft.core.Holder<?> h) return h.value();
         if (o instanceof java.util.function.Supplier<?> sp) return sp.get();
         return o;
+    }
+
+    /** Рецепт только в списке категории (без поиска по предметам — например, всё топливо для вкладки печи). */
+    static void addTypeOnly(Entry e) {
+        BY_TYPE.computeIfAbsent(e.type(), k -> new ArrayList<>()).add(e);
+        TYPE_ICON.putIfAbsent(e.type(), e.catalyst());
+    }
+
+    static List<ItemStack> alternatives(Ingredient ing) {
+        return alts(ing);
+    }
+
+    static List<Field> fieldsOf(Class<?> c) {
+        return fields(c);
     }
 
     /** Рецепт из внешнего источника (плагин JEI, страница-подсказка). */
@@ -157,7 +241,32 @@ public final class RecipeIndex {
 
     public static List<Entry> entriesOf(ResourceLocation type) {
         ensure();
-        return BY_TYPE.getOrDefault(type, List.of());
+        List<Entry> l = BY_TYPE.getOrDefault(type, List.of());
+        if (HIDDEN.isEmpty() && HIDDEN_TYPES.isEmpty()) return l;
+        List<Entry> out = new ArrayList<>();
+        for (Entry e : l) if (visible(e)) out.add(e);
+        return out;
+    }
+
+    /** Все категории, где есть рецепты (для API JEI). */
+    public static Set<ResourceLocation> types() {
+        ensure();
+        return BY_TYPE.keySet();
+    }
+
+    /** Убрать наш общий разбор рецепта с этим id (его показывает расширение мода) и поставить новый. */
+    public static void replace(ResourceLocation id, Entry with) {
+        List<Entry> l = BY_TYPE.get(with.type());
+        if (l != null) {
+            Set<Entry> drop = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+            for (Entry e : l) if (e.id().equals(id) && e.card() == null) drop.add(e);
+            if (!drop.isEmpty()) {
+                l.removeAll(drop);
+                for (List<Entry> x : BY_OUTPUT.values()) x.removeIf(drop::contains);
+                for (List<Entry> x : BY_INPUT.values()) x.removeIf(drop::contains);
+            }
+        }
+        index(with);
     }
 
     private static void vanillaCatalysts() {
@@ -170,13 +279,16 @@ public final class RecipeIndex {
         CATALYSTS.put(new ResourceLocation("smithing"), new ArrayList<>(List.of(new ItemStack(Items.SMITHING_TABLE))));
         CATALYSTS.put(BREWING, new ArrayList<>(List.of(new ItemStack(Items.BREWING_STAND))));
         CATALYSTS.put(FUEL, new ArrayList<>(List.of(new ItemStack(Items.FURNACE), new ItemStack(Items.BLAST_FURNACE), new ItemStack(Items.SMOKER))));
+        CATALYSTS.put(ANVIL, new ArrayList<>(List.of(new ItemStack(Items.ANVIL), new ItemStack(Items.CHIPPED_ANVIL), new ItemStack(Items.DAMAGED_ANVIL))));
+        CATALYSTS.put(COMPOST, new ArrayList<>(List.of(new ItemStack(Items.COMPOSTER))));
+        CATALYSTS.put(GRINDSTONE, new ArrayList<>(List.of(new ItemStack(Items.GRINDSTONE))));
     }
 
     public static List<ItemStack> catalysts(ResourceLocation type) {
         return CATALYSTS.getOrDefault(type, List.of());
     }
 
-    private static void index(Entry e) {
+    static void index(Entry e) {
         BY_TYPE.computeIfAbsent(e.type(), k -> new ArrayList<>()).add(e);
         TYPE_ICON.putIfAbsent(e.type(), e.catalyst());
         Set<Item> outs = new LinkedHashSet<>();
@@ -367,12 +479,31 @@ public final class RecipeIndex {
 
     public static Map<ResourceLocation, List<Entry>> recipesFor(ItemStack stack) {
         ensure();
-        return group(filter(BY_OUTPUT.getOrDefault(stack.getItem(), List.of()), stack, true), stack, false);
+        return group(filter(withDynamic(BY_OUTPUT.getOrDefault(stack.getItem(), List.of()), stack, false), stack, true), stack, false);
     }
 
     public static Map<ResourceLocation, List<Entry>> usesOf(ItemStack stack) {
         ensure();
-        return group(filter(BY_INPUT.getOrDefault(stack.getItem(), List.of()), stack, false), stack, true);
+        return group(filter(withDynamic(BY_INPUT.getOrDefault(stack.getItem(), List.of()), stack, true), stack, false), stack, true);
+    }
+
+    private static List<Entry> withDynamic(List<Entry> base, ItemStack stack, boolean uses) {
+        List<Entry> list = base;
+        if (dynamic != null) {
+            try {
+                List<Entry> more = dynamic.apply(stack, uses);
+                if (more != null && !more.isEmpty()) {
+                    list = new ArrayList<>(base);
+                    list.addAll(more);
+                }
+            } catch (Throwable t) {
+                ArcHud.LOGGER.debug("Arc HUD: dynamic recipes failed", t);
+            }
+        }
+        if (HIDDEN.isEmpty() && HIDDEN_TYPES.isEmpty()) return list;
+        List<Entry> out = new ArrayList<>();
+        for (Entry e : list) if (visible(e)) out.add(e);
+        return out;
     }
 
     /** Предметы с NBT (зачарованные книги, зелья) — только рецепты именно с ними. */

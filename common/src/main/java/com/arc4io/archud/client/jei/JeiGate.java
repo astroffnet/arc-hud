@@ -81,5 +81,27 @@ public final class JeiGate {
         }
     }
 
+    /** Ингредиент под мышью в GUI мода (бак с жидкостью, панель), который мод объявил для JEI; жидкость — ведром. */
+    public static net.minecraft.world.item.ItemStack ingredientUnder(net.minecraft.client.gui.screens.Screen s, double mx, double my) {
+        if (!loaded) return net.minecraft.world.item.ItemStack.EMPTY;
+        try {
+            Object r = Class.forName("com.arc4io.archud.client.jei.JeiBridge")
+                    .getMethod("ingredientUnder", net.minecraft.client.gui.screens.Screen.class, double.class, double.class).invoke(null, s, mx, my);
+            return r instanceof net.minecraft.world.item.ItemStack st ? st : net.minecraft.world.item.ItemStack.EMPTY;
+        } catch (Throwable t) {
+            return net.minecraft.world.item.ItemStack.EMPTY;
+        }
+    }
+
+    /** Общий вызов метода моста без аргументов-классов API (null, если моста нет). */
+    public static Object call(String method, Class<?>[] types, Object... args) {
+        if (!loaded) return null;
+        try {
+            return Class.forName("com.arc4io.archud.client.jei.JeiBridge").getMethod(method, types).invoke(null, args);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
     static boolean loaded;
 }

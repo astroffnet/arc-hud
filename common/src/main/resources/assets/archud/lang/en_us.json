@@ -1377,7 +1377,7 @@
   "archud.recipes.empty": "No data",
   "archud.recipes.uses_of": "USED IN",
   "archud.recipes.recipes_of": "HOW TO MAKE",
-  "archud.recipes.hint": "LMB — recipes · RMB — uses",
+  "archud.recipes.hint": "R / LMB — recipes · U / RMB — uses",
   "archud.recipes.search": "Search… (@mod)",
   "archud.recipes.type.minecraft.crafting": "Crafting",
   "archud.recipes.type.minecraft.smelting": "Smelting",
@@ -1387,7 +1387,7 @@
   "archud.recipes.type.minecraft.stonecutting": "Stonecutting",
   "archud.recipes.type.minecraft.smithing": "Smithing",
   "archud.recipes.type.archud.fuel": "Fuel",
-  "key.archud.recipes": "Item recipes (Shift — uses)",
+  "key.archud.recipes": "Show item recipes (R over an item)",
   "archud.config.recipeViewer": "Recipe viewer (like JEI)",
   "archud.config.recipeItemList": "Item list next to windows",
   "archud.recipes.cook": "%s s · %s XP",
@@ -1422,5 +1422,13 @@
   "archud.save.error": "Could not save the world: %s",
   "archud.config.guiBatching": "Fast rendering of Arc HUD windows",
   "archud.config.jeiPlugins": "Use mods' JEI plugins (recipes, categories, GUI)",
-  "archud.recipes.info": "Information"
+  "archud.recipes.info": "Information",
+  "key.archud.uses": "Show item uses (U over an item)",
+  "archud.recipes.transfer": "Move recipe into the window",
+  "archud.recipes.transfer.max": "Shift — as many as you can",
+  "archud.recipes.transfer.missing": "Missing items:",
+  "archud.recipes.compost": "Chance to raise level: %s%%",
+  "archud.recipes.type.minecraft.anvil": "Anvil",
+  "archud.recipes.type.minecraft.compostable": "Composter",
+  "archud.recipes.type.minecraft.grindstone": "Grindstone"
 }

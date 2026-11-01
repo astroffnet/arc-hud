@@ -74,6 +74,7 @@
     "HumanoidCopyMixin",
     "ArmorLayerModelsMixin",
     "RecipeKeyboardMixin",
+    "TooltipStackMixin",
     "RecipeMouseMixin",
     "KeyMappingClickAccessor",
     "GuiGraphicsAccessor",
