@@ -181,7 +181,6 @@ public final class ArcServer {
                 String key = pos == null ? "none" : dim + "|" + pos.asLong() + "|" + anchor;
                 if (key.equals(LAST_RESPAWN.get(p.getUUID()))) continue;
                 LAST_RESPAWN.put(p.getUUID(), key);
-                if ("compat".equals(System.getenv("ARCHUD_SHOWCASE"))) ArcHud.LOGGER.info("[Compat] server sends respawn {}", key);
                 FriendlyByteBuf buf = ArcNet.create("respawn");
                 buf.writeBoolean(pos != null);
                 if (pos != null) {
