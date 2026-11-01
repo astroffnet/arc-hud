@@ -1506,8 +1506,8 @@
   "archud.config.guiCache": "Интерфейс не ест FPS (свой вывод окон)",
   "archud.config.guiIdleFps": "Обновление окна в покое, раз/с",
   "archud.config.guiActiveFps": "Обновление окна при действиях, раз/с",
-  "archud.fx.player_shadows": "Тени игроков",
-  "archud.fx.player_shadows.desc": "Игроки отбрасывают настоящую тень по солнцу (ночью — по луне): видно позу, броню и предметы в руках. Почти не стоит FPS.",
+  "archud.fx.player_shadows": "Arc RT-тени",
+  "archud.fx.player_shadows.desc": "Игроки и мобы отбрасывают тени от солнца, луны, факелов, фонарей, лавы и других светящихся блоков. До каждого источника пускается луч: за стеной или под крышей тени от него нет. Тень лежит с противоположной от света стороны, вытягивается от низкого источника и имеет мягкие края.",
   "archud.craft.search": "Поиск…",
   "archud.craft.clear": "Очистить",
   "archud.craft.take_all": "Всё в инвентарь",
@@ -1521,5 +1521,13 @@
   "archud.anvil.fits_busy": "Вторая ячейка занята.",
   "archud.anvil.fits_none": "В инвентаре нет ничего, что подходит к этому предмету.",
   "archud.anvil.put": "Клик — положить во вторую ячейку",
-  "archud.config.customCrafting": "Новый верстак"
+  "archud.config.customCrafting": "Новый верстак",
+  "archud.fx.group.shadows": "Тени (трассировка лучей)",
+  "archud.fx.shadow_quality": "Качество теней",
+  "archud.fx.shadow_quality.desc": "Низкое — только солнце и луна; среднее — плюс ближайший светящийся блок; высокое — до трёх источников на сущность, мягкая полутень и больше сущностей.",
+  "archud.fx.shadow_quality.0": "Низкое",
+  "archud.fx.shadow_quality.1": "Среднее",
+  "archud.fx.shadow_quality.2": "Высокое",
+  "archud.fx.hide_blob": "Убрать круглую тень",
+  "archud.fx.hide_blob.desc": "Не рисовать ванильный тёмный круг под сущностями, пока включены Arc RT-тени."
 }

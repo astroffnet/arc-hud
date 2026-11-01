@@ -445,8 +445,27 @@ public final class CompatDriver {
             mc.player.setYRot(0F);
             mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
         }, null);
+        add(5, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().shadowQuality = 3;
+            cmd(mc, "summon minecraft:zombie ~2 ~ ~3 {NoAI:1b,PersistenceRequired:1b}");
+            cmd(mc, "summon minecraft:pig ~-2 ~ ~4 {NoAI:1b}");
+        }, null);
         add(30, mc -> {}, "c31_player_shadow");
-        add(5, mc -> cmd(mc, "tp @s ~ ~ ~6"), null);
+        // ночь: факелы и фонарь вокруг — тени расходятся от каждого источника, за стеной тени нет
+        add(5, mc -> {
+            cmd(mc, "time set 18000");
+            cmd(mc, "setblock ~4 ~ ~2 minecraft:torch");
+            cmd(mc, "setblock ~-3 ~ ~6 minecraft:lantern");
+            cmd(mc, "setblock ~0 ~ ~9 minecraft:glowstone");
+        }, null);
+        add(40, mc -> {}, "c31b_rt_shadow_night");
+        add(5, mc -> {
+            cmd(mc, "kill @e[type=!player]");
+            cmd(mc, "fill ~-4 ~ ~1 ~4 ~ ~10 minecraft:air");
+            cmd(mc, "time set 4000");
+            cmd(mc, "tp @s ~ ~ ~6");
+            com.arc4io.archud.config.ArcConfig.get().shadowQuality = 2;
+        }, null);
         add(5, mc -> {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             cmd(mc, "fill ~-1 ~-1 ~3 ~1 ~-1 ~4 minecraft:water");
