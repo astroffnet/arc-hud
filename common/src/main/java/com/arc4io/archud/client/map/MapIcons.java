@@ -37,8 +37,9 @@ public final class MapIcons {
     public static void glyph(GuiGraphics g, String id, int x, int y, int size, int alpha) {
         int i = index(id);
         if (i < 0) return;
-        RenderSystem.enableBlend();
         g.setColor(1F, 1F, 1F, alpha / 255F);
+        RenderSystem.enableBlend(); // после setColor: он сбрасывает очередь заливок, а та выключает смешивание
+        RenderSystem.defaultBlendFunc();
         g.blit(TEX, x, y, size, size, (i % 8) * 32, (i / 8) * 32, 32, 32, 256, 128);
         g.setColor(1F, 1F, 1F, 1F);
     }

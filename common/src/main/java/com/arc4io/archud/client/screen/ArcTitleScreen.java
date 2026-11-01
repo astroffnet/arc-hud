@@ -164,6 +164,10 @@ public class ArcTitleScreen extends Screen implements com.arc4io.archud.client.s
         g.pose().pushPose();
         g.pose().translate(0, bob, 0);
         g.setColor(1F, 1F, 1F, Draw.easeOut(intro));
+        // setColor сбрасывает очередь заливок, а она выключает смешивание — без этого мягкое свечение
+        // логотипа (полупрозрачные пиксели) рисовалось сплошным голубым пятном
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         g.blit(LOGO, lx, ly, logoW, logoH, 0, 0, 512, 128, 512, 128);
         g.setColor(1F, 1F, 1F, 1F);
         g.pose().popPose();
