@@ -62,6 +62,20 @@ public final class PlayerAnimCompat {
         return ok;
     }
 
+    /** Сгибы рук анимации playerAnimator — на модель аксессуара (без сброса наклона корпуса). */
+    public static void syncArmBends(HumanoidModel<?> from, HumanoidModel<?> to) {
+        if (from == to || !setup()) return;
+        try {
+            if (!mutable.isInstance(from) || !mutable.isInstance(to)) return;
+            Object anim = supplierGet.invoke(getSupplier.invoke(from));
+            if (anim == null || !(Boolean) isActive.invoke(anim)) return;
+            bend.invoke(bendHelper, to.rightArm, getBend.invoke(anim, "rightArm"));
+            bend.invoke(bendHelper, to.leftArm, getBend.invoke(anim, "leftArm"));
+        } catch (Throwable t) {
+            if (errors++ < 3) ArcHud.LOGGER.warn("Arc HUD: playerAnimator bend sync failed", t);
+        }
+    }
+
     /** После {@code from.copyPropertiesTo(to)}. */
     public static void afterCopy(HumanoidModel<?> from, HumanoidModel<?> to) {
         if (from == to || ARMOR_MODELS.contains(to) || !ArcConfig.get().accessoryAnimFix || !setup()) return;

@@ -392,6 +392,8 @@ public class ArcConfig {
     public boolean customCrafting = true;
     /** Аксессуары следуют анимациям рук (playerAnimator: Legends, Emotecraft…). */
     public boolean accessoryAnimFix = true;
+    /** Перчатки Aether рисуются вместе с рукой игрока и повторяют её анимации (Punchy, Legends, playerAnimator и т. п.). */
+    public boolean aetherGlovesFix = true;
     /** Просмотр рецептов (как JEI): клавиша R и экран рецептов. */
     public boolean recipeViewer = true;
     /** Экран перезагрузки ресурсов в стиле Arc HUD (вместо красного экрана Mojang). */

@@ -1522,5 +1522,6 @@
   "archud.fx.hide_blob": "Убрать круглую тень",
   "archud.fx.hide_blob.desc": "Не рисовать ванильный тёмный круг под игроками, мобами и предметами.",
   "archud.legends.stealth": "Скрытность",
-  "archud.fx.group.entity_shadows": "Тени"
+  "archud.fx.group.entity_shadows": "Тени",
+  "archud.config.aetherGlovesFix": "Перчатки Aether двигаются с руками"
 }
