@@ -36,6 +36,7 @@ final class EffectsPage {
         if (!com.arc4io.archud.compat.OptiFineCompat.present() && !ArcHud.platform().isModLoaded("iris") && !ArcHud.platform().isModLoaded("oculus")) {
             List<VideoEntry> packs = new ArrayList<>();
             packs.add(new PackChoice());
+            packs.add(new Bool("shaderpack_linear", () -> c.shaderPackLinear, v -> c.shaderPackLinear = v, null));
             packs.add(new OpenFolder());
             packs.add(new Info("shaderpack_status", () -> Component.literal(com.arc4io.archud.client.fx.pack.PackPipeline.describe())));
             p.group(Component.translatable("archud.fx.group.shaderpacks"), packs);
