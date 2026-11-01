@@ -45,8 +45,9 @@ public final class ArcLoadingCover {
         // логотип
         int logoW = Math.min(w - 40, 300), logoH = logoW / 4;
         int lx = (w - logoW) / 2, ly = h / 2 - logoH - 14;
-        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.setColor(1F, 1F, 1F, alpha);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend(); // после setColor: он выключает смешивание
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
         g.blit(LOGO, lx, ly, logoW, logoH, 0, 0, 512, 128, 512, 128);
         g.setColor(1F, 1F, 1F, 1F);
         // прогресс
