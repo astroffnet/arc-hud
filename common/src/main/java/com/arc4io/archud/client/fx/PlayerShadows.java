@@ -393,14 +393,17 @@ public final class PlayerShadows {
                         if (!visible(level, e, 1 + (int) c[1], mid, start)) continue;
                         used++;
                         float strength = (float) (c[0] * camFade);
-                        // низкий источник (факел на стене у пола) «поднимаем» над головой — иначе тень уходила бы в бесконечность
-                        double lyLocal = Math.max(l.y() - ey, height + 0.6);
                         double lxLocal = l.x() - ex, lzLocal = l.z() - ez;
                         double horiz = Math.sqrt(lxLocal * lxLocal + lzLocal * lzLocal);
                         if (horiz < 0.3) {
                             lxLocal += 0.3;
                             horiz = 0.3;
                         }
+                        // низкий источник (факел у пола) «поднимаем»: тень не длиннее ~1.5 роста сущности,
+                        // иначе от факела в паре блоков она тянулась бы на десяток блоков
+                        double realY = l.y() - ey;
+                        double lyLocal = Math.max(realY, height + horiz / 1.5);
+                        if (lyLocal > realY + 0.5) strength *= 0.75F;
                         int samples = quality == 3 ? 2 : 1;
                         int alpha = (int) (strength * (samples == 1 ? 120 : 70));
                         for (int s = 0; s < samples && alpha > 3; s++) {

@@ -1529,5 +1529,6 @@
   "archud.fx.shadow_quality.1": "Среднее",
   "archud.fx.shadow_quality.2": "Высокое",
   "archud.fx.hide_blob": "Убрать круглую тень",
-  "archud.fx.hide_blob.desc": "Не рисовать ванильный тёмный круг под сущностями, пока включены Arc RT-тени."
+  "archud.fx.hide_blob.desc": "Не рисовать ванильный тёмный круг под сущностями, пока включены Arc RT-тени.",
+  "archud.legends.stealth": "Скрытность"
 }
