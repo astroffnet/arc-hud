@@ -79,6 +79,12 @@ public final class WaypointManager {
     private static int respawnCheckTick;
 
     private static void checkRespawnBlock(Minecraft mc) {
+        if (com.arc4io.archud.client.dev.CompatDriver.enabled() && respawnPos != null) {
+            ArcHud.LOGGER.info("[Compat] respawn check dim={}/{} loaded={} chunk={} block={}", respawnDim,
+                    mc.level == null ? "-" : mc.level.dimension().location(), mc.level != null && mc.level.isLoaded(respawnPos),
+                    mc.level != null && mc.level.hasChunk(respawnPos.getX() >> 4, respawnPos.getZ() >> 4),
+                    mc.level == null ? "-" : mc.level.getBlockState(respawnPos));
+        }
         if (respawnPos == null || respawnDim == null || mc.level == null || mc.player == null) return;
         if (!respawnDim.equals(mc.level.dimension().location().toString()) || !mc.level.isLoaded(respawnPos)) return;
         if (!mc.level.hasChunk(respawnPos.getX() >> 4, respawnPos.getZ() >> 4)) return;
