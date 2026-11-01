@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Просмотр рецептов (как JEI/REI/EMI): «как сделать» и «где используется» для предмета.
@@ -40,6 +41,10 @@ public class ArcRecipeScreen extends Screen {
     private final List<Object[]> decorations = new ArrayList<>();
     private ResourceLocation hoverCat;
     private List<Component> hoverTip;
+    /** Перенос рецепта в окно, из которого открыли рецепты (кнопка «+»): кэш планов и кнопки на экране. */
+    private final Map<RecipeIndex.Entry, Object[]> plans = new java.util.IdentityHashMap<>();
+    private final List<Object[]> plusButtons = new ArrayList<>();
+    private RecipeIndex.Entry hoverPlus, hoverPlusLast;
     private static final int TOP = 64; // заголовок + вкладки категорий + строка категории
     private ArcButton modeBtn, backBtn, prevBtn, nextBtn;
 
@@ -147,7 +152,7 @@ public class ArcRecipeScreen extends Screen {
     private record Placed(RecipeIndex.Entry e, int x, int y, int w, int h) {}
 
     private static int naturalW(RecipeIndex.Entry e, net.minecraft.client.gui.Font font) {
-        if (e.card() != null) return e.card().width() + 10;
+        if (e.card() != null) return e.card().width() + 24;
         int n = e.outputs().size();
         int outW = n == 0 ? (e.type().equals(RecipeIndex.FUEL) ? 14 : 0) : n == 1 ? 22 : ((n + 2) / 3) * 20;
         int body = 6 + cols(e) * 18 + 6 + 24 + outW + 16;
@@ -249,6 +254,9 @@ public class ArcRecipeScreen extends Screen {
 
         renderTabs(g, mouseX, mouseY, accent);
         batch.clear();
+        plusButtons.clear();
+        hoverPlusLast = hoverPlus;
+        hoverPlus = null;
         decorations.clear();
         if (!cats.isEmpty() && !pages.isEmpty()) {
             ResourceLocation c = cats.get(category);
@@ -261,6 +269,7 @@ public class ArcRecipeScreen extends Screen {
             renderCatalysts(g, c, mouseX, mouseY, accent);
             for (Placed pl : pages.get(page)) {
                 renderCard(g, pl.e(), x0 + 32 + pl.x(), y0 + TOP + pl.y(), pl.w(), pl.h(), mouseX, mouseY, accent);
+                renderPlus(g, pl.e(), x0 + 32 + pl.x(), y0 + TOP + pl.y(), pl.w(), pl.h(), mouseX, mouseY, accent);
             }
             String pg = (page + 1) + " / " + pages.size();
             g.drawCenteredString(font, pg, x0 + 32 + (w - 36) / 2, y0 + h - 16, 0xFFCFD8DC);
@@ -271,12 +280,14 @@ public class ArcRecipeScreen extends Screen {
         nextBtn.active = page < pages.size() - 1;
         super.render(g, mouseX, mouseY, pt);
         RecipeOverlay.render(this, g, mouseX, mouseY);
-        if (!hoverStack.isEmpty()) {
+        if (hoverTip != null && !hoverTip.isEmpty()) {
+            List<Component> tip = new ArrayList<>(hoverTip);
+            if (!hoverStack.isEmpty()) tip.add(Component.translatable("archud.recipes.hint").withStyle(s -> s.withColor(0x6A7380)));
+            g.renderComponentTooltip(font, tip, mouseX, mouseY);
+        } else if (!hoverStack.isEmpty()) {
             List<Component> tip = new ArrayList<>(getTooltipFromItem(minecraft, hoverStack));
             tip.add(Component.translatable("archud.recipes.hint").withStyle(s -> s.withColor(0x6A7380)));
             g.renderComponentTooltip(font, tip, mouseX, mouseY);
-        } else if (hoverTip != null && !hoverTip.isEmpty()) {
-            g.renderComponentTooltip(font, hoverTip, mouseX, mouseY);
         } else if (hoverCat != null) {
             g.renderTooltip(font, Component.literal(categoryName(hoverCat).getString() + " (" + data.get(hoverCat).size() + ")"), mouseX, mouseY);
         }
@@ -354,7 +365,7 @@ public class ArcRecipeScreen extends Screen {
         Draw.panel(g, x, y, cw, ch, 0xC0101419, 0x30FFFFFF);
         if (e.card() != null) {
             RecipeCard card = e.card();
-            int ox = x + (cw - card.width()) / 2, oy = y + 5;
+            int ox = x + Math.max(5, (cw - 14 - card.width()) / 2), oy = y + 5;
             int lx = mx - ox, ly = my - oy;
             boolean inside = lx >= 0 && ly >= 0 && lx < card.width() && ly < card.height();
             g.pose().pushPose();
@@ -368,7 +379,7 @@ public class ArcRecipeScreen extends Screen {
                 try {
                     ItemStack st = card.stackAt(lx, ly);
                     if (!st.isEmpty()) hoverStack = st;
-                    else hoverTip = card.tooltip(lx, ly);
+                    hoverTip = card.tooltip(lx, ly);
                 } catch (Throwable ignored) {
                 }
             }
@@ -380,8 +391,15 @@ public class ArcRecipeScreen extends Screen {
         int outRows = Math.max(1, Math.min(3, e.outputs().size()));
         int body = Math.max(rows, outRows) * 18;
         int gx = x + 6, gy = y + 5 + (body - rows * 18) / 2;
+        Set<Integer> missing = Set.of();
+        if (e == hoverPlusLast) {
+            Object[] pc = plans.get(e);
+            if (pc != null && pc[0] instanceof RecipeTransfer.Plan p) missing = p.missing();
+        }
         for (int i = 0; i < n; i++) {
-            slot(g, e.inputs().get(i), gx + (i % c) * 18, gy + (i / c) * 18, mx, my, 0x50FFFFFF, false);
+            int sx = gx + (i % c) * 18, sy = gy + (i / c) * 18;
+            slot(g, e.inputs().get(i), sx, sy, mx, my, missing.contains(i) ? 0xFFFF5050 : 0x50FFFFFF, false);
+            if (missing.contains(i)) g.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0x50FF3030);
         }
         int ax = gx + c * 18 + 6, ay = y + 5 + body / 2;
         if (!e.outputs().isEmpty()) {
@@ -423,6 +441,51 @@ public class ArcRecipeScreen extends Screen {
         }
     }
 
+    /** План переноса для записи (обновляется 2 раза в секунду и при нажатии Shift). */
+    private RecipeTransfer.Plan planFor(RecipeIndex.Entry e) {
+        boolean shift = hasShiftDown();
+        Object[] c = plans.get(e);
+        long now = Util.getMillis();
+        if (c == null || now - (Long) c[1] > 500 || (Boolean) c[2] != shift) {
+            RecipeTransfer.Plan p = null;
+            try {
+                p = RecipeTransfer.plan(parent, e, shift);
+            } catch (Throwable ignored) {
+            }
+            c = new Object[]{p, now, shift};
+            plans.put(e, c);
+        }
+        return (RecipeTransfer.Plan) c[0];
+    }
+
+    private void renderPlus(GuiGraphics g, RecipeIndex.Entry e, int x, int y, int cw, int ch, int mx, int my, int accent) {
+        if (!(parent instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>)) return;
+        RecipeTransfer.Plan p = planFor(e);
+        if (p == null) return;
+        int bx = x + cw - 13, by = y + ch - 13;
+        boolean hov = mx >= bx && mx < bx + 11 && my >= by && my < by + 11;
+        int border = p.ok() ? Draw.alpha(accent, hov ? 0xFF : 0xB0) : 0xC0FF5050;
+        Draw.panel(g, bx, by, 11, 11, hov ? 0xE0202832 : 0xE0101419, border);
+        g.drawString(font, "+", bx + 3, by + 2, p.ok() ? 0xFFFFFFFF : 0xFFFF8080, false);
+        plusButtons.add(new Object[]{bx, by, e});
+        if (hov) {
+            hoverPlus = e;
+            hoverTip = p.tooltip();
+        }
+    }
+
+    /** Для теста: перенести первый рецепт текущей страницы (как клик по «+»). */
+    public String transferFirstForTest() {
+        if (pages.isEmpty() || pages.get(page).isEmpty()) return "no recipes";
+        RecipeIndex.Entry e = pages.get(page).get(0).e();
+        RecipeTransfer.Plan p = RecipeTransfer.plan(parent, e, false);
+        if (p == null) return "not supported in " + (parent == null ? "null" : parent.getClass().getSimpleName());
+        if (!p.ok()) return "missing " + p.missing() + " " + p.tooltip().stream().map(Component::getString).toList();
+        minecraft.setScreen(parent);
+        p.run().run();
+        return "ok";
+    }
+
     public static Component categoryName(ResourceLocation type) {
         Component title = RecipeIndex.TITLES.get(type);
         if (title != null) return title;
@@ -438,6 +501,21 @@ public class ArcRecipeScreen extends Screen {
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (super.mouseClicked(mx, my, button)) return true;
+        for (Object[] b : plusButtons) {
+            int bx = (Integer) b[0], by = (Integer) b[1];
+            if (button != 0 || mx < bx || mx >= bx + 11 || my < by || my >= by + 11) continue;
+            RecipeIndex.Entry e = (RecipeIndex.Entry) b[2];
+            plans.remove(e);
+            RecipeTransfer.Plan p = planFor(e);
+            if (p == null || !p.ok() || p.run() == null) return true;
+            minecraft.setScreen(parent);
+            try {
+                p.run().run();
+            } catch (Throwable t) {
+                com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: recipe transfer failed", t);
+            }
+            return true;
+        }
         int vis = tabsVisible();
         int ty = y0 + 26;
         if (cats.size() > vis && my >= ty && my < ty + 21) {
@@ -484,9 +562,13 @@ public class ArcRecipeScreen extends Screen {
             back();
             return true;
         }
-        if (com.arc4io.archud.client.ArcKeys.RECIPES.matches(key, scan) && !hoverStack.isEmpty()) {
-            navigate(hoverStack.copy(), (mods & GLFW.GLFW_MOD_SHIFT) != 0);
-            return true;
+        boolean r = com.arc4io.archud.client.ArcKeys.RECIPES.matches(key, scan), u = com.arc4io.archud.client.ArcKeys.USES.matches(key, scan);
+        if (r || u) {
+            ItemStack st = !hoverStack.isEmpty() ? hoverStack : RecipeOverlay.hoveredAnywhere(this);
+            if (!st.isEmpty()) {
+                navigate(st.copy(), u || (mods & GLFW.GLFW_MOD_SHIFT) != 0);
+                return true;
+            }
         }
         if (key == GLFW.GLFW_KEY_LEFT && page > 0) page--;
         else if (key == GLFW.GLFW_KEY_RIGHT && page < pages.size() - 1) page++;

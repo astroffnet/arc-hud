@@ -1436,7 +1436,7 @@
   "archud.recipes.empty": "Нет данных",
   "archud.recipes.uses_of": "ГДЕ ИСПОЛЬЗУЕТСЯ",
   "archud.recipes.recipes_of": "КАК СДЕЛАТЬ",
-  "archud.recipes.hint": "ЛКМ — рецепты · ПКМ — применение",
+  "archud.recipes.hint": "R / ЛКМ — как сделать · U / ПКМ — где используется",
   "archud.recipes.search": "Поиск… (@мод)",
   "archud.recipes.type.minecraft.crafting": "Верстак",
   "archud.recipes.type.minecraft.smelting": "Печь",
@@ -1446,7 +1446,7 @@
   "archud.recipes.type.minecraft.stonecutting": "Камнерез",
   "archud.recipes.type.minecraft.smithing": "Кузнечный стол",
   "archud.recipes.type.archud.fuel": "Топливо",
-  "key.archud.recipes": "Рецепты предмета (Shift — применение)",
+  "key.archud.recipes": "Как сделать предмет (R над предметом)",
   "archud.config.recipeViewer": "Просмотр рецептов (как JEI)",
   "archud.config.recipeItemList": "Список предметов справа от окон",
   "archud.recipes.cook": "%s с · %s опыта",
@@ -1481,5 +1481,13 @@
   "archud.save.error": "Не удалось сохранить мир: %s",
   "archud.config.guiBatching": "Быстрая отрисовка окон Arc HUD",
   "archud.config.jeiPlugins": "Понимать плагины модов для JEI (рецепты, категории, GUI)",
-  "archud.recipes.info": "Описание"
+  "archud.recipes.info": "Описание",
+  "key.archud.uses": "Где используется предмет (U над предметом)",
+  "archud.recipes.transfer": "Перенести рецепт в окно",
+  "archud.recipes.transfer.max": "Shift — сразу на сколько хватит",
+  "archud.recipes.transfer.missing": "Не хватает предметов:",
+  "archud.recipes.compost": "Шанс поднять уровень: %s%%",
+  "archud.recipes.type.minecraft.anvil": "Наковальня",
+  "archud.recipes.type.minecraft.compostable": "Компостер",
+  "archud.recipes.type.minecraft.grindstone": "Точило"
 }

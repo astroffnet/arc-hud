@@ -44,6 +44,45 @@ public final class CompatDriver {
         STEPS.add(new Step(delay, action, shot));
     }
 
+    /** Навести курсор на ячейку с предметом в открытом окне. */
+    private static void hover(Minecraft mc, net.minecraft.world.item.Item item) {
+        if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> s)) return;
+        var acc = (com.arc4io.archud.mixin.ContainerScreenAccessor) s;
+        for (Slot sl : s.getMenu().slots) {
+            if (!sl.hasItem() || sl.getItem().getItem() != item) continue;
+            double scale = mc.getWindow().getGuiScale();
+            double x = (acc.archud$left() + sl.x + 8) * scale, y = (acc.archud$top() + sl.y + 8) * scale;
+            org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), x, y);
+            try {
+                var m = mc.mouseHandler.getClass().getDeclaredMethod("onMove", long.class, double.class, double.class);
+                m.setAccessible(true);
+                m.invoke(mc.mouseHandler, mc.getWindow().getWindow(), x, y);
+            } catch (Throwable t) {
+                ArcHud.LOGGER.info("[Compat] cannot move mouse: {}", t.toString());
+            }
+            ArcHud.LOGGER.info("[Compat] hover {} at slot {}", BuiltInRegistries.ITEM.getKey(item), sl.index);
+            return;
+        }
+        ArcHud.LOGGER.info("[Compat] hover: no {} in window", BuiltInRegistries.ITEM.getKey(item));
+    }
+
+    private static void press(Minecraft mc, int key) {
+        long w = mc.getWindow().getWindow();
+        int scan = org.lwjgl.glfw.GLFW.glfwGetKeyScancode(key);
+        mc.keyboardHandler.keyPress(w, key, scan, 1, 0);
+        mc.keyboardHandler.keyPress(w, key, scan, 0, 0);
+    }
+
+    /** Перенести первый рецепт открытого окна рецептов в окно, из которого его открыли. */
+    private static void transferFirst(Minecraft mc, String tag) {
+        if (!(mc.screen instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen rs)) {
+            ArcHud.LOGGER.info("[Compat] {} transfer: no recipe screen", tag);
+            return;
+        }
+        String r = rs.transferFirstForTest();
+        ArcHud.LOGGER.info("[Compat] {} transfer: {}", tag, r);
+    }
+
     private static void cmd(Minecraft mc, String c) {
         var server = mc.getSingleplayerServer();
         if (server == null || mc.player == null) return;
@@ -303,7 +342,60 @@ public final class CompatDriver {
             add(20, mc -> {}, "c21_fd_info_page");
             add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
             add(10, mc -> closeScreen(mc), null);
+            // перенос рецепта в котелок (обработчик переноса Farmer's Delight для JEI)
+            add(5, mc -> {
+                cmd(mc, "give @s minecraft:beef 4");
+                cmd(mc, "give @s minecraft:carrot 4");
+                cmd(mc, "give @s minecraft:potato 4");
+                cmd(mc, "give @s minecraft:bowl 4");
+            }, null);
+            add(10, mc -> KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(mc.options.keyUse.saveString())), null);
+            add(15, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen,
+                    new net.minecraft.world.item.ItemStack(BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("farmersdelight", "beef_stew"))), false), null);
+            add(20, mc -> {}, "c22_fd_transfer_button");
+            add(5, mc -> transferFirst(mc, "c22"), null);
+            add(20, mc -> ArcHud.LOGGER.info("[Compat] after pot transfer: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c23_fd_transferred");
+            add(5, mc -> closeScreen(mc), null);
+            add(10, mc -> closeScreen(mc), null);
         }
+        // клавиши R / U над предметом в инвентаре, перенос рецепта в верстак, встроенные категории JEI
+        add(5, mc -> {
+            cmd(mc, "give @s minecraft:stick 8");
+            cmd(mc, "give @s minecraft:oak_planks 16");
+            cmd(mc, "give @s minecraft:wheat_seeds 8");
+        }, null);
+        add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
+        add(10, mc -> hover(mc, net.minecraft.world.item.Items.COBBLESTONE), null);
+        add(5, mc -> press(mc, org.lwjgl.glfw.GLFW.GLFW_KEY_U), null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] key U -> {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c24_key_u");
+        add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+        add(10, mc -> hover(mc, net.minecraft.world.item.Items.STICK), null);
+        add(5, mc -> press(mc, org.lwjgl.glfw.GLFW.GLFW_KEY_R), null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] key R -> {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c25_key_r");
+        add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+        add(10, mc -> closeScreen(mc), null);
+        add(5, mc -> cmd(mc, "setblock ~ ~ ~1 minecraft:crafting_table"), null);
+        add(10, mc -> KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.getKey(mc.options.keyUse.saveString())), null);
+        add(15, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE_PICKAXE), false), null);
+        add(20, mc -> {}, "c26_transfer_button");
+        add(5, mc -> transferFirst(mc, "c26"), null);
+        add(20, mc -> {}, "c27_transferred");
+        add(5, mc -> closeScreen(mc), null);
+        add(10, mc -> closeScreen(mc), null);
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE), true), null);
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen rs) rs.selectCategory(new net.minecraft.resources.ResourceLocation("anvil"));
+        }, null);
+        add(20, mc -> {}, "c28_anvil");
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WHEAT_SEEDS), true), null);
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.recipes.ArcRecipeScreen rs) rs.selectCategory(new net.minecraft.resources.ResourceLocation("compostable"));
+        }, null);
+        add(20, mc -> {}, "c29_compost");
+        add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.TIPPED_ARROW), false), null);
+        add(20, mc -> {}, "c30_tipped");
+        add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+        add(10, mc -> closeScreen(mc), null);
         add(10, mc -> {
             cmd(mc, "tellraw @a [{\"text\":\"<Notch> \"},{\"text\":\"привет, как дела?\"}]");
             cmd(mc, "tellraw @a {\"text\":\"[Сервер] Рестарт через 5 минут\",\"color\":\"gold\"}");

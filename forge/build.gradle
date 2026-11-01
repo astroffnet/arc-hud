@@ -152,6 +152,14 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// Часть внутренних классов JEI, которые зовут некоторые плагины модов (Aether): только во вложенной копии API
+sourceSets {
+    jeiShim {
+        java.srcDir '../common/jei-shim/java'
+        compileClasspath += sourceSets.main.compileClasspath
+    }
+}
+
 // API JEI отдельным модом «jei» (lowcodefml): классы API из maven + mods.toml и лицензия MIT; переводится в SRG (reobf)
 def jeiApiContents = { Jar t, String name, String dir ->
     t.archiveFileName = name
@@ -160,6 +168,7 @@ def jeiApiContents = { Jar t, String name, String dir ->
         exclude 'META-INF/**', 'pack.mcmeta', '*.png'
     }
     t.from(file('jei-api'))
+    t.from(sourceSets.jeiShim.output)
     t.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     t.manifest { attributes(['Implementation-Title': 'jei-api', 'Implementation-Version': jei_version, 'Automatic-Module-Name': 'jei.api.archud']) }
 }

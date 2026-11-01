@@ -107,6 +107,14 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
 }
 
+// Часть внутренних классов JEI, которые зовут некоторые плагины модов (Aether): только во вложенной копии API
+sourceSets {
+    jeiShim {
+        java.srcDir '../common/jei-shim/java'
+        compileClasspath += sourceSets.main.compileClasspath
+    }
+}
+
 // API JEI отдельным модом «jei»: классы API + fabric.mod.json и лицензия MIT, переведённые в intermediary
 def jeiApiJar = tasks.register('jeiApiJar', Jar) {
     archiveFileName = 'jei-api-archud-fabric-dev.jar'
@@ -115,6 +123,7 @@ def jeiApiJar = tasks.register('jeiApiJar', Jar) {
         exclude 'META-INF/**', 'fabric.mod.json', 'pack.mcmeta', '*.png', '*.mixins.json', '*refmap*'
     }
     from(file('jei-api'))
+    from(sourceSets.jeiShim.output)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 def jeiApiRemap = tasks.register('jeiApiRemapJar', net.fabricmc.loom.task.RemapJarTask) {

@@ -144,7 +144,7 @@ final class JeiHelpers {
                 .on("getUniqueIdentifierForStack", 2, a -> BuiltInRegistries.ITEM.getKey(((ItemStack) a[0]).getItem()).toString())
                 .build();
         IColorHelper colors = Stub.empty(IColorHelper.class);
-        IPlatformFluidHelper fluids = Stub.empty(IPlatformFluidHelper.class);
+        IPlatformFluidHelper fluids = JeiInternals.fluidHelper();
         IVanillaRecipeFactory vanilla = vanillaFactory();
         IIngredientVisibility visibility = Stub.of(IIngredientVisibility.class).on("isIngredientVisible", a -> true).build();
         return Stub.of(IJeiHelpers.class)
@@ -163,27 +163,161 @@ final class JeiHelpers {
                 .build();
     }
 
+    private static IIngredientManager manager;
+
+    /** Помощник/рендер для типа: зарегистрированный модом, для предметов и жидкостей — наш. */
+    private static Object helperFor(Class<?> c) {
+        Object h = INGREDIENT_HELPERS.get(c);
+        if (h == null) for (Map.Entry<Class<?>, Object> e : INGREDIENT_HELPERS.entrySet()) if (e.getKey().isAssignableFrom(c)) h = e.getValue();
+        if (h != null) return h;
+        if (c != null && !ItemStack.class.isAssignableFrom(c) && isFluidClass(c)) return fluidHelper();
+        return itemHelper();
+    }
+
+    private static Object rendererFor(Class<?> c) {
+        Object r = INGREDIENT_RENDERERS.get(c);
+        if (r == null) for (Map.Entry<Class<?>, Object> e : INGREDIENT_RENDERERS.entrySet()) if (e.getKey().isAssignableFrom(c)) r = e.getValue();
+        if (r != null) return r;
+        if (c != null && ItemStack.class.isAssignableFrom(c)) return itemRenderer();
+        if (c != null && isFluidClass(c)) return fluidRenderer();
+        return null;
+    }
+
+    private static boolean isFluidClass(Class<?> c) {
+        var t = JeiInternals.fluidType();
+        return t != null && t.getIngredientClass().isAssignableFrom(c);
+    }
+
+    private static Class<?> classOf(Object o) {
+        if (o instanceof IIngredientType<?> t) return t.getIngredientClass();
+        return o == null ? Object.class : o.getClass();
+    }
+
     static IIngredientManager ingredientManager() {
-        return Stub.of(IIngredientManager.class)
-                .on("getAllIngredients", 1, a -> a[0] == VanillaTypes.ITEM_STACK ? RecipeIndex.items() : List.of())
-                .on("getIngredientHelper", 1, a -> {
-                    Class<?> c = a[0] instanceof IIngredientType<?> t ? t.getIngredientClass() : a[0] == null ? Object.class : a[0].getClass();
-                    Object h = INGREDIENT_HELPERS.get(c);
-                    return h != null ? h : itemHelper();
+        if (manager != null) return manager;
+        manager = Stub.of(IIngredientManager.class)
+                .on("getAllIngredients", 1, a -> {
+                    if (a[0] == VanillaTypes.ITEM_STACK) return RecipeIndex.items();
+                    return new ArrayList<>(JeiBridge.INGREDIENTS.getOrDefault((IIngredientType<?>) a[0], List.of()));
                 })
-                .on("getIngredientRenderer", 1, a -> {
-                    Class<?> c = a[0] instanceof IIngredientType<?> t ? t.getIngredientClass() : a[0] == null ? Object.class : a[0].getClass();
-                    return INGREDIENT_RENDERERS.get(c);
-                })
+                .on("getIngredientHelper", 1, a -> helperFor(classOf(a[0])))
+                .on("getIngredientRenderer", 1, a -> rendererFor(classOf(a[0])))
                 .on("getRegisteredIngredientTypes", 0, a -> {
                     List<IIngredientType<?>> l = new ArrayList<>(INGREDIENT_TYPES);
                     l.add(0, VanillaTypes.ITEM_STACK);
+                    var f = JeiInternals.fluidType();
+                    if (f != null && !l.contains(f)) l.add(1, f);
                     return l;
                 })
-                .on("getIngredientTypeChecked", 1, a -> Optional.of(a[0] instanceof Class<?> c && ItemStack.class.isAssignableFrom(c)
-                        ? VanillaTypes.ITEM_STACK : typeOf(a[0])))
-                .on("createTypedIngredient", 2, a -> Optional.of(typed((IIngredientType) a[0], a[1])))
+                .on("getIngredientTypeForUid", 1, a -> {
+                    if (VanillaTypes.ITEM_STACK.getUid().equals(a[0])) return Optional.of(VanillaTypes.ITEM_STACK);
+                    for (IIngredientType<?> t : INGREDIENT_TYPES) if (t.getUid().equals(a[0])) return Optional.of(t);
+                    var f = JeiInternals.fluidType();
+                    return f != null && f.getUid().equals(a[0]) ? Optional.of(f) : Optional.empty();
+                })
+                .on("getIngredientTypeChecked", 1, a -> {
+                    Class<?> c = a[0] instanceof Class<?> k ? k : classOf(a[0]);
+                    if (ItemStack.class.isAssignableFrom(c)) return Optional.of(VanillaTypes.ITEM_STACK);
+                    for (IIngredientType<?> t : INGREDIENT_TYPES) if (t.getIngredientClass().isAssignableFrom(c)) return Optional.of(t);
+                    var f = JeiInternals.fluidType();
+                    if (f != null && f.getIngredientClass().isAssignableFrom(c)) return Optional.of(f);
+                    return a[0] instanceof Class<?> ? Optional.empty() : Optional.of(typeOf(a[0]));
+                })
+                .on("getIngredientTypeWithSubtypesFromBase", 1, a -> {
+                    var f = JeiInternals.fluidType();
+                    if (a[0] instanceof net.minecraft.world.item.Item) return Optional.of(VanillaTypes.ITEM_STACK);
+                    if (a[0] instanceof net.minecraft.world.level.material.Fluid && f != null) return Optional.of(f);
+                    return Optional.empty();
+                })
+                .on("createTypedIngredient", 2, a -> a[1] == null ? Optional.empty() : Optional.of(typed((IIngredientType) a[0], a[1])))
                 .on("normalizeTypedIngredient", 1, a -> a[0])
+                .on("createClickableIngredient", 4, a -> {
+                    if (a[1] == null) return Optional.empty();
+                    ITypedIngredient ti = typed((IIngredientType) a[0], a[1]);
+                    net.minecraft.client.renderer.Rect2i area = (net.minecraft.client.renderer.Rect2i) a[2];
+                    return Optional.of(Stub.of(mezz.jei.api.runtime.IClickableIngredient.class)
+                            .on("getTypedIngredient", 0, b -> ti)
+                            .on("getArea", 0, b -> area)
+                            .build());
+                })
+                .on("addIngredientsAtRuntime", 2, a -> {
+                    if (a[0] == VanillaTypes.ITEM_STACK) RecipeIndex.addItems((Collection<ItemStack>) a[1]);
+                    else JeiBridge.INGREDIENTS.computeIfAbsent((IIngredientType<?>) a[0], k -> new ArrayList<>()).addAll((Collection<?>) a[1]);
+                    return null;
+                })
+                .on("removeIngredientsAtRuntime", 2, a -> {
+                    if (a[0] == VanillaTypes.ITEM_STACK) RecipeIndex.removeItems((Collection<ItemStack>) a[1]);
+                    else JeiBridge.INGREDIENTS.getOrDefault((IIngredientType<?>) a[0], new ArrayList<>()).removeAll((Collection<?>) a[1]);
+                    return null;
+                })
+                .on("getIngredientAliases", 1, a -> List.of())
+                .build();
+        return manager;
+    }
+
+    static Object itemRenderer() {
+        return Stub.of(mezz.jei.api.ingredients.IIngredientRenderer.class)
+                .on("render", 2, a -> {
+                    net.minecraft.client.gui.GuiGraphics g = (net.minecraft.client.gui.GuiGraphics) a[0];
+                    ItemStack s = (ItemStack) a[1];
+                    g.renderItem(s, 0, 0);
+                    g.renderItemDecorations(net.minecraft.client.Minecraft.getInstance().font, s, 0, 0);
+                    return null;
+                })
+                .on("render", 4, a -> {
+                    net.minecraft.client.gui.GuiGraphics g = (net.minecraft.client.gui.GuiGraphics) a[0];
+                    ItemStack s = (ItemStack) a[1];
+                    g.renderItem(s, (Integer) a[2], (Integer) a[3]);
+                    return null;
+                })
+                .on("getTooltip", 2, a -> new ArrayList<>(net.minecraft.client.gui.screens.Screen.getTooltipFromItem(net.minecraft.client.Minecraft.getInstance(), (ItemStack) a[0])))
+                .on("getWidth", 0, a -> 16)
+                .on("getHeight", 0, a -> 16)
+                .build();
+    }
+
+    static Object fluidRenderer() {
+        return Stub.of(mezz.jei.api.ingredients.IIngredientRenderer.class)
+                .on("render", 2, a -> {
+                    var f = JeiCard.fluidOf(a[1]);
+                    if (f != null) JeiCard.drawFluid((net.minecraft.client.gui.GuiGraphics) a[0], f, 0, 0, 16, 16);
+                    return null;
+                })
+                .on("render", 4, a -> {
+                    var f = JeiCard.fluidOf(a[1]);
+                    if (f != null) JeiCard.drawFluid((net.minecraft.client.gui.GuiGraphics) a[0], f, (Integer) a[2], (Integer) a[3], 16, 16);
+                    return null;
+                })
+                .on("getTooltip", 2, a -> {
+                    List<net.minecraft.network.chat.Component> l = new ArrayList<>();
+                    var f = JeiCard.fluidOf(a[0]);
+                    if (f != null) l.add(f.defaultFluidState().createLegacyBlock().getBlock().getName());
+                    return l;
+                })
+                .on("getWidth", 0, a -> 16)
+                .on("getHeight", 0, a -> 16)
+                .build();
+    }
+
+    static Object fluidHelper() {
+        return Stub.of(IIngredientHelper.class)
+                .on("getIngredientType", 0, a -> JeiInternals.fluidType())
+                .on("getDisplayName", 1, a -> {
+                    var f = JeiCard.fluidOf(a[0]);
+                    return f == null ? "" : f.defaultFluidState().createLegacyBlock().getBlock().getName().getString();
+                })
+                .on("getUniqueId", 2, a -> {
+                    var f = JeiCard.fluidOf(a[0]);
+                    return f == null ? "" : "fluid:" + BuiltInRegistries.FLUID.getKey(f);
+                })
+                .on("getResourceLocation", 1, a -> {
+                    var f = JeiCard.fluidOf(a[0]);
+                    return f == null ? new ResourceLocation("empty") : BuiltInRegistries.FLUID.getKey(f);
+                })
+                .on("copyIngredient", 1, a -> a[0])
+                .on("getAmount", 1, a -> JeiCard.fluidAmount(a[0]))
+                .on("isValidIngredient", 1, a -> JeiCard.fluidOf(a[0]) != null)
+                .on("getErrorInfo", 1, a -> String.valueOf(a[0]))
                 .build();
     }
 
