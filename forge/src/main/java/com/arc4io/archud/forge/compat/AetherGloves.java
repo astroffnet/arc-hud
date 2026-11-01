@@ -50,7 +50,7 @@ public final class AetherGloves {
     private static Class<?> glovesItem, glovesRenderer;
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
-    private static int errors, dbg;
+    private static int errors;
     /** Какая рука рисуется от первого лица (renderRightHand / renderLeftHand). */
     public static boolean fpRight = true;
 
@@ -131,20 +131,12 @@ public final class AetherGloves {
 
     /** Рисуется часть модели: если это рука игрока — запомнить её итоговое положение. */
     public static void part(ModelPart part, PoseStack pose, int light) {
-        if (current == null || drawing || !part.visible) return;
+        if (current == null || drawing || !part.visible || com.arc4io.archud.client.dev.CompatDriver.noPartHook) return;
         boolean right;
         if (firstPerson) {
             // от первого лица моды могут подменять саму часть руки — берём первую часть, нарисованную в renderHand
             if (!PENDING.isEmpty()) return;
             right = fpRight;
-            if (dbg++ < 2) {
-                StringBuilder sb = new StringBuilder();
-                for (StackTraceElement el : Thread.currentThread().getStackTrace()) sb.append("\n    ").append(el);
-                PartPose pp = part.storePose(), mp = (right ? playerModel.rightArm : playerModel.leftArm).storePose();
-                ArcHud.LOGGER.info("[Gloves] fp part pose=({},{},{} r {},{},{}) modelArm=({},{},{} r {},{},{}) same={} trace:{}",
-                        pp.x, pp.y, pp.z, pp.xRot, pp.yRot, pp.zRot, mp.x, mp.y, mp.z, mp.xRot, mp.yRot, mp.zRot,
-                        part == (right ? playerModel.rightArm : playerModel.leftArm), sb);
-            }
         } else {
             right = part == playerModel.rightArm;
             if (!right && part != playerModel.leftArm) return;
@@ -154,6 +146,20 @@ public final class AetherGloves {
         copy.last().pose().set(p.pose());
         copy.last().normal().set(p.normal());
         PENDING.add(new Pending(right, copy.last(), part.storePose(), part.xScale, part.yScale, part.zScale, light));
+    }
+
+    /**
+     * Конец {@code renderHand} (первое лицо). Если отрисовку части руки перехватить не удалось (OptiFine и другие моды
+     * переписывают ModelPart), перчатка берётся из самой руки, которую рисовала игра, — в её итоговой позе.
+     */
+    public static void endHand(LivingEntity e, ModelPart arm, PoseStack pose, int light) {
+        if (current != null && current == e && firstPerson && PENDING.isEmpty() && arm != null && !drawing) {
+            PoseStack copy = new PoseStack();
+            copy.last().pose().set(pose.last().pose());
+            copy.last().normal().set(pose.last().normal());
+            PENDING.add(new Pending(fpRight, copy.last(), arm.storePose(), arm.xScale, arm.yScale, arm.zScale, light));
+        }
+        end(e);
     }
 
     /** Aether не рисует перчатку сам, если она уже нарисована вместе с рукой. */

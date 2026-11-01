@@ -30,6 +30,8 @@ import java.util.function.Consumer;
 public final class CompatDriver {
     /** Тест: наклон руки от первого лица (как у модов анимаций вроде Punchy), градусы. */
     public static float handTilt;
+    /** Тест: как будто перехват отрисовки частей модели не сработал (OptiFine и т. п.). */
+    public static boolean noPartHook;
     private record Step(int delay, Consumer<Minecraft> action, String shot) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
@@ -267,8 +269,11 @@ public final class CompatDriver {
             mc.player.setXRot(10F);
         }, null);
         add(15, mc -> {}, "c40_glove_fp");
-        add(3, mc -> handTilt = 35F, null);
+        add(3, mc -> handTilt = 12F, null);
         add(10, mc -> {}, "c41_glove_fp_tilt_fixed");
+        add(3, mc -> noPartHook = true, null);
+        add(10, mc -> {}, "c41b_glove_fp_tilt_fallback");
+        add(3, mc -> noPartHook = false, null);
         add(3, mc -> com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = false, null);
         add(10, mc -> {}, "c42_glove_fp_tilt_aether_only");
         add(3, mc -> {
