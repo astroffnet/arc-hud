@@ -75,6 +75,12 @@ public final class PackUniforms {
         v.put("shadowProjection", new Matrix4f());
         v.put("shadowProjectionInverse", new Matrix4f());
         v.put("cameraPosition", vec(cameraPos));
+        v.put("cameraPositionInt", new int[]{(int) Math.floor(cameraPos.x), (int) Math.floor(cameraPos.y), (int) Math.floor(cameraPos.z)});
+        v.put("cameraPositionFract", new float[]{(float) (cameraPos.x - Math.floor(cameraPos.x)), (float) (cameraPos.y - Math.floor(cameraPos.y)),
+                (float) (cameraPos.z - Math.floor(cameraPos.z))});
+        v.put("previousCameraPositionInt", new int[]{(int) Math.floor(prevCameraPos.x), (int) Math.floor(prevCameraPos.y), (int) Math.floor(prevCameraPos.z)});
+        v.put("renderStage", 0);
+        v.put("isElytraFlying", Minecraft.getInstance().player != null && Minecraft.getInstance().player.isFallFlying() ? 1 : 0);
         v.put("previousCameraPosition", vec(prevCameraPos));
         v.put("eyeAltitude", (float) cameraPos.y);
         v.put("fogColor", new float[]{RenderSystem.getShaderFogColor()[0], RenderSystem.getShaderFogColor()[1], RenderSystem.getShaderFogColor()[2]});

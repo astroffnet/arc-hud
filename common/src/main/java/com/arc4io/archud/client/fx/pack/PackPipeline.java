@@ -37,6 +37,7 @@ public final class PackPipeline {
     private static String loadedKey = "";
     private static final List<Pass> PASSES = new ArrayList<>();
     private static Pass finalPass;
+    private static CustomUniforms custom;
     private static String status = "";
     private static int errors;
     private static boolean failed;
@@ -118,6 +119,7 @@ public final class PackPipeline {
             return;
         }
         String dim = dimFolder();
+        custom = CustomUniforms.parse(pack.program("shaders.properties", null));
         for (int i = 0; i <= 15; i++) {
             String n = i == 0 ? "composite" : "composite" + i;
             Pass p = compile(n, dim);
@@ -125,7 +127,7 @@ public final class PackPipeline {
         }
         finalPass = compile("final", dim);
         int total = PASSES.size() + (finalPass != null ? 1 : 0);
-        status = pack.name() + ": " + total + (errors > 0 ? " ✔, " + errors + " ✘" : " ✔");
+        status = pack.name() + ": " + total + (errors > 0 ? " ✔, " + errors + " ✘" : " ✔") + (custom.size() > 0 ? " · uniform " + custom.size() : "");
         if (total == 0) status = pack.name() + ": composite/final ✘";
         ArcHud.LOGGER.info("Arc HUD: shader pack {} — {} passes, {} errors", pack.name(), total, errors);
     }
@@ -345,6 +347,7 @@ public final class PackPipeline {
             if (pack == null || (PASSES.isEmpty() && finalPass == null)) return;
             ensureResources(main.width, main.height);
             PackUniforms.update(partialTick, w, h);
+            if (custom != null) custom.update(PackUniforms.VALUES);
             RenderSystem.disableBlend();
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
@@ -483,7 +486,7 @@ public final class PackPipeline {
         Object v = PackUniforms.VALUES.get(u.name);
         if (v == null) return;
         switch (u.type) {
-            case GL11C.GL_FLOAT -> GL20C.glUniform1f(u.location, v instanceof Number n ? n.floatValue() : 0F);
+            case GL11C.GL_FLOAT -> GL20C.glUniform1f(u.location, v instanceof Number n ? n.floatValue() : v instanceof float[] f && f.length > 0 ? f[0] : 0F);
             case GL11C.GL_INT, GL20C.GL_BOOL -> GL20C.glUniform1i(u.location, v instanceof Number n ? n.intValue() : 0);
             case GL20C.GL_FLOAT_VEC2 -> {
                 if (v instanceof float[] f && f.length >= 2) GL20C.glUniform2f(u.location, f[0], f[1]);
@@ -496,6 +499,9 @@ public final class PackPipeline {
             }
             case GL20C.GL_INT_VEC2 -> {
                 if (v instanceof int[] i && i.length >= 2) GL20C.glUniform2i(u.location, i[0], i[1]);
+            }
+            case GL20C.GL_INT_VEC3 -> {
+                if (v instanceof int[] i && i.length >= 3) GL20C.glUniform3i(u.location, i[0], i[1], i[2]);
             }
             case GL20C.GL_FLOAT_MAT4 -> {
                 if (v instanceof Matrix4f m) {
