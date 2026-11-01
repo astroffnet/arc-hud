@@ -85,21 +85,21 @@ public final class RecipeOverlay {
         return r;
     }
 
-    /** Разметить список для экрана (вызывается при открытии/изменении размера). */
+    /** Разметить список для экрана (вызывается при открытии/изменении размера): прижат к правому краю экрана. */
     public static void attach(Screen s, int guiRight) {
         owner = s;
         int left = rightEdge(s, guiRight, 0, s.height) + 6;
-        x = left;
+        int avail = s.width - left - 4;
         y = 6;
-        w = s.width - left - 4;
         h = s.height - 6 - 4;
-        cols = Math.max(0, Math.min(12, (w - 4) / CELL));
+        cols = Math.max(0, Math.min(12, (avail - 4) / CELL));
         rows = Math.max(0, (h - 20 - 14) / CELL);
         if (cols < 3 || rows < 3) {
             cols = 0;
             rows = 0;
         }
         w = cols * CELL + 4;
+        x = s.width - 4 - w;
     }
 
     private static void ensureAttached(Screen s) {
@@ -179,7 +179,42 @@ public final class RecipeOverlay {
         return filtered;
     }
 
+    /** Кадр и экран, для которых панель уже нарисована (из AbstractContainerScreen.render, до подсказки окна). */
+    private static Screen panelDrawnFor;
+    private static long panelDrawnFrame = -1;
+
+    private static long frames;
+
+    /** Только панель (без подсказок) — вызывается в конце отрисовки окна, до его собственной подсказки. */
+    public static void renderPanel(Screen s, GuiGraphics g) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen != s) return;
+        double mx = mc.mouseHandler.xpos() * mc.getWindow().getGuiScaledWidth() / Math.max(1, mc.getWindow().getScreenWidth());
+        double my = mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / Math.max(1, mc.getWindow().getScreenHeight());
+        drawPanel(s, g, (int) mx, (int) my);
+        panelDrawnFor = s;
+        panelDrawnFrame = frames;
+    }
+
+    /** После всей отрисовки окна: панель (если окно её не нарисовало), подсказка предмета списка, перетаскивание. */
     public static void render(Screen s, GuiGraphics g, int mx, int my) {
+        boolean drawn = panelDrawnFor == s && panelDrawnFrame == frames;
+        frames++;
+        if (!drawn) drawPanel(s, g, mx, my);
+        if (!listFor(s) || cols == 0) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (!hovered.isEmpty()) {
+            List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(mc, hovered));
+            tip.add(Component.literal(BuiltInRegistries.ITEM.getKey(hovered.getItem()).getNamespace()).withStyle(st -> st.withColor(0x5A86FF).withItalic(true)));
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 300);
+            g.renderComponentTooltip(mc.font, tip, mx, my);
+            g.pose().popPose();
+        }
+        renderDrag(s, g, mx, my);
+    }
+
+    private static void drawPanel(Screen s, GuiGraphics g, int mx, int my) {
         hovered = ItemStack.EMPTY;
         if (!listFor(s)) return;
         ensureAttached(s);
@@ -226,15 +261,6 @@ public final class RecipeOverlay {
             g.fill(cx, sy + 2, cx + 1, sy + 12, 0xFFFFFFFF);
         }
         g.pose().popPose();
-        if (!hovered.isEmpty()) {
-            List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(mc, hovered));
-            tip.add(Component.literal(BuiltInRegistries.ITEM.getKey(hovered.getItem()).getNamespace()).withStyle(st -> st.withColor(0x5A86FF).withItalic(true)));
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 300);
-            g.renderComponentTooltip(font, tip, mx, my);
-            g.pose().popPose();
-        }
-        renderDrag(s, g, mx, my);
     }
 
     private static boolean inside(double mx, double my) {

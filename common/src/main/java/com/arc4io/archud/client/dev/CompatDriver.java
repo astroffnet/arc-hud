@@ -750,6 +750,28 @@ public final class CompatDriver {
             com.arc4io.archud.client.fx.pack.PackPipeline.reload();
         }, null);
 
+        // список предметов прижат к правому краю, подсказка предмета инвентаря — поверх списка
+        add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
+        add(10, mc -> {
+            var inv = mc.player.getInventory();
+            net.minecraft.world.item.Item it = null;
+            for (int i = 0; i < inv.getContainerSize() && it == null; i++) if (!inv.getItem(i).isEmpty()) it = inv.getItem(i).getItem();
+            if (it != null) hover(mc, it);
+        }, null);
+        add(10, mc -> ArcHud.LOGGER.info("[Compat] recipe list shown={} screen={} width={}", com.arc4io.archud.client.recipes.RecipeOverlay.shown(),
+                mc.screen == null ? "none" : mc.screen.getClass().getSimpleName(), mc.screen == null ? 0 : mc.screen.width), "c75_list_tooltip");
+        add(5, CompatDriver::closeScreen, null);
+        add(5, mc -> {
+            var w = mc.getWindow();
+            ArcHud.LOGGER.info("[Compat] window before F11: {}x{}", w.getScreenWidth(), w.getScreenHeight());
+            com.arc4io.archud.client.video.Borderless.toggle(w);
+        }, null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] borderless={} window {}x{}", com.arc4io.archud.client.video.Borderless.active(),
+                mc.getWindow().getScreenWidth(), mc.getWindow().getScreenHeight()), "c76_borderless");
+        add(5, mc -> com.arc4io.archud.client.video.Borderless.toggle(mc.getWindow()), null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] borderless={} window {}x{}", com.arc4io.archud.client.video.Borderless.active(),
+                mc.getWindow().getScreenWidth(), mc.getWindow().getScreenHeight()), null);
+
         add(20, mc -> {
             ArcHud.LOGGER.info("[Compat] done");
             mc.stop();

@@ -34,7 +34,6 @@ public final class ArcKeys {
 
     public static final KeyMapping ZOOM = new KeyMapping("key.archud.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
     public static final KeyMapping FREELOOK = new KeyMapping("key.archud.freelook", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, CATEGORY);
-    public static final KeyMapping FULLBRIGHT = new KeyMapping("key.archud.fullbright", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
     public static final KeyMapping COPY_COORDS = new KeyMapping("key.archud.copy_coords", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
     public static final KeyMapping CLEAN_SCREENSHOT = new KeyMapping("key.archud.clean_screenshot", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
     public static final KeyMapping AUTO_SPRINT = new KeyMapping("key.archud.auto_sprint", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, CATEGORY);
@@ -49,7 +48,7 @@ public final class ArcKeys {
     /** Консоль как в играх на Source (клавиша «~» / «Ё»). */
     public static final KeyMapping CONSOLE = new KeyMapping("key.archud.console", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, CATEGORY);
 
-    public static final List<KeyMapping> ALL = List.of(CONSOLE, SAVE_WORLD, ZOOM, FREELOOK, FULLBRIGHT, COPY_COORDS, CLEAN_SCREENSHOT, AUTO_SPRINT, CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
+    public static final List<KeyMapping> ALL = List.of(CONSOLE, SAVE_WORLD, ZOOM, FREELOOK, COPY_COORDS, CLEAN_SCREENSHOT, AUTO_SPRINT, CAMERA, CAMERA_SHOULDER, INSPECT, OPEN_BACKPACK, TOGGLE_HUD, TOGGLE_BHOP, OPEN_CONFIG, SORT_INVENTORY,
             WORLD_MAP, ADD_WAYPOINT, WAYPOINTS, ZOOM_IN, ZOOM_OUT, HOST_PANEL, RECIPES, USES);
 
     private ArcKeys() {}
