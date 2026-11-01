@@ -163,6 +163,17 @@ public final class RenderScale {
         failed = false;
     }
 
+    /**
+     * Область вывода во время отрисовки мира в уменьшенный буфер: размер окна → размер буфера.
+     * null — менять ничего не нужно.
+     */
+    public static int[] fixViewport(int x, int y, int w, int h) {
+        if (!swapped || scaled == null || real == null) return null;
+        if (x != 0 || y != 0 || w != real.width || h != real.height) return null;
+        if (w == scaled.width && h == scaled.height) return null;
+        return new int[]{0, 0, scaled.width, scaled.height};
+    }
+
     /** Размер, в котором сейчас рисуется мир (для подписи в настройках). */
     public static String info() {
         Minecraft mc = Minecraft.getInstance();

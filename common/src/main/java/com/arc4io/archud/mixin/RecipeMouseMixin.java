@@ -23,6 +23,7 @@ public abstract class RecipeMouseMixin {
     private void archud$press(long window, int button, int action, int mods, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (window != mc.getWindow().getWindow() || mc.screen == null) return;
+        com.arc4io.archud.client.screen.GuiCache.poke();
         if (action == 0) {
             if (RecipeOverlay.release(mc.screen, archud$gx(mc), archud$gy(mc), button)) ci.cancel();
             return;
@@ -35,6 +36,7 @@ public abstract class RecipeMouseMixin {
     private void archud$scroll(long window, double dx, double dy, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (window != mc.getWindow().getWindow() || mc.screen == null || dy == 0) return;
+        com.arc4io.archud.client.screen.GuiCache.poke();
         if (RecipeOverlay.scroll(mc.screen, archud$gx(mc), archud$gy(mc), Math.signum(dy))) ci.cancel();
     }
 }

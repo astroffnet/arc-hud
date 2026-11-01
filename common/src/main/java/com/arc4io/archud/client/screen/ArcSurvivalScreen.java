@@ -115,16 +115,18 @@ public class ArcSurvivalScreen extends AbstractContainerScreen<AbstractContainer
         int cx = leftPos + coreX();
         sortBtn = addRenderableWidget(new ArcButton(cx + 100, topPos + 76, 18, 16, Component.empty(),
                 b -> ArcClient.platform().sendToServer(ArcPacket.SORT_INVENTORY)).icon(Icons.SORT));
-        sortBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.sort.tooltip")));
+        sortBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.inv.sort")));
         packBtn = addRenderableWidget(new ArcButton(cx + 120, topPos + 76, 18, 16, Component.empty(),
                 b -> ArcClient.platform().sendToServer(ArcPacket.OPEN_BACKPACK)).icon(Icons.BACKPACK));
         packBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("key.archud.backpack")));
-        boolean hasPack = false;
-        try {
-            hasPack = !ArcHud.platform().findEquippedBackpack(minecraft.player).isEmpty();
-        } catch (Exception ignored) {
-        }
-        packBtn.active = hasPack;
+        // рюкзак открывается и надетый, и лежащий в инвентаре/руке — кнопка всегда доступна (сервер скажет, если рюкзака нет)
+        packBtn.active = true;
+    }
+
+    /** Для теста: центр кнопки сортировки (0) или рюкзака (1). */
+    public int[] debugButton(int which) {
+        ArcButton b = which == 0 ? sortBtn : packBtn;
+        return new int[]{b.getX() + b.getWidth() / 2, b.getY() + b.getHeight() / 2};
     }
 
     private static void move(Slot s, int x, int y) {

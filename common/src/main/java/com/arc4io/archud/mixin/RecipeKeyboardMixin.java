@@ -14,7 +14,9 @@ public abstract class RecipeKeyboardMixin {
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true, require = 0)
     private void archud$key(long window, int key, int scan, int action, int mods, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
-        if (window != mc.getWindow().getWindow() || mc.screen == null || action == 0) return;
+        if (window != mc.getWindow().getWindow() || mc.screen == null) return;
+        com.arc4io.archud.client.screen.GuiCache.poke();
+        if (action == 0) return;
         if (RecipeOverlay.key(mc.screen, key, scan, mods)) ci.cancel();
     }
 
@@ -22,6 +24,7 @@ public abstract class RecipeKeyboardMixin {
     private void archud$char(long window, int codepoint, int mods, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (window != mc.getWindow().getWindow() || mc.screen == null || !Character.isBmpCodePoint(codepoint)) return;
+        com.arc4io.archud.client.screen.GuiCache.poke();
         if (RecipeOverlay.typed(mc.screen, (char) codepoint, mods)) ci.cancel();
     }
 }

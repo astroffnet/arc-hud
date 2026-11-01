@@ -335,7 +335,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         highlighted = f.self() ? null : f;
         highlightUntil = Util.getMillis() + 4000;
         if (gotoBox != null && !f.self()) gotoBox.setValue("");
-        if (navigate && !f.self()) Navigator.navigateTo((int) Math.floor(f.x()), (int) Math.floor(f.y()), (int) Math.floor(f.z()), f.dim());
+        if (navigate && !f.self()) Navigator.navigateToPlayer(f.id(), f.name(), f.x(), f.y(), f.z(), f.dim());
     }
 
     /** Подсказки игроков под полем поиска; возвращает true, если клик попал в подсказку. */
@@ -871,8 +871,14 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
                 TempadCompat.openDoor(t);
                 minecraft.setScreen(null);
             }
-            case "nav_player" -> Navigator.navigateTo((int) Math.floor(menuPlayerPos[0]), (int) Math.floor(menuPlayerPos[1]),
-                    (int) Math.floor(menuPlayerPos[2]), viewDim());
+            case "nav_player" -> {
+                String pname = Component.translatable("archud.nav.point").getString();
+                if (minecraft.getConnection() != null && menuPlayer != null) {
+                    var info = minecraft.getConnection().getPlayerInfo(menuPlayer);
+                    if (info != null) pname = info.getProfile().getName();
+                }
+                Navigator.navigateToPlayer(menuPlayer, pname, menuPlayerPos[0], menuPlayerPos[1], menuPlayerPos[2], viewDim());
+            }
             case "tempad_player" -> {
                 com.arc4io.archud.client.ArcClientNet.tempadDoorToPlayer(menuPlayer);
                 minecraft.setScreen(null);

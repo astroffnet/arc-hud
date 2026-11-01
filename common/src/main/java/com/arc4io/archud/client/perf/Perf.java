@@ -23,10 +23,12 @@ public final class Perf {
     /** Описание: id, группа, вид, варианты значений, значение в пресете «Баланс», в пресете «Максимум FPS». */
     public record Opt(String id, String group, Kind kind, int[] values, int balanced, int max, IntSupplier getter, Consumer<Integer> setter) {
         public int get() {
+            if (blocked(id)) return 0;
             return getter != null ? getter.getAsInt() : ArcConfig.get().perf.getOrDefault(id, 0);
         }
 
         public void set(int v) {
+            if (blocked(id)) v = 0;
             if (setter != null) setter.accept(v);
             else if (v == 0) ArcConfig.get().perf.remove(id);
             else ArcConfig.get().perf.put(id, v);
@@ -186,8 +188,38 @@ public final class Perf {
         return BY_ID.get(id);
     }
 
+    /**
+     * Оптимизации, которые лезут в те же места, что OptiFine и Sodium/Embeddium/Rubidium (свой рендер чанков,
+     * частиц, анимаций текстур, конвейер шейдеров): вместе они могли ронять игру (ошибки стека отрисовки),
+     * поэтому при этих модах такие пункты не действуют — то же самое делают сами OptiFine/Sodium.
+     */
+    private static final java.util.Set<String> CLASHING = java.util.Set.of("p_async", "p_light_cache", "s_lazy_anim", "s_world_behind_menu",
+            "s_entity_outline", "x_fast_paintings", "r_upload_budget", "x_item_spin", "x_item_single", "w_mipmaps", "w_fast_graphics", "w_smooth_light",
+            "w_biome_blend");
+    private static Boolean heavy;
+
+    /** Стоит OptiFine или Sodium-подобный мод. */
+    public static boolean heavyRenderer() {
+        if (heavy == null) {
+            boolean h;
+            try {
+                h = com.arc4io.archud.compat.RenderCompat.optifine() || com.arc4io.archud.compat.RenderCompat.sodiumLike();
+            } catch (Throwable t) {
+                h = false;
+            }
+            heavy = h;
+        }
+        return heavy;
+    }
+
+    /** Пункт недоступен рядом с OptiFine/Sodium. */
+    public static boolean blocked(String id) {
+        return CLASHING.contains(id) && heavyRenderer();
+    }
+
     /** Значение настройки (0 — выключено). */
     public static int get(String id) {
+        if (blocked(id)) return 0;
         return ArcConfig.get().perf.getOrDefault(id, 0);
     }
 

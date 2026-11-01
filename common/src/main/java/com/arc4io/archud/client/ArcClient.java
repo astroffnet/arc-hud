@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
  * Клиентская логика, общая для Forge и Fabric.
  */
 public final class ArcClient {
+    private static int warmTicks;
     private static boolean glChecked;
     private static ClientPlatform platform;
 
@@ -144,6 +145,16 @@ public final class ArcClient {
         com.arc4io.archud.client.map.WaypointManager.tick(mc);
         com.arc4io.archud.client.map.MapScanner.tick(mc);
         com.arc4io.archud.client.map.Navigator.tick(mc);
+        com.arc4io.archud.client.net.SteamGate.tick();
+        // индекс рецептов строится заранее (через 5 с после входа в мир), а не при первом открытии окна рецептов
+        if (mc.level == null) warmTicks = 0;
+        else if (++warmTicks == 100 && com.arc4io.archud.client.recipes.RecipeOverlay.enabled() && mc.screen == null) {
+            try {
+                com.arc4io.archud.client.recipes.RecipeIndex.ensure();
+            } catch (Throwable t) {
+                com.arc4io.archud.ArcHud.LOGGER.warn("Arc HUD: recipe index warm-up failed", t);
+            }
+        }
         com.arc4io.archud.client.map.TrailManager.tick(mc);
         BunnyHop.tick(mc);
         HudRenderer.tick(mc);

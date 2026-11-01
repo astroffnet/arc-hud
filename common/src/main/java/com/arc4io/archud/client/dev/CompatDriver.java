@@ -83,6 +83,15 @@ public final class CompatDriver {
         ArcHud.LOGGER.info("[Compat] {} transfer: {}", tag, r);
     }
 
+    private static String invOrder(Minecraft mc) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 9; i < 36; i++) {
+            var st = mc.player.getInventory().getItem(i);
+            if (!st.isEmpty()) sb.append(BuiltInRegistries.ITEM.getKey(st.getItem()).getPath()).append('x').append(st.getCount()).append(' ');
+        }
+        return sb.toString();
+    }
+
     private static void cmd(Minecraft mc, String c) {
         var server = mc.getSingleplayerServer();
         if (server == null || mc.player == null) return;
@@ -308,6 +317,34 @@ public final class CompatDriver {
         }, null);
         add(30, mc -> {}, "c09_anvil");
         add(10, mc -> closeScreen(mc), null);
+        // кнопки «Сортировать» и «Рюкзак» в инвентаре выживания
+        add(5, mc -> {
+            cmd(mc, "give @s minecraft:dirt 5");
+            cmd(mc, "give @s minecraft:apple 3");
+            cmd(mc, "give @s minecraft:dirt 7");
+        }, null);
+        add(10, mc -> mc.setScreen(new InventoryScreen(mc.player)), null);
+        add(10, mc -> {
+            ArcHud.LOGGER.info("[Compat] inventory before sort: {}", invOrder(mc));
+            if (mc.screen instanceof com.arc4io.archud.client.screen.ArcSurvivalScreen s) {
+                int[] c = s.debugButton(0);
+                boolean r = s.mouseClicked(c[0], c[1], 0);
+                s.mouseReleased(c[0], c[1], 0);
+                ArcHud.LOGGER.info("[Compat] sort button click handled={}", r);
+            } else ArcHud.LOGGER.info("[Compat] inventory screen is {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+        }, null);
+        add(15, mc -> ArcHud.LOGGER.info("[Compat] inventory after sort: {}", invOrder(mc)), "c09b_sorted");
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.screen.ArcSurvivalScreen s) {
+                int[] c = s.debugButton(1);
+                boolean r = s.mouseClicked(c[0], c[1], 0);
+                s.mouseReleased(c[0], c[1], 0);
+                ArcHud.LOGGER.info("[Compat] backpack button click handled={}", r);
+            }
+        }, null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] after backpack button: {}", mc.screen == null ? "none" : mc.screen.getClass().getSimpleName()), "c09c_backpack_btn");
+        add(5, mc -> closeScreen(mc), null);
+        add(10, mc -> closeScreen(mc), null);
         // плагин Farmer's Delight для JEI (без JEI): его категории в нашем окне рецептов и «кликабельная стрелка» котелка
         if (ArcHud.platform().isModLoaded("farmersdelight")) {
             add(5, mc -> {
@@ -395,6 +432,52 @@ public final class CompatDriver {
         add(5, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.TIPPED_ARROW), false), null);
         add(20, mc -> {}, "c30_tipped");
         add(5, mc -> { if (mc.screen != null) mc.screen.onClose(); }, null);
+        add(10, mc -> closeScreen(mc), null);
+        // тени игроков (встроенный шейдер), апскейл с мобами/водой/лавой, свой вывод окон
+        add(5, mc -> {
+            cmd(mc, "time set 4000");
+            cmd(mc, "weather clear");
+            var c = com.arc4io.archud.config.ArcConfig.get();
+            c.shaderEnabled = true;
+            c.shaderPlayerShadows = true;
+            mc.player.setXRot(20F);
+            mc.player.setYRot(0F);
+            mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
+        }, null);
+        add(30, mc -> {}, "c31_player_shadow");
+        add(5, mc -> {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            cmd(mc, "fill ~-1 ~-1 ~3 ~1 ~-1 ~4 minecraft:water");
+            cmd(mc, "fill ~2 ~-1 ~3 ~3 ~-1 ~4 minecraft:lava");
+            cmd(mc, "summon minecraft:pig ~-2 ~ ~5 {NoAI:1b}");
+            cmd(mc, "summon minecraft:cow ~1 ~ ~6 {NoAI:1b}");
+            cmd(mc, "summon minecraft:zombie ~3 ~ ~6 {NoAI:1b,PersistenceRequired:1b}");
+            mc.player.setXRot(25F);
+            mc.player.setYRot(0F);
+        }, null);
+        add(30, mc -> {}, "c32_native");
+        add(5, mc -> {
+            var c = com.arc4io.archud.config.ArcConfig.get();
+            c.renderScale = 50;
+            c.upscaler = 1;
+        }, null);
+        add(30, mc -> {}, "c33_fsr50");
+        add(5, mc -> com.arc4io.archud.config.ArcConfig.get().upscaler = 2, null);
+        add(40, mc -> {}, "c34_tsr50");
+        add(5, mc -> {
+            var c = com.arc4io.archud.config.ArcConfig.get();
+            c.renderScale = 100;
+            c.upscaler = 1;
+            cmd(mc, "kill @e[type=!player]");
+        }, null);
+        add(10, mc -> com.arc4io.archud.client.recipes.ArcRecipeScreen.open(mc.screen, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK), true), null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] fps recipe screen, cached output: {}", mc.getFps()), "c35_cached_recipes");
+        add(5, mc -> com.arc4io.archud.config.ArcConfig.get().guiCache = false, null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] fps recipe screen, direct output: {}", mc.getFps()), null);
+        add(5, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().guiCache = true;
+            if (mc.screen != null) mc.screen.onClose();
+        }, null);
         add(10, mc -> closeScreen(mc), null);
         add(10, mc -> {
             cmd(mc, "tellraw @a [{\"text\":\"<Notch> \"},{\"text\":\"привет, как дела?\"}]");

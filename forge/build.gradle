@@ -73,6 +73,7 @@ repositories {
         }, fg.repository)
         filter { includeGroup 'mezz.jei' }
     }
+    mavenCentral()
     maven {
         name = 'Sponge'
         url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -86,6 +87,7 @@ repositories {
 configurations {
     bundled
     jeiApi
+    steam
 }
 
 dependencies {
@@ -116,8 +118,14 @@ dependencies {
     if (project.hasProperty('compatMods')) {
         // мод с плагином для JEI (без самого JEI) — проверка моста
         runtimeOnly fg.deobf("maven.modrinth:farmers-delight:SiIpcZzM")
+        // Embeddium (Sodium для Forge) — у игрока стоит Sodium-подобный рендер: проверка апскейла, теней, вывода окон
+        runtimeOnly fg.deobf("maven.modrinth:embeddium:UTbfe5d1")
         runtimeOnly files(layout.buildDirectory.file('jei-api-dev/jei-api-archud-forge-dev.jar')) { builtBy 'jeiApiDevJar' }
     }
+
+    // steamworks4j (MIT, code-disaster) — приглашения через Steam (Spacewar); классы и библиотеки Steam внутри jar
+    compileOnly 'com.code-disaster.steamworks4j:steamworks4j:1.9.0'
+    steam('com.code-disaster.steamworks4j:steamworks4j:1.9.0') { transitive = false }
 
     // Curios — необязательная зависимость (слоты спины/пояса/амулетов)
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
@@ -134,6 +142,9 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.named('jar', Jar).configure {
+    from({ configurations.steam.collect { zipTree(it) } }) {
+        exclude 'META-INF/**'
+    }
     manifest {
         attributes([
                 'Specification-Title'     : 'archud',
@@ -218,7 +229,7 @@ def serverJar = tasks.register('serverJar', Zip) {
     archiveFileName = "archud-server-forge-${minecraft_version}-${mod_version}.jar"
     destinationDirectory = layout.buildDirectory.dir('libs')
     from({ zipTree(tasks.named('jar').get().archiveFile.get().asFile) }) {
-        exclude 'resourcepacks/**', 'assets/**', 'META-INF/jarjar/**'
+        exclude 'resourcepacks/**', 'assets/**', 'META-INF/jarjar/**', 'com/codedisaster/**', '*.dll', '*.so', '*.dylib'
     }
 }
 tasks.named('build') { dependsOn serverJar }

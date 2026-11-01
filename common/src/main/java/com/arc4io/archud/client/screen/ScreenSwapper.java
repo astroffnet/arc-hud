@@ -141,6 +141,10 @@ public final class ScreenSwapper {
             var pack = ArcBackpackScreen.backpackFor(cs, mc.player);
             if (pack != null) return new ArcBackpackScreen(cs.getMenu(), mc.player.getInventory(), cs.getTitle(), pack);
         }
+        if (cfg.customCrafting && c == net.minecraft.client.gui.screens.inventory.CraftingScreen.class && mc.player != null) {
+            var cs = (net.minecraft.client.gui.screens.inventory.CraftingScreen) next;
+            return new ArcCraftingScreen(cs.getMenu(), mc.player.getInventory(), cs.getTitle());
+        }
         if (cfg.customAnvil && c == net.minecraft.client.gui.screens.inventory.AnvilScreen.class && mc.player != null) {
             var a = (net.minecraft.client.gui.screens.inventory.AnvilScreen) next;
             return new ArcAnvilScreen(a.getMenu(), mc.player.getInventory(), a.getTitle());

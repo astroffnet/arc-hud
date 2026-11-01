@@ -77,7 +77,7 @@ public final class RenderTweaks {
 
     /** Мир не виден — анимации текстур можно не пересчитывать. */
     public static boolean skipTextureAnimation() {
-        if (!ArcConfig.get().lazyTextureAnimations) return false;
+        if (!ArcConfig.get().lazyTextureAnimations || Perf.blocked("s_lazy_anim")) return false;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return false; // меню: панорама и анимированные иконки
         if (!mc.isWindowActive() && ArcConfig.get().dynamicFps) return true;

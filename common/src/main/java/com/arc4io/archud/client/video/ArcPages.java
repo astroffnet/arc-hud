@@ -104,6 +104,8 @@ public final class ArcPages {
 
         @Override
         public Component description() {
+            if (Perf.blocked(opt.id())) return Component.translatable("archud.perf." + opt.id() + ".desc").copy().append("\n\n")
+                    .append(Component.translatable("archud.perf.blocked", com.arc4io.archud.compat.RenderCompat.optifine() ? "OptiFine" : "Sodium / Embeddium"));
             return Component.translatable("archud.perf." + opt.id() + ".desc");
         }
 
@@ -130,6 +132,11 @@ public final class ArcPages {
         @Override
         public Component impact() {
             return Component.translatable("archud.perf.impact." + opt.group());
+        }
+
+        @Override
+        public boolean available() {
+            return !Perf.blocked(opt.id());
         }
 
         @Override

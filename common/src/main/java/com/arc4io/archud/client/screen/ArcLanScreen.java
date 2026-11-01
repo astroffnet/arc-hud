@@ -17,7 +17,8 @@ import net.minecraft.world.level.GameType;
  */
 public class ArcLanScreen extends ArcScreen {
     private GameType mode = GameType.SURVIVAL;
-    private boolean cheats, pvp = true, flight, onlineMode = true;
+    /** По умолчанию при открытии по сети: полёты разрешены (иначе игроков кикает «полёт запрещён»), читы выключены. */
+    private boolean cheats = false, pvp = true, flight = true, onlineMode = true;
     private Difficulty difficulty;
     private EditBox port, motd;
     private String error = "";
@@ -33,7 +34,6 @@ public class ArcLanScreen extends ArcScreen {
         if (difficulty == null && server != null) {
             difficulty = server.getWorldData().getDifficulty();
             mode = server.getDefaultGameType();
-            cheats = server.getWorldData().getAllowCommands();
         }
         int x = px + 10, w = pw - 20, half = (w - 6) / 2, y = py + 28;
         addRenderableWidget(CycleButton.builder(GameType::getShortDisplayName)

@@ -13,6 +13,7 @@ public abstract class ChatAddMixin {
     @ModifyVariable(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
             at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
     private Component archud$decorate(Component msg) {
+        com.arc4io.archud.client.screen.GuiCache.invalidate(com.arc4io.archud.client.screen.GuiCache.CHAT);
         return ChatExtras.process((ChatComponent) (Object) this, msg);
     }
 }

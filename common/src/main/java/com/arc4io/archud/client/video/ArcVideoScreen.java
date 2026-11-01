@@ -134,14 +134,22 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
         listBottom = height - (descW > 0 ? 32 : 66);
 
         String prev = search != null ? search.getValue() : "";
+        boolean searchWasFocused = search != null && search.isFocused();
         search = new EditBox(font, listX, 14, Math.min(220, listW - 4), 16, Component.translatable("archud.video.search"));
         search.setHint(Component.translatable("archud.video.search").withStyle(s -> s.withColor(0x6A7380)));
         search.setValue(prev);
         search.setResponder(v -> {
             scroll = 0;
+            // пересобираем строки, но поле поиска остаётся в фокусе (раньше после первой буквы фокус терялся)
             rebuildWidgets();
+            setFocused(search);
+            search.setFocused(true);
         });
         addRenderableWidget(search);
+        if (searchWasFocused) {
+            setFocused(search);
+            search.setFocused(true);
+        }
 
         int by = height - 26;
         int bx = width - 8;
