@@ -108,6 +108,8 @@ dependencies {
         // библиотеки, которые Legends несёт внутри себя (jar-in-jar не деобфусцируется в dev-запуске)
         runtimeOnly fg.deobf("curse.maven:photon-871522:7501597")
         runtimeOnly fg.deobf("maven.modrinth:ldlib:ONxYJpRz")
+        // Punchy (анимации рук от первого лица) — проверка перчаток Aether вместе с его анимациями
+        runtimeOnly fg.deobf("maven.modrinth:punchy-fpa:XVlWzHbQ")
     }
 
     // API JEI: компилируемся против него; в jar вкладывается отдельным модом «jei» (только API) — если поставлен
