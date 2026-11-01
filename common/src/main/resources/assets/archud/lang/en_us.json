@@ -1447,8 +1447,8 @@
   "archud.config.guiCache": "UI does not eat FPS (own window output)",
   "archud.config.guiIdleFps": "Window refresh when idle, per second",
   "archud.config.guiActiveFps": "Window refresh while interacting, per second",
-  "archud.fx.player_shadows": "Player shadows",
-  "archud.fx.player_shadows.desc": "Players cast a real shadow from the sun (the moon at night) showing pose, armor and held items. Nearly free.",
+  "archud.fx.player_shadows": "Arc RT shadows",
+  "archud.fx.player_shadows.desc": "Players and mobs cast shadows from the sun, moon, torches, lanterns, lava and other glowing blocks. A ray is traced to every light: no shadow from a light behind a wall or above a roof. Shadows fall away from the light, stretch from low lights and have soft edges.",
   "archud.craft.search": "Search…",
   "archud.craft.clear": "Clear",
   "archud.craft.take_all": "All to inventory",
@@ -1462,5 +1462,13 @@
   "archud.anvil.fits_busy": "The second slot is taken.",
   "archud.anvil.fits_none": "Nothing in your inventory fits this item.",
   "archud.anvil.put": "Click — put into the second slot",
-  "archud.config.customCrafting": "New crafting table"
+  "archud.config.customCrafting": "New crafting table",
+  "archud.fx.group.shadows": "Shadows (ray tracing)",
+  "archud.fx.shadow_quality": "Shadow quality",
+  "archud.fx.shadow_quality.desc": "Low: sun and moon only; Medium: plus the nearest glowing block; High: up to three lights per entity, soft penumbra and more entities.",
+  "archud.fx.shadow_quality.0": "Low",
+  "archud.fx.shadow_quality.1": "Medium",
+  "archud.fx.shadow_quality.2": "High",
+  "archud.fx.hide_blob": "Remove round shadow",
+  "archud.fx.hide_blob.desc": "Do not draw the vanilla dark circle under entities while Arc RT shadows are on."
 }

@@ -78,6 +78,8 @@
     "ScaledViewportMixin",
     "PlayerShadowMixin",
     "GuiCacheBlendMixin",
+    "RegenOverlayMixin",
+    "VanillaShadowMixin",
     "RecipeMouseMixin",
     "KeyMappingClickAccessor",
     "GuiGraphicsAccessor",
