@@ -417,6 +417,8 @@ public class ArcConfig {
     public boolean borderlessF11 = true;
     /** Игра была закрыта в режиме «полноэкранный в окне» — включить при запуске. */
     public boolean borderlessActive = false;
+    /** В инвентаре свёрнута карточка характеристик и эффектов. */
+    public boolean invStatsHidden = false;
     /** Свой вывод интерфейса: окно рисуется в отдельный буфер и обновляется только при изменениях (не ест FPS). */
     public boolean guiCache = true;
     /** Сколько раз в секунду обновлять открытое окно, когда в нём ничего не происходит. */
