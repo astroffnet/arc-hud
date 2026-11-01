@@ -34,6 +34,14 @@ public final class TempadServer {
     private static java.lang.reflect.Constructor<?> newLocation;
     private static final Map<UUID, Integer> LAST_HASH = new HashMap<>();
     private static int tick;
+    /** Двери Tempad к игроку: дверь → за кем она следует (место назначения обновляется, пока дверь открыта). */
+    private static final Map<net.minecraft.world.entity.Entity, UUID> FOLLOW = new java.util.WeakHashMap<>();
+    private static Class<?> doorClass;
+    private static Method doorSetLocation;
+    private static Method getFavorite;
+    private static Object channel;
+    private static Method channelSend;
+    private static java.lang.reflect.Constructor<?> newScreenPacket;
 
     private TempadServer() {}
 
@@ -95,6 +103,7 @@ public final class TempadServer {
                 }
             }
         }
+        if (tick % 5 == 0 && !FOLLOW.isEmpty()) updateFollowing(server);
         if (tick % PERIOD != 0 || !available()) return;
         Level overworld = server.overworld();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -133,9 +142,12 @@ public final class TempadServer {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.player_hidden"), true);
                 return;
             }
-            openDoorTo(player, t.getGameProfile().getName(), t.getBlockX(), t.getBlockY(), t.getBlockZ(),
+            net.minecraft.world.entity.Entity door = openDoorTo(player, t.getGameProfile().getName(), t.getBlockX(), t.getBlockY(), t.getBlockZ(),
                     t.level().dimension().location().toString());
+            // дверь ведёт к самому игроку: пока она открыта, место назначения следует за ним
+            if (door != null) FOLLOW.put(door, t.getUUID());
         });
+        com.arc4io.archud.network.ArcNet.onServer("tempad_screen", (player, buf) -> openScreen(player));
         com.arc4io.archud.network.ArcNet.onServer("tempad_door", (player, buf) -> {
             String name = buf.readUtf(64);
             int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
@@ -153,22 +165,22 @@ public final class TempadServer {
      * Дверь Tempad к любой точке (метке с карты Arc HUD) в любом измерении — с теми же проверками, что у Tempad:
      * Tempad в инвентаре или браслете, заряд/топливо, разрешение на межпространственные переходы.
      */
-    public static void openDoorTo(ServerPlayer player, String name, int x, int y, int z, String dim) {
-        if (!available()) return;
+    public static net.minecraft.world.entity.Entity openDoorTo(ServerPlayer player, String name, int x, int y, int z, String dim) {
+        if (!available()) return null;
         try {
             ResourceLocation dimId = ResourceLocation.tryParse(dim);
-            if (dimId == null || player.getServer() == null) return;
+            if (dimId == null || player.getServer() == null) return null;
             ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, dimId);
             if (player.getServer().getLevel(key) == null) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_level"), true);
-                return;
+                return null;
             }
-            if (Math.abs(x) > 30_000_000 || Math.abs(z) > 30_000_000) return;
+            if (Math.abs(x) > 30_000_000 || Math.abs(z) > 30_000_000) return null;
             // всегда ищем безопасное место: твёрдый пол, не пустота, не лава (чанк при необходимости загружается)
             BlockPos safe = TeleportSafety.find(player.getServer().getLevel(key), x, y, z);
             if (safe == null) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tp.unsafe"), true);
-                return;
+                return null;
             }
             x = safe.getX();
             y = safe.getY();
@@ -176,25 +188,99 @@ public final class TempadServer {
             ItemStack stack = (ItemStack) findTempad.invoke(null, player);
             if (stack == null || stack.isEmpty() || !tempadItem.isInstance(stack.getItem())) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_tempad"), true);
-                return;
+                return null;
             }
             Object option = getOption.invoke(stack.getItem());
             if (com.arc4io.archud.config.ArcConfig.get().tempadNoCooldown) stack.removeTagKey("Timer");
             if (!(boolean) canOpen.invoke(option, player, stack)) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_fuel"), true);
-                return;
+                return null;
             }
             if (!(boolean) mayTeleport.invoke(null, key, player)) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_dimension"), true);
-                return;
+                return null;
             }
             String n = name == null || name.isBlank() ? "Arc HUD" : name.length() > 48 ? name.substring(0, 48) : name;
             Object loc = newLocation.newInstance(n, key, new BlockPos(x, y, z), UUID.randomUUID());
             onOpen.invoke(option, player);
             if (com.arc4io.archud.config.ArcConfig.get().tempadNoCooldown) stack.removeTagKey("Timer");
             summon.invoke(null, loc, player, 0xFF8800);
+            return findDoor(player, loc);
         } catch (Throwable t) {
             ArcHud.LOGGER.debug("Arc HUD: Tempad door to waypoint failed", t);
+        }
+        return null;
+    }
+
+    /** Только что открытая дверь (по её месту назначения). */
+    private static net.minecraft.world.entity.Entity findDoor(ServerPlayer player, Object loc) {
+        try {
+            if (doorClass == null) {
+                doorClass = Class.forName("me.codexadrian.tempad.common.entity.TimedoorEntity", false, TempadServer.class.getClassLoader());
+                doorSetLocation = doorClass.getMethod("setLocation", newLocation.getDeclaringClass());
+            }
+            Method getLoc = doorClass.getMethod("getLocation");
+            for (net.minecraft.world.entity.Entity e : player.level().getEntitiesOfClass(net.minecraft.world.entity.Entity.class,
+                    player.getBoundingBox().inflate(6), doorClass::isInstance)) {
+                if (getLoc.invoke(e) == loc) return e;
+            }
+        } catch (Throwable t) {
+            ArcHud.LOGGER.debug("Arc HUD: Tempad door lookup failed", t);
+        }
+        return null;
+    }
+
+    /** Двери к игрокам: переносим место назначения туда, где игрок сейчас (в т.ч. в другое измерение). */
+    private static void updateFollowing(MinecraftServer server) {
+        FOLLOW.entrySet().removeIf(en -> {
+            net.minecraft.world.entity.Entity door = en.getKey();
+            if (door == null || door.isRemoved()) return true;
+            ServerPlayer t = server.getPlayerList().getPlayer(en.getValue());
+            if (t == null || ArcServer.isHidden(t.getUUID())) return false;
+            try {
+                net.minecraft.server.level.ServerLevel lvl = t.serverLevel();
+                BlockPos safe = TeleportSafety.find(lvl, t.getBlockX(), t.getBlockY(), t.getBlockZ());
+                if (safe == null) safe = t.blockPosition();
+                Object loc = newLocation.newInstance(t.getGameProfile().getName(), lvl.dimension(), safe, UUID.randomUUID());
+                doorSetLocation.invoke(door, loc);
+            } catch (Throwable ex) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    /** Экран Tempad из инвентаря Arc HUD: Tempad может лежать где угодно в инвентаре или в браслете. */
+    public static void openScreen(ServerPlayer player) {
+        if (!available()) return;
+        try {
+            ItemStack stack = (ItemStack) findTempad.invoke(null, player);
+            if (stack == null || stack.isEmpty()) {
+                for (int i = 0; i < player.getInventory().getContainerSize() && (stack == null || stack.isEmpty()); i++) {
+                    if (tempadItem.isInstance(player.getInventory().getItem(i).getItem())) stack = player.getInventory().getItem(i);
+                }
+            }
+            if (stack == null || stack.isEmpty() || !tempadItem.isInstance(stack.getItem())) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("archud.tempad.no_tempad"), true);
+                return;
+            }
+            if (newScreenPacket == null) {
+                ClassLoader cl = TempadServer.class.getClassLoader();
+                Class<?> handler = Class.forName("me.codexadrian.tempad.common.data.TempadLocationHandler", false, cl);
+                getFavorite = handler.getMethod("getFavorite", Level.class, UUID.class);
+                Class<?> pkt = Class.forName("me.codexadrian.tempad.common.network.messages.s2c.OpenTempadScreenPacket", false, cl);
+                newScreenPacket = pkt.getConstructor(List.class, UUID.class);
+                channel = Class.forName("me.codexadrian.tempad.common.network.NetworkHandler", false, cl).getField("CHANNEL").get(null);
+                for (Method m : channel.getClass().getMethods()) {
+                    if (m.getName().equals("sendToPlayer") && m.getParameterCount() == 2) channelSend = m;
+                }
+            }
+            Map<?, ?> map = (Map<?, ?>) getLocations.invoke(null, player.level(), player.getUUID());
+            Object packet = newScreenPacket.newInstance(new ArrayList<>(map == null ? List.of() : map.values()),
+                    getFavorite.invoke(null, player.level(), player.getUUID()));
+            channelSend.invoke(channel, packet, player);
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: cannot open Tempad screen", t);
         }
     }
 

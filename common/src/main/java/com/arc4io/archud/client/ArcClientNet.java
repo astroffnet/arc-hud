@@ -58,6 +58,8 @@ public final class ArcClientNet {
             sharing = buf.readBoolean();
             tempadDoors = buf.isReadable() && buf.readBoolean();
             modServer = buf.isReadable() && buf.readBoolean();
+            String worldId = buf.isReadable() ? buf.readUtf(64) : "";
+            if (!worldId.isEmpty()) com.arc4io.archud.client.map.MapCache.checkWorldId(WaypointManager.worldKey(), worldId);
             if (ArcConfig.get().hideFromMap) sendPrivacy(true);
         });
         ArcNet.onClient("map_chunks", buf -> {
@@ -82,6 +84,24 @@ public final class ArcClientNet {
             }
         });
         ArcNet.onClient("wp_shared", ArcClientNet::onShared);
+        ArcNet.onClient("wp_global", buf -> {
+            boolean canEdit = buf.readBoolean();
+            int n = buf.readVarInt();
+            List<Waypoint> list = new ArrayList<>();
+            for (int i = 0; i < n && i < 4096; i++) {
+                String id = buf.readUtf(64), name = buf.readUtf(64);
+                int x = buf.readInt(), y = buf.readInt(), z = buf.readInt();
+                String dim = buf.readUtf(128);
+                int color = buf.readInt();
+                String icon = buf.readUtf(32), author = buf.readUtf(32);
+                Waypoint w = new Waypoint(name, x, y, z, color | 0xFF000000, dim, Waypoint.Source.GLOBAL);
+                w.globalId = id;
+                if (!icon.isEmpty()) w.icon = icon;
+                w.sharedBy = author.isEmpty() ? null : author;
+                list.add(w);
+            }
+            WaypointManager.setGlobal(list, canEdit);
+        });
         ArcNet.onClient("admin_allowed", buf -> adminAllowed = buf.readBoolean());
         ArcNet.onClient("admin_state", buf -> {
             try {
@@ -224,6 +244,7 @@ public final class ArcClientNet {
         SENT_HASH.clear();
         OUTGOING.clear();
         WaypointManager.clearShared();
+        com.arc4io.archud.client.map.ShareInbox.clear();
         com.arc4io.archud.client.map.Legends.reset();
     }
 
@@ -344,6 +365,32 @@ public final class ArcClientNet {
     }
 
     // ------------------------------------------------------------------ метки
+    /** Администратор: создать глобальную метку (её сразу видят все игроки). */
+    public static void globalAdd(Waypoint w) {
+        FriendlyByteBuf buf = ArcNet.create("wp_global_add");
+        buf.writeUtf(w.name.length() > 64 ? w.name.substring(0, 64) : w.name, 64);
+        buf.writeInt(w.x);
+        buf.writeInt(w.y);
+        buf.writeInt(w.z);
+        buf.writeUtf(w.dimension, 128);
+        buf.writeInt(w.color);
+        buf.writeUtf(w.icon == null ? "" : w.icon, 32);
+        ArcNet.sendToServer(buf);
+    }
+
+    /** Администратор: удалить глобальную метку. */
+    public static void globalRemove(Waypoint w) {
+        if (w.globalId == null) return;
+        FriendlyByteBuf buf = ArcNet.create("wp_global_remove");
+        buf.writeUtf(w.globalId, 64);
+        ArcNet.sendToServer(buf);
+    }
+
+    /** Открыть экран Tempad (Tempad в инвентаре или браслете — сервер проверяет). */
+    public static void tempadScreen() {
+        ArcNet.sendToServer(ArcNet.create("tempad_screen"));
+    }
+
     public static boolean canShare() {
         return welcomed && sharing;
     }
@@ -372,13 +419,7 @@ public final class ArcClientNet {
         Waypoint w = new Waypoint(name, x, y, z, color | 0xFF000000, dim, Waypoint.Source.SHARED);
         if (!icon.isEmpty()) w.icon = icon;
         w.sharedBy = from;
-        WaypointManager.addShared(w);
-        Minecraft mc = Minecraft.getInstance();
-        SystemToast.add(mc.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
-                Component.translatable("archud.share.received", from), Component.literal("◆ " + name + "  (" + x + ", " + y + ", " + z + ")"));
-        if (mc.player != null) {
-            mc.player.displayClientMessage(Component.translatable("archud.share.received_chat", from, name, x, y, z)
-                    .withStyle(ChatFormatting.AQUA), false);
-        }
+        // сначала спросить: уведомление с кнопками «Принять» / «Отклонить»
+        com.arc4io.archud.client.map.ShareInbox.offer(w);
     }
 }

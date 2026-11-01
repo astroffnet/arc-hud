@@ -15,6 +15,11 @@ public final class Navigator {
     private static Waypoint target;
     private static long startedAt;
     private static double startDistance;
+    /**
+     * Прибытие засчитывается только после того, как игрок хоть раз отошёл от цели: метка смерти ставится прямо
+     * под мёртвым игроком — раньше навигация сразу писала «Вы прибыли» и удаляла метку.
+     */
+    private static boolean armed;
 
     private Navigator() {}
 
@@ -31,6 +36,7 @@ public final class Navigator {
         startedAt = System.currentTimeMillis();
         LocalPlayer p = Minecraft.getInstance().player;
         startDistance = p == null || w == null ? 0 : w.horizontalDistance(p.getX(), p.getZ());
+        armed = p != null && w != null && w.distanceTo(p.getX(), p.getY(), p.getZ()) > 8;
         if (p != null && w != null) {
             p.displayClientMessage(Component.translatable("archud.nav.started", w.name).withStyle(ChatFormatting.AQUA), true);
         }
@@ -95,8 +101,17 @@ public final class Navigator {
         if (target == null || mc.player == null || mc.level == null) return;
         follow(mc);
         String dim = mc.level.dimension().location().toString();
-        if (!target.dimension.equals(dim)) return;
-        if (target.distanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ()) < 4.5) {
+        if (!target.dimension.equals(dim)) {
+            armed = true;
+            return;
+        }
+        if (mc.player.isDeadOrDying() || mc.screen instanceof net.minecraft.client.gui.screens.DeathScreen) return;
+        double d = target.distanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        if (!armed) {
+            if (d > 8) armed = true;
+            return;
+        }
+        if (d < 4.5) {
             mc.player.displayClientMessage(Component.translatable("archud.nav.arrived", target.name).withStyle(ChatFormatting.GREEN), true);
             mc.player.playSound(SoundEvents.PLAYER_LEVELUP, 0.6F, 1.6F);
             if (target.source == Waypoint.Source.DEATH && ArcConfig.get().navigateToDeath) {

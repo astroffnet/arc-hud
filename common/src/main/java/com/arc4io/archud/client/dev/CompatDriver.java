@@ -30,6 +30,33 @@ import java.util.function.Consumer;
 public final class CompatDriver {
     /** Тест: наклон руки от первого лица (как у модов анимаций вроде Punchy), градусы. */
     public static float handTilt;
+    private static int[] bed = {0, 0, 0};
+
+    /** Простой шейдерпак в старом стиле OptiFine (GLSL 120, gl_FragData, texture2D, DRAWBUFFERS) для проверки загрузчика. */
+    private static void writeTestShaderPack(Minecraft mc) {
+        try {
+            var dir = mc.gameDirectory.toPath().resolve("shaderpacks").resolve("ArcTest").resolve("shaders");
+            java.nio.file.Files.createDirectories(dir);
+            String vsh = "#version 120\nvarying vec2 texcoord;\nvoid main() {\n gl_Position = ftransform();\n texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;\n}\n";
+            java.nio.file.Files.writeString(dir.resolve("composite.vsh"), vsh);
+            java.nio.file.Files.writeString(dir.resolve("final.vsh"), vsh);
+            java.nio.file.Files.writeString(dir.resolve("composite.fsh"), "#version 120\n#include \"/lib/tone.glsl\"\n"
+                    + "uniform sampler2D colortex0;\nuniform sampler2D depthtex0;\nuniform float viewWidth, viewHeight, frameTimeCounter;\n"
+                    + "varying vec2 texcoord;\n/* DRAWBUFFERS:04 */\nvoid main() {\n vec3 c = texture2D(colortex0, texcoord).rgb;\n"
+                    + " float d = texture2D(depthtex0, texcoord).r;\n vec3 s = sepia(c);\n"
+                    + " gl_FragData[0] = vec4(mix(c, s, 0.8), 1.0);\n gl_FragData[1] = vec4(vec3(pow(d, 64.0)), 1.0);\n}\n");
+            java.nio.file.Files.createDirectories(dir.resolve("lib"));
+            java.nio.file.Files.writeString(dir.resolve("lib").resolve("tone.glsl"),
+                    "vec3 sepia(vec3 c) { return vec3(dot(c, vec3(0.393, 0.769, 0.189)), dot(c, vec3(0.349, 0.686, 0.168)), dot(c, vec3(0.272, 0.534, 0.131))); }\n");
+            java.nio.file.Files.writeString(dir.resolve("final.fsh"), "#version 120\nuniform sampler2D gcolor;\nuniform sampler2D gaux1;\n"
+                    + "uniform float aspectRatio;\nvarying vec2 texcoord;\nvoid main() {\n vec3 c = texture2D(gcolor, texcoord).rgb;\n"
+                    + " vec2 v = texcoord - 0.5; v.x *= aspectRatio;\n c *= 1.0 - dot(v, v) * 0.9;\n"
+                    + " if (texcoord.x > 0.8 && texcoord.y > 0.8) c = texture2D(gaux1, (texcoord - 0.8) / 0.2).rgb;\n"
+                    + " gl_FragColor = vec4(c, 1.0);\n}\n");
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("[Compat] cannot write test shader pack", e);
+        }
+    }
     /** Тест: как будто перехват отрисовки частей модели не сработал (OptiFine и т. п.). */
     public static boolean noPartHook;
     private record Step(int delay, Consumer<Minecraft> action, String shot) {}
@@ -576,6 +603,130 @@ public final class CompatDriver {
         add(20, mc -> mc.setScreen(new net.minecraft.client.gui.screens.ChatScreen("")), "c10_chat");
         add(10, mc -> mc.setScreen(null), null);
         add(10, mc -> {}, "c11_chat_hud");
+
+        // ---------------- метки, консоль, моды, карта, шейдерпаки
+        add(5, mc -> {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            cmd(mc, "time set 6000");
+            cmd(mc, "gamerule doImmediateRespawn true");
+            cmd(mc, "kill @s");
+        }, null);
+        add(40, mc -> {
+            if (mc.player != null && mc.player.isDeadOrDying()) mc.player.respawn();
+        }, null);
+        add(40, mc -> {
+            long deaths = com.arc4io.archud.client.map.WaypointManager.user().stream()
+                    .filter(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.DEATH).count();
+            var nav = com.arc4io.archud.client.map.Navigator.target();
+            ArcHud.LOGGER.info("[Compat] death waypoints={} navTarget={}", deaths, nav == null ? "none" : nav.source + ":" + nav.name);
+        }, "c60_after_death");
+        // обмен меткой: уведомление «Принять / Отклонить»
+        add(5, mc -> {
+            var w = new com.arc4io.archud.client.map.Waypoint("Дом Notch", 120, 64, -40, 0xFF4FC3F7, "minecraft:overworld",
+                    com.arc4io.archud.client.map.Waypoint.Source.SHARED);
+            w.sharedBy = "Notch";
+            com.arc4io.archud.client.map.ShareInbox.offer(w);
+        }, null);
+        add(15, mc -> {}, "c61_share_offer");
+        add(5, mc -> mc.setScreen(new net.minecraft.client.gui.screens.ChatScreen("")), null);
+        add(10, mc -> {}, "c62_share_offer_chat");
+        add(5, mc -> {
+            var o = com.arc4io.archud.client.map.ShareInbox.pending();
+            if (!o.isEmpty()) com.arc4io.archud.client.map.ShareInbox.accept(o.get(0).id());
+            boolean saved = com.arc4io.archud.client.map.WaypointManager.user().stream().anyMatch(w -> w.name.equals("Дом Notch"));
+            ArcHud.LOGGER.info("[Compat] shared waypoint accepted -> saved={} pending={}", saved, o.size());
+            mc.setScreen(null);
+        }, null);
+        // кнопка «Сохранить мир»
+        add(5, mc -> com.arc4io.archud.server.WorldSaver.request(true), null);
+        add(30, mc -> ArcHud.LOGGER.info("[Compat] save button label: {}", com.arc4io.archud.client.WorldSaveClient.buttonLabel(mc).getString()), null);
+        // глобальная метка администратора
+        add(5, mc -> com.arc4io.archud.client.ArcClientNet.globalAdd(new com.arc4io.archud.client.map.Waypoint("Спавн сервера",
+                (int) mc.player.getX() + 6, (int) mc.player.getY(), (int) mc.player.getZ() + 6, 0xFFFFD54F, "minecraft:overworld",
+                com.arc4io.archud.client.map.Waypoint.Source.USER)), null);
+        add(20, mc -> {
+            var all = com.arc4io.archud.client.map.WaypointManager.all();
+            long g = all.stream().filter(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.GLOBAL).count();
+            ArcHud.LOGGER.info("[Compat] global waypoints={} canEdit={}", g, com.arc4io.archud.client.map.WaypointManager.globalCanEdit());
+            mc.setScreen(new com.arc4io.archud.client.map.WaypointListScreen(null));
+        }, null);
+        add(15, mc -> {}, "c63_waypoints_global");
+        // скрыть метку у себя
+        add(5, mc -> {
+            for (var w : com.arc4io.archud.client.map.WaypointManager.all()) {
+                if (w.source == com.arc4io.archud.client.map.Waypoint.Source.GLOBAL) com.arc4io.archud.client.map.WaypointManager.setVisible(w, false);
+            }
+            long shown = com.arc4io.archud.client.map.WaypointManager.inDimension().stream()
+                    .filter(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.GLOBAL).count();
+            ArcHud.LOGGER.info("[Compat] global waypoints shown after hide={}", shown);
+            for (var w : com.arc4io.archud.client.map.WaypointManager.all()) {
+                if (w.source == com.arc4io.archud.client.map.Waypoint.Source.GLOBAL) com.arc4io.archud.client.map.WaypointManager.setVisible(w, true);
+            }
+            mc.setScreen(null);
+        }, null);
+        // кровать: метка есть, кровать сломана — метки нет
+        add(5, mc -> {
+            int bx = (int) Math.floor(mc.player.getX()) + 2, by = (int) Math.floor(mc.player.getY()), bz = (int) Math.floor(mc.player.getZ());
+            cmd(mc, "setblock " + bx + " " + by + " " + bz + " minecraft:red_bed[facing=east,part=foot]");
+            cmd(mc, "setblock " + (bx + 1) + " " + by + " " + bz + " minecraft:red_bed[facing=east,part=head]");
+            cmd(mc, "spawnpoint @s " + bx + " " + by + " " + bz);
+            bed = new int[]{bx, by, bz};
+        }, null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint before break={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
+                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN)), null);
+        add(5, mc -> {
+            cmd(mc, "setblock " + bed[0] + " " + bed[1] + " " + bed[2] + " minecraft:air");
+            cmd(mc, "setblock " + (bed[0] + 1) + " " + bed[1] + " " + bed[2] + " minecraft:air");
+        }, null);
+        add(60, mc -> ArcHud.LOGGER.info("[Compat] bed waypoint after break={}", com.arc4io.archud.client.map.WaypointManager.all().stream()
+                .anyMatch(w -> w.source == com.arc4io.archud.client.map.Waypoint.Source.SPAWN)), null);
+        // консоль «~»
+        add(5, mc -> mc.setScreen(new com.arc4io.archud.client.console.ConsoleScreen()), null);
+        add(5, mc -> {
+            if (mc.screen instanceof com.arc4io.archud.client.console.ConsoleScreen cs) {
+                for (char c : "time set 1000".toCharArray()) cs.charTyped(c, 0);
+                cs.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, 0, 0);
+                for (char c : "help".toCharArray()) cs.charTyped(c, 0);
+                cs.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, 0, 0);
+            }
+        }, null);
+        add(20, mc -> ArcHud.LOGGER.info("[Compat] console: daytime after command={}", mc.level.getDayTime() % 24000), "c64_console");
+        add(5, mc -> mc.setScreen(null), null);
+        // меню модов: кнопка «Выключить»
+        add(5, mc -> mc.setScreen(new com.arc4io.archud.client.mods.ArcModListScreen(null)), null);
+        add(20, mc -> {}, "c65_mods");
+        add(5, mc -> mc.setScreen(null), null);
+        // карта от другого мира убирается
+        add(5, mc -> {
+            String key = com.arc4io.archud.client.map.WaypointManager.worldKey();
+            var dir = ArcHud.platform().configDir().resolve("archud").resolve("map").resolve(key);
+            boolean before = java.nio.file.Files.isDirectory(dir);
+            com.arc4io.archud.client.map.MapCache.checkWorldId(key, "compat-other-world");
+            com.arc4io.archud.client.map.MapCache.checkWorldId(key, "compat-new-world");
+            ArcHud.LOGGER.info("[Compat] map wipe: before={} oldMapStillThere={}", before, java.nio.file.Files.isDirectory(dir.resolve("minecraft~overworld")));
+        }, null);
+        add(10, mc -> {}, "c66_map_wiped_toast");
+        // шейдерпаки своим загрузчиком: тестовый пак + скачанные (BSL, Complementary)
+        add(5, mc -> {
+            writeTestShaderPack(mc);
+            cmd(mc, "time set 1000");
+            mc.player.setXRot(10F);
+        }, null);
+        for (int i = 0; i < 4; i++) {
+            final int idx = i;
+            add(5, mc -> {
+                var packs = com.arc4io.archud.client.fx.pack.PackPipeline.packs();
+                ArcHud.LOGGER.info("[Compat] shader packs available: {}", packs);
+                com.arc4io.archud.config.ArcConfig.get().shaderPack = idx < packs.size() ? packs.get(idx) : "";
+                com.arc4io.archud.client.fx.pack.PackPipeline.reload();
+            }, null);
+            add(40, mc -> ArcHud.LOGGER.info("[Compat] shader pack {} status: {}", com.arc4io.archud.config.ArcConfig.get().shaderPack,
+                    com.arc4io.archud.client.fx.pack.PackPipeline.describe()), "c7" + idx + "_shaderpack");
+        }
+        add(5, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().shaderPack = "";
+            com.arc4io.archud.client.fx.pack.PackPipeline.reload();
+        }, null);
 
         add(20, mc -> {
             ArcHud.LOGGER.info("[Compat] done");

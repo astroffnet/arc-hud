@@ -178,6 +178,7 @@ public final class MapCache {
         int bx = cx * 16, bz = cz * 16;
         Region r = region(layer, Math.floorDiv(bx, REGION), Math.floorDiv(bz, REGION), true);
         int lx = Math.floorMod(bx, REGION), lz = Math.floorMod(bz, REGION);
+        if (verify(layer, r, lx, lz, abgr)) return; // сохранённая карта оказалась от другого мира — стёрта
         boolean changed = false;
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
@@ -330,6 +331,96 @@ public final class MapCache {
             else r.image.close();
         }
         l.regions.clear();
+    }
+
+    // ------------------------------------------------------------------ чужая / устаревшая карта
+    /**
+     * Сохранённая карта сверяется с настоящим миром: первые изученные после входа чанки, для которых уже есть
+     * сохранённая картинка, сравниваются с ней. Если местность почти везде другая (мир на сервере пересоздан,
+     * сменился сид, другой сервер на том же адресе) — вся старая карта этого мира убирается, чтобы не было
+     * «призрачных» территорий. Сервер Arc HUD вдобавок присылает id мира — тогда проверка мгновенная.
+     */
+    private static String verifyWorld = "";
+    private static int compared, mismatched;
+    private static final int VERIFY_CHUNKS = 24;
+
+    private static boolean verify(Layer layer, Region r, int lx, int lz, int[] abgr) {
+        if (!layer.world.equals(verifyWorld)) {
+            verifyWorld = layer.world;
+            compared = mismatched = 0;
+        }
+        if (compared >= VERIFY_CHUNKS) return false;
+        int both = 0, diff = 0;
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                int v = abgr[z * 16 + x], old = r.image.getPixelRGBA(lx + x, lz + z);
+                if (v == 0 || old == 0) continue;
+                both++;
+                if (Math.abs((v & 0xFF) - (old & 0xFF)) > 28 || Math.abs((v >> 8 & 0xFF) - (old >> 8 & 0xFF)) > 28
+                        || Math.abs((v >> 16 & 0xFF) - (old >> 16 & 0xFF)) > 28) diff++;
+            }
+        }
+        if (both < 128) return false;
+        compared++;
+        if (diff * 10 >= both * 7) mismatched++;
+        if (compared == VERIFY_CHUNKS && mismatched * 10 >= compared * 6) {
+            ArcHud.LOGGER.info("Arc HUD: saved map of {} does not match the world ({}/{} chunks differ) — removing it", layer.world, mismatched, compared);
+            wipeWorld(layer.world);
+            notifyWiped();
+            return true;
+        }
+        return false;
+    }
+
+    /** Сервер Arc HUD прислал id мира: другой id — старая карта не от этого мира. */
+    public static void checkWorldId(String world, String id) {
+        if (world == null || world.isEmpty() || world.equals("unknown") || id == null || id.isEmpty()) return;
+        Path base = ArcHud.platform().configDir().resolve("archud").resolve("map").resolve(world);
+        Path f = base.resolve(".world_id");
+        try {
+            if (Files.exists(f)) {
+                String old = Files.readString(f).trim();
+                if (old.equals(id)) return;
+                ArcHud.LOGGER.info("Arc HUD: world id of {} changed — removing the old saved map", world);
+                wipeWorld(world);
+                notifyWiped();
+            }
+            Files.createDirectories(base);
+            Files.writeString(f, id);
+            verifyWorld = world;
+            compared = VERIFY_CHUNKS; // id совпал / записан — сверка чанков не нужна
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("Arc HUD: world id check failed", e);
+        }
+    }
+
+    /** Убрать сохранённую карту мира (файлы переносятся в config/archud/map_removed — на случай ошибки). */
+    public static synchronized void wipeWorld(String world) {
+        for (Layer l : LAYERS.values()) {
+            if (!l.world.equals(world)) continue;
+            release(l);
+            l.missing.clear();
+        }
+        Path base = ArcHud.platform().configDir().resolve("archud").resolve("map").resolve(world);
+        try {
+            if (Files.isDirectory(base)) {
+                Path trash = ArcHud.platform().configDir().resolve("archud").resolve("map_removed")
+                        .resolve(world + "-" + System.currentTimeMillis());
+                Files.createDirectories(trash.getParent());
+                Files.move(base, trash);
+            }
+        } catch (Exception e) {
+            ArcHud.LOGGER.warn("Arc HUD: cannot remove old map of " + world, e);
+        }
+        MapScanner.clearScanned();
+    }
+
+    private static void notifyWiped() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.client.gui.components.toasts.SystemToast.addOrUpdate(mc.getToasts(),
+                net.minecraft.client.gui.components.toasts.SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                net.minecraft.network.chat.Component.translatable("archud.map.wiped_title"),
+                net.minecraft.network.chat.Component.translatable("archud.map.wiped"));
     }
 
     public static void touch(Layer l) {

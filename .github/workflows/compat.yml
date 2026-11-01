@@ -28,6 +28,15 @@ jobs:
           gradle-version: "8.8"
       - name: Install virtual display
         run: sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri mesa-utils
+      - name: Download shader packs (test of the built-in shader pack loader)
+        continue-on-error: true
+        run: |
+          mkdir -p ${{ matrix.loader }}/run/shaderpacks
+          for slug in bsl-shaders complementary-reimagined; do
+            url=$(curl -s "https://api.modrinth.com/v2/project/$slug/version" | jq -r '[.[] | select(.loaders | index("iris") or index("optifine"))][0].files[0].url')
+            [ -n "$url" ] && [ "$url" != "null" ] && curl -sSLo "${{ matrix.loader }}/run/shaderpacks/$slug.zip" "$url"
+          done
+          ls -la ${{ matrix.loader }}/run/shaderpacks
       - name: Run client with showcase driver
         working-directory: ${{ matrix.loader }}
         env:

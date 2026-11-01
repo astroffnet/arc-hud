@@ -302,6 +302,16 @@ public final class ForgeClient implements ClientPlatform {
     }
 
     @Override
+    public java.nio.file.Path modFile(String id) {
+        try {
+            var info = net.minecraftforge.fml.ModList.get().getModFileById(id);
+            return info == null ? null : info.getFile().getFilePath();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    @Override
     public java.nio.file.Path modsDir() {
         return net.minecraftforge.fml.loading.FMLPaths.MODSDIR.get();
     }

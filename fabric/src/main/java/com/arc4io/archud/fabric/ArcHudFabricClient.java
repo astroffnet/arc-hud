@@ -147,6 +147,19 @@ public class ArcHudFabricClient implements ClientModInitializer, ClientPlatform 
     }
 
     @Override
+    public java.nio.file.Path modFile(String id) {
+        try {
+            var c = net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(id);
+            if (c.isEmpty()) return null;
+            var origin = c.get().getOrigin();
+            if (origin.getKind() != net.fabricmc.loader.api.metadata.ModOrigin.Kind.PATH || origin.getPaths().isEmpty()) return null;
+            return origin.getPaths().get(0);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    @Override
     public java.util.List<com.arc4io.archud.client.mods.ModEntry> mods() {
         return FabricMods.mods();
     }

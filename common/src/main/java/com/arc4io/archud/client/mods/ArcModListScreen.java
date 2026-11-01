@@ -36,7 +36,9 @@ public class ArcModListScreen extends ArcScreen {
     private final List<ModEntry> shown = new ArrayList<>();
     private ModEntry selected;
     private EditBox search;
-    private ArcButton configBtn, siteBtn, libsBtn;
+    private ArcButton configBtn, siteBtn, libsBtn, toggleBtn, restartBtn;
+    /** Выключенные моды (файлы .jar.disabled) — показываются в списке, их можно включить. */
+    private final Map<ModEntry, ModToggle.Disabled> disabled = new HashMap<>();
     private final Map<String, Integer> children = new HashMap<>();
     private static boolean showLibs;
     private double scroll, descScroll;
@@ -55,6 +57,12 @@ public class ArcModListScreen extends ArcScreen {
             if (m.parent() != null && !m.parent().isEmpty()) children.merge(m.parent(), 1, Integer::sum);
             all.add(m);
         }
+        disabled.clear();
+        for (ModToggle.Disabled d : ModToggle.disabled()) {
+            ModEntry e = new ModEntry("disabled:" + d.file().getFileName(), d.name(), d.version(), d.description(), null, null, false, null, null, null);
+            disabled.put(e, d);
+            all.add(e);
+        }
         all.sort(Comparator.comparing(m -> m.name().toLowerCase(Locale.ROOT)));
         listW = Math.min(200, pw / 3);
         search = addRenderableWidget(new EditBox(font, px + 10, py + 26, listW, 16, Component.translatable("archud.controls.search")));
@@ -63,6 +71,10 @@ public class ArcModListScreen extends ArcScreen {
         int dx = px + listW + 20;
         configBtn = addRenderableWidget(new ArcButton(dx, py + ph - 24, 110, 18, Component.translatable("archud.mods.config"), b -> openConfig()));
         siteBtn = addRenderableWidget(new ArcButton(dx + 114, py + ph - 24, 90, 18, Component.translatable("archud.mods.site"), b -> openSite()));
+        // включить / выключить — в правом верхнем углу карточки мода
+        toggleBtn = addRenderableWidget(new ArcButton(px + pw - 122, py + 32, 108, 18, Component.translatable("archud.mods.disable"), b -> toggle()));
+        restartBtn = addRenderableWidget(new ArcButton(px + pw - 122, py + 54, 108, 18,
+                Component.translatable("archud.mods.restart_apply"), b -> ModToggle.applyAndRestart(minecraft)));
         int half = (listW + 4 - 4) / 2;
         addRenderableWidget(new ArcButton(px + 8, py + ph - 24, half, 18, Component.translatable("archud.mods.folder"),
                 b -> Util.getPlatform().openFile(com.arc4io.archud.client.ArcClient.platform().modsDir().toFile())));
@@ -97,6 +109,39 @@ public class ArcModListScreen extends ArcScreen {
     private void updateButtons() {
         configBtn.active = selected != null && selected.config() != null;
         siteBtn.active = selected != null && selected.url() != null && !selected.url().isBlank();
+        if (toggleBtn == null) return;
+        ModToggle.Disabled d = selected == null ? null : disabled.get(selected);
+        if (d != null) {
+            toggleBtn.active = true;
+            toggleBtn.setMessage(Component.translatable("archud.mods.enable"));
+        } else if (selected != null && ModToggle.pendingDisable(selected.id())) {
+            toggleBtn.active = true;
+            toggleBtn.setMessage(Component.translatable("archud.mods.undo_disable"));
+        } else {
+            toggleBtn.active = selected != null && ModToggle.canToggle(selected.id());
+            toggleBtn.setMessage(Component.translatable("archud.mods.disable"));
+        }
+        toggleBtn.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(
+                selected != null && !toggleBtn.active ? "archud.mods.toggle_locked" : "archud.mods.toggle_tip")));
+        restartBtn.visible = ModToggle.hasChanges();
+    }
+
+    private void toggle() {
+        if (selected == null) return;
+        ModToggle.Disabled d = disabled.get(selected);
+        if (d != null) {
+            if (ModToggle.enable(d)) {
+                ModToggle.markEnabled();
+                disabled.remove(selected);
+                all.remove(selected);
+                selected = null;
+            }
+        } else if (ModToggle.pendingDisable(selected.id())) {
+            ModToggle.undoDisable(selected.id());
+        } else {
+            ModToggle.disable(selected.id());
+        }
+        refresh();
     }
 
     private void openConfig() {
@@ -174,8 +219,11 @@ public class ArcModListScreen extends ArcScreen {
                 drawLogo(g, m, lx + 4, y + 2, 20, 20);
                 String n = m.name();
                 if (font.width(n) > listW - 34) n = font.plainSubstrByWidth(n, listW - 38) + "…";
-                g.drawString(font, n, lx + 28, y + 3, sel ? 0xFFFFFFFF : Draw.TEXT, true);
-                Draw.small(g, font, m.version(), lx + 28, y + 13, Draw.TEXT_DIM, 0.6F);
+                boolean off = disabled.containsKey(m), willOff = !off && ModToggle.pendingDisable(m.id());
+                g.drawString(font, n, lx + 28, y + 3, off ? 0xFF7A838F : sel ? 0xFFFFFFFF : Draw.TEXT, true);
+                String ver = m.version() + (off ? "  · " + Component.translatable("archud.mods.off").getString()
+                        : willOff ? "  · " + Component.translatable("archud.mods.will_off").getString() : "");
+                Draw.small(g, font, ver, lx + 28, y + 13, off || willOff ? 0xFFFF8A65 : Draw.TEXT_DIM, 0.6F);
             }
             y += ROW;
         }

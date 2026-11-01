@@ -187,6 +187,7 @@ def serverMeta = tasks.register('serverMeta') {
         new java.util.zip.ZipFile(jar).withCloseable { z -> text = z.getInputStream(z.getEntry('fabric.mod.json')).getText('UTF-8') }
         def json = new groovy.json.JsonSlurper().parseText(text)
         json.remove('jars')
+        if (json.entrypoints) { json.entrypoints.remove('client'); json.entrypoints.remove('modmenu') }
         json.description = (json.description ?: '') + ' (server build)'
         def f = out.get().asFile
         f.parentFile.mkdirs()
@@ -199,6 +200,9 @@ def serverJar = tasks.register('serverJar', Zip) {
     destinationDirectory = layout.buildDirectory.dir('libs')
     from({ zipTree(tasks.named('remapJar').get().archiveFile.get().asFile) }) {
         exclude 'resourcepacks/**', 'META-INF/jars/**', 'fabric.mod.json', 'com/codedisaster/**', '*.dll', '*.so', '*.dylib'
+        // только серверное: без клиентского кода (client/perf остаётся — его читает серверная оптимизация TPS)
+        exclude { e -> e.path.startsWith('com/arc4io/archud/client/') && !e.path.startsWith('com/arc4io/archud/client/perf/') }
+        exclude 'com/arc4io/archud/fabric/ArcHudFabricClient*', 'com/arc4io/archud/fabric/FabricMods*', 'com/arc4io/archud/fabric/compat/ModMenuCompat*'
         exclude { e -> e.path.startsWith('assets/') && e.path != 'assets/archud/icon.png' && !e.directory }
     }
     from(layout.buildDirectory.dir('server-meta'))

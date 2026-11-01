@@ -408,6 +408,8 @@ public class ArcConfig {
     public boolean steamInvites = true;
     /** Не рисовать ванильный круг-тень под игроками, мобами и предметами. */
     public boolean hideVanillaShadows = true;
+    /** Шейдерпак из папки shaderpacks, который Arc HUD запускает сам (без Iris / OptiFine); пусто — выключено. */
+    public String shaderPack = "";
     /** Свой вывод интерфейса: окно рисуется в отдельный буфер и обновляется только при изменениях (не ест FPS). */
     public boolean guiCache = true;
     /** Сколько раз в секунду обновлять открытое окно, когда в нём ничего не происходит. */

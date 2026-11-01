@@ -232,6 +232,11 @@ def serverJar = tasks.register('serverJar', Zip) {
     destinationDirectory = layout.buildDirectory.dir('libs')
     from({ zipTree(tasks.named('jar').get().archiveFile.get().asFile) }) {
         exclude 'resourcepacks/**', 'assets/**', 'META-INF/jarjar/**', 'com/codedisaster/**', '*.dll', '*.so', '*.dylib'
+        // только серверное: без клиентского кода (HUD, карта, экраны, рецепты, шейдеры, консоль…).
+        // client/perf остаётся — его настройки читает серверная оптимизация TPS
+        exclude { e -> e.path.startsWith('com/arc4io/archud/client/') && !e.path.startsWith('com/arc4io/archud/client/perf/') }
+        exclude 'com/arc4io/archud/forge/ForgeClient*', 'com/arc4io/archud/forge/cit/**', 'com/arc4io/archud/forge/compat/AetherGloves*',
+                'com/arc4io/archud/forge/compat/LegendsCompat*'
     }
 }
 tasks.named('build') { dependsOn serverJar }

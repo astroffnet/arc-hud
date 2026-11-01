@@ -720,6 +720,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         menuPlayer = null;
         menuLegend = wp == null ? Legends.at(viewDim(), mapCX(), mapCY(), centerX, centerZ, zoom, mx, my) : null;
         if (menuLegend != null) {
+            menuItems.add("tp_smart");
             menuItems.add("nav_legend");
             menuItems.add("hide_legend");
             menuOpen = true;
@@ -737,6 +738,8 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             menuItems.add(Navigator.isTarget(wp) ? "nav_stop" : "nav");
             menuItems.add("edit");
             menuItems.add("share");
+            menuItems.add("hide_wp");
+            if (wp.source == Waypoint.Source.GLOBAL && WaypointManager.globalCanEdit()) menuItems.add("global_remove");
         } else {
             menuItems.add("tp_smart");
             menuItems.add("nav_here");
@@ -756,7 +759,7 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
     }
 
     private String tpKey() {
-        String base = menuPlayer != null ? "tp_to_player" : menuWaypoint != null ? "tp_to_wp" : "tp_here";
+        String base = menuPlayer != null ? "tp_to_player" : menuWaypoint != null || menuLegend != null ? "tp_to_wp" : "tp_here";
         return base + switch (tpMode()) {
             case 2 -> "_tempad";
             case 1 -> "_op";
@@ -775,6 +778,11 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
         if (menuPlayer != null) {
             if (mode == 2) com.arc4io.archud.client.ArcClientNet.tempadDoorToPlayer(menuPlayer);
             else if (minecraft.getConnection() != null) minecraft.getConnection().sendCommand("tp @s " + menuPlayerName);
+        } else if (menuLegend != null) {
+            Waypoint t = new Waypoint(Legends.name(menuLegend).getString(), menuLegend.x(), menuLegend.y(), menuLegend.z(), Legends.COLOR,
+                    menuLegend.dim(), Waypoint.Source.TEMP);
+            if (mode == 2) TempadCompat.openDoor(t);
+            else com.arc4io.archud.client.ArcClientNet.safeTeleport(t.dimension, t.x, t.y, t.z);
         } else if (menuWaypoint != null) {
             if (mode == 2) TempadCompat.openDoor(menuWaypoint);
             else com.arc4io.archud.client.ArcClientNet.safeTeleport(menuWaypoint.dimension, menuWaypoint.x, menuWaypoint.y, menuWaypoint.z);
@@ -890,6 +898,11 @@ public class WorldMapScreen extends Screen implements com.arc4io.archud.client.s
             case "nav_here" -> Navigator.navigateTo(menuWX, ty, menuWZ, viewDim());
             case "nav_legend" -> Navigator.navigateTo(menuLegend.x(), menuLegend.y(), menuLegend.z(), viewDim());
             case "hide_legend" -> Legends.hide(menuLegend);
+            case "hide_wp" -> {
+                if (Navigator.isTarget(menuWaypoint)) Navigator.clear();
+                WaypointManager.setVisible(menuWaypoint, false);
+            }
+            case "global_remove" -> com.arc4io.archud.client.ArcClientNet.globalRemove(menuWaypoint);
             case "share_coords" -> {
                 if (minecraft.getConnection() != null) minecraft.getConnection().sendChat("x:" + menuWX + " y:" + ty + " z:" + menuWZ);
             }

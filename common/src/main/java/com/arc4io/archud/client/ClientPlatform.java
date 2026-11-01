@@ -57,6 +57,11 @@ public interface ClientPlatform {
         return java.util.List.of();
     }
 
+    /** Файл мода (jar в папке mods) или null — встроенный / вложенный мод. */
+    default java.nio.file.Path modFile(String id) {
+        return null;
+    }
+
     /** Папка mods. */
     default java.nio.file.Path modsDir() {
         return net.minecraft.client.Minecraft.getInstance().gameDirectory.toPath().resolve("mods");

@@ -4,7 +4,7 @@ package com.arc4io.archud.client.map;
  * Метка на карте.
  */
 public class Waypoint {
-    public enum Source {USER, DEATH, WAYSTONE, TEMPAD, SPAWN, SHARED, TEMP}
+    public enum Source {USER, DEATH, WAYSTONE, TEMPAD, SPAWN, SHARED, TEMP, GLOBAL, LODESTONE}
 
     public static final int[] PALETTE = {0xFF4FC3F7, 0xFFFF5252, 0xFF9CFF5A, 0xFFFFD54F, 0xFFB388FF, 0xFFFF8A65, 0xFFFFFFFF, 0xFF26C6DA,
             0xFFF06292, 0xFF8D6E63};
@@ -27,7 +27,17 @@ public class Waypoint {
     /** Метка следует за игроком (навигация к игроку): его UUID, координаты обновляются каждый тик. Не сохраняется. */
     public transient java.util.UUID followPlayer;
 
+    /** Глобальная метка администратора: её id на сервере. */
+    public String globalId;
+
     public Waypoint() {}
+
+    /** Постоянный ключ метки — для «скрыть у себя» у меток, которые пересоздаются модами и сервером. */
+    public String key() {
+        if (globalId != null) return "G|" + globalId;
+        if (extId != null) return source + "|" + extId;
+        return source + "|" + dimension + "|" + x + "|" + y + "|" + z + "|" + name;
+    }
 
     public Waypoint(String name, int x, int y, int z, int color, String dimension, Source source) {
         this.name = name;
@@ -47,6 +57,8 @@ public class Waypoint {
     public String initials() {
         if (source == Source.DEATH) return "✝";
         if (source == Source.SPAWN) return "⌂"; // кровать / якорь
+        if (source == Source.LODESTONE) return "◎";
+        if (source == Source.GLOBAL && (name == null || name.isBlank())) return "★";
         String n = name == null ? "" : name.trim();
         if (n.isEmpty()) return "?";
         String[] parts = n.split("\\s+");

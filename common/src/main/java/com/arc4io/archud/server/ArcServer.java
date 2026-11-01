@@ -66,6 +66,7 @@ public final class ArcServer {
         WaypointStore.init();
         AdminServer.init();
         EnchantServer.init();
+        GlobalWaypoints.init();
         ArcNet.onServer("privacy", (player, buf) -> {
             if (!ARC_PLAYERS.contains(player.getUUID())) return;
             if (buf.readBoolean()) HIDDEN.add(player.getUUID());
@@ -86,6 +87,7 @@ public final class ArcServer {
         AuthGate.tick(server);
         AntiEsp.tick();
         AdminServer.tick(server, tick);
+        GlobalWaypoints.tick(server, tick);
         LegendServer.tick(server, ARC_PLAYERS);
         // AntiESP: перепроверка видимости, даже если игрок стоит на месте (ванилла пересчитывает только при движении)
         if (AntiEsp.enabled() && tick % 5 == 0) {
@@ -172,6 +174,9 @@ public final class ArcServer {
                 if (pos != null) {
                     net.minecraft.server.level.ServerLevel lvl = server.getLevel(p.getRespawnDimension());
                     anchor = lvl != null && lvl.isLoaded(pos) && lvl.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.RespawnAnchorBlock;
+                    // кровать сломана (а якоря нет) — метки возрождения больше нет
+                    if (lvl != null && lvl.isLoaded(pos) && !anchor
+                            && !(lvl.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.BedBlock)) pos = null;
                 }
                 String key = pos == null ? "none" : dim + "|" + pos.asLong() + "|" + anchor;
                 if (key.equals(LAST_RESPAWN.get(p.getUUID()))) continue;
@@ -230,6 +235,7 @@ public final class ArcServer {
         PENDING_HELLO.remove(player.getUUID());
         AuthGate.onLogout(player);
         AdminServer.onLogout(player);
+        GlobalWaypoints.onLogout(player);
     }
 
     public static void onStop(MinecraftServer server) {
@@ -242,6 +248,7 @@ public final class ArcServer {
         ARC_PLAYERS.clear();
         PENDING_HELLO.clear();
         AuthGate.reset();
+        GlobalWaypoints.reset();
         HIDDEN.clear();
         MAP.clear();
         UPLOAD_QUEUE.clear();
@@ -272,8 +279,10 @@ public final class ArcServer {
         w.writeBoolean(cfg.serverWaypointSharing);
         w.writeBoolean(TempadServer.isAvailable());
         w.writeBoolean(true); // сервер — мод (не плагин): есть стол зачарования Arc и т.п.
+        w.writeUtf(player.getServer() == null ? "" : GlobalWaypoints.worldId(player.getServer()), 64);
         ArcNet.sendToPlayer(player, w);
         WaypointStore.sendSaved(player);
+        GlobalWaypoints.send(player);
         LegendServer.onWelcome(player);
         if (protocol != PROTOCOL || !cfg.serverMapSync) return;
         Deque<long[]> q = new ArrayDeque<>();

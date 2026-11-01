@@ -32,6 +32,15 @@ final class EffectsPage {
         if (ShaderPacks.inUse()) shader.add(new Info("shaderpack", () -> Component.translatable("archud.fx.shaderpack.value")));
         p.group(Component.translatable("archud.fx.group.shader"), shader);
 
+        // шейдерпаки из папки shaderpacks — своим загрузчиком, когда нет Iris / Oculus / OptiFine
+        if (!com.arc4io.archud.compat.OptiFineCompat.present() && !ArcHud.platform().isModLoaded("iris") && !ArcHud.platform().isModLoaded("oculus")) {
+            List<VideoEntry> packs = new ArrayList<>();
+            packs.add(new PackChoice());
+            packs.add(new OpenFolder());
+            packs.add(new Info("shaderpack_status", () -> Component.literal(com.arc4io.archud.client.fx.pack.PackPipeline.describe())));
+            p.group(Component.translatable("archud.fx.group.shaderpacks"), packs);
+        }
+
         List<VideoEntry> shadows = new ArrayList<>();
         shadows.add(new Bool("hide_blob", () -> c.hideVanillaShadows, v -> c.hideVanillaShadows = v, null));
         p.group(Component.translatable("archud.fx.group.entity_shadows"), shadows);
@@ -171,6 +180,72 @@ final class EffectsPage {
         public void cycle(int dir) {
             set.accept(Math.floorMod(get.getAsInt() + dir, count));
             ArcConfig.save();
+        }
+    }
+
+    /** Выбор шейдерпака: «Выкл.» и все паки из папки shaderpacks. */
+    static final class PackChoice implements VideoEntry {
+        private final List<String> list = com.arc4io.archud.client.fx.pack.PackPipeline.packs();
+
+        public Component name() {
+            return EffectsPage.name("shaderpack_choice");
+        }
+
+        public Component description() {
+            return desc("shaderpack_choice");
+        }
+
+        private int index() {
+            int i = list.indexOf(ArcConfig.get().shaderPack);
+            return i < 0 ? 0 : i + 1;
+        }
+
+        public Component valueText() {
+            int i = index();
+            return i == 0 ? Component.translatable("options.off") : Component.literal(com.arc4io.archud.client.fx.pack.PackPipeline.selectedLabel());
+        }
+
+        public Kind kind() {
+            return Kind.CYCLE;
+        }
+
+        public void cycle(int dir) {
+            int n = list.size() + 1;
+            int i = Math.floorMod(index() + dir, n);
+            ArcConfig.get().shaderPack = i == 0 ? "" : list.get(i - 1);
+            ArcConfig.save();
+            com.arc4io.archud.client.fx.pack.PackPipeline.reload();
+        }
+    }
+
+    /** Открыть папку shaderpacks. */
+    static final class OpenFolder implements VideoEntry {
+        public Component name() {
+            return EffectsPage.name("shaderpack_folder");
+        }
+
+        public Component description() {
+            return desc("shaderpack_folder");
+        }
+
+        public Component valueText() {
+            return Component.empty();
+        }
+
+        public Kind kind() {
+            return Kind.BUTTON;
+        }
+
+        public Component buttonText() {
+            return Component.translatable("archud.fx.shaderpack_folder.open");
+        }
+
+        public void press() {
+            try {
+                java.nio.file.Files.createDirectories(com.arc4io.archud.client.fx.pack.PackPipeline.dir());
+            } catch (Exception ignored) {
+            }
+            net.minecraft.Util.getPlatform().openFile(com.arc4io.archud.client.fx.pack.PackPipeline.dir().toFile());
         }
     }
 

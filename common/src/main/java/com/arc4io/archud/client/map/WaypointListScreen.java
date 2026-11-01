@@ -157,6 +157,7 @@ public class WaypointListScreen extends ArcScreen {
     }
 
     static boolean deletable(Waypoint w) {
+        if (w.source == Waypoint.Source.GLOBAL) return WaypointManager.globalCanEdit(); // глобальные — только администратор
         return w.source == Waypoint.Source.USER || w.source == Waypoint.Source.DEATH || w.source == Waypoint.Source.SHARED;
     }
 
@@ -169,7 +170,8 @@ public class WaypointListScreen extends ArcScreen {
         int idx = rows.indexOf(selected);
         if (Navigator.isTarget(selected)) Navigator.clear();
         flash(Component.translatable("archud.wpl.deleted", selected.name).getString());
-        WaypointManager.remove(selected);
+        if (selected.source == Waypoint.Source.GLOBAL) com.arc4io.archud.client.ArcClientNet.globalRemove(selected);
+        else WaypointManager.remove(selected);
         refresh();
         selected = rows.isEmpty() ? null : rows.get(Math.min(Math.max(0, idx), rows.size() - 1));
         updateButtons();
@@ -217,8 +219,7 @@ public class WaypointListScreen extends ArcScreen {
             Waypoint wp = rows.get(i);
             // «глаз» — видимость
             if (mx >= x + w - 22) {
-                wp.visible = !wp.visible;
-                if (wp.editable()) WaypointManager.save();
+                WaypointManager.setVisible(wp, !wp.visible);
                 return true;
             }
             boolean dbl = wp == selected && Util.getMillis() - lastClick < 300;
