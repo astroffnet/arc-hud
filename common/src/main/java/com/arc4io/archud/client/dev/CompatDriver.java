@@ -301,22 +301,33 @@ public final class CompatDriver {
             mc.options.keyUp.setDown(false);
             mc.player.getInventory().selected = 8;
         }, null);
-        // сравнение с Punchy: без фикса и совсем без перчаток (чья рука тёмная — Punchy или наша)
-        add(3, mc -> com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = false, null);
+        // Punchy без костюма Legends: рука игрока, перчатка на ней — покой, удар, меч, удар мечом, ходьба; затем без фикса
+        add(3, mc -> cmd(mc, "item replace entity @s armor.chest with air"), null);
+        add(10, mc -> {}, "c53_punchy_no_suit");
+        add(2, mc -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND), null);
+        add(3, mc -> {}, "c56_punchy_no_suit_swing");
+        add(3, mc -> mc.player.getInventory().selected = 5, null);
+        add(12, mc -> {}, "c57_punchy_no_suit_sword");
+        add(2, mc -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND), null);
+        add(3, mc -> {}, "c58_punchy_no_suit_sword_swing");
+        add(2, mc -> mc.options.keyUp.setDown(true), null);
+        add(10, mc -> {}, "c59_punchy_no_suit_walk");
+        add(2, mc -> {
+            mc.options.keyUp.setDown(false);
+            mc.player.getInventory().selected = 8;
+            com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = false;
+        }, null);
         add(10, mc -> {}, "c52_punchy_fix_off");
+        add(2, mc -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND), null);
+        add(3, mc -> {}, "c52b_punchy_fix_off_swing");
+        // без перчаток вовсе, в костюме — чья тёмная рука
         add(3, mc -> {
             com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = true;
-            cmd(mc, "item replace entity @s armor.chest with air");
+            cmd(mc, "curios clear @s aether_gloves");
+            cmd(mc, "item replace entity @s armor.chest with legendsmod:steve_chest");
         }, null);
-        add(10, mc -> {}, "c53_punchy_no_suit");
-        add(3, mc -> cmd(mc, "curios clear @s hands"), null);
-        add(10, mc -> {}, "c54_punchy_no_gloves");
-        add(3, mc -> {
-            cmd(mc, "curios set hands 0 @s aether:iron_gloves");
-            cmd(mc, "curios replace hands 0 @s with aether:iron_gloves");
-        }, null);
-        add(10, mc -> {}, "c55_punchy_gloves_back_no_suit");
-        add(3, mc -> cmd(mc, "item replace entity @s armor.chest with legendsmod:steve_chest"), null);
+        add(10, mc -> {}, "c54_punchy_suit_no_gloves");
+        add(3, mc -> cmd(mc, "curios set aether_gloves 0 @s aether:iron_gloves"), null);
         for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c46_glove_fp_ab2"}, {"legendsmod.key.ability_1", "c47_glove_fp_ab1"},
                 {"legendsmod.key.ability_3", "c48_glove_fp_ab3"}}) {
             add(3, mc -> ability(mc, ab[0], true), null);
