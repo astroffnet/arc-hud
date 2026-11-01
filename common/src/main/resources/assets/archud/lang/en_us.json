@@ -1470,5 +1470,6 @@
   "archud.fx.shadow_quality.1": "Medium",
   "archud.fx.shadow_quality.2": "High",
   "archud.fx.hide_blob": "Remove round shadow",
-  "archud.fx.hide_blob.desc": "Do not draw the vanilla dark circle under entities while Arc RT shadows are on."
+  "archud.fx.hide_blob.desc": "Do not draw the vanilla dark circle under entities while Arc RT shadows are on.",
+  "archud.legends.stealth": "Stealth"
 }

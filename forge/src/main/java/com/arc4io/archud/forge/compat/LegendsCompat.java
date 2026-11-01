@@ -33,6 +33,8 @@ public final class LegendsCompat {
 
     private static Method shouldRender, stamina, maxStamina, mana, maxMana, getSuit, walkSpeed;
     private static Capability<?> livingCap;
+    private static Method concealment;
+    private static Object stealthEffect;
     private static Method rows, rowLabel, rowCooldown, rowProgress, rowActive, rowCooling;
 
     private LegendsCompat() {}
@@ -68,6 +70,16 @@ public final class LegendsCompat {
             ArcHudApi.markReplaced("legendsmod:speed");
         } catch (Throwable t) {
             ArcHud.LOGGER.warn("Arc HUD: скорость костюма Legends недоступна: {}", t.toString());
+        }
+        try {
+            // скрытность (0..100, пока действует способность «Скрытность») — полоса в нашем HUD вместо родной тёмно-красной
+            concealment = Class.forName("com.tihyo.legends.client.gui.StealthHudState").getMethod("getDisplayedConcealment");
+            stealthEffect = Class.forName("com.tihyo.legends.abilities.LegendsAbilities").getField("STEALTH").get(null);
+            ArcHudApi.registerMainBar(ArcHud.id("legends_stealth"), Component.translatable("archud.legends.stealth"), 0xFF8E7CC3,
+                    Icons.MOON, ArcHudApi.Side.LEFT, LegendsCompat::stealth);
+            ArcHudApi.markReplaced("legendsmod:stealth");
+        } catch (Throwable t) {
+            ArcHud.LOGGER.warn("Arc HUD: скрытность Legends недоступна: {}", t.toString());
         }
         try {
             Class<?> overlay = Class.forName(ABILITIES);
@@ -110,6 +122,18 @@ public final class LegendsCompat {
             float m = ((Number) max.invoke(null)).floatValue();
             if (m <= 0) return null;
             return new float[]{((Number) value.invoke(null)).floatValue(), m};
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static float[] stealth() {
+        LocalPlayer p = Minecraft.getInstance().player;
+        if (p == null || concealment == null) return null;
+        try {
+            Object eff = ((net.minecraftforge.registries.RegistryObject<?>) stealthEffect).get();
+            if (!(eff instanceof net.minecraft.world.effect.MobEffect m) || !p.hasEffect(m)) return null;
+            return new float[]{Math.max(0, Math.min(100, ((Number) concealment.invoke(null)).intValue())), 100F};
         } catch (Throwable t) {
             return null;
         }
