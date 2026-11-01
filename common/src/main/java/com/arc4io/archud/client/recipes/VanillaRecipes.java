@@ -93,7 +93,7 @@ final class VanillaRecipes {
         try {
             r.run();
         } catch (Throwable t) {
-            ArcHud.LOGGER.debug("Arc HUD: built-in recipes part failed", t);
+            ArcHud.LOGGER.warn("Arc HUD: built-in recipes part failed: {}", t.toString());
         }
     }
 
@@ -131,9 +131,10 @@ final class VanillaRecipes {
         Set<Item> seen = new HashSet<>();
         List<Enchantment> enchants = new ArrayList<>();
         for (Enchantment e : BuiltInRegistries.ENCHANTMENT) enchants.add(e);
-        for (ItemStack base : items) {
-            Item item = base.getItem();
-            if (base.hasTag() || !seen.add(item)) continue;
+        for (ItemStack listed : items) {
+            Item item = listed.getItem();
+            if (!seen.add(item)) continue;
+            ItemStack base = new ItemStack(item); // чистый предмет (у прочных в списке есть тег Damage:0)
             if (base.isDamageableItem()) {
                 Ingredient mat = Ingredient.EMPTY;
                 try {
@@ -246,8 +247,9 @@ final class VanillaRecipes {
 
     private static void dyedArmor(List<ItemStack> items) {
         Set<Item> seen = new HashSet<>();
-        for (ItemStack s : items) {
-            if (!(s.getItem() instanceof DyeableLeatherItem) || !seen.add(s.getItem())) continue;
+        for (ItemStack listed : items) {
+            if (!(listed.getItem() instanceof DyeableLeatherItem) || !seen.add(listed.getItem())) continue;
+            ItemStack s = new ItemStack(listed.getItem());
             for (DyeColor c : DyeColor.values()) {
                 DyeItem dye = DyeItem.byColor(c);
                 ItemStack out = DyeableLeatherItem.dyeArmor(s.copyWithCount(1), List.of(dye));

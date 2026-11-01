@@ -507,14 +507,25 @@ public final class RecipeIndex {
     }
 
     /** Предметы с NBT (зачарованные книги, зелья) — только рецепты именно с ними. */
+    /** NBT предмета без износа (Damage): по нему различаются зелья, книги, отделка — но не степень поломки. */
+    private static net.minecraft.nbt.CompoundTag meaningfulTag(ItemStack s) {
+        if (!s.hasTag()) return null;
+        net.minecraft.nbt.CompoundTag t = s.getTag().copy();
+        t.remove("Damage");
+        return t.isEmpty() ? null : t;
+    }
+
     private static List<Entry> filter(List<Entry> list, ItemStack stack, boolean output) {
-        if (!stack.hasTag()) return list;
+        net.minecraft.nbt.CompoundTag want = meaningfulTag(stack);
+        if (want == null) return list;
         List<Entry> out = new ArrayList<>();
         for (Entry e : list) {
             boolean match = false;
             for (List<ItemStack> alt : output ? e.outputs() : e.inputs()) {
                 for (ItemStack s : alt) {
-                    if (s.getItem() == stack.getItem() && (!s.hasTag() || ItemStack.isSameItemSameTags(s, stack))) match = true;
+                    if (s.getItem() != stack.getItem()) continue;
+                    net.minecraft.nbt.CompoundTag t = meaningfulTag(s);
+                    if (t == null || t.equals(want)) match = true;
                 }
             }
             if (match) out.add(e);

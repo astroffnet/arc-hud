@@ -522,7 +522,8 @@ public final class JeiBridge {
     static RecipeIndex.Entry convert(ResourceLocation uid, Object recipe, int n) {
         if (recipe == null) return null;
         RecipeIndex.Entry cached = ENTRY_OF.get(recipe);
-        if (cached != null) return cached;
+        // наш общий разбор рецепта игры не мешает мод-категории показать его по-своему
+        if (cached != null && (cached.card() != null || !CATEGORIES.containsKey(uid))) return cached;
         RecipeIndex.Entry entry = null;
         try {
             IRecipeCategory cat = CATEGORIES.get(uid);
