@@ -10,6 +10,7 @@ base {
 }
 
 repositories {
+    mavenCentral()
     exclusiveContent {
         forRepository {
             maven {
@@ -58,6 +59,7 @@ sourceSets.main {
 
 configurations {
     jeiApi
+    steam
 }
 
 dependencies {
@@ -65,6 +67,9 @@ dependencies {
     compileOnly "mezz.jei:jei-1.20.1-common-api:${project.jei_version}"
     jeiApi("mezz.jei:jei-1.20.1-common-api:${project.jei_version}") { transitive = false }
     jeiApi("mezz.jei:jei-1.20.1-fabric-api:${project.jei_version}") { transitive = false }
+    // steamworks4j (MIT, code-disaster) — приглашения через Steam (Spacewar); классы и библиотеки Steam внутри jar
+    compileOnly 'com.code-disaster.steamworks4j:steamworks4j:1.9.0'
+    steam('com.code-disaster.steamworks4j:steamworks4j:1.9.0') { transitive = false }
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     // Официальные маппинги Mojang — те же имена классов, что и в Forge, поэтому общий код один
     mappings loom.officialMojangMappings()
@@ -94,6 +99,12 @@ processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     filesMatching('fabric.mod.json') {
         expand 'version': project.version
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    from({ configurations.steam.collect { zipTree(it) } }) {
+        exclude 'META-INF/**'
     }
 }
 
@@ -187,7 +198,7 @@ def serverJar = tasks.register('serverJar', Zip) {
     archiveFileName = "archud-server-fabric-${project.minecraft_version}-${project.mod_version}.jar"
     destinationDirectory = layout.buildDirectory.dir('libs')
     from({ zipTree(tasks.named('remapJar').get().archiveFile.get().asFile) }) {
-        exclude 'resourcepacks/**', 'META-INF/jars/**', 'fabric.mod.json'
+        exclude 'resourcepacks/**', 'META-INF/jars/**', 'fabric.mod.json', 'com/codedisaster/**', '*.dll', '*.so', '*.dylib'
         exclude { e -> e.path.startsWith('assets/') && e.path != 'assets/archud/icon.png' && !e.directory }
     }
     from(layout.buildDirectory.dir('server-meta'))

@@ -128,8 +128,16 @@ public final class ArcTabList {
         // голова скина
         PlayerFaceRenderer.draw(g, info.getSkinLocation(), x + 4, y + 2, 16);
         if (spectator) g.fill(x + 4, y + 2, x + 20, y + 18, 0x90000000);
-        if (VoiceCompat.isTalking(info.getProfile().getId())) {
-            Draw.outline(g, x + 3, y + 1, 18, 18, Draw.alpha(0xFF66FF99, alpha));
+        // голосовой чат: игроки нашей группы обведены, говорящие — мигают зелёным
+        java.util.UUID vid = info.getProfile().getId();
+        boolean mate = VoiceCompat.inMyGroup(vid), speaking = VoiceCompat.isTalking(vid);
+        if (speaking) {
+            float pulse = 0.55F + 0.45F * (float) Math.sin(net.minecraft.Util.getMillis() / 110.0);
+            int c = mate ? 0xFF66FF99 : 0xFF9CFF5A;
+            Draw.outline(g, x + 3, y + 1, 18, 18, Draw.alpha(c, (int) (alpha * pulse)));
+            Draw.outline(g, x + 2, y, 20, 20, Draw.alpha(c, (int) (alpha * pulse * 0.45F)));
+        } else if (mate) {
+            Draw.outline(g, x + 3, y + 1, 18, 18, Draw.alpha(0xFF80DEEA, alpha));
         }
         // имя
         Component name = overlay.getNameForDisplay(info);

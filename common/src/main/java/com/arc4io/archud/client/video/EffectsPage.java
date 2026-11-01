@@ -29,6 +29,7 @@ final class EffectsPage {
         shader.add(new Slider("temperature", -50, 50, 5, () -> c.shaderTemperature, v -> c.shaderTemperature = v, ""));
         shader.add(new Slider("sharpen", 0, 100, 5, () -> c.shaderSharpen, v -> c.shaderSharpen = v, "%"));
         shader.add(new Bool("fxaa", () -> c.shaderFxaa, v -> c.shaderFxaa = v, null));
+        shader.add(new Bool("player_shadows", () -> c.shaderPlayerShadows, v -> c.shaderPlayerShadows = v, null));
         if (ShaderPacks.inUse()) shader.add(new Info("shaderpack", () -> Component.translatable("archud.fx.shaderpack.value")));
         p.group(Component.translatable("archud.fx.group.shader"), shader);
 

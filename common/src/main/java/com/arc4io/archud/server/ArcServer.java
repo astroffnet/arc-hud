@@ -130,7 +130,7 @@ public final class ArcServer {
             });
         }
         // позиции игроков
-        if (tick % 20 == 0 && cfg.serverPlayerPositions) {
+        if (tick % 5 == 0 && cfg.serverPlayerPositions) { // 4 раза в секунду — точки и навигация к игроку двигаются плавно
             List<ServerPlayer> all = server.getPlayerList().getPlayers();
             int vd = server.getPlayerList().getViewDistance();
             for (ServerPlayer p : all) {

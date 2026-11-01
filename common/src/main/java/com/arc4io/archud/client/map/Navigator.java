@@ -42,6 +42,34 @@ public final class Navigator {
         set(w);
     }
 
+    /** Навигация к игроку: метка движется за ним (по сущности рядом или по позициям с сервера Arc HUD). */
+    public static void navigateToPlayer(java.util.UUID id, String name, double x, double y, double z, String dimension) {
+        Waypoint w = new Waypoint(name, (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z), 0xFF9CFF5A, dimension, Waypoint.Source.TEMP);
+        w.followPlayer = id;
+        set(w);
+    }
+
+    /** Обновить координаты метки-игрока. */
+    private static void follow(Minecraft mc) {
+        if (target == null || target.followPlayer == null || mc.level == null) return;
+        var p = mc.level.getPlayerByUUID(target.followPlayer);
+        if (p != null) {
+            target.x = (int) Math.floor(p.getX());
+            target.y = (int) Math.floor(p.getY());
+            target.z = (int) Math.floor(p.getZ());
+            target.dimension = mc.level.dimension().location().toString();
+            return;
+        }
+        for (var rp : com.arc4io.archud.client.ArcClientNet.players()) {
+            if (!rp.id().equals(target.followPlayer)) continue;
+            target.x = (int) Math.floor(rp.x());
+            target.y = (int) Math.floor(rp.y());
+            target.z = (int) Math.floor(rp.z());
+            target.dimension = rp.dimension();
+            return;
+        }
+    }
+
     public static void clear() {
         target = null;
     }
@@ -65,6 +93,7 @@ public final class Navigator {
 
     public static void tick(Minecraft mc) {
         if (target == null || mc.player == null || mc.level == null) return;
+        follow(mc);
         String dim = mc.level.dimension().location().toString();
         if (!target.dimension.equals(dim)) return;
         if (target.distanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ()) < 4.5) {

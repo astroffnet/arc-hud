@@ -321,12 +321,22 @@ public class HostPanelScreen extends ArcScreen {
         int x = px + 10, w = pw - 20, y = py + 70;
         int half = (w - 4) / 2;
         if (flags[F_PUBLISHED]) {
-            addRenderableWidget(new ArcButton(x, y, half, 18, Component.translatable("archud.admin.copy_address"), b -> {
-                minecraft.keyboardHandler.setClipboard(address());
+            int third = (w - 8) / 3;
+            addRenderableWidget(new ArcButton(x, y, third, 18, Component.translatable("archud.admin.copy_address"), b -> {
+                minecraft.keyboardHandler.setClipboard(inviteAddress());
                 status = Component.translatable("archud.admin.copied").getString();
                 statusTime = System.currentTimeMillis();
             }));
-            addRenderableWidget(new ArcButton(x + half + 4, y, w - half - 4, 18, Component.translatable("archud.admin.close_lan"), b -> closeLan()).danger());
+            ArcButton steam = addRenderableWidget(new ArcButton(x + third + 4, y, third, 18, Component.translatable("archud.steam.invite"), b -> {
+                IntegratedServer s = server();
+                String world = s == null ? "Minecraft" : s.getWorldData().getLevelName();
+                boolean ok = com.arc4io.archud.client.net.SteamGate.invite(inviteAddress(), world);
+                status = ok ? Component.translatable("archud.steam.opened").getString()
+                        : Component.translatable("archud.steam.error." + com.arc4io.archud.client.net.SteamGate.lastError()).getString();
+                statusTime = System.currentTimeMillis();
+            }));
+            steam.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("archud.steam.invite.tip")));
+            addRenderableWidget(new ArcButton(x + 2 * (third + 4), y, w - 2 * (third + 4), 18, Component.translatable("archud.admin.close_lan"), b -> closeLan()).danger());
         } else {
             addRenderableWidget(new ArcButton(x, y, w, 18, Component.translatable("menu.shareToLan"),
                     b -> minecraft.setScreen(new net.minecraft.client.gui.screens.ShareToLanScreen(this))));
@@ -353,6 +363,12 @@ public class HostPanelScreen extends ArcScreen {
         }
     }
 
+    /** Адрес для друзей: из интернета (e4mc), если есть, иначе адрес в локальной сети. */
+    private String inviteAddress() {
+        String internet = com.arc4io.archud.client.net.E4mcBridge.domain();
+        return internet != null ? internet : address();
+    }
+
     private String address() {
         IntegratedServer s = server();
         int port = s == null ? 0 : ((IntegratedServerAccessor) s).archud$getPublishedPort();
@@ -361,6 +377,7 @@ public class HostPanelScreen extends ArcScreen {
 
     /** Закрыть игру для сети: перестать принимать подключения, отключить гостей, убрать из списка LAN. */
     private void closeLan() {
+        com.arc4io.archud.client.net.SteamGate.close();
         String msg = Component.translatable("archud.admin.lan_closed_kick").getString();
         UUID me = minecraft.player == null ? null : minecraft.player.getUUID();
         run("archud.admin.lan_closed", s -> {

@@ -15,6 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ChatComponentMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void archud$render(GuiGraphics graphics, int tickCount, int mouseX, int mouseY, CallbackInfo ci) {
+        ChatComponent self = (ChatComponent) (Object) this;
+        if (com.arc4io.archud.client.screen.GuiCache.chat(self, graphics, mouseX, mouseY, () -> self.render(graphics, tickCount, mouseX, mouseY))) {
+            ci.cancel();
+            return;
+        }
         if (ArcChatRenderer.enabled()) {
             ArcChatRenderer.render((ChatComponent) (Object) this, graphics, tickCount, mouseX, mouseY);
             ci.cancel();

@@ -24,6 +24,8 @@ public class Waypoint {
 
     /** Кто поделился меткой (для SHARED). */
     public String sharedBy;
+    /** Метка следует за игроком (навигация к игроку): его UUID, координаты обновляются каждый тик. Не сохраняется. */
+    public transient java.util.UUID followPlayer;
 
     public Waypoint() {}
 

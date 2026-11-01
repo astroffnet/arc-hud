@@ -28,6 +28,8 @@ public final class VoiceCompat {
     private static boolean svc, plasmo;
     private static final Map<String, Method> METHODS = new HashMap<>();
     private static Set<UUID> talking = Set.of();
+    /** Игроки в той же группе голосового чата, что и мы (Simple Voice Chat). */
+    private static Set<UUID> groupMates = Set.of();
     private static long lastUpdate;
     private static String ownState = "";
     private static boolean ownTalking, ownWhisper;
@@ -56,6 +58,13 @@ public final class VoiceCompat {
         return (svc || plasmo) && ArcConfig.get().voiceIntegration;
     }
 
+    /** Игрок в нашей группе голосового чата. */
+    public static boolean inMyGroup(UUID id) {
+        if (!active()) return false;
+        update();
+        return groupMates.contains(id);
+    }
+
     /** Говорит ли игрок прямо сейчас. */
     public static boolean isTalking(UUID id) {
         if (!active()) return false;
@@ -70,6 +79,8 @@ public final class VoiceCompat {
         lastUpdate = now;
         Minecraft mc = Minecraft.getInstance();
         Set<UUID> set = new HashSet<>();
+        Set<UUID> mates = new HashSet<>();
+        groupMates = mates;
         ownTalking = ownWhisper = false;
         group = null;
         ownState = "";
@@ -78,7 +89,7 @@ public final class VoiceCompat {
             return;
         }
         try {
-            if (svc) updateSvc(mc, set);
+            if (svc) updateSvc(mc, set, mates);
             else if (plasmo) updatePlasmo(mc, set);
         } catch (Throwable ignored) {
         }
@@ -86,7 +97,26 @@ public final class VoiceCompat {
         talking = set;
     }
 
-    private static void updateSvc(Minecraft mc, Set<UUID> set) throws Exception {
+    /** Все игроки из списка TAB (в том числе далёкие). */
+    private static List<UUID> tabPlayers(Minecraft mc) {
+        List<UUID> out = new ArrayList<>();
+        if (mc.getConnection() != null) for (var info : mc.getConnection().getOnlinePlayers()) out.add(info.getProfile().getId());
+        else for (Player p : mc.level.players()) out.add(p.getUUID());
+        return out;
+    }
+
+    /** id группы из состояния игрока / менеджера SVC (ClientGroup с getId() или сам UUID). */
+    private static Object groupId(Object g) {
+        if (g == null) return null;
+        if (g instanceof UUID) return g;
+        try {
+            return call(g, null, "getId");
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static void updateSvc(Minecraft mc, Set<UUID> set, Set<UUID> mates) throws Exception {
         Class<?> cm = Integrations.cls("de.maxhenkel.voicechat.voice.client.ClientManager");
         Object states = call(null, cm, "getPlayerStateManager");
         if (states != null) {
@@ -98,6 +128,19 @@ public final class VoiceCompat {
             if (g != null) {
                 Object n = call(g, null, "getName");
                 group = n == null ? null : n.toString();
+                Object myGroup = groupId(g);
+                if (myGroup != null) {
+                    try {
+                        Method getState = states.getClass().getMethod("getState", UUID.class);
+                        for (UUID id : tabPlayers(mc)) {
+                            if (mc.player != null && id.equals(mc.player.getUUID())) continue;
+                            Object st = getState.invoke(states, id);
+                            if (st == null) continue;
+                            if (myGroup.equals(groupId(call(st, null, "getGroup")))) mates.add(id);
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
             }
         }
         Object client = call(null, cm, "getClient");
@@ -110,9 +153,9 @@ public final class VoiceCompat {
         Object cache = call(client, null, "getTalkCache");
         if (cache == null) return;
         Method isTalking = cache.getClass().getMethod("isTalking", UUID.class);
-        for (Player p : mc.level.players()) {
-            if (p == mc.player) continue;
-            if ((boolean) isTalking.invoke(cache, p.getUUID())) set.add(p.getUUID());
+        for (UUID id : tabPlayers(mc)) {
+            if (mc.player != null && id.equals(mc.player.getUUID())) continue;
+            if ((boolean) isTalking.invoke(cache, id)) set.add(id);
         }
     }
 

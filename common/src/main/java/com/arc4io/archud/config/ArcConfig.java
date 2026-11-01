@@ -388,6 +388,8 @@ public class ArcConfig {
     public boolean chatStyle = true;
     public boolean customBackpackScreen = true;
     public boolean customAnvil = true;
+    /** Новый верстак (с «можно сделать» и раскладкой рецепта). */
+    public boolean customCrafting = true;
     /** Аксессуары следуют анимациям рук (playerAnimator: Legends, Emotecraft…). */
     public boolean accessoryAnimFix = true;
     /** Просмотр рецептов (как JEI): клавиша R и экран рецептов. */
@@ -400,6 +402,16 @@ public class ArcConfig {
     public boolean recipeItemList = true;
     /** Понимать плагины модов, написанные для JEI (категории, рецепты, подсказки, области GUI). */
     public boolean jeiPlugins = true;
+    /** Приглашения друзей через Steam (Spacewar 480) при игре по сети. */
+    public boolean steamInvites = true;
+    /** Тени игроков во встроенном шейдере. */
+    public boolean shaderPlayerShadows = true;
+    /** Свой вывод интерфейса: окно рисуется в отдельный буфер и обновляется только при изменениях (не ест FPS). */
+    public boolean guiCache = true;
+    /** Сколько раз в секунду обновлять открытое окно, когда в нём ничего не происходит. */
+    public int guiIdleFps = 10;
+    /** И когда двигают мышь / печатают. */
+    public int guiActiveFps = 40;
     public boolean chatAnimation = true;
     public boolean inventoryStats = true;
     public boolean inventoryButtons = true;
