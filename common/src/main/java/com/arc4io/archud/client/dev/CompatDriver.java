@@ -301,6 +301,22 @@ public final class CompatDriver {
             mc.options.keyUp.setDown(false);
             mc.player.getInventory().selected = 8;
         }, null);
+        // сравнение с Punchy: без фикса и совсем без перчаток (чья рука тёмная — Punchy или наша)
+        add(3, mc -> com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = false, null);
+        add(10, mc -> {}, "c52_punchy_fix_off");
+        add(3, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = true;
+            cmd(mc, "item replace entity @s armor.chest with air");
+        }, null);
+        add(10, mc -> {}, "c53_punchy_no_suit");
+        add(3, mc -> cmd(mc, "curios clear @s hands"), null);
+        add(10, mc -> {}, "c54_punchy_no_gloves");
+        add(3, mc -> {
+            cmd(mc, "curios set hands 0 @s aether:iron_gloves");
+            cmd(mc, "curios replace hands 0 @s with aether:iron_gloves");
+        }, null);
+        add(10, mc -> {}, "c55_punchy_gloves_back_no_suit");
+        add(3, mc -> cmd(mc, "item replace entity @s armor.chest with legendsmod:steve_chest"), null);
         for (String[] ab : new String[][]{{"legendsmod.key.ability_2", "c46_glove_fp_ab2"}, {"legendsmod.key.ability_1", "c47_glove_fp_ab1"},
                 {"legendsmod.key.ability_3", "c48_glove_fp_ab3"}}) {
             add(3, mc -> ability(mc, ab[0], true), null);

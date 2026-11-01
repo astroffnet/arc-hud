@@ -50,7 +50,7 @@ public final class AetherGloves {
     private static Class<?> glovesItem, glovesRenderer;
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
-    private static int errors;
+    private static int errors, dbgDraw;
     /** Punchy рисует руку от первого лица сам (своей моделью игрока) — начало и конец его отрисовки руки. */
     public static void punchyArm(LivingEntity player, Object model, boolean right, MultiBufferSource b) {
         fpRight = right;
@@ -267,6 +267,7 @@ public final class AetherGloves {
         Object renderer = ((Optional<?>) getRenderer.invoke(null, gloves.getItem())).orElse(null);
         if (!glovesRenderer.isInstance(renderer)) return;
         if (firstPerson && duplicate(p)) return;
+        if (firstPerson && dbgDraw++ < 3) ArcHud.LOGGER.info("[Gloves] fp draw light={} pose={}", Integer.toHexString(p.light()), p.pose().pose());
         Item item = gloves.getItem();
         PoseStack pose = new PoseStack();
         pose.last().pose().set(p.pose().pose());
