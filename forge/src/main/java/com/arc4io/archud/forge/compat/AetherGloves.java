@@ -50,7 +50,7 @@ public final class AetherGloves {
     private static Class<?> glovesItem, glovesRenderer;
     private static Method texture, colors, material, getRenderer;
     private static Field fModel, fSlim, fFirst, fTrim, fTrimSlim, fTrimFirst;
-    private static int errors;
+    private static int errors, dbg;
     /** Какая рука рисуется от первого лица (renderRightHand / renderLeftHand). */
     public static boolean fpRight = true;
 
@@ -137,6 +137,14 @@ public final class AetherGloves {
             // от первого лица моды могут подменять саму часть руки — берём первую часть, нарисованную в renderHand
             if (!PENDING.isEmpty()) return;
             right = fpRight;
+            if (dbg++ < 2) {
+                StringBuilder sb = new StringBuilder();
+                for (StackTraceElement el : Thread.currentThread().getStackTrace()) sb.append("\n    ").append(el);
+                PartPose pp = part.storePose(), mp = (right ? playerModel.rightArm : playerModel.leftArm).storePose();
+                ArcHud.LOGGER.info("[Gloves] fp part pose=({},{},{} r {},{},{}) modelArm=({},{},{} r {},{},{}) same={} trace:{}",
+                        pp.x, pp.y, pp.z, pp.xRot, pp.yRot, pp.zRot, mp.x, mp.y, mp.z, mp.xRot, mp.yRot, mp.zRot,
+                        part == (right ? playerModel.rightArm : playerModel.leftArm), sb);
+            }
         } else {
             right = part == playerModel.rightArm;
             if (!right && part != playerModel.leftArm) return;
