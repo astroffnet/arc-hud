@@ -64,21 +64,11 @@ public final class AetherGloves {
     /** Полная матрица руки — уже после {@code translateAndRotate} (вместе с преобразованиями модов вроде Punchy). */
     private record Pending(boolean right, PoseStack.Pose pose, int light) {}
 
-    private static int dbg;
-
     private static Pending capture(boolean right, ModelPart part, PoseStack pose, int light) {
         PoseStack copy = new PoseStack();
         copy.last().pose().set(pose.last().pose());
         copy.last().normal().set(pose.last().normal());
-        org.joml.Matrix4f before = new org.joml.Matrix4f(copy.last().pose());
         part.translateAndRotate(copy);
-        if (firstPerson && dbg++ < 6) {
-            StackTraceElement[] st = Thread.currentThread().getStackTrace();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 2; i < Math.min(st.length, 9); i++) sb.append(" <- ").append(st[i].getClassName().replaceAll(".*\\.", "")).append('.').append(st[i].getMethodName());
-            ArcHud.LOGGER.info("[Gloves] fp capture part=({},{},{} r {},{},{} s {},{},{}) before={} after={} light={} via{}", part.x, part.y, part.z,
-                    part.xRot, part.yRot, part.zRot, part.xScale, part.yScale, part.zScale, before, copy.last().pose(), light, sb);
-        }
         return new Pending(right, copy.last(), light);
     }
 
@@ -208,6 +198,59 @@ public final class AetherGloves {
         return (HumanoidModel<?>) f.get(renderer);
     }
 
+    /** Punchy вешает на части моделей свою матрицу (применяется в translateAndRotate) — у перчатки её быть не должно. */
+    private static Method getExplicit, setExplicit;
+    private static boolean explicitChecked, explicitLogged;
+
+    private static Object clearExplicit(ModelPart part) {
+        if (!explicitChecked) {
+            explicitChecked = true;
+            try {
+                getExplicit = ModelPart.class.getMethod("punchy$getExplicitTransform");
+                setExplicit = ModelPart.class.getMethod("punchy$setExplicitTransform", org.joml.Matrix4f.class);
+            } catch (Throwable ignored) {
+                getExplicit = setExplicit = null;
+            }
+        }
+        if (getExplicit == null) return null;
+        try {
+            Object old = getExplicit.invoke(part);
+            if (old != null) {
+                if (!explicitLogged) {
+                    explicitLogged = true;
+                    ArcHud.LOGGER.info("Arc HUD: Aether glove part carried a Punchy transform — cleared for the glove");
+                }
+                setExplicit.invoke(part, (Object) null);
+            }
+            return old;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static void restoreExplicit(ModelPart part, Object old) {
+        if (old == null || setExplicit == null) return;
+        try {
+            setExplicit.invoke(part, old);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** Одна и та же рука в одном кадре (рука Punchy и рука костюма поверх неё) — перчатка рисуется один раз. */
+    private static final org.joml.Matrix4f LAST_RIGHT = new org.joml.Matrix4f(), LAST_LEFT = new org.joml.Matrix4f();
+    private static long lastRightFrame = -1, lastLeftFrame = -1;
+
+    private static boolean duplicate(Pending p) {
+        long frame = net.minecraft.Util.getNanos() / 4_000_000L; // ~4 мс — внутри одного кадра
+        org.joml.Matrix4f last = p.right() ? LAST_RIGHT : LAST_LEFT;
+        long lf = p.right() ? lastRightFrame : lastLeftFrame;
+        boolean dup = lf == frame && last.equals(p.pose().pose(), 1e-3F);
+        last.set(p.pose().pose());
+        if (p.right()) lastRightFrame = frame;
+        else lastLeftFrame = frame;
+        return dup;
+    }
+
     private static ModelPart arm(HumanoidModel<?> m, Pending p) {
         ModelPart part = p.right() ? m.rightArm : m.leftArm;
         // положение уже в матрице — сама часть перчатки ничего не сдвигает и не поворачивает
@@ -223,6 +266,7 @@ public final class AetherGloves {
     private static void draw(Pending p) throws Exception {
         Object renderer = ((Optional<?>) getRenderer.invoke(null, gloves.getItem())).orElse(null);
         if (!glovesRenderer.isInstance(renderer)) return;
+        if (firstPerson && duplicate(p)) return;
         Item item = gloves.getItem();
         PoseStack pose = new PoseStack();
         pose.last().pose().set(p.pose().pose());
@@ -237,14 +281,18 @@ public final class AetherGloves {
             b = ((Number) c.getRight()).floatValue();
         }
         VertexConsumer vc = ItemRenderer.getArmorFoilBuffer(buffers, RenderType.armorCutoutNoCull(tex), false, gloves.hasFoil());
+        Object explicit = clearExplicit(arm);
         arm.render(pose, vc, p.light(), OverlayTexture.NO_OVERLAY, r, g, b, 1F);
+        restoreExplicit(arm, explicit);
 
         Optional<ArmorTrim> trim = ArmorTrim.getTrim(current.level().registryAccess(), gloves);
         if (trim.isPresent()) {
             ModelPart trimArm = arm(model(renderer, true), p);
             TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(Sheets.ARMOR_TRIMS_SHEET)
                     .getSprite(trim.get().outerTexture((ArmorMaterial) material.invoke(item)));
+            Object te = clearExplicit(trimArm);
             trimArm.render(pose, sprite.wrap(buffers.getBuffer(Sheets.armorTrimsSheet())), p.light(), OverlayTexture.NO_OVERLAY);
+            restoreExplicit(trimArm, te);
         }
     }
 }
