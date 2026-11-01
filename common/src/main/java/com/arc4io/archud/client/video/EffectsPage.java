@@ -33,10 +33,8 @@ final class EffectsPage {
         p.group(Component.translatable("archud.fx.group.shader"), shader);
 
         List<VideoEntry> shadows = new ArrayList<>();
-        shadows.add(new Bool("player_shadows", () -> c.shaderPlayerShadows, v -> c.shaderPlayerShadows = v, null));
-        shadows.add(new Cycle("shadow_quality", 3, () -> c.shadowQuality - 1, v -> c.shadowQuality = v + 1));
         shadows.add(new Bool("hide_blob", () -> c.hideVanillaShadows, v -> c.hideVanillaShadows = v, null));
-        p.group(Component.translatable("archud.fx.group.shadows"), shadows);
+        p.group(Component.translatable("archud.fx.group.entity_shadows"), shadows);
 
         List<VideoEntry> scale = new ArrayList<>();
         // «DLSS» в привычном виде: пресеты качества → временной апскейл Arc TSR с нужным масштабом

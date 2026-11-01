@@ -74,7 +74,6 @@
     "RecipeKeyboardMixin",
     "TooltipStackMixin",
     "ScaledViewportMixin",
-    "PlayerShadowMixin",
     "GuiCacheBlendMixin",
     "VanillaShadowMixin",
     "RecipeMouseMixin",
