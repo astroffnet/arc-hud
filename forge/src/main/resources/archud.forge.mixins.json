@@ -27,6 +27,11 @@
     "IntegratedCommandsMixin"
   ],
   "client": [
+    "GloveEntityRenderMixin",
+    "GloveArmPartMixin",
+    "GloveHandMixin",
+    "AetherGlovesRendererMixin",
+    "AetherHandOverlayMixin",
     "PerfEntityRenderMixin",
     "PerfLayerMixin",
     "LivingEntityRendererAccessor",

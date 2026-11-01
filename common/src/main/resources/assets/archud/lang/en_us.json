@@ -1463,5 +1463,6 @@
   "archud.fx.hide_blob": "Remove round shadow",
   "archud.fx.hide_blob.desc": "Do not draw the vanilla dark circle under players, mobs and items.",
   "archud.legends.stealth": "Stealth",
-  "archud.fx.group.entity_shadows": "Shadows"
+  "archud.fx.group.entity_shadows": "Shadows",
+  "archud.config.aetherGlovesFix": "Aether gloves follow arm animations"
 }

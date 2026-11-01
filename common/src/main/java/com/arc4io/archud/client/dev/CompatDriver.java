@@ -28,6 +28,8 @@ import java.util.function.Consumer;
  * эффекты на разных масштабах интерфейса, кнопки модов (Регенерация), способности Legends с надетыми перчатками.
  */
 public final class CompatDriver {
+    /** Тест: наклон руки от первого лица (как у модов анимаций вроде Punchy), градусы. */
+    public static float handTilt;
     private record Step(int delay, Consumer<Minecraft> action, String shot) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
@@ -258,6 +260,28 @@ public final class CompatDriver {
             add(60, mc -> {}, null);
         }
         add(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON), null);
+        // перчатки Aether вместе с рукой: пустая рука, затем рука, сдвинутая «модом анимаций», с фиксом и без
+        add(5, mc -> {
+            mc.player.getInventory().selected = 8;
+            cmd(mc, "item replace entity @s hotbar.8 with air");
+            mc.player.setXRot(10F);
+        }, null);
+        add(15, mc -> {}, "c40_glove_fp");
+        add(3, mc -> handTilt = 35F, null);
+        add(10, mc -> {}, "c41_glove_fp_tilt_fixed");
+        add(3, mc -> com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = false, null);
+        add(10, mc -> {}, "c42_glove_fp_tilt_aether_only");
+        add(3, mc -> {
+            com.arc4io.archud.config.ArcConfig.get().aetherGlovesFix = true;
+            handTilt = 0F;
+            mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
+            mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        }, null);
+        add(3, mc -> {}, "c43_glove_tp_swing");
+        add(20, mc -> {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            cmd(mc, "give @s minecraft:beef 3");
+        }, null);
         // просмотр рецептов: список предметов у инвентаря и экран рецептов
         add(5, mc -> {
             mc.options.guiScale().set(2);
