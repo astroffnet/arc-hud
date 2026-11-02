@@ -21,6 +21,7 @@ import java.util.Set;
  */
 public final class SodiumBridge {
     private static final String[] SCREENS = {
+            "io.arc4io.arcium.gui.ArciumOptionsScreen",
             "me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI",
             "org.embeddedt.embeddium.gui.EmbeddiumVideoOptionsScreen",
             "org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen",
@@ -47,6 +48,7 @@ public final class SodiumBridge {
 
     public static String brand() {
         var p = ArcHud.platform();
+        if (p.isModLoaded("arcium")) return "Arcium";
         if (p.isModLoaded("embeddium")) return "Embeddium";
         if (p.isModLoaded("rubidium")) return "Rubidium";
         return "Sodium";
@@ -69,6 +71,11 @@ public final class SodiumBridge {
                 continue;
             }
             // Sodium: закрытый конструктор + статический createScreen(Screen); Embeddium: открытый конструктор
+            try {
+                Object s = c.getMethod("create", Screen.class).invoke(null, parent); // Arcium
+                if (s instanceof Screen sc && field(sc, "pages") != null) return sc;
+            } catch (Throwable ignored) {
+            }
             try {
                 Object s = c.getMethod("createScreen", Screen.class).invoke(null, parent);
                 if (s instanceof Screen sc && field(sc, "pages") != null) return sc;
