@@ -65,7 +65,7 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
         this.source = source;
         this.pages = ArcPages.append(pages); // + «Оптимизация» и «Эффекты» Arc HUD
         this.sodiumEntries = sodiumEntries;
-        this.original = original;
+        this.original = ArciumBridge.swap(parent, original);
         if (showcaseFromEnd > 0) {
             lastPage = this.pages.size() - showcaseFromEnd;
             showcaseFromEnd = 0;
@@ -182,11 +182,12 @@ public class ArcVideoScreen extends Screen implements ScreenFit.Fits {
     }
 
     private String sourceName() {
-        return switch (source) {
+        String name = switch (source) {
             case SODIUM -> SodiumBridge.brand();
             case OPTIFINE -> "OptiFine";
             default -> "Minecraft";
         };
+        return ArciumBridge.label(name, original);
     }
 
     // ================================================================== строки
