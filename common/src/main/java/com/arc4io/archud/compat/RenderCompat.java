@@ -43,7 +43,7 @@ public final class RenderCompat {
     }
 
     public static boolean sodiumLike() {
-        return ArcHud.platform().isModLoaded("embeddium") || ArcHud.platform().isModLoaded("rubidium") || ArcHud.platform().isModLoaded("sodium");
+        return ArcHud.platform().isModLoaded("arcium") || ArcHud.platform().isModLoaded("embeddium") || ArcHud.platform().isModLoaded("rubidium") || ArcHud.platform().isModLoaded("sodium");
     }
 
     public static boolean irisLike() {
@@ -53,6 +53,7 @@ public final class RenderCompat {
     public static String renderer() {
         if (renderer == null) {
             if (optifine()) renderer = "OptiFine";
+            else if (ArcHud.platform().isModLoaded("arcium")) renderer = "Arcium";
             else if (ArcHud.platform().isModLoaded("embeddium")) renderer = "Embeddium";
             else if (ArcHud.platform().isModLoaded("rubidium")) renderer = "Rubidium";
             else if (ArcHud.platform().isModLoaded("sodium")) renderer = "Sodium";
