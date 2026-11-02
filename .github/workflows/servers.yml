@@ -58,7 +58,8 @@ jobs:
 
       - name: Build ${{ matrix.project }}
         working-directory: ${{ matrix.project }}
-        run: gradle build --no-daemon -q
+        # кэш Gradle из setup-gradle мог запомнить «файл не найден» (сбой Maven Central) — при ошибке собрать с обновлением зависимостей
+        run: gradle build --no-daemon -q || gradle build --no-daemon -q --refresh-dependencies
 
       - name: JDK ${{ matrix.java }} for the server
         uses: actions/setup-java@v4
