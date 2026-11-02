@@ -69,7 +69,7 @@ final class EffectsPage {
         plants.add(new Bool("waving_leaves", () -> c.wavingLeaves, v -> c.wavingLeaves = v, Waving::rebuildChunks));
         plants.add(new Slider("waving_strength", 0, 100, 5, () -> c.wavingStrength, v -> c.wavingStrength = v, "%"));
         plants.add(new Slider("waving_speed", 0, 100, 5, () -> c.wavingSpeed, v -> c.wavingSpeed = v, "%"));
-        if (ArcHud.platform().isModLoaded("sodium") || ArcHud.platform().isModLoaded("embeddium") || ArcHud.platform().isModLoaded("rubidium")) {
+        if (ArcHud.platform().isModLoaded("sodium") || ArcHud.platform().isModLoaded("arcium") || ArcHud.platform().isModLoaded("embeddium") || ArcHud.platform().isModLoaded("rubidium")) {
             plants.add(new Info("waving_sodium", () -> Component.translatable("archud.fx.waving_sodium.value")));
         }
         p.group(Component.translatable("archud.fx.group.plants"), plants);
