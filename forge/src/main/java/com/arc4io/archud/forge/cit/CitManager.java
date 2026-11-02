@@ -45,6 +45,7 @@ public final class CitManager {
         if (stack.isEmpty()) return null;
         List<CitRule> rules = byItem.get(stack.getItem());
         if (rules == null) return null;
+        if (com.arc4io.archud.client.video.ArciumBridge.citActive()) return null; // включён CIT Arcium — свой не применяем
         for (CitRule r : rules) {
             if (!r.matches(stack)) continue;
             ModelManager mm = Minecraft.getInstance().getModelManager();

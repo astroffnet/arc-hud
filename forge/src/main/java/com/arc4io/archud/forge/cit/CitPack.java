@@ -53,6 +53,7 @@ public final class CitPack implements PackResources {
         List<CitRule> rules = new ArrayList<>();
         try {
             if (!com.arc4io.archud.config.ArcConfig.get().citSupport) return;
+            if (com.arc4io.archud.client.video.ArciumBridge.citActive()) return; // CIT делает Arcium
             Map<String, IoSupplier<InputStream>> all = new HashMap<>(); // все файлы cit-папок, верхние пакеты перекрывают нижние
             List<Pack> packs = new ArrayList<>(Minecraft.getInstance().getResourcePackRepository().getSelectedPacks());
             List<PackResources> opened = new ArrayList<>();
