@@ -52,13 +52,14 @@ public final class SteamInvites {
                 }
             }
             SteamAPI.loadLibraries();
-            if (!SteamAPI.isSteamRunning(true)) {
-                lastError = "steam_not_running";
-                tried = false; // попробуем снова, когда Steam запустят
-                return false;
-            }
+            // SteamAPI_IsSteamRunning часто отвечает «нет» при запущенном Steam (запуск игры через лаунчер, от другого
+            // пользователя или с другими правами), поэтому сразу пробуем подключиться, а «Steam не запущен» говорим,
+            // только если процесса Steam действительно нет
             if (!SteamAPI.init()) {
-                lastError = "steam_init";
+                boolean proc = steamProcess();
+                lastError = proc ? "steam_init" : "steam_not_running";
+                tried = false; // попробуем снова при следующем нажатии
+                ArcHud.LOGGER.warn("Arc HUD: SteamAPI.init() failed (steam process found: {}, IsSteamRunning: {})", proc, safeRunning());
                 return false;
             }
             matchmaking = new SteamMatchmaking((SteamMatchmakingCallback) Proxy.newProxyInstance(SteamInvites.class.getClassLoader(),
@@ -107,8 +108,29 @@ public final class SteamInvites {
             return true;
         } catch (Throwable t) {
             lastError = "steam_init";
-            ArcHud.LOGGER.warn("Arc HUD: Steam invites unavailable: {}", t.toString());
+            tried = false;
+            ArcHud.LOGGER.warn("Arc HUD: Steam invites unavailable", t);
             return false;
+        }
+    }
+
+    /** Есть ли среди процессов клиент Steam (steam.exe / steam / steamwebhelper). */
+    private static boolean steamProcess() {
+        try {
+            return ProcessHandle.allProcesses().anyMatch(ph -> ph.info().command().map(c -> {
+                String n = new File(c).getName().toLowerCase(java.util.Locale.ROOT);
+                return n.equals("steam.exe") || n.equals("steam") || n.startsWith("steamwebhelper") || n.equals("steam_osx");
+            }).orElse(false));
+        } catch (Throwable t) {
+            return true;
+        }
+    }
+
+    private static String safeRunning() {
+        try {
+            return String.valueOf(SteamAPI.isSteamRunning(true));
+        } catch (Throwable t) {
+            return t.toString();
         }
     }
 

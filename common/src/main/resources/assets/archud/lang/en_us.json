@@ -1438,7 +1438,7 @@
   "archud.steam.invite.tip": "Opens the Steam invite dialog (via Spacewar). Your friend accepts the invite in the Steam overlay while Minecraft with Arc HUD is running and joins right away. Friends outside your network need the e4mc address.",
   "archud.steam.opened": "Steam invite dialog opened",
   "archud.steam.error.steam_not_running": "Steam is not running",
-  "archud.steam.error.steam_init": "Could not connect to Steam",
+  "archud.steam.error.steam_init": "Steam is running but refused the connection: sign in to Steam and run the game and Steam with the same rights (neither as administrator)",
   "archud.steam.error.steam_missing": "Steam invites are disabled in settings",
   "archud.steam.error.lobby": "Steam did not create a lobby, try again",
   "archud.steam.error.": "Opening the Steam invite dialog…",

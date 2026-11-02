@@ -1497,7 +1497,7 @@
   "archud.steam.invite.tip": "Откроет окно приглашения Steam (через Spacewar). Друг принимает приглашение в оверлее Steam при запущенном Minecraft с Arc HUD — и сразу подключается. Для игры не из одной сети нужен адрес e4mc.",
   "archud.steam.opened": "Открыто окно приглашения Steam",
   "archud.steam.error.steam_not_running": "Steam не запущен",
-  "archud.steam.error.steam_init": "Не удалось подключиться к Steam",
+  "archud.steam.error.steam_init": "Steam запущен, но не дал подключиться: войдите в аккаунт Steam и запускайте игру и Steam с одинаковыми правами (оба не от администратора)",
   "archud.steam.error.steam_missing": "Приглашения Steam выключены в настройках",
   "archud.steam.error.lobby": "Steam не создал лобби, попробуйте ещё раз",
   "archud.steam.error.": "Открываю окно приглашения Steam…",
