@@ -1,0 +1,138 @@
+[02Nov2026 19:55:08.606] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserver, --fml.forgeVersion, 47.3.0, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, nogui]
+[02Nov2026 19:55:08.611] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.21 by Eclipse Adoptium; OS Linux arch amd64 version 7.0.0-1017-azure
+[02Nov2026 19:55:08.711] [main/WARN] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Configuration file /tmp/srv/config/fml.toml is not correct. Correcting
+[02Nov2026 19:55:08.713] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
+[02Nov2026 19:55:08.714] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
+[02Nov2026 19:55:08.714] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
+[02Nov2026 19:55:08.757] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserver
+[02Nov2026 19:55:08.807] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/tmp/srv/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar%2365!/ Service=ModLauncher Env=SERVER
+[02Nov2026 19:55:09.058] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /tmp/srv/libraries/net/minecraftforge/fmlcore/1.20.1-47.3.0/fmlcore-1.20.1-47.3.0.jar is missing mods.toml file
+[02Nov2026 19:55:09.059] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /tmp/srv/libraries/net/minecraftforge/javafmllanguage/1.20.1-47.3.0/javafmllanguage-1.20.1-47.3.0.jar is missing mods.toml file
+[02Nov2026 19:55:09.060] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /tmp/srv/libraries/net/minecraftforge/lowcodelanguage/1.20.1-47.3.0/lowcodelanguage-1.20.1-47.3.0.jar is missing mods.toml file
+[02Nov2026 19:55:09.061] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /tmp/srv/libraries/net/minecraftforge/mclanguage/1.20.1-47.3.0/mclanguage-1.20.1-47.3.0.jar is missing mods.toml file
+[02Nov2026 19:55:09.301] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: Found 5 dependencies adding them to mods collection
+[02Nov2026 19:55:10.612] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[02Nov2026 19:55:10.627] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserver' with arguments [nogui]
+[02Nov2026 19:55:10.872] [main/WARN] [mixin/]: Error loading class: net/minecraft/server/network/ServerCommonPacketListenerImpl (java.lang.ClassNotFoundException: net.minecraft.server.network.ServerCommonPacketListenerImpl)
+[02Nov2026 19:55:10.873] [main/WARN] [mixin/]: @Mixin target net.minecraft.server.network.ServerCommonPacketListenerImpl was not found e4mc.mixins.json:ServerCommonPacketListenerImplAccessor
+[02Nov2026 19:55:11.416] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.4).
+[02Nov2026 19:55:16.703] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: Forge mod loading, version 47.3.0, for MC 1.20.1 with MCP 20230612.114412
+[02Nov2026 19:55:16.708] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: MinecraftForge v47.3.0 Initialized
+[02Nov2026 19:55:16.745] [modloading-worker-0/INFO] [com.arc4io.archud.ArcHud/]: Arc HUD by arc4io loaded on Forge
+[02Nov2026 19:55:17.688] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[02Nov2026 19:55:18.190] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Found status: OUTDATED Current: 47.3.0 Target: 47.4.28
+[02Nov2026 19:55:18.512] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[02Nov2026 19:55:18.552] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/tmp/srv/libraries/net/minecraft/server/1.20.1-20230612.114412/server-1.20.1-20230612.114412-srg.jar%23103!/assets/.mcassetsroot' uses unexpected schema
+[02Nov2026 19:55:18.553] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/tmp/srv/libraries/net/minecraft/server/1.20.1-20230612.114412/server-1.20.1-20230612.114412-srg.jar%23103!/data/.mcassetsroot' uses unexpected schema
+[02Nov2026 19:55:20.231] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
+[02Nov2026 19:55:20.351] [main/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1271 advancements
+[02Nov2026 19:55:20.854] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.20.1
+[02Nov2026 19:55:20.855] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[02Nov2026 19:55:20.855] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[02Nov2026 19:55:20.855] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[02Nov2026 19:55:20.967] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
+[02Nov2026 19:55:20.993] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using epoll channel type
+[02Nov2026 19:55:21.137] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[02Nov2026 19:55:21.137] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[02Nov2026 19:55:21.137] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[02Nov2026 19:55:21.137] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[02Nov2026 19:55:21.138] [e4mc_minecraft-init/INFO] [e4mc/]: broker req: https://broker.e4mc.link/getBestRelay GET
+[02Nov2026 19:55:21.170] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Configuration file ./world/serverconfig/forge-server.toml is not correct. Correcting
+[02Nov2026 19:55:21.171] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SimpleCommentedConfig:{}. 
+[02Nov2026 19:55:21.171] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[02Nov2026 19:55:21.171] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[02Nov2026 19:55:21.172] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[02Nov2026 19:55:21.172] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.zombieBaseSummonChance was corrected from null to its default, 0.1. 
+[02Nov2026 19:55:21.172] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.zombieBabyChance was corrected from null to its default, 0.05. 
+[02Nov2026 19:55:21.172] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[02Nov2026 19:55:21.172] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[02Nov2026 19:55:21.203] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[02Nov2026 19:55:21.589] [e4mc_minecraft-init/INFO] [e4mc/]: broker resp: (GET https://broker.e4mc.link/getBestRelay) 200
+[02Nov2026 19:55:21.591] [e4mc_minecraft-init/INFO] [e4mc/]: using relay na
+[02Nov2026 19:55:22.832] [Netty Epoll Server IO #1/INFO] [e4mc/]: control channel open: [id: 0x16a38240, QuicStreamAddress{streamId=0}]
+[02Nov2026 19:55:22.833] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing link.e4mc.QuiclimeSession$ControlMessageCodec$ProbeCapabilitiesMessageServerbound@3c8ea4e6
+[02Nov2026 19:55:22.833] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing 30 bytes
+[02Nov2026 19:55:22.837] [Netty Epoll Server IO #1/INFO] [e4mc/]: probing capabilities
+[02Nov2026 19:55:22.838] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing link.e4mc.QuiclimeSession$ControlMessageCodec$RequestDomainAssignmentMessageServerbound@2a2d80ef
+[02Nov2026 19:55:22.838] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing 37 bytes
+[02Nov2026 19:55:22.838] [Netty Epoll Server IO #1/INFO] [e4mc/]: control channel write complete
+[02Nov2026 19:55:22.877] [Netty Epoll Server IO #1/WARN] [e4mc/]: e4mc running on Dedicated Server; This works, but isn't recommended as e4mc is designed for short-lived LAN servers
+[02Nov2026 19:55:22.877] [Netty Epoll Server IO #1/INFO] [e4mc/]: Domain assigned: mashed-jubilant.na.e4mc.link
+[02Nov2026 19:55:22.880] [Netty Epoll Server IO #2/INFO] [e4mc/]: relaymap req: https://natives.e4mc.link/relaymap.json GET
+[02Nov2026 19:55:22.973] [Netty Epoll Server IO #2/INFO] [e4mc/]: relaymap resp: (GET https://natives.e4mc.link/relaymap.json) 200
+[02Nov2026 19:55:23.975] [Dialtone Server Dispatcher/INFO] [e4mc/]: got new session ticket
+[02Nov2026 19:55:23.976] [Dialtone Server Dispatcher/INFO] [e4mc/]: got new session ticket
+[02Nov2026 19:55:23.977] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing link.e4mc.QuiclimeSession$ControlMessageCodec$DialtoneRegisterTicketMessageServerbound@7a3a9cdf
+[02Nov2026 19:55:23.979] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing 114 bytes
+[02Nov2026 19:55:23.981] [Netty Epoll Server IO #1/INFO] [e4mc/]: notified server of our ticket
+[02Nov2026 19:55:23.981] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing link.e4mc.QuiclimeSession$ControlMessageCodec$DialtoneRegisterTicketMessageServerbound@6eb5e0c1
+[02Nov2026 19:55:23.982] [Netty Epoll Server IO #1/INFO] [e4mc/]: writing 160 bytes
+[02Nov2026 19:55:23.986] [Netty Epoll Server IO #1/INFO] [e4mc/]: notified server of our ticket
+[02Nov2026 19:55:27.444] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[02Nov2026 19:55:28.222] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:28.223] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:28.508] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:28.946] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:29.450] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:29.953] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[02Nov2026 19:55:30.450] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 1%
+[02Nov2026 19:55:30.946] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 2%
+[02Nov2026 19:55:31.465] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 3%
+[02Nov2026 19:55:31.963] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 4%
+[02Nov2026 19:55:32.447] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 5%
+[02Nov2026 19:55:32.955] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 6%
+[02Nov2026 19:55:33.450] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 8%
+[02Nov2026 19:55:33.947] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 9%
+[02Nov2026 19:55:34.458] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 10%
+[02Nov2026 19:55:34.946] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 12%
+[02Nov2026 19:55:35.447] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 15%
+[02Nov2026 19:55:35.953] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 16%
+[02Nov2026 19:55:36.454] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 18%
+[02Nov2026 19:55:36.953] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 21%
+[02Nov2026 19:55:37.448] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 23%
+[02Nov2026 19:55:37.947] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 24%
+[02Nov2026 19:55:38.455] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 27%
+[02Nov2026 19:55:38.951] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 30%
+[02Nov2026 19:55:39.447] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 32%
+[02Nov2026 19:55:39.982] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 33%
+[02Nov2026 19:55:40.448] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 35%
+[02Nov2026 19:55:40.982] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 39%
+[02Nov2026 19:55:41.477] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 42%
+[02Nov2026 19:55:41.955] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 43%
+[02Nov2026 19:55:42.446] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 45%
+[02Nov2026 19:55:42.947] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 47%
+[02Nov2026 19:55:43.446] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 51%
+[02Nov2026 19:55:43.948] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 53%
+[02Nov2026 19:55:44.456] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 54%
+[02Nov2026 19:55:44.947] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 56%
+[02Nov2026 19:55:45.454] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 58%
+[02Nov2026 19:55:45.990] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 62%
+[02Nov2026 19:55:46.446] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 64%
+[02Nov2026 19:55:46.951] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 67%
+[02Nov2026 19:55:47.445] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 69%
+[02Nov2026 19:55:47.958] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 70%
+[02Nov2026 19:55:48.469] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 73%
+[02Nov2026 19:55:48.950] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 76%
+[02Nov2026 19:55:49.472] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 78%
+[02Nov2026 19:55:49.948] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 80%
+[02Nov2026 19:55:50.457] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 82%
+[02Nov2026 19:55:50.953] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 83%
+[02Nov2026 19:55:51.448] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 86%
+[02Nov2026 19:55:51.947] [Worker-Main-1/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 89%
+[02Nov2026 19:55:52.450] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 92%
+[02Nov2026 19:55:52.946] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 95%
+[02Nov2026 19:55:53.449] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 98%
+[02Nov2026 19:55:53.626] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 26181 ms
+[02Nov2026 19:55:53.627] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (32.468s)! For help, type "help"
+[02Nov2026 19:55:53.645] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[02Nov2026 19:56:14.349] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping the server
+[02Nov2026 19:56:14.395] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[02Nov2026 19:56:14.396] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[02Nov2026 19:56:14.396] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[02Nov2026 19:56:15.063] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[02Nov2026 19:56:15.923] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[02Nov2026 19:56:15.924] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[02Nov2026 19:56:15.955] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[02Nov2026 19:56:15.955] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[02Nov2026 19:56:15.955] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[02Nov2026 19:56:15.955] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
