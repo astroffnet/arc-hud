@@ -1,0 +1,4 @@
+19:[10:38:31] [Server thread/INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+31:[10:38:40] [Server thread/INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+32:[10:38:40] [Server thread/INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+38:[10:39:01] [Server thread/INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
