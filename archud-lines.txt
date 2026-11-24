@@ -1,0 +1,7 @@
+6:[10:38:37] [Paper Plugin Remapper Thread - 1/INFO]: [PluginRemapper] Remapping plugin 'plugins/archud-server-bukkit-1.2.0.jar'...
+7:[10:38:37] [Paper Plugin Remapper Thread - 1/INFO]: [PluginRemapper] Done remapping plugin 'plugins/archud-server-bukkit-1.2.0.jar' in 69ms.
+10: - ArcHUD (1.2.0)
+30:[10:38:42] [Server thread/INFO]: [ArcHUD] Loading server plugin ArcHUD v1.2.0
+42:[10:38:56] [Server thread/INFO]: [ArcHUD] Enabling ArcHUD v1.2.0
+43:[10:38:56] [Server thread/INFO]: [ArcHUD] Arc HUD server part 1.2.0 enabled (map, players, waypoints, admin panel, AntiESP)
+56:[10:39:18] [Server thread/INFO]: [ArcHUD] Disabling ArcHUD v1.2.0
